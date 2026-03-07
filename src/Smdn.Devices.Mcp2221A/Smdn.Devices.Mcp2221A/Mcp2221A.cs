@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using Smdn.Devices.Mcp2221A.Peripherals.I2c;
 using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
@@ -84,6 +85,21 @@ public partial class Mcp2221A :
   /// <remarks>Always returns <c>01234567</c>.</remarks>
   public string? ChipFactorySerialNumber { get; private set; } = null;
 
+  /// <remarks>
+  /// If the <see cref="FirmwareRevision"/> is not retrieved or is an unknown
+  /// revision, assume it is an MCP2221A.
+  /// </remarks>
+  internal bool IsMcp2221A
+    => !string.Equals(FirmwareRevision, FirmwareRevisionMcp2221, StringComparison.Ordinal);
+
+  [CLSCompliant(false)]
+  public Mcp2221AI2cBus I2c {
+    get {
+      ThrowIfDisposed();
+      return field;
+    }
+  }
+
   private Mcp2221A(
     IUsbHidDevice hidDevice,
     bool shouldDisposeUsbHidDevice,
@@ -104,7 +120,7 @@ public partial class Mcp2221A :
       this.GP3,
     };
 
-    this.I2c = new I2cFunctionality(this);
+    I2c = new(this, logger);
 
     this.logger = logger;
   }
@@ -156,7 +172,7 @@ public partial class Mcp2221A :
 #if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
   [MemberNotNull(nameof(hidDevice))]
 #endif
-  private void ThrowIfDisposed() => _ = hidDevice ?? throw new ObjectDisposedException(GetType().Name);
+  internal void ThrowIfDisposed() => _ = hidDevice ?? throw new ObjectDisposedException(GetType().Name);
 
   internal void OpenEndPoint(CancellationToken cancellationToken)
   {

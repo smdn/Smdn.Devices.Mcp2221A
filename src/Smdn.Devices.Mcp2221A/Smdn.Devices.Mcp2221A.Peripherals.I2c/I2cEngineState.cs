@@ -5,18 +5,12 @@ using System;
 using System.Device.Gpio;
 using System.Linq;
 
-namespace Smdn.Devices.Mcp2221A;
+namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
 internal readonly struct I2cEngineState {
-  public enum TransferStatus : byte {
-    NoSpecialOperation = 0x00, // No special operation
-    MarkedForCancellation = 0x10, // The current I2C/SMBus transfer was marked for cancellation
-    AlreadyInIdleMode = 0x11, // The I2C engine was already in idle mode
-  }
-
   public bool IsInitialState => StateMachineStateValue == 0 && Address == 0 && CommunicationSpeedDividerValue == 0;
 
-  public TransferStatus BusStatus { get; init; }
+  public I2cEngineTransferStatus BusStatus { get; init; }
   public byte StateMachineStateValue { get; init; }
   public int RequestedTransferLength { get; init; }
   public int AlreadyTransferredLength { get; init; }
@@ -33,7 +27,7 @@ internal readonly struct I2cEngineState {
     => new() {
 #pragma warning disable IDE0055 // Fix formatting
       // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
-      BusStatus                       = (TransferStatus)resp[2],
+      BusStatus                       = (I2cEngineTransferStatus)resp[2],
       StateMachineStateValue          = resp[8], // Internal I2C state machine state value
       RequestedTransferLength         = resp[9] | (resp[10] << 8), // Lower/Higher byte of the requested I2C transfer length
       AlreadyTransferredLength        = resp[11] | (resp[12] << 8), // Lower/Higher byte of the already transferred number of bytes

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using NUnit.Framework;
 
+using Smdn.Devices.Mcp2221A.Peripherals.I2c;
 using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
@@ -49,62 +50,6 @@ partial class Mcp2221ATests {
       return (device, baseDevice.EndPoint);
     }
 
-    private static System.Collections.IEnumerable YieldTestCases_CreateI2cBusAdapter()
-    {
-      const bool ShouldDisposeMcp2221 = true;
-      const bool ShouldNotDisposeMcp2221 = false;
-
-      yield return new object[] { I2cBusSpeed.StandardMode, ShouldDisposeMcp2221 };
-      yield return new object[] { I2cBusSpeed.FastMode, ShouldDisposeMcp2221 };
-      yield return new object[] { I2cBusSpeed.LowSpeedMode, ShouldNotDisposeMcp2221 };
-    }
-
-    [TestCaseSource(nameof(YieldTestCases_CreateI2cBusAdapter))]
-    public async Task CreateI2cBusAdapter(
-      I2cBusSpeed busSpeed,
-      bool shouldDisposeMcp2221
-    )
-    {
-      var (device, _) = await CreatePseudoDeviceWithConfiguredI2C();
-
-      using var i2cBus = device.I2c.CreateI2cBusAdapter(
-        busSpeed,
-        shouldDisposeMcp2221
-      );
-
-      Assert.That(i2cBus, Is.Not.Null);
-      Assert.That(i2cBus.BusSpeed, Is.EqualTo(busSpeed));
-      Assert.That(device.I2c.BusSpeed, Is.EqualTo(busSpeed));
-
-      i2cBus.BusSpeed = I2cBusSpeed.FastMode;
-
-      Assert.That(device.I2c.BusSpeed, Is.EqualTo(I2cBusSpeed.FastMode));
-
-      device.I2c.BusSpeed = I2cBusSpeed.LowSpeedMode;
-
-      Assert.That(i2cBus.BusSpeed, Is.EqualTo(I2cBusSpeed.LowSpeedMode));
-
-      i2cBus.Dispose();
-
-      Assert.That(
-        () => i2cBus.CreateDevice(0x00),
-        Throws.TypeOf<ObjectDisposedException>()
-      );
-
-      Assert.That(
-        () => _ = device.HidDevice,
-        shouldDisposeMcp2221
-          ? Throws.TypeOf<ObjectDisposedException>()
-          : Throws.Nothing
-      );
-
-      Assert.That(
-        i2cBus.Dispose,
-        Throws.Nothing,
-        "dispose again"
-      );
-    }
-
     private static System.Collections.IEnumerable YieldTestCases_CreateI2cDeviceAdapter()
     {
       const bool ShouldDisposeMcp2221A = true;
@@ -123,7 +68,7 @@ partial class Mcp2221ATests {
     {
       var (device, _) = await CreatePseudoDeviceWithConfiguredI2C();
 
-      using var i2cDevice = device.I2c.CreateI2cDeviceAdapter(deviceAddress, shouldDisposeMcp2221A);
+      using var i2cDevice = device.I2c.CreateDevice(deviceAddress, shouldDisposeMcp2221A);
 
       Assert.That(i2cDevice, Is.Not.Null);
       Assert.That(i2cDevice.ConnectionSettings, Is.Not.Null);
@@ -156,11 +101,11 @@ partial class Mcp2221ATests {
 
     [Test]
     public async Task Write()
-      => await TestWrite(d => { d.I2c.Write(address, [0x00, 0x00, 0x00]); return Task.CompletedTask; });
+      => await TestWrite(d => { d.I2c.Write(address, 100, [0x00, 0x00, 0x00]); return Task.CompletedTask; });
 
     [Test]
     public async Task WriteAsync()
-      => await TestWrite(async d => { await d.I2c.WriteAsync(address, new byte[] { 0x00, 0x00, 0x00 }); });
+      => await TestWrite(async d => { await d.I2c.WriteAsync(address, 100, new byte[] { 0x00, 0x00, 0x00 }); });
 
     private async Task TestWrite(Func<Mcp2221A, Task> writeAction)
     {

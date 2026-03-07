@@ -22,10 +22,8 @@ await using var device = await Mcp2221A.CreateAsync(serviceProvider);
 
 await device.GP3.ConfigureAsLedI2cAsync();
 
-device.I2c.BusSpeed = I2cBusSpeed.FastMode;
-
 using var display = SO1602A.Create(
-  device.I2c.CreateI2cDeviceAdapter(SO1602A.DefaultI2CAddress)
+  device.I2c.CreateDevice(SO1602A.DefaultI2CAddress).WithFastMode()
 );
 
 // write string and display it

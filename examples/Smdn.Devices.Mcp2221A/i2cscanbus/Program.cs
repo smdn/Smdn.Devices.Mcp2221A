@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 
 using Smdn.Devices.Mcp2221A;
+using Smdn.Devices.Mcp2221A.Peripherals.I2c;
 using Smdn.IO.UsbHid.DependencyInjection;
 
 var services = new ServiceCollection();
@@ -16,8 +17,6 @@ services.AddHidSharpUsbHid();
 using var serviceProvider = services.BuildServiceProvider();
 
 await using var device = await Mcp2221A.CreateAsync(serviceProvider);
-
-device.I2c.BusSpeed = I2cBusSpeed.Default;
 
 var initialCursorPosition = (left: Console.CursorLeft, top: Console.CursorTop);
 
@@ -40,8 +39,14 @@ I2cAddress addressRangeMin = I2cAddress.DeviceMinValue;
 I2cAddress addressRangeMax = I2cAddress.DeviceMaxValue;
 // I2cAddress addressRangeMin = 0x20;
 // I2cAddress addressRangeMax = 0x27;
+const int TransmissionSpeedInKbps = 100;
 
-var (writeAddressSet, readAddressSet) = await device.I2c.ScanBusAsync(addressRangeMin, addressRangeMax, scanBusProgress);
+var (writeAddressSet, readAddressSet) = await device.I2c.ScanBusAsync(
+  addressRangeMin,
+  addressRangeMax,
+  TransmissionSpeedInKbps,
+  scanBusProgress
+);
 
 foreach (var writeRead in new[] {
   new {Header = "[I2C write]", AddressSet = writeAddressSet},

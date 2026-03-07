@@ -16,9 +16,6 @@ namespace Smdn.Devices.Mcp2221A;
 #pragma warning disable IDE0040, CA1724
 partial class Mcp2221A {
 #pragma warning restore IDE0040, CA1724
-  internal delegate void ConstructCommandAction<TArg>(Span<byte> command, ReadOnlySpan<byte> userData, TArg arg);
-  internal delegate TResponse ParseResponseFunc<TArg, TResponse>(ReadOnlySpan<byte> response, TArg arg);
-
   private const int CommandLength = 64;
   private const int ResponseLength = 64;
   private const int CommandReportLength = 1 + CommandLength;
@@ -46,8 +43,8 @@ partial class Mcp2221A {
     ReadOnlyMemory<byte> userData,
     TArg arg,
     CancellationToken cancellationToken,
-    ConstructCommandAction<TArg> constructCommand,
-    ParseResponseFunc<TArg, TResponse> parseResponse
+    Mcp2221AConstructCommandAction<TArg> constructCommand,
+    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse
   )
 #pragma warning restore CA1068
   {
@@ -119,8 +116,8 @@ partial class Mcp2221A {
     ReadOnlySpan<byte> userData,
     TArg arg,
     CancellationToken cancellationToken,
-    ConstructCommandAction<TArg> constructCommand,
-    ParseResponseFunc<TArg, TResponse> parseResponse
+    Mcp2221AConstructCommandAction<TArg> constructCommand,
+    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse
   )
 #pragma warning restore CA1068
   {

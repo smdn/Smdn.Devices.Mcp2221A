@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 
 using Smdn.Devices.Mcp2221A;
+using Smdn.Devices.Mcp2221A.Peripherals.I2c;
 using Smdn.IO.UsbHid.DependencyInjection;
 
 var services = new ServiceCollection();

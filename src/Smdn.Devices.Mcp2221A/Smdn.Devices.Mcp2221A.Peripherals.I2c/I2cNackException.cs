@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Smdn.Devices.Mcp2221A;
+namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
 public class I2cNackException : I2cCommandException {
   public I2cNackException() : base("A NACK response was returned for the requested I2C command.") { }

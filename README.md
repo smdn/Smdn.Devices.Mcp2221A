@@ -28,7 +28,8 @@ See [Smdn.Devices.Mcp2221A examples](examples/Smdn.Devices.Mcp2221A/).
 - [x] GP functionalities
   - [x] GPIO
     - [x] GPIO read/write value
-    - [x] GPIO get/set direction (some methods throw NotImplementedException)
+    - [x] GPIO get/set direction
+      - ⚠ Some methods throw NotImplementedException
   - [ ] ADC inputs
   - [ ] DAC outputs
   - [ ] Clock output
@@ -41,13 +42,14 @@ See [Smdn.Devices.Mcp2221A examples](examples/Smdn.Devices.Mcp2221A/).
     - [x] Configure GP3 as LED_I2C
     - [ ] Set initial value (Negating logic level)
 - [x] I2C functionalities
-  - [x] I2C read/write (7-bit address) (Transferring larger than 60 bytes have not been tested with actual device)
+  - [x] I2C read/write (7-bit address)
+    - ⚠ Transferring larger than 60 bytes have not been tested with actual device
   - [ ] I2C read/write (10-bit address)
-  - [x] configure communication speed
-    - [x] Standard mode (100kbps)
-    - [x] Fast mode (400kbps)
-    - [x] Low speed mode (10kbps)
-    - [ ] Non-standard custom speed
+  - [x] Standard mode (100kbps)
+  - [x] Fast mode (400kbps)
+  - [x] Non-standard custom speed
+    - [x] 50kbps, 200kbps, 1Mbps, etc.
+    - ⚠ MCP2221A can be configured up to approximately 4Mbps, but operation above 400kbps is not guaranteed.
 - [ ] Flash/SRAM functionalities
   - [ ] SRAM read/write
     - [x] GP settings

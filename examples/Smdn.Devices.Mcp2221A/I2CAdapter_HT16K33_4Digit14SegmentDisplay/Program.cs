@@ -23,16 +23,11 @@ await using var device = await Mcp2221A.CreateAsync(serviceProvider);
 
 await device.GP3.ConfigureAsLedI2cAsync();
 
-var i2cBus = device.I2c.CreateI2cBusAdapter(
-  busSpeed: I2cBusSpeed.Default
-  // If an I2cCommandException is thrown when using the
-  // HidSharp backend, try the following configuration:
-  // busSpeed: I2cBusSpeed.FastMode
-);
-
+// If an I2cCommandException is thrown when using the
+// HidSharp backend, try WithFastMode() instead of WithStandardMode().
 var i2cDevices = new[] {
-  i2cBus.CreateDevice(Ht16k33.DefaultI2cAddress | 0b_000),
-  i2cBus.CreateDevice(Ht16k33.DefaultI2cAddress | 0b_001),
+  device.I2c.CreateDevice(Ht16k33.DefaultI2cAddress | 0b_000).WithStandardMode(),
+  device.I2c.CreateDevice(Ht16k33.DefaultI2cAddress | 0b_001).WithStandardMode(),
 };
 
 FourDigitFourteenSegmentDisplay[] displays = [

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<docs>
+  <I2cReadWriteTransmissionSpeedParameter>
+    <remarks>
+      <para>
+        <b>Supported Transmission Speed Range:</b>
+        Both MCP2221 and MCP2221A officially support Standard Mode (100 kbps) and Fast Mode (400 kbps).
+      </para>
+      <para>
+        <b>Device-Specific Constraints:</b>
+        <list type="bullet">
+          <item>
+            <description>
+              <b>MCP2221A:</b> Minimum recommended speed is approx. 47 kbps. The speed divider
+              is calculated as <c>Divider = (12 MHz / Speed) - 2</c>.
+            </description>
+          </item>
+          <item>
+            <description>
+              <b>MCP2221:</b> Minimum recommended speed is approx. 12 kbps. The speed divider
+              is calculated as <c>Divider = ((12 MHz / Speed) - 20) / 4</c>.
+            </description>
+          </item>
+        </list>
+      </para>
+      <para>
+        <b>High-Speed Mode (3.4 Mbps):</b>
+        Not supported. Although the divider formula might allow for higher values, the
+        physical electrical characteristics (rise/fall times) and internal logic are not
+        designed for High-Speed mode. Values exceeding 400 kbps are generally not
+        recommended for reliable communication.
+      </para>
+    </remarks>
+  </I2cReadWriteTransmissionSpeedParameter>
+</docs>
