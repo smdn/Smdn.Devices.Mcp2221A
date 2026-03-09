@@ -41,7 +41,7 @@ class PseudoUsbHidEndPoint : IUsbHidEndPoint {
     ReadStream = null;
 
     if (shouldDisposeDevice)
-      Device.Dispose();
+      Device?.Dispose();
 
     Device = null!;
   }
@@ -58,7 +58,7 @@ class PseudoUsbHidEndPoint : IUsbHidEndPoint {
       ReadStream = null;
     }
 
-    if (shouldDisposeDevice)
+    if (shouldDisposeDevice && Device is not null)
       await Device.DisposeAsync();
 
     Device = null!;

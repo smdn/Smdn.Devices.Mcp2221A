@@ -61,7 +61,6 @@ class PseudoUsbHidDevice : IUsbHidDevice {
   {
     IsDisposed = true;
 
-    endpoint?.Dispose();
     endpoint = null;
   }
 
@@ -69,10 +68,7 @@ class PseudoUsbHidDevice : IUsbHidDevice {
   {
     IsDisposed = true;
 
-    if (endpoint != null) {
-      await endpoint.DisposeAsync().ConfigureAwait(false);
-      endpoint = null;
-    }
+    endpoint = null;
   }
 
   public IUsbHidEndPoint OpenEndPoint(
