@@ -77,15 +77,13 @@ internal sealed class Mcp2221ATransceiver : IDisposable {
     }
   }
 
-#pragma warning disable CA1068 // CA1068: CancellationToken parameters must come last
   public async ValueTask<TResponse> CommandAsync<TArg, TResponse>(
     ReadOnlyMemory<byte> userData,
     TArg arg,
-    CancellationToken cancellationToken,
     Mcp2221AConstructCommandAction<TArg> constructCommand,
-    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse
+    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse,
+    CancellationToken cancellationToken
   )
-#pragma warning restore CA1068
   {
     if (constructCommand is null)
       throw new ArgumentNullException(nameof(constructCommand));
@@ -156,15 +154,13 @@ internal sealed class Mcp2221ATransceiver : IDisposable {
     }
   }
 
-#pragma warning disable CA1068 // CA1068: CancellationToken parameters must come last
   public TResponse Command<TArg, TResponse>(
     ReadOnlySpan<byte> userData,
     TArg arg,
-    CancellationToken cancellationToken,
     Mcp2221AConstructCommandAction<TArg> constructCommand,
-    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse
+    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse,
+    CancellationToken cancellationToken
   )
-#pragma warning restore CA1068
   {
     if (constructCommand is null)
       throw new ArgumentNullException(nameof(constructCommand));
