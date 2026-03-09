@@ -82,23 +82,29 @@ partial class Mcp2221A {
     CancellationToken cancellationToken
   )
   {
-    Mcp2221A? device = null;
+    IUsbHidEndPoint? usbHidEndPoint = null;
 
     try {
-      device = new Mcp2221A(
-        hidDevice: usbHidDevice,
-        shouldDisposeUsbHidDevice: shouldDisposeUsbHidDevice,
-        logger: serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221A>()
-      );
-
       try {
-        await device.OpenEndPointAsync(
+        // hereafter, the lifecycle of device will be delegated to its endpoint
+        usbHidEndPoint = await usbHidDevice.OpenEndPointAsync(
+          shouldDisposeDevice: shouldDisposeUsbHidDevice,
           cancellationToken: cancellationToken
         ).ConfigureAwait(false);
       }
       catch (Exception ex) {
         throw new Mcp2221AUnavailableException(ex, usbHidDevice);
       }
+
+      var logger = serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221A>();
+      var transceiver = new Mcp2221ATransceiver(
+        endPoint: usbHidEndPoint,
+        logger: logger
+      );
+      var device = new Mcp2221A(
+        transceiver: transceiver,
+        logger: logger
+      );
 
       await device.RetrieveChipInformationAsync(
         ValidateHardwareRevision,
@@ -109,7 +115,8 @@ partial class Mcp2221A {
       return device;
     }
     catch {
-      await device!.DisposeAsync().ConfigureAwait(false);
+      if (usbHidEndPoint is not null)
+        await usbHidEndPoint.DisposeAsync().ConfigureAwait(false);
 
       throw;
     }
@@ -125,23 +132,29 @@ partial class Mcp2221A {
     CancellationToken cancellationToken
   )
   {
-    Mcp2221A? device = null;
+    IUsbHidEndPoint? usbHidEndPoint = null;
 
     try {
-      device = new Mcp2221A(
-        hidDevice: usbHidDevice,
-        shouldDisposeUsbHidDevice: shouldDisposeUsbHidDevice,
-        logger: serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221A>()
-      );
-
       try {
-        device.OpenEndPoint(
+        // hereafter, the lifecycle of device will be delegated to its endpoint
+        usbHidEndPoint = usbHidDevice.OpenEndPoint(
+          shouldDisposeDevice: shouldDisposeUsbHidDevice,
           cancellationToken: cancellationToken
         );
       }
       catch (Exception ex) {
         throw new Mcp2221AUnavailableException(ex, usbHidDevice);
       }
+
+      var logger = serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221A>();
+      var transceiver = new Mcp2221ATransceiver(
+        endPoint: usbHidEndPoint,
+        logger: logger
+      );
+      var device = new Mcp2221A(
+        transceiver: transceiver,
+        logger: logger
+      );
 
       device.RetrieveChipInformation(
         ValidateHardwareRevision,
@@ -152,7 +165,7 @@ partial class Mcp2221A {
       return device;
     }
     catch {
-      device!.Dispose();
+      usbHidEndPoint?.Dispose();
 
       throw;
     }
