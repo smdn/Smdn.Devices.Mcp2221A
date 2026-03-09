@@ -9,6 +9,62 @@ namespace Smdn.Devices.Mcp2221A;
 #pragma warning disable IDE0040
 public partial class Mcp2221A {
 #pragma warning restore IDE0040, CA1724
+  internal readonly struct None { }
+
+  internal TResponse Command<TResponse>(
+    Mcp2221AConstructCommandAction<None> constructCommand,
+    Mcp2221AParseResponseFunc<None, TResponse> parseResponse,
+    CancellationToken cancellationToken
+  )
+    => Transceiver.Command<None, TResponse>(
+      userData: default,
+      arg: default,
+      cancellationToken: cancellationToken,
+      constructCommand: constructCommand,
+      parseResponse: parseResponse
+    );
+
+  internal ValueTask<TResponse> CommandAsync<TResponse>(
+    Mcp2221AConstructCommandAction<None> constructCommand,
+    Mcp2221AParseResponseFunc<None, TResponse> parseResponse,
+    CancellationToken cancellationToken
+  )
+    => Transceiver.CommandAsync<None, TResponse>(
+      userData: default,
+      arg: default,
+      constructCommand: constructCommand,
+      parseResponse: parseResponse,
+      cancellationToken: cancellationToken
+    );
+
+  internal TResponse Command<TArg, TResponse>(
+    TArg arg,
+    Mcp2221AConstructCommandAction<TArg> constructCommand,
+    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse,
+    CancellationToken cancellationToken
+  )
+    => Transceiver.Command(
+      userData: default,
+      arg: arg,
+      cancellationToken: cancellationToken,
+      constructCommand: constructCommand,
+      parseResponse: parseResponse
+    );
+
+  internal ValueTask<TResponse> CommandAsync<TArg, TResponse>(
+    TArg arg,
+    Mcp2221AConstructCommandAction<TArg> constructCommand,
+    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse,
+    CancellationToken cancellationToken
+  )
+    => Transceiver.CommandAsync(
+      userData: default,
+      arg: arg,
+      constructCommand: constructCommand,
+      parseResponse: parseResponse,
+      cancellationToken: cancellationToken
+    );
+
   internal TResponse Command<TArg, TResponse>(
     ReadOnlySpan<byte> userData,
     TArg arg,

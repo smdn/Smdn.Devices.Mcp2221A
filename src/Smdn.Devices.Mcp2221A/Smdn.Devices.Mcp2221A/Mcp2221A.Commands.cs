@@ -19,7 +19,7 @@ partial class Mcp2221A {
 
   private static class RetrieveRevisionCommand {
 #pragma warning disable IDE0060, SA1313 // [IDE0060] Remove unused parameter [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
-    public static void ConstructCommand(Span<byte> comm, ReadOnlySpan<byte> userData, int _)
+    public static void ConstructCommand(Span<byte> comm, ReadOnlySpan<byte> userData, None _)
 #pragma warning restore IDE0060, SA1313
     {
       // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
@@ -31,7 +31,7 @@ partial class Mcp2221A {
     public static (
       string firmwareRevision,
       string hardwareRevision
-    ) ParseResponse(ReadOnlySpan<byte> resp, int _)
+    ) ParseResponse(ReadOnlySpan<byte> resp, None _)
 #pragma warning restore IDE0060, SA1313
     {
       static void CreateRevisionString(Span<char> str, (char major, char minor) revision)
@@ -121,8 +121,6 @@ partial class Mcp2221A {
   )
   {
     (HardwareRevision, FirmwareRevision) = await CommandAsync(
-      userData: default,
-      arg: 0,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveRevisionCommand.ConstructCommand,
       parseResponse: RetrieveRevisionCommand.ParseResponse
@@ -132,7 +130,6 @@ partial class Mcp2221A {
     validateFirmwareRevision?.Invoke(FirmwareRevision);
 
     ManufacturerDescriptor = await CommandAsync(
-      userData: default,
       arg: ReadFlashDataSubCode.UsbDescriptorStringManufacturer,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
@@ -140,7 +137,6 @@ partial class Mcp2221A {
     ).ConfigureAwait(false);
 
     ProductDescriptor = await CommandAsync(
-      userData: default,
       arg: ReadFlashDataSubCode.UsbDescriptorStringProduct,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
@@ -148,7 +144,6 @@ partial class Mcp2221A {
     ).ConfigureAwait(false);
 
     SerialNumberDescriptor = await CommandAsync(
-      userData: default,
       arg: ReadFlashDataSubCode.UsbDescriptorStringSerialNumber,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
@@ -156,7 +151,6 @@ partial class Mcp2221A {
     ).ConfigureAwait(false);
 
     ChipFactorySerialNumber = await CommandAsync(
-      userData: default,
       arg: ReadFlashDataSubCode.ChipFactorySerialNumber,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
@@ -171,8 +165,6 @@ partial class Mcp2221A {
   )
   {
     (HardwareRevision, FirmwareRevision) = Command(
-      userData: default,
-      arg: 0,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveRevisionCommand.ConstructCommand,
       parseResponse: RetrieveRevisionCommand.ParseResponse
@@ -182,7 +174,6 @@ partial class Mcp2221A {
     validateFirmwareRevision?.Invoke(FirmwareRevision);
 
     ManufacturerDescriptor = Command(
-      userData: default,
       arg: ReadFlashDataSubCode.UsbDescriptorStringManufacturer,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
@@ -190,7 +181,6 @@ partial class Mcp2221A {
     );
 
     ProductDescriptor = Command(
-      userData: default,
       arg: ReadFlashDataSubCode.UsbDescriptorStringProduct,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
@@ -198,7 +188,6 @@ partial class Mcp2221A {
     );
 
     SerialNumberDescriptor = Command(
-      userData: default,
       arg: ReadFlashDataSubCode.UsbDescriptorStringSerialNumber,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
@@ -206,7 +195,6 @@ partial class Mcp2221A {
     );
 
     ChipFactorySerialNumber = Command(
-      userData: default,
       arg: ReadFlashDataSubCode.ChipFactorySerialNumber,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,

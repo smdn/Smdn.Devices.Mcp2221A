@@ -103,7 +103,6 @@ partial class Mcp2221A {
       CancellationToken cancellationToken = default
     )
       => device.CommandAsync(
-        userData: default,
         arg: this,
         cancellationToken: cancellationToken,
         constructCommand: GetDirectionCommand.ConstructCommand,
@@ -115,7 +114,6 @@ partial class Mcp2221A {
       CancellationToken cancellationToken = default
     )
       => device.Command(
-        userData: default,
         arg: this,
         cancellationToken: cancellationToken,
         constructCommand: GetDirectionCommand.ConstructCommand,
@@ -141,7 +139,6 @@ partial class Mcp2221A {
       CancellationToken cancellationToken = default
     )
       => device.CommandAsync(
-        userData: default,
         arg: (this, newDirection),
         cancellationToken: cancellationToken,
         constructCommand: SetDirectionCommand.ConstructCommand,
@@ -154,7 +151,6 @@ partial class Mcp2221A {
       CancellationToken cancellationToken = default
     )
       => device.Command(
-        userData: default,
         arg: (this, newDirection),
         cancellationToken: cancellationToken,
         constructCommand: SetDirectionCommand.ConstructCommand,
@@ -190,7 +186,6 @@ partial class Mcp2221A {
       CancellationToken cancellationToken = default
     )
       => device.CommandAsync(
-        userData: default,
         arg: this,
         cancellationToken: cancellationToken,
         constructCommand: GetValueCommand.ConstructCommand,
@@ -202,7 +197,6 @@ partial class Mcp2221A {
       CancellationToken cancellationToken = default
     )
       => device.Command(
-        userData: default,
         arg: this,
         cancellationToken: cancellationToken,
         constructCommand: GetValueCommand.ConstructCommand,
@@ -249,7 +243,6 @@ partial class Mcp2221A {
       CancellationToken cancellationToken = default
     )
       => device.CommandAsync(
-        userData: default,
         arg: (this, newValue),
         cancellationToken: cancellationToken,
         constructCommand: SetValueCommand.ConstructCommand,
@@ -262,7 +255,6 @@ partial class Mcp2221A {
       CancellationToken cancellationToken = default
     )
       => device.Command(
-        userData: default,
         arg: (this, newValue),
         cancellationToken: cancellationToken,
         constructCommand: SetValueCommand.ConstructCommand,
