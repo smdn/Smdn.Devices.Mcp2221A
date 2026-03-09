@@ -17,7 +17,7 @@ using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
 
-internal sealed class Mcp2221ATransceiver : IDisposable {
+internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
   private const int CommandLength = 64;
   private const int ResponseLength = 64;
   private const int CommandReportLength = 1 + CommandLength;

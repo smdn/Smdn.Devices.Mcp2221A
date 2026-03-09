@@ -120,7 +120,7 @@ partial class Mcp2221A {
     CancellationToken cancellationToken
   )
   {
-    (HardwareRevision, FirmwareRevision) = await CommandAsync(
+    (HardwareRevision, FirmwareRevision) = await this.CommandAsync(
       cancellationToken: cancellationToken,
       constructCommand: RetrieveRevisionCommand.ConstructCommand,
       parseResponse: RetrieveRevisionCommand.ParseResponse
@@ -129,28 +129,28 @@ partial class Mcp2221A {
     validateHardwareRevision?.Invoke(HardwareRevision);
     validateFirmwareRevision?.Invoke(FirmwareRevision);
 
-    ManufacturerDescriptor = await CommandAsync(
+    ManufacturerDescriptor = await this.CommandAsync(
       arg: ReadFlashDataSubCode.UsbDescriptorStringManufacturer,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     ).ConfigureAwait(false);
 
-    ProductDescriptor = await CommandAsync(
+    ProductDescriptor = await this.CommandAsync(
       arg: ReadFlashDataSubCode.UsbDescriptorStringProduct,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     ).ConfigureAwait(false);
 
-    SerialNumberDescriptor = await CommandAsync(
+    SerialNumberDescriptor = await this.CommandAsync(
       arg: ReadFlashDataSubCode.UsbDescriptorStringSerialNumber,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     ).ConfigureAwait(false);
 
-    ChipFactorySerialNumber = await CommandAsync(
+    ChipFactorySerialNumber = await this.CommandAsync(
       arg: ReadFlashDataSubCode.ChipFactorySerialNumber,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
@@ -164,7 +164,7 @@ partial class Mcp2221A {
     CancellationToken cancellationToken
   )
   {
-    (HardwareRevision, FirmwareRevision) = Command(
+    (HardwareRevision, FirmwareRevision) = this.Command(
       cancellationToken: cancellationToken,
       constructCommand: RetrieveRevisionCommand.ConstructCommand,
       parseResponse: RetrieveRevisionCommand.ParseResponse
@@ -173,28 +173,28 @@ partial class Mcp2221A {
     validateHardwareRevision?.Invoke(HardwareRevision);
     validateFirmwareRevision?.Invoke(FirmwareRevision);
 
-    ManufacturerDescriptor = Command(
+    ManufacturerDescriptor = this.Command(
       arg: ReadFlashDataSubCode.UsbDescriptorStringManufacturer,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     );
 
-    ProductDescriptor = Command(
+    ProductDescriptor = this.Command(
       arg: ReadFlashDataSubCode.UsbDescriptorStringProduct,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     );
 
-    SerialNumberDescriptor = Command(
+    SerialNumberDescriptor = this.Command(
       arg: ReadFlashDataSubCode.UsbDescriptorStringSerialNumber,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     );
 
-    ChipFactorySerialNumber = Command(
+    ChipFactorySerialNumber = this.Command(
       arg: ReadFlashDataSubCode.ChipFactorySerialNumber,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
