@@ -101,18 +101,19 @@ partial class Mcp2221A {
         endPoint: usbHidEndPoint,
         logger: logger
       );
-      var device = new Mcp2221A(
+      var info = await Mcp2221AInfo.ReadFromAsync(
         transceiver: transceiver,
-        logger: logger
-      );
-
-      await device.RetrieveChipInformationAsync(
-        ValidateHardwareRevision,
-        ValidateFirmwareRevision,
         cancellationToken: cancellationToken
       ).ConfigureAwait(false);
 
-      return device;
+      ValidateHardwareRevision(info.HardwareRevision);
+      ValidateFirmwareRevision(info.FirmwareRevision);
+
+      return new(
+        transceiver: transceiver,
+        info: info,
+        logger: logger
+      );
     }
     catch {
       if (usbHidEndPoint is not null)
@@ -151,18 +152,19 @@ partial class Mcp2221A {
         endPoint: usbHidEndPoint,
         logger: logger
       );
-      var device = new Mcp2221A(
+      var info = Mcp2221AInfo.ReadFrom(
         transceiver: transceiver,
-        logger: logger
-      );
-
-      device.RetrieveChipInformation(
-        ValidateHardwareRevision,
-        ValidateFirmwareRevision,
         cancellationToken: cancellationToken
       );
 
-      return device;
+      ValidateHardwareRevision(info.HardwareRevision);
+      ValidateFirmwareRevision(info.FirmwareRevision);
+
+      return new(
+        transceiver: transceiver,
+        info: info,
+        logger: logger
+      );
     }
     catch {
       usbHidEndPoint?.Dispose();

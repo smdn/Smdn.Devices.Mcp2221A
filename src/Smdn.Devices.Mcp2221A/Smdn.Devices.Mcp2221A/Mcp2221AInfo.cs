@@ -10,13 +10,11 @@ using System.Threading.Tasks;
 
 namespace Smdn.Devices.Mcp2221A;
 
-#pragma warning disable IDE0040, CA1724
-partial class Mcp2221A {
-#pragma warning restore IDE0040, CA1724
-#if __FUTURE_VERSION
-  public ValueTask ResetAsync() => ValueTask.FromException(new NotImplementedException());
-#endif
-
+/// <summary>
+/// Represents the information set on the MCP2221/MCP2221A or
+/// stored in its flash memory.
+/// </summary>
+public sealed class Mcp2221AInfo : IMcp2221AInfo {
   private static class RetrieveRevisionCommand {
 #pragma warning disable IDE0060, SA1313 // [IDE0060] Remove unused parameter [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
     public static void ConstructCommand(Span<byte> comm, ReadOnlySpan<byte> userData, None _)
@@ -71,7 +69,7 @@ partial class Mcp2221A {
       // Read Flash Data Sub Code
       // 0x02: Read USB Manufacturer Descriptor String
       // 0x03: Read USB Product Descriptor String
-      // 0x04: Read USB Manufacturer Descriptor String
+      // 0x04: Read USB Serial Number Descriptor String
       // 0x05: Read Chip Factory Serial Number
       comm[1] = (byte)subCode;
     }
@@ -114,91 +112,140 @@ partial class Mcp2221A {
     }
   }
 
-  private async ValueTask RetrieveChipInformationAsync(
-    Action<string> validateHardwareRevision,
-    Action<string> validateFirmwareRevision,
+  internal static async ValueTask<Mcp2221AInfo> ReadFromAsync(
+    Mcp2221ATransceiver transceiver,
     CancellationToken cancellationToken
   )
   {
-    (HardwareRevision, FirmwareRevision) = await this.CommandAsync(
+    var (hardwareRevision, firmwareRevision) = await transceiver.CommandAsync(
       cancellationToken: cancellationToken,
       constructCommand: RetrieveRevisionCommand.ConstructCommand,
       parseResponse: RetrieveRevisionCommand.ParseResponse
     ).ConfigureAwait(false);
 
-    validateHardwareRevision?.Invoke(HardwareRevision);
-    validateFirmwareRevision?.Invoke(FirmwareRevision);
-
-    ManufacturerDescriptor = await this.CommandAsync(
+    var manufacturerDescriptor = await transceiver.CommandAsync(
       arg: ReadFlashDataSubCode.UsbDescriptorStringManufacturer,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     ).ConfigureAwait(false);
 
-    ProductDescriptor = await this.CommandAsync(
+    var productDescriptor = await transceiver.CommandAsync(
       arg: ReadFlashDataSubCode.UsbDescriptorStringProduct,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     ).ConfigureAwait(false);
 
-    SerialNumberDescriptor = await this.CommandAsync(
+    var serialNumberDescriptor = await transceiver.CommandAsync(
       arg: ReadFlashDataSubCode.UsbDescriptorStringSerialNumber,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     ).ConfigureAwait(false);
 
-    ChipFactorySerialNumber = await this.CommandAsync(
+    var chipFactorySerialNumber = await transceiver.CommandAsync(
       arg: ReadFlashDataSubCode.ChipFactorySerialNumber,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     ).ConfigureAwait(false);
+
+    return new(
+      hardwareRevision: hardwareRevision,
+      firmwareRevision: firmwareRevision,
+      manufacturer: manufacturerDescriptor,
+      product: productDescriptor,
+      serialNumber: serialNumberDescriptor,
+      chipFactorySerialNumber: chipFactorySerialNumber
+    );
   }
 
-  private void RetrieveChipInformation(
-    Action<string> validateHardwareRevision,
-    Action<string> validateFirmwareRevision,
+  internal static Mcp2221AInfo ReadFrom(
+    Mcp2221ATransceiver transceiver,
     CancellationToken cancellationToken
   )
   {
-    (HardwareRevision, FirmwareRevision) = this.Command(
+    var (hardwareRevision, firmwareRevision) = transceiver.Command(
       cancellationToken: cancellationToken,
       constructCommand: RetrieveRevisionCommand.ConstructCommand,
       parseResponse: RetrieveRevisionCommand.ParseResponse
     );
 
-    validateHardwareRevision?.Invoke(HardwareRevision);
-    validateFirmwareRevision?.Invoke(FirmwareRevision);
-
-    ManufacturerDescriptor = this.Command(
+    var manufacturerDescriptor = transceiver.Command(
       arg: ReadFlashDataSubCode.UsbDescriptorStringManufacturer,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     );
 
-    ProductDescriptor = this.Command(
+    var productDescriptor = transceiver.Command(
       arg: ReadFlashDataSubCode.UsbDescriptorStringProduct,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     );
 
-    SerialNumberDescriptor = this.Command(
+    var serialNumberDescriptor = transceiver.Command(
       arg: ReadFlashDataSubCode.UsbDescriptorStringSerialNumber,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     );
 
-    ChipFactorySerialNumber = this.Command(
+    var chipFactorySerialNumber = transceiver.Command(
       arg: ReadFlashDataSubCode.ChipFactorySerialNumber,
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     );
+
+    return new(
+      hardwareRevision: hardwareRevision,
+      firmwareRevision: firmwareRevision,
+      manufacturer: manufacturerDescriptor,
+      product: productDescriptor,
+      serialNumber: serialNumberDescriptor,
+      chipFactorySerialNumber: chipFactorySerialNumber
+    );
+  }
+
+  /*
+   * instance members
+   */
+
+  /// <inheritdoc/>
+  public string HardwareRevision { get; init; }
+
+  /// <inheritdoc/>
+  public string FirmwareRevision { get; init; }
+
+  /// <inheritdoc/>
+  public string Manufacturer { get; init; }
+
+  /// <inheritdoc/>
+  public string Product { get; init; }
+
+  /// <inheritdoc/>
+  public string SerialNumber { get; init; }
+
+  /// <inheritdoc/>
+  public string ChipFactorySerialNumber { get; init; }
+
+  private Mcp2221AInfo(
+    string hardwareRevision,
+    string firmwareRevision,
+    string manufacturer,
+    string product,
+    string serialNumber,
+    string chipFactorySerialNumber
+  )
+  {
+    HardwareRevision = hardwareRevision;
+    FirmwareRevision = firmwareRevision;
+    Manufacturer = manufacturer;
+    Product = product;
+    SerialNumber = serialNumber;
+    ChipFactorySerialNumber = chipFactorySerialNumber;
   }
 }

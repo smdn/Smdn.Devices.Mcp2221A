@@ -129,10 +129,19 @@ public partial class Mcp2221ATests {
   {
     Assert.That(device.FirmwareRevision, Is.EqualTo("1.2"), nameof(device.FirmwareRevision));
     Assert.That(device.HardwareRevision, Is.EqualTo("A.6"), nameof(device.HardwareRevision));
-    Assert.That(device.ManufacturerDescriptor, Is.EqualTo(DefaultManufacturer), nameof(device.ManufacturerDescriptor));
-    Assert.That(device.ProductDescriptor, Is.EqualTo(DefaultProduct), nameof(device.ProductDescriptor));
-    Assert.That(device.SerialNumberDescriptor, Is.EqualTo(DefaultSerialNumber), nameof(device.SerialNumberDescriptor));
+    Assert.That(device.Manufacturer, Is.EqualTo(DefaultManufacturer), nameof(device.Manufacturer));
+    Assert.That(device.Product, Is.EqualTo(DefaultProduct), nameof(device.Product));
+    Assert.That(device.SerialNumber, Is.EqualTo(DefaultSerialNumber), nameof(device.SerialNumber));
     Assert.That(device.ChipFactorySerialNumber, Is.EqualTo(DefaultChipFactorySerialNumber), nameof(device.ChipFactorySerialNumber));
+
+    var info = (IMcp2221AInfo)device;
+
+    Assert.That(info.FirmwareRevision, Is.EqualTo("1.2"), nameof(info.FirmwareRevision));
+    Assert.That(info.HardwareRevision, Is.EqualTo("A.6"), nameof(info.HardwareRevision));
+    Assert.That(info.Manufacturer, Is.EqualTo(DefaultManufacturer), nameof(info.Manufacturer));
+    Assert.That(info.Product, Is.EqualTo(DefaultProduct), nameof(info.Product));
+    Assert.That(info.SerialNumber, Is.EqualTo(DefaultSerialNumber), nameof(info.SerialNumber));
+    Assert.That(info.ChipFactorySerialNumber, Is.EqualTo(DefaultChipFactorySerialNumber), nameof(info.ChipFactorySerialNumber));
   }
 
   [Test]
@@ -154,18 +163,18 @@ public partial class Mcp2221ATests {
 
     Assert.That(() => _ = device.HidDevice, Throws.Nothing);
 
-    Assert.That(() =>_ = device.HardwareRevision, Throws.Nothing);
-    Assert.That(() =>_ = device.FirmwareRevision, Throws.Nothing);
-    Assert.That(() =>_ = device.ManufacturerDescriptor, Throws.Nothing);
-    Assert.That(() =>_ = device.ProductDescriptor, Throws.Nothing);
-    Assert.That(() =>_ = device.SerialNumberDescriptor, Throws.Nothing);
-    Assert.That(() =>_ = device.ChipFactorySerialNumber, Throws.Nothing);
-    Assert.That(() =>_ = device.GPs, Throws.Nothing);
-    Assert.That(() =>_ = device.GP0, Throws.Nothing);
-    Assert.That(() =>_ = device.GP1, Throws.Nothing);
-    Assert.That(() =>_ = device.GP2, Throws.Nothing);
-    Assert.That(() =>_ = device.GP3, Throws.Nothing);
-    Assert.That(() =>_ = device.I2c, Throws.Nothing);
+    Assert.That(() => _ = device.HardwareRevision, Throws.Nothing);
+    Assert.That(() => _ = device.FirmwareRevision, Throws.Nothing);
+    Assert.That(() => _ = device.Manufacturer, Throws.Nothing);
+    Assert.That(() => _ = device.Product, Throws.Nothing);
+    Assert.That(() => _ = device.SerialNumber, Throws.Nothing);
+    Assert.That(() => _ = device.ChipFactorySerialNumber, Throws.Nothing);
+    Assert.That(() => _ = device.GPs, Throws.Nothing);
+    Assert.That(() => _ = device.GP0, Throws.Nothing);
+    Assert.That(() => _ = device.GP1, Throws.Nothing);
+    Assert.That(() => _ = device.GP2, Throws.Nothing);
+    Assert.That(() => _ = device.GP3, Throws.Nothing);
+    Assert.That(() => _ = device.I2c, Throws.Nothing);
 
     var i2c = device.I2c;
 
@@ -176,9 +185,9 @@ public partial class Mcp2221ATests {
 
     Assert.That(() => _ = device.HardwareRevision, Throws.Nothing);
     Assert.That(() => _ = device.FirmwareRevision, Throws.Nothing);
-    Assert.That(() => _ = device.ManufacturerDescriptor, Throws.Nothing);
-    Assert.That(() => _ = device.ProductDescriptor, Throws.Nothing);
-    Assert.That(() => _ = device.SerialNumberDescriptor, Throws.Nothing);
+    Assert.That(() => _ = device.Manufacturer, Throws.Nothing);
+    Assert.That(() => _ = device.Product, Throws.Nothing);
+    Assert.That(() => _ = device.SerialNumber, Throws.Nothing);
     Assert.That(() => _ = device.ChipFactorySerialNumber, Throws.Nothing);
     Assert.That(() => _ = device.GPs, Throws.Nothing);
     Assert.That(() => _ = device.GP0, Throws.Nothing);

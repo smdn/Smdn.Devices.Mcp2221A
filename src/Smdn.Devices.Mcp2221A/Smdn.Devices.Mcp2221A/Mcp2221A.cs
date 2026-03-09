@@ -69,22 +69,6 @@ public partial class Mcp2221A :
   internal Mcp2221ATransceiver Transceiver => transceiver ?? throw new ObjectDisposedException(GetType().Name);
   public IUsbHidDevice HidDevice => transceiver?.EndPoint?.Device ?? throw new ObjectDisposedException(GetType().Name);
 
-  public string? HardwareRevision { get; private set; } = null;
-  public string? FirmwareRevision { get; private set; } = null;
-  public string? ManufacturerDescriptor { get; private set; } = null;
-  public string? ProductDescriptor { get; private set; } = null;
-  public string? SerialNumberDescriptor { get; private set; } = null;
-
-  /// <remarks>Always returns <c>01234567</c>.</remarks>
-  public string? ChipFactorySerialNumber { get; private set; } = null;
-
-  /// <remarks>
-  /// If the <see cref="FirmwareRevision"/> is not retrieved or is an unknown
-  /// revision, assume it is an MCP2221A.
-  /// </remarks>
-  internal bool IsMcp2221A
-    => !string.Equals(FirmwareRevision, FirmwareRevisionMcp2221, StringComparison.Ordinal);
-
   [CLSCompliant(false)]
   public Mcp2221AI2cBus I2c {
     get {
@@ -95,10 +79,12 @@ public partial class Mcp2221A :
 
   private Mcp2221A(
     Mcp2221ATransceiver transceiver,
+    IMcp2221AInfo info,
     ILogger? logger
   )
   {
     this.transceiver = transceiver ?? throw new ArgumentNullException(nameof(transceiver));
+    this.info = info ?? throw new ArgumentNullException(nameof(info));
 
     this.GP0 = new GP0Functionality(this);
     this.GP1 = new GP1Functionality(this);
