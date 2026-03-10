@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 using NUnit.Framework;
@@ -16,8 +17,29 @@ public partial class Mcp2221ATests {
   private const byte ReportInput = 0x00;
   private const byte ReportOutput = 0x00;
 
-  internal static PseudoUsbHidDevice CreatePseudoDevice()
-    => new PseudoUsbHidDevice(
+  internal const string DefaultManufacturer = "Microchip Technology Inc.";
+  internal const string DefaultProduct = "MCP2221 USB-I2C/UART Combo";
+  internal const string DefaultSerialNumber = "XXXXXXXXXX";
+  internal const string DefaultChipFactorySerialNumber = "01234567";
+
+  internal static PseudoUsbHidDevice CreatePseudoDevice(
+    int vendorId = Mcp2221A.DeviceVendorId,
+    int productId = Mcp2221A.DeviceProductId,
+    byte hardwareRevisionMajor = (byte)'A', // = MCP2221/MCP2221A,
+    byte hardwareRevisionMinor = (byte)'6', // = MCP2221/MCP2221A,
+    byte firmwareRevisionMajor = (byte)'1', // = MCP2221/MCP2221A,
+    byte firmwareRevisionMinor = (byte)'2', // = MCP2221A,
+    string manufacturer = DefaultManufacturer,
+    string product = DefaultProduct,
+    string serialNumber = DefaultSerialNumber,
+    string chipFactorySerialNumber = DefaultChipFactorySerialNumber
+  )
+    => new(
+      vendorId: vendorId,
+      productId: productId,
+      productName: product,
+      manufacturer: manufacturer,
+      serialNumber: serialNumber,
       createWriteStream: () => new MemoryStream(capacity: (1 + 64) * 5),
       createReadStream: () => {
         var readStream = new MemoryStream(capacity: (1 + 64) * 5);
@@ -27,24 +49,38 @@ public partial class Mcp2221ATests {
           ReportInput, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x03, 0x00, 0x03, 0x14, 0x00, 0x40, 0x00, 0x10, 0x28, 0x00, 0x60, 0x01, 0x01, 0x00, 0x00, 0xF1, 0x79, 0xF0, 0x00, 0x00, 0x00, 0x30, 0x30, 0x0B, 0x30, 0x14, 0x23, 0x17, 0x7D, 0x06, 0x00, 0x00, 0x26, 0x94, 0x14, 0x41, 0x36, 0x31, 0x32, 0xFB, 0x03, 0x00, 0x00, 0xFA, 0x03, 0x76, 0x03, 0x5B, 0x02, 0x00, 0x00, 0x00, 0x00,
         ]);
 
+        const int DescriptorOffset = 2;
+
+        var manufacturerDescriptor = new byte[64 - 4];
+        var manufacturerDescriptorLength = (byte)Encoding.Unicode.GetBytes(manufacturer, manufacturerDescriptor);
+
         readStream.Write([
           // [MCP2221A] 3.1.2 READ FLASH DATA - TABLE 3-7 RESPONSE STRUCTURE - READ USB MANUFACTURER DESCRIPTOR STRING SUB-COMMAND
-          ReportInput, 0xB0, 0x00, 0x34, 0x03, 0x4D, 0x00, 0x69, 0x00, 0x63, 0x00, 0x72, 0x00, 0x6F, 0x00, 0x63, 0x00, 0x68, 0x00, 0x69, 0x00, 0x70, 0x00, 0x20, 0x00, 0x54, 0x00, 0x65, 0x00, 0x63, 0x00, 0x68, 0x00, 0x6E, 0x00, 0x6F, 0x00, 0x6C, 0x00, 0x6F, 0x00, 0x67, 0x00, 0x79, 0x00, 0x20, 0x00, 0x49, 0x00, 0x6E, 0x00, 0x63, 0x00, 0x2E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+          ReportInput, 0xB0, 0x00, (byte)(DescriptorOffset + manufacturerDescriptorLength), 0x03, .. manufacturerDescriptor
         ]);
+
+        var productDescriptor = new byte[64 - 4];
+        var productDescriptorLength = Encoding.Unicode.GetBytes(product, productDescriptor);
 
         readStream.Write([
           // [MCP2221A] 3.1.2 READ FLASH DATA - TABLE 3-8 RESPONSE STRUCTURE - READ USB PRODUCT DESCRIPTOR STRING SUB-COMMAND
-          ReportInput, 0xB0, 0x00, 0x36, 0x03, 0x4D, 0x00, 0x43, 0x00, 0x50, 0x00, 0x32, 0x00, 0x32, 0x00, 0x32, 0x00, 0x31, 0x00, 0x20, 0x00, 0x55, 0x00, 0x53, 0x00, 0x42, 0x00, 0x2D, 0x00, 0x49, 0x00, 0x32, 0x00, 0x43, 0x00, 0x2F, 0x00, 0x55, 0x00, 0x41, 0x00, 0x52, 0x00, 0x54, 0x00, 0x20, 0x00, 0x43, 0x00, 0x6F, 0x00, 0x6D, 0x00, 0x62, 0x00, 0x6F, 0x00, 0x79, 0x03, 0x7A, 0x02, 0x00, 0x00, 0x00, 0x00
+          ReportInput, 0xB0, 0x00, (byte)(DescriptorOffset + productDescriptorLength), 0x03, .. productDescriptor
         ]);
+
+        var serialNumberDescriptor = new byte[64 - 4];
+        var serialNumberDescriptorLength = Encoding.Unicode.GetBytes(serialNumber, serialNumberDescriptor);
 
         readStream.Write([
           // [MCP2221A] 3.1.2 READ FLASH DATA - TABLE 3-9 RESPONSE STRUCTURE - READ USB SERIAL NUMBER DESCRIPTOR STRING SUB-COMMAND
-          ReportInput, 0xB0, 0x00, 0x16, 0x03, 0x58, 0x00, 0x58, 0x00, 0x58, 0x00, 0x58, 0x00, 0x58, 0x00, 0x58, 0x00, 0x58, 0x00, 0x58, 0x00, 0x58, 0x00, 0x58, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+          ReportInput, 0xB0, 0x00, (byte)(DescriptorOffset + serialNumberDescriptorLength), 0x03, .. serialNumberDescriptor
         ]);
+
+        var chipFactorySerialNumberDescriptor = new byte[64 - 4];
+        var chipFactorySerialNumberDescriptorLength = Encoding.ASCII.GetBytes(chipFactorySerialNumber, chipFactorySerialNumberDescriptor);
 
         readStream.Write([
           // [MCP2221A] 3.1.2 READ FLASH DATA - TABLE 3-10 RESPONSE STRUCTURE - READ CHIP FACTORY SERIAL NUMBER SUB-COMMAND
-          ReportInput, 0xB0, 0x00, 0x08, 0x00, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x00, 0x03, 0x14, 0x00, 0x40, 0x00, 0x10, 0x28, 0x00, 0x60, 0x01, 0x01, 0x00, 0x00, 0xF1, 0x79, 0xF0, 0x00, 0x00, 0x00, 0x30, 0x30, 0x0B, 0x30, 0x14, 0x23, 0x17, 0x7D, 0x06, 0x00, 0x00, 0x26, 0x94, 0x14, 0x41, 0x36, 0x31, 0x32, 0xFB, 0x03, 0x00, 0x00, 0xFA, 0x03, 0x76, 0x03, 0x5B, 0x02, 0x00, 0x00, 0x00, 0x00
+          ReportInput, 0xB0, 0x00, (byte)chipFactorySerialNumberDescriptorLength, 0x00, .. chipFactorySerialNumberDescriptor
         ]);
 
         readStream.Position = 0L;
@@ -71,10 +107,10 @@ public partial class Mcp2221ATests {
 
     Assert.That(device.FirmwareRevision, Is.EqualTo("1.2"), nameof(device.FirmwareRevision));
     Assert.That(device.HardwareRevision, Is.EqualTo("A.6"), nameof(device.HardwareRevision));
-    Assert.That(device.ManufacturerDescriptor, Is.EqualTo("Microchip Technology Inc."), nameof(device.ManufacturerDescriptor));
-    Assert.That(device.ProductDescriptor, Is.EqualTo("MCP2221 USB-I2C/UART Combo"), nameof(device.ProductDescriptor));
-    Assert.That(device.SerialNumberDescriptor, Is.EqualTo("XXXXXXXXXX"), nameof(device.SerialNumberDescriptor));
-    Assert.That(device.ChipFactorySerialNumber, Is.EqualTo("01234567"), nameof(device.ChipFactorySerialNumber));
+    Assert.That(device.ManufacturerDescriptor, Is.EqualTo(DefaultManufacturer), nameof(device.ManufacturerDescriptor));
+    Assert.That(device.ProductDescriptor, Is.EqualTo(DefaultProduct), nameof(device.ProductDescriptor));
+    Assert.That(device.SerialNumberDescriptor, Is.EqualTo(DefaultSerialNumber), nameof(device.SerialNumberDescriptor));
+    Assert.That(device.ChipFactorySerialNumber, Is.EqualTo(DefaultChipFactorySerialNumber), nameof(device.ChipFactorySerialNumber));
   }
 
   [Test]
