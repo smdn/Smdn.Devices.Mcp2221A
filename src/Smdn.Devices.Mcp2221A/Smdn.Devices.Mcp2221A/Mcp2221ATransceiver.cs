@@ -124,6 +124,9 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
             cancellationToken
           ).ConfigureAwait(false);
       }
+      catch (OperationCanceledException) {
+        throw;
+      }
       catch (Exception ex) {
         throw new Mcp2221ACommandException("writing command report failed", ex);
       }
@@ -133,6 +136,9 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
           responseReportMemory,
           cancellationToken
         ).ConfigureAwait(false);
+      }
+      catch (OperationCanceledException) {
+        throw;
       }
       catch (Exception ex) {
         throw new Mcp2221ACommandException("reading response report failed", ex);
@@ -196,6 +202,9 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
         cancellationToken
       );
     }
+    catch (OperationCanceledException) {
+      throw;
+    }
     catch (Exception ex) {
       throw new Mcp2221ACommandException("writing command report failed", ex);
     }
@@ -205,6 +214,9 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
         responseReport,
         cancellationToken
       );
+    }
+    catch (OperationCanceledException) {
+      throw;
     }
     catch (Exception ex) {
       throw new Mcp2221ACommandException("reading response report failed", ex);

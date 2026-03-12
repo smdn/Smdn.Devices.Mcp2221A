@@ -3,9 +3,11 @@
 namespace Smdn.Devices.Mcp2221A;
 
 /// <summary>
-/// Defines an interface for accessing pre-fetched information set on the MCP2221/MCP2221A
-/// or stored in its flash memory.
+/// Defines an interface for accessing pre-fetched chip information set on
+/// the MCP2221/MCP2221A or stored in its flash memory.
 /// </summary>
+/// <seealso cref="Mcp2221A.Create{TServiceKey}(System.IServiceProvider, TServiceKey, System.Predicate{Smdn.IO.UsbHid.IUsbHidDevice}?, System.Predicate{Smdn.Devices.Mcp2221A.IMcp2221AInfo}?, System.Threading.CancellationToken)"/>
+/// <seealso cref="Mcp2221A.CreateAsync{TServiceKey}(System.IServiceProvider, TServiceKey, System.Predicate{Smdn.IO.UsbHid.IUsbHidDevice}?, System.Predicate{Smdn.Devices.Mcp2221A.IMcp2221AInfo}?, System.Threading.CancellationToken)"/>
 public interface IMcp2221AInfo {
   /// <summary>
   /// Gets the hardware revision represented as a string in the format <c>major.minor</c>.

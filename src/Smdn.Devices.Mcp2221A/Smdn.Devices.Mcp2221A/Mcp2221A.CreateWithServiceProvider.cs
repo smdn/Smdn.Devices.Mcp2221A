@@ -4,8 +4,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Microsoft.Extensions.DependencyInjection;
-
 using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
@@ -13,85 +11,199 @@ namespace Smdn.Devices.Mcp2221A;
 #pragma warning disable IDE0040, CA1724
 partial class Mcp2221A {
 #pragma warning restore IDE0040, CA1724
+  /// <summary>
+  /// Finds and opens a <see cref="Mcp2221A"/> device that is the first found among the
+  /// USB HID devices on the system, and creates an instance for it asynchronously.
+  /// </summary>
+  /// <param name="serviceProvider">
+  /// The <see cref="IServiceProvider"/> that provides required <see cref="IUsbHidService"/>
+  /// and other optional services like logging.
+  /// </param>
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// </param>
+  /// <returns>
+  /// A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.
+  /// The result of the task is a <see cref="Mcp2221A"/> instance for the found device.
+  /// </returns>
+  /// <exception cref="ArgumentNullException">
+  /// <paramref name="serviceProvider"/> is <see langword="null"/>.
+  /// </exception>
+  /// <exception cref="InvalidOperationException">
+  /// <see cref="IUsbHidService"/> is not registered in <paramref name="serviceProvider"/>.
+  /// </exception>
+  /// <exception cref="Mcp2221ANotFoundException">
+  /// No MCP2221/MCP2221 was found on the system.
+  /// </exception>
+  /// <exception cref="OperationCanceledException">
+  /// The operation was cancelled.
+  /// </exception>
+  /// <remarks>
+  /// <para>
+  /// This method requires an <see cref="IUsbHidService"/> to be registered
+  /// in the <paramref name="serviceProvider"/>.
+  /// </para>
+  /// </remarks>
+  /// <seealso cref="CreateAsync(IUsbHidDevice, bool, IServiceProvider?, CancellationToken)"/>
   public static ValueTask<Mcp2221A> CreateAsync(
     IServiceProvider serviceProvider,
     CancellationToken cancellationToken = default
   )
-    => CreateWithServiceProviderAsyncCore(
+    => CreateFromFirstUsbHidDeviceAsyncCore(
       serviceProvider: serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider)),
       serviceKey: (object?)null,
-      predicate: null,
+      usbHidDeviceFilter: null,
       cancellationToken: cancellationToken
     );
 
+  /// <summary>
+  /// Finds and opens a <see cref="Mcp2221A"/> device that is the first found among the
+  /// USB HID devices on the system, and creates an instance for it.
+  /// </summary>
+  /// <param name="serviceProvider">
+  /// The <see cref="IServiceProvider"/> that provides required <see cref="IUsbHidService"/>
+  /// and other optional services like logging.
+  /// </param>
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// </param>
+  /// <returns>
+  /// A <see cref="Mcp2221A"/> instance for the found device.
+  /// </returns>
+  /// <exception cref="ArgumentNullException">
+  /// <paramref name="serviceProvider"/> is <see langword="null"/>.
+  /// </exception>
+  /// <exception cref="InvalidOperationException">
+  /// <see cref="IUsbHidService"/> is not registered in <paramref name="serviceProvider"/>.
+  /// </exception>
+  /// <exception cref="Mcp2221ANotFoundException">
+  /// No MCP2221/MCP2221 was found on the system.
+  /// </exception>
+  /// <exception cref="OperationCanceledException">
+  /// The operation was cancelled.
+  /// </exception>
+  /// <remarks>
+  /// <para>
+  /// This method requires an <see cref="IUsbHidService"/> to be registered
+  /// in the <paramref name="serviceProvider"/>.
+  /// </para>
+  /// </remarks>
+  /// <seealso cref="Create(IUsbHidDevice, bool, IServiceProvider?, CancellationToken)"/>
   public static Mcp2221A Create(
     IServiceProvider serviceProvider,
     CancellationToken cancellationToken = default
   )
-    => CreateWithServiceProviderCore(
+    => CreateFromFirstUsbHidDeviceCore(
       serviceProvider: serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider)),
       serviceKey: (object?)null,
-      predicate: null,
+      usbHidDeviceFilter: null,
       cancellationToken: cancellationToken
     );
 
+  /// <summary>
+  /// Finds and opens a <see cref="Mcp2221A"/> device that is the first found among the
+  /// USB HID devices on the system, and creates an instance for it asynchronously.
+  /// </summary>
+  /// <typeparam name="TServiceKey">
+  /// The type of the <paramref name="serviceKey"/>.
+  /// </typeparam>
+  /// <param name="serviceProvider">
+  /// The <see cref="IServiceProvider"/> that provides required <see cref="IUsbHidService"/>
+  /// and other optional services like logging.
+  /// </param>
+  /// <param name="serviceKey">
+  /// The key for the <see cref="IUsbHidService"/> to be obtained
+  /// from the <paramref name="serviceProvider"/>. If a keyed service is not found,
+  /// it attempts to resolve a non-keyed <see cref="IUsbHidService"/>.
+  /// </param>
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// </param>
+  /// <returns>
+  /// A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.
+  /// The result of the task is a <see cref="Mcp2221A"/> instance for the found device.
+  /// </returns>
+  /// <exception cref="ArgumentNullException">
+  /// <paramref name="serviceProvider"/> is <see langword="null"/>.
+  /// </exception>
+  /// <exception cref="InvalidOperationException">
+  /// <see cref="IUsbHidService"/> is not registered in <paramref name="serviceProvider"/>.
+  /// </exception>
+  /// <exception cref="Mcp2221ANotFoundException">
+  /// No MCP2221/MCP2221 was found on the system.
+  /// </exception>
+  /// <exception cref="OperationCanceledException">
+  /// The operation was cancelled.
+  /// </exception>
+  /// <remarks>
+  /// <para>
+  /// This method requires an <see cref="IUsbHidService"/> to be registered
+  /// in the <paramref name="serviceProvider"/>.
+  /// </para>
+  /// </remarks>
+  /// <seealso cref="CreateAsync{TServiceKey}(IUsbHidDevice, IServiceProvider?, TServiceKey, bool, CancellationToken)"/>
   public static ValueTask<Mcp2221A> CreateAsync<TServiceKey>(
     IServiceProvider serviceProvider,
     TServiceKey serviceKey,
     CancellationToken cancellationToken = default
   )
-    => CreateWithServiceProviderAsyncCore(
+    => CreateFromFirstUsbHidDeviceAsyncCore(
       serviceProvider: serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider)),
       serviceKey: serviceKey,
-      predicate: null,
+      usbHidDeviceFilter: null,
       cancellationToken: cancellationToken
     );
 
+  /// <summary>
+  /// Finds and opens a <see cref="Mcp2221A"/> device that is the first found among the
+  /// USB HID devices on the system, and creates an instance for it.
+  /// </summary>
+  /// <typeparam name="TServiceKey">
+  /// The type of the <paramref name="serviceKey"/>.
+  /// </typeparam>
+  /// <param name="serviceProvider">
+  /// The <see cref="IServiceProvider"/> that provides required <see cref="IUsbHidService"/>
+  /// and other optional services like logging.
+  /// </param>
+  /// <param name="serviceKey">
+  /// The key for the <see cref="IUsbHidService"/> to be obtained
+  /// from the <paramref name="serviceProvider"/>. If a keyed service is not found,
+  /// it attempts to resolve a non-keyed <see cref="IUsbHidService"/>.
+  /// </param>
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// </param>
+  /// <returns>
+  /// A <see cref="Mcp2221A"/> instance for the found device.
+  /// </returns>
+  /// <exception cref="ArgumentNullException">
+  /// <paramref name="serviceProvider"/> is <see langword="null"/>.
+  /// </exception>
+  /// <exception cref="InvalidOperationException">
+  /// <see cref="IUsbHidService"/> is not registered in <paramref name="serviceProvider"/>.
+  /// </exception>
+  /// <exception cref="Mcp2221ANotFoundException">
+  /// No MCP2221/MCP2221 was found on the system.
+  /// </exception>
+  /// <exception cref="OperationCanceledException">
+  /// The operation was cancelled.
+  /// </exception>
+  /// <remarks>
+  /// <para>
+  /// This method requires an <see cref="IUsbHidService"/> to be registered
+  /// in the <paramref name="serviceProvider"/>.
+  /// </para>
+  /// </remarks>
+  /// <seealso cref="Create{TServiceKey}(IUsbHidDevice, IServiceProvider?, TServiceKey, bool, CancellationToken)"/>
   public static Mcp2221A Create<TServiceKey>(
     IServiceProvider serviceProvider,
     TServiceKey serviceKey,
     CancellationToken cancellationToken = default
   )
-    => CreateWithServiceProviderCore(
+    => CreateFromFirstUsbHidDeviceCore(
       serviceProvider: serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider)),
       serviceKey: serviceKey,
-      predicate: null,
-      cancellationToken: cancellationToken
-    );
-
-  private static IMcp2221AUsbHidDeviceFactory GetUsbHidDeviceFactoryFrom<TServiceKey>(
-    IServiceProvider? serviceProvider,
-    TServiceKey serviceKey
-  )
-    =>
-      serviceProvider?.GetKeyedService<IMcp2221AUsbHidDeviceFactory>(serviceKey) ??
-      Mcp2221ADefaultUsbHidDeviceFactory.Instance; // fallback to default factory
-
-  private static ValueTask<Mcp2221A> CreateWithServiceProviderAsyncCore<TServiceKey>(
-    IServiceProvider? serviceProvider,
-    TServiceKey? serviceKey,
-    Predicate<IUsbHidDevice>? predicate,
-    CancellationToken cancellationToken = default
-  )
-    => CreateWithDeviceFactoryAsyncCore(
-      usbHidDeviceFactory: GetUsbHidDeviceFactoryFrom(serviceProvider, serviceKey),
-      serviceProvider: serviceProvider,
-      serviceKey: serviceKey,
-      predicate: predicate,
-      cancellationToken: cancellationToken
-    );
-
-  private static Mcp2221A CreateWithServiceProviderCore<TServiceKey>(
-    IServiceProvider? serviceProvider,
-    TServiceKey? serviceKey,
-    Predicate<IUsbHidDevice>? predicate,
-    CancellationToken cancellationToken = default
-  )
-    => CreateWithDeviceFactoryCore(
-      usbHidDeviceFactory: GetUsbHidDeviceFactoryFrom(serviceProvider, serviceKey),
-      serviceProvider: serviceProvider,
-      serviceKey: serviceKey,
-      predicate: predicate,
+      usbHidDeviceFilter: null,
       cancellationToken: cancellationToken
     );
 }

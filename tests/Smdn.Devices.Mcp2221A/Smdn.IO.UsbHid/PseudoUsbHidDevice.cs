@@ -55,6 +55,9 @@ class PseudoUsbHidDevice : IUsbHidDevice {
       ? throw new ObjectDisposedException(GetType().FullName)
       : endpoint ?? throw new InvalidOperationException("endpoint is not opened");
 
+  public Action? OnEndPointOpeningAction { get; set; }
+  public Action? OnEndPointOpenedAction { get; set; }
+
   public PseudoUsbHidDevice(
     int vendorId,
     int productId,
@@ -95,12 +98,21 @@ class PseudoUsbHidDevice : IUsbHidDevice {
     CancellationToken cancellationToken
   )
   {
+    if (IsDisposed)
+      throw new ObjectDisposedException(GetType().FullName);
+
+    OnEndPointOpeningAction?.Invoke();
+
+    cancellationToken.ThrowIfCancellationRequested();
+
     endpoint = new PseudoUsbHidEndPoint(
       this,
       openOutEndPoint ? createWriteStream?.Invoke() : null,
       openInEndPoint ? createReadStream?.Invoke() : null,
       shouldDisposeDevice
     );
+
+    OnEndPointOpenedAction?.Invoke();
 
     return endpoint;
   }
@@ -112,12 +124,21 @@ class PseudoUsbHidDevice : IUsbHidDevice {
     CancellationToken cancellationToken
   )
   {
+    if (IsDisposed)
+      throw new ObjectDisposedException(GetType().FullName);
+
+    OnEndPointOpeningAction?.Invoke();
+
+    cancellationToken.ThrowIfCancellationRequested();
+
     endpoint = new PseudoUsbHidEndPoint(
       this,
       openOutEndPoint ? createWriteStream?.Invoke() : null,
       openInEndPoint ? createReadStream?.Invoke() : null,
       shouldDisposeDevice
     );
+
+    OnEndPointOpenedAction?.Invoke();
 
     return new(endpoint);
   }
