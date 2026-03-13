@@ -367,26 +367,14 @@ partial class Mcp2221A {
     // default VID/PID. If a filter is specified, apply that filter.
     // Considerations for cases where custom VID/PID is set are handled
     // through the use of filters.
-    // TODO: use IUsbHidService.FindAllDevices
-    var mcp2221AUsbHidDevices = usbHidService.GetDevices(
+    var mcp2221AUsbHidDevices = usbHidService.FindAllDevices(
       vendorId: usbHidDeviceFilter is null ? Mcp2221A.DeviceVendorId : null,
       productId: usbHidDeviceFilter is null ? Mcp2221A.DeviceProductId : null,
-      cancellationToken
+      predicate: usbHidDeviceFilter,
+      cancellationToken: cancellationToken
     );
 
-    if (usbHidDeviceFilter is null)
-      return (usbHidService, mcp2221AUsbHidDevices);
-
-    var filteredDevices = new List<IUsbHidDevice>(capacity: mcp2221AUsbHidDevices.Count);
-
-    foreach (var usbHidDevice in mcp2221AUsbHidDevices) {
-      if (usbHidDeviceFilter(usbHidDevice))
-        filteredDevices.Add(usbHidDevice);
-      else
-        usbHidDevice.Dispose();
-    }
-
-    return (usbHidService, filteredDevices);
+    return (usbHidService, mcp2221AUsbHidDevices);
   }
 
   private static async ValueTask<Mcp2221A> CreateWithDeviceFilterAsyncCore(
