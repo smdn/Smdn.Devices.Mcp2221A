@@ -16,7 +16,7 @@
 [![NuGet Smdn.Devices.MCP2221](https://img.shields.io/nuget/v/Smdn.Devices.MCP2221.svg)](https://www.nuget.org/packages/Smdn.Devices.MCP2221/)
 [![NuGet Smdn.Devices.Mcp2221A](https://img.shields.io/nuget/v/Smdn.Devices.Mcp2221A.svg)](https://www.nuget.org/packages/Smdn.Devices.Mcp2221A/)
 
-[Smdn.Devices.Mcp2221A](src/Smdn.Devices.Mcp2221A/) is a .NET library for the **Microchip Technology [MCP2221](https://www.microchip.com/wwwproducts/en/MCP2221) and [MCP2221A](https://www.microchip.com/wwwproducts/en/MCP2221A), a USB2.0 to I<sup>2</sup>C/UART Protocol Converter with GPIO**. This library provides APIs that enable .NET applications to access the functions of the MCP2221/MCP2221A via the USB-HID interface.
+[Smdn.Devices.Mcp2221A](src/Smdn.Devices.Mcp2221A/) is a .NET library for the **Microchip Technology [MCP2221](https://www.microchip.com/wwwproducts/en/MCP2221) and [MCP2221A](https://www.microchip.com/wwwproducts/en/MCP2221A), a USB2.0 to I<sup>2</sup>C/UART Protocol Converter with GPIO**. This library provides APIs that enable .NET applications to access the functions of the MCP2221/MCP2221A via the USB HID interface.
 
 With this library, you can interface with I<sup>2</sup>C devices and control GPIO pins from any PC that has a USB port. It can be used without intermediate microcontrollers like Raspberry Pi or Arduino and does not require any special kernel drivers, offering an alternative for hardware control and prototyping.
 
@@ -70,7 +70,7 @@ Haven't tested with the actual MCP2221, but it is expected that works as same as
 # Library API features
 - Frameworks/Platforms
   - .NET Standard 2.1/.NET 5
-  - Windows/Linux/MacOS and any other platforms which USB-HID driver supports
+  - Windows/Linux/MacOS and any other platforms which USB HID driver supports
 - `Smdn.Devices.Mcp2221A`
   - `Read`/`Write` and other command methods
     - Supports `Span<byte>`/`Memory<byte>`
@@ -79,7 +79,7 @@ Haven't tested with the actual MCP2221, but it is expected that works as same as
   - Can handle multiple MCP2221/MCP2221A by finding target with `Predicate<IUsbHidDevice>` and/or `Predicate<IMcp2221AInfo>`. ([example](examples/Smdn.Devices.Mcp2221A/SelectDevice/))
   - Can handle MCP2221/MCP2221A with custom VID/PID values written in the chip settings. ([example](examples/Smdn.Devices.Mcp2221A/SelectDevice/))
   - I2C bus scanning ([example](examples/Smdn.Devices.Mcp2221A/i2cscanbus/))
-  - Using [HIDSharp](https://www.zer7.com/software/hidsharp) as default USB-HID driver, [LibUsbDotNet](https://www.nuget.org/packages/LibUsbDotNet/) also supported.
+  - Using [HIDSharp](https://www.zer7.com/software/hidsharp) as default USB HID driver, [LibUsbDotNet](https://www.nuget.org/packages/LibUsbDotNet/) also supported.
   - Provides an adapter for [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio/)
   - Can handle I2C devices using with [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings/)
 

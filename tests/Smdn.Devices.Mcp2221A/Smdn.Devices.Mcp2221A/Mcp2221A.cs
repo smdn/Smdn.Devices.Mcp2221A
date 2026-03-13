@@ -208,7 +208,7 @@ public partial class Mcp2221ATests {
     Assert.That(async () => await i2c.ReadAsync(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => i2c.ReadAsync(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => i2c.Read(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
-    Assert.That(baseDevice.IsDisposed, Is.EqualTo(shouldDisposeUsbHidDevice), "USB-HID device disposed");
+    Assert.That(baseDevice.IsDisposed, Is.EqualTo(shouldDisposeUsbHidDevice), "USB HID device disposed");
 
     Assert.That(async () => await disposeAction(device), Throws.Nothing, "dispose again");
   }

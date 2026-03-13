@@ -7,7 +7,7 @@ You can run this example with following instruction.
 Required devices and parts are as follows:
 
 - PC with USB ports and
-  - OS with USB-HID
+  - OS with USB HID
   - .NET SDK
 - MCP2221/MCP2221A and
   - resistors, capacitors, USB breakout and some accessory parts. (See [/doc/wiring](/doc/wiring#prerequisites) for detail)
