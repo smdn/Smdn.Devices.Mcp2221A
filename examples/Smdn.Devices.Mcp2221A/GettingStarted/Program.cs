@@ -33,9 +33,9 @@ services.AddLibUsbDotNetUsbHid(
     options.DebugLevel = LogLevel.None;
     // Specify the filename of the libusb-1.0 library installed on your
     // system or placed in the output directory.
-    options.LibUsbLibraryPath = "libusb-1.0.so.0";
-    // options.LibUsbLibraryPath = "libusb-1.0.dll";
-    // options.LibUsbLibraryPath = "libusb-1.0.dylib";
+    options.LibUsbLibraryPath = "libusb-1.0.so.0"; // Linux
+    // options.LibUsbLibraryPath = "libusb-1.0.dll"; // Windows
+    // options.LibUsbLibraryPath = "libusb-1.0.dylib"; // MacOS
   }
 );
 */
