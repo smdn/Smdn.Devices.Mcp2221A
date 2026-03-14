@@ -4,7 +4,6 @@ using System;
 #if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
 using System.Diagnostics.CodeAnalysis;
 #endif
-using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
@@ -66,31 +65,9 @@ public partial class Mcp2221A :
   /*
    * instance members
    */
-  private readonly bool shouldDisposeUsbHidDevice;
-
-  private IUsbHidDevice? hidDevice;
-  public IUsbHidDevice HidDevice => hidDevice ?? throw new ObjectDisposedException(GetType().Name);
-
-  private IUsbHidEndPoint? hidStream;
-  private IUsbHidEndPoint HidStream => hidStream ?? throw new ObjectDisposedException(GetType().Name);
-
-  private readonly ILogger? logger;
-
-  public string? HardwareRevision { get; private set; } = null;
-  public string? FirmwareRevision { get; private set; } = null;
-  public string? ManufacturerDescriptor { get; private set; } = null;
-  public string? ProductDescriptor { get; private set; } = null;
-  public string? SerialNumberDescriptor { get; private set; } = null;
-
-  /// <remarks>Always returns <c>01234567</c>.</remarks>
-  public string? ChipFactorySerialNumber { get; private set; } = null;
-
-  /// <remarks>
-  /// If the <see cref="FirmwareRevision"/> is not retrieved or is an unknown
-  /// revision, assume it is an MCP2221A.
-  /// </remarks>
-  internal bool IsMcp2221A
-    => !string.Equals(FirmwareRevision, FirmwareRevisionMcp2221, StringComparison.Ordinal);
+  private Mcp2221ATransceiver? transceiver;
+  internal Mcp2221ATransceiver Transceiver => transceiver ?? throw new ObjectDisposedException(GetType().Name);
+  public IUsbHidDevice HidDevice => transceiver?.EndPoint?.Device ?? throw new ObjectDisposedException(GetType().Name);
 
   [CLSCompliant(false)]
   public Mcp2221AI2cBus I2c {
@@ -101,13 +78,13 @@ public partial class Mcp2221A :
   }
 
   private Mcp2221A(
-    IUsbHidDevice hidDevice,
-    bool shouldDisposeUsbHidDevice,
+    Mcp2221ATransceiver transceiver,
+    IMcp2221AInfo info,
     ILogger? logger
   )
   {
-    this.hidDevice = hidDevice ?? throw new ArgumentNullException(nameof(hidDevice));
-    this.shouldDisposeUsbHidDevice = shouldDisposeUsbHidDevice;
+    this.transceiver = transceiver ?? throw new ArgumentNullException(nameof(transceiver));
+    this.info = info ?? throw new ArgumentNullException(nameof(info));
 
     this.GP0 = new GP0Functionality(this);
     this.GP1 = new GP1Functionality(this);
@@ -121,8 +98,6 @@ public partial class Mcp2221A :
     };
 
     I2c = new(this, logger);
-
-    this.logger = logger;
   }
 
   public void Dispose()
@@ -144,65 +119,21 @@ public partial class Mcp2221A :
   protected virtual void Dispose(bool disposing)
   {
     if (disposing) {
-      hidStream?.Dispose();
-      hidStream = null;
-
-      if (shouldDisposeUsbHidDevice)
-        hidDevice?.Dispose();
-
-      hidDevice = null;
+      transceiver?.Dispose();
+      transceiver = null;
     }
   }
 
   protected virtual async ValueTask DisposeAsyncCore()
   {
-    if (hidStream is not null) {
-      await hidStream.DisposeAsync().ConfigureAwait(false);
-      hidStream = null;
-    }
-
-    if (hidDevice is not null) {
-      if (shouldDisposeUsbHidDevice)
-        await hidDevice.DisposeAsync().ConfigureAwait(false);
-
-      hidDevice = null;
+    if (transceiver is not null) {
+      await transceiver.DisposeAsync().ConfigureAwait(false);
+      transceiver = null;
     }
   }
 
 #if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
-  [MemberNotNull(nameof(hidDevice))]
+  [MemberNotNull(nameof(transceiver))]
 #endif
-  internal void ThrowIfDisposed() => _ = hidDevice ?? throw new ObjectDisposedException(GetType().Name);
-
-  internal void OpenEndPoint(CancellationToken cancellationToken)
-  {
-    ThrowIfDisposed();
-
-    hidStream =
-#if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
-      hidDevice
-#else
-      hidDevice!
-#endif
-        .OpenEndPoint(
-          shouldDisposeDevice: false, // the source device must not be disposed when disposing of an endpoint
-          cancellationToken: cancellationToken
-        );
-  }
-
-  internal async ValueTask OpenEndPointAsync(CancellationToken cancellationToken)
-  {
-    ThrowIfDisposed();
-
-    hidStream = await
-#if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
-      hidDevice
-#else
-      hidDevice!
-#endif
-        .OpenEndPointAsync(
-          shouldDisposeDevice: false, // the source device must not be disposed when disposing of an endpoint
-          cancellationToken: cancellationToken
-        ).ConfigureAwait(false);
-  }
+  internal void ThrowIfDisposed() => _ = transceiver ?? throw new ObjectDisposedException(GetType().Name);
 }

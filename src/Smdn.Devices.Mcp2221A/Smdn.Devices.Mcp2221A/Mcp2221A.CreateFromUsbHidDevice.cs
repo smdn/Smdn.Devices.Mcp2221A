@@ -14,6 +14,54 @@ namespace Smdn.Devices.Mcp2221A;
 #pragma warning disable IDE0040, CA1724
 partial class Mcp2221A {
 #pragma warning restore IDE0040, CA1724
+  /// <summary>
+  /// Creates an instance of <see cref="Mcp2221A"/> from the specified
+  /// <see cref="IUsbHidDevice"/> asynchronously.
+  /// </summary>
+  /// <param name="usbHidDevice">
+  /// The <see cref="IUsbHidDevice"/> to create an instance from.
+  /// </param>
+  /// <param name="shouldDisposeUsbHidDevice">
+  /// <see langword="true"/> to dispose the <paramref name="usbHidDevice"/> when the
+  /// created <see cref="Mcp2221A"/> instance is disposed; otherwise, <see langword="false"/>.
+  /// </param>
+  /// <param name="serviceProvider">
+  /// An optional <see cref="IServiceProvider"/> for providing services like logging.
+  /// </param>
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// </param>
+  /// <returns>
+  /// A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.
+  /// The result of the task is a new <see cref="Mcp2221A"/> instance.
+  /// </returns>
+  /// <exception cref="ArgumentNullException">
+  /// <paramref name="usbHidDevice"/> is <see langword="null"/>.
+  /// </exception>
+  /// <exception cref="Mcp2221AUnavailableException">
+  /// Failed to open the endpoint for the specified <paramref name="usbHidDevice"/>.
+  /// This can be due to lack of permissions, the device being disconnected,
+  /// or being used by another process. The <see cref="Exception.InnerException"/>
+  /// property holds the original exception.
+  /// </exception>
+  /// <exception cref="Mcp2221ANotSupportedException">
+  /// The hardware or firmware revision of the device is not supported.
+  /// </exception>
+  /// <exception cref="OperationCanceledException">
+  /// The operation was cancelled.
+  /// </exception>
+  /// <remarks>
+  /// <para>
+  /// If an <see cref="ILoggerFactory"/> is registered in the <paramref name="serviceProvider"/>,
+  /// the communication process will be logged.
+  /// </para>
+  /// <para>
+  /// If <paramref name="shouldDisposeUsbHidDevice"/> is set to <see langword="true"/>,
+  /// the lifecycle of the provided <paramref name="usbHidDevice"/> is tied to the
+  /// created <see cref="Mcp2221A"/> instance. Disposing the <see cref="Mcp2221A"/>
+  /// instance will also dispose the <paramref name="usbHidDevice"/>.
+  /// </para>
+  /// </remarks>
   public static ValueTask<Mcp2221A> CreateAsync(
     IUsbHidDevice usbHidDevice,
     bool shouldDisposeUsbHidDevice = false,
@@ -28,6 +76,53 @@ partial class Mcp2221A {
       cancellationToken: cancellationToken
     );
 
+  /// <summary>
+  /// Creates an instance of <see cref="Mcp2221A"/> from the specified
+  /// <see cref="IUsbHidDevice"/>.
+  /// </summary>
+  /// <param name="usbHidDevice">
+  /// The <see cref="IUsbHidDevice"/> to create an instance from.
+  /// </param>
+  /// <param name="shouldDisposeUsbHidDevice">
+  /// <see langword="true"/> to dispose the <paramref name="usbHidDevice"/> when the
+  /// created <see cref="Mcp2221A"/> instance is disposed; otherwise, <see langword="false"/>.
+  /// </param>
+  /// <param name="serviceProvider">
+  /// An optional <see cref="IServiceProvider"/> for providing services like logging.
+  /// </param>
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// </param>
+  /// <returns>
+  /// A <see cref="Mcp2221A"/> instance.
+  /// </returns>
+  /// <exception cref="ArgumentNullException">
+  /// <paramref name="usbHidDevice"/> is <see langword="null"/>.
+  /// </exception>
+  /// <exception cref="Mcp2221AUnavailableException">
+  /// Failed to open the endpoint for the specified <paramref name="usbHidDevice"/>.
+  /// This can be due to lack of permissions, the device being disconnected,
+  /// or being used by another process. The <see cref="Exception.InnerException"/>
+  /// property holds the original exception.
+  /// </exception>
+  /// <exception cref="Mcp2221ANotSupportedException">
+  /// The hardware or firmware revision of the device is not supported.
+  /// </exception>
+  /// <exception cref="OperationCanceledException">
+  /// The operation was cancelled.
+  /// </exception>
+  /// <remarks>
+  /// <para>
+  /// If an <see cref="ILoggerFactory"/> is registered in the <paramref name="serviceProvider"/>,
+  /// the communication process will be logged.
+  /// </para>
+  /// <para>
+  /// If <paramref name="shouldDisposeUsbHidDevice"/> is set to <see langword="true"/>,
+  /// the lifecycle of the provided <paramref name="usbHidDevice"/> is tied to the
+  /// created <see cref="Mcp2221A"/> instance. Disposing the <see cref="Mcp2221A"/>
+  /// instance will also dispose the <paramref name="usbHidDevice"/>.
+  /// </para>
+  /// </remarks>
   public static Mcp2221A Create(
     IUsbHidDevice usbHidDevice,
     bool shouldDisposeUsbHidDevice = false,
@@ -42,9 +137,63 @@ partial class Mcp2221A {
       cancellationToken: cancellationToken
     );
 
+  /// <summary>
+  /// Creates an instance of <see cref="Mcp2221A"/> from the specified
+  /// <see cref="IUsbHidDevice"/> asynchronously.
+  /// </summary>
+  /// <typeparam name="TServiceKey">
+  /// The type of the <paramref name="serviceKey"/>.
+  /// </typeparam>
+  /// <param name="usbHidDevice">
+  /// The <see cref="IUsbHidDevice"/> to create an instance from.
+  /// </param>
+  /// <param name="serviceProvider">
+  /// An optional <see cref="IServiceProvider"/> for providing services like logging.
+  /// </param>
+  /// <param name="serviceKey">
+  /// The key for the services to be obtained from the <paramref name="serviceProvider"/>.
+  /// </param>
+  /// <param name="shouldDisposeUsbHidDevice">
+  /// <see langword="true"/> to dispose the <paramref name="usbHidDevice"/> when the
+  /// created <see cref="Mcp2221A"/> instance is disposed; otherwise, <see langword="false"/>.
+  /// </param>
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// </param>
+  /// <returns>
+  /// A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.
+  /// The result of the task is a new <see cref="Mcp2221A"/> instance.
+  /// </returns>
+  /// <exception cref="ArgumentNullException">
+  /// <paramref name="usbHidDevice"/> is <see langword="null"/>.
+  /// </exception>
+  /// <exception cref="Mcp2221AUnavailableException">
+  /// Failed to open the endpoint for the specified <paramref name="usbHidDevice"/>.
+  /// This can be due to lack of permissions, the device being disconnected,
+  /// or being used by another process. The <see cref="Exception.InnerException"/>
+  /// property holds the original exception.
+  /// </exception>
+  /// <exception cref="Mcp2221ANotSupportedException">
+  /// The hardware or firmware revision of the device is not supported.
+  /// </exception>
+  /// <exception cref="OperationCanceledException">
+  /// The operation was cancelled.
+  /// </exception>
+  /// <remarks>
+  /// <para>
+  /// If an <see cref="ILoggerFactory"/> is registered in the <paramref name="serviceProvider"/>,
+  /// the communication process will be logged.
+  /// </para>
+  /// <para>
+  /// If <paramref name="shouldDisposeUsbHidDevice"/> is set to <see langword="true"/>,
+  /// the lifecycle of the provided <paramref name="usbHidDevice"/> is tied to the
+  /// created <see cref="Mcp2221A"/> instance. Disposing the <see cref="Mcp2221A"/>
+  /// instance will also dispose the <paramref name="usbHidDevice"/>.
+  /// </para>
+  /// </remarks>
   public static ValueTask<Mcp2221A> CreateAsync<TServiceKey>(
     IUsbHidDevice usbHidDevice,
-    IServiceProvider serviceProvider,
+    IServiceProvider? serviceProvider,
     TServiceKey serviceKey,
     bool shouldDisposeUsbHidDevice = false,
     CancellationToken cancellationToken = default
@@ -57,9 +206,62 @@ partial class Mcp2221A {
       cancellationToken: cancellationToken
     );
 
+  /// <summary>
+  /// Creates an instance of <see cref="Mcp2221A"/> from the specified
+  /// <see cref="IUsbHidDevice"/>.
+  /// </summary>
+  /// <typeparam name="TServiceKey">
+  /// The type of the <paramref name="serviceKey"/>.
+  /// </typeparam>
+  /// <param name="usbHidDevice">
+  /// The <see cref="IUsbHidDevice"/> to create an instance from.
+  /// </param>
+  /// <param name="serviceProvider">
+  /// An optional <see cref="IServiceProvider"/> for providing services like logging.
+  /// </param>
+  /// <param name="serviceKey">
+  /// The key for the services to be obtained from the <paramref name="serviceProvider"/>.
+  /// </param>
+  /// <param name="shouldDisposeUsbHidDevice">
+  /// <see langword="true"/> to dispose the <paramref name="usbHidDevice"/> when the
+  /// created <see cref="Mcp2221A"/> instance is disposed; otherwise, <see langword="false"/>.
+  /// </param>
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// </param>
+  /// <returns>
+  /// A <see cref="Mcp2221A"/> instance.
+  /// </returns>
+  /// <exception cref="ArgumentNullException">
+  /// <paramref name="usbHidDevice"/> is <see langword="null"/>.
+  /// </exception>
+  /// <exception cref="Mcp2221AUnavailableException">
+  /// Failed to open the endpoint for the specified <paramref name="usbHidDevice"/>.
+  /// This can be due to lack of permissions, the device being disconnected,
+  /// or being used by another process. The <see cref="Exception.InnerException"/>
+  /// property holds the original exception.
+  /// </exception>
+  /// <exception cref="Mcp2221ANotSupportedException">
+  /// The hardware or firmware revision of the device is not supported.
+  /// </exception>
+  /// <exception cref="OperationCanceledException">
+  /// The operation was cancelled.
+  /// </exception>
+  /// <remarks>
+  /// <para>
+  /// If an <see cref="ILoggerFactory"/> is registered in the <paramref name="serviceProvider"/>,
+  /// the communication process will be logged.
+  /// </para>
+  /// <para>
+  /// If <paramref name="shouldDisposeUsbHidDevice"/> is set to <see langword="true"/>,
+  /// the lifecycle of the provided <paramref name="usbHidDevice"/> is tied to the
+  /// created <see cref="Mcp2221A"/> instance. Disposing the <see cref="Mcp2221A"/>
+  /// instance will also dispose the <paramref name="usbHidDevice"/>.
+  /// </para>
+  /// </remarks>
   public static Mcp2221A Create<TServiceKey>(
     IUsbHidDevice usbHidDevice,
-    IServiceProvider serviceProvider,
+    IServiceProvider? serviceProvider,
     TServiceKey serviceKey,
     bool shouldDisposeUsbHidDevice = false,
     CancellationToken cancellationToken = default
@@ -69,6 +271,84 @@ partial class Mcp2221A {
       shouldDisposeUsbHidDevice: shouldDisposeUsbHidDevice,
       serviceProvider: serviceProvider,
       serviceKey: serviceKey,
+      cancellationToken: cancellationToken
+    );
+
+  private static IUsbHidService GetUsbHidServiceOrThrow(
+    IServiceProvider serviceProvider,
+    object? serviceKey
+  )
+  {
+    try {
+      return
+        serviceProvider.GetKeyedService<IUsbHidService>(serviceKey) ??
+        serviceProvider.GetRequiredService<IUsbHidService>();
+    }
+    catch (InvalidOperationException ex) {
+      throw new InvalidOperationException(
+        message: $"{nameof(IUsbHidService)} could not be resolved. To use this method overload, {nameof(IUsbHidService)} must be registered in {nameof(IServiceProvider)}.",
+        innerException: ex
+      );
+    }
+  }
+
+  private static IUsbHidDevice GetFirstUsbHidDeviceOrThrow(
+    IServiceProvider serviceProvider,
+    object? serviceKey,
+    Predicate<IUsbHidDevice>? usbHidDeviceFilter,
+    CancellationToken cancellationToken
+  )
+  {
+    var usbHidService = GetUsbHidServiceOrThrow(serviceProvider, serviceKey);
+
+    // Considering the possibility that custom VID/PIDs may be configured,
+    // filtering by VID/PID is not performed here when Predicate<IUsbHidDevice>
+    // is provided; instead, it is delegated to Predicate<IUsbHidDevice>.
+    var usbHidDevice = usbHidService.FindDevice(
+      vendorId: usbHidDeviceFilter is null ? Mcp2221A.DeviceVendorId : null,
+      productId: usbHidDeviceFilter is null ? Mcp2221A.DeviceProductId : null,
+      predicate: usbHidDeviceFilter,
+      cancellationToken: cancellationToken
+    );
+
+    return usbHidDevice ?? throw new Mcp2221ANotFoundException(usbHidService, usbHidDeviceFilter);
+  }
+
+  private static ValueTask<Mcp2221A> CreateFromFirstUsbHidDeviceAsyncCore<TServiceKey>(
+    IServiceProvider serviceProvider,
+    TServiceKey? serviceKey,
+    Predicate<IUsbHidDevice>? usbHidDeviceFilter,
+    CancellationToken cancellationToken
+  )
+    => CreateFromUsbHidDeviceAsyncCore(
+      usbHidDevice: GetFirstUsbHidDeviceOrThrow(
+        serviceProvider: serviceProvider,
+        serviceKey: serviceKey,
+        usbHidDeviceFilter: usbHidDeviceFilter,
+        cancellationToken: cancellationToken
+      ),
+      serviceProvider: serviceProvider,
+      serviceKey: serviceKey,
+      shouldDisposeUsbHidDevice: true,
+      cancellationToken: cancellationToken
+    );
+
+  private static Mcp2221A CreateFromFirstUsbHidDeviceCore<TServiceKey>(
+    IServiceProvider serviceProvider,
+    TServiceKey? serviceKey,
+    Predicate<IUsbHidDevice>? usbHidDeviceFilter,
+    CancellationToken cancellationToken
+  )
+    => CreateFromUsbHidDeviceCore(
+      usbHidDevice: GetFirstUsbHidDeviceOrThrow(
+        serviceProvider: serviceProvider,
+        serviceKey: serviceKey,
+        usbHidDeviceFilter: usbHidDeviceFilter,
+        cancellationToken: cancellationToken
+      ),
+      serviceProvider: serviceProvider,
+      serviceKey: serviceKey,
+      shouldDisposeUsbHidDevice: true,
       cancellationToken: cancellationToken
     );
 
@@ -82,34 +362,42 @@ partial class Mcp2221A {
     CancellationToken cancellationToken
   )
   {
-    Mcp2221A? device = null;
+    IUsbHidEndPoint? usbHidEndPoint = null;
 
     try {
-      device = new Mcp2221A(
-        hidDevice: usbHidDevice,
-        shouldDisposeUsbHidDevice: shouldDisposeUsbHidDevice,
-        logger: serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221A>()
-      );
-
       try {
-        await device.OpenEndPointAsync(
+        // hereafter, the lifecycle of device will be delegated to its endpoint
+        usbHidEndPoint = await usbHidDevice.OpenEndPointAsync(
+          shouldDisposeDevice: shouldDisposeUsbHidDevice,
           cancellationToken: cancellationToken
         ).ConfigureAwait(false);
       }
-      catch (Exception ex) {
+      catch (Exception ex) when (ex is not OperationCanceledException) {
         throw new Mcp2221AUnavailableException(ex, usbHidDevice);
       }
 
-      await device.RetrieveChipInformationAsync(
-        ValidateHardwareRevision,
-        ValidateFirmwareRevision,
+      var logger = serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221A>();
+      var transceiver = new Mcp2221ATransceiver(
+        endPoint: usbHidEndPoint,
+        logger: logger
+      );
+      var info = await Mcp2221AInfo.ReadFromAsync(
+        transceiver: transceiver,
         cancellationToken: cancellationToken
       ).ConfigureAwait(false);
 
-      return device;
+      return CreateFromInfoAndTransceiver(
+        transceiver: transceiver,
+        info: info,
+        logger: logger,
+        cancellationToken: cancellationToken
+      );
     }
     catch {
-      await device!.DisposeAsync().ConfigureAwait(false);
+      if (usbHidEndPoint is not null)
+        await usbHidEndPoint.DisposeAsync().ConfigureAwait(false);
+      if (shouldDisposeUsbHidDevice)
+        await usbHidDevice.DisposeAsync().ConfigureAwait(false);
 
       throw;
     }
@@ -125,34 +413,42 @@ partial class Mcp2221A {
     CancellationToken cancellationToken
   )
   {
-    Mcp2221A? device = null;
+    IUsbHidEndPoint? usbHidEndPoint = null;
 
     try {
-      device = new Mcp2221A(
-        hidDevice: usbHidDevice,
-        shouldDisposeUsbHidDevice: shouldDisposeUsbHidDevice,
-        logger: serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221A>()
-      );
-
       try {
-        device.OpenEndPoint(
+        // hereafter, the lifecycle of device will be delegated to its endpoint
+        usbHidEndPoint = usbHidDevice.OpenEndPoint(
+          shouldDisposeDevice: shouldDisposeUsbHidDevice,
           cancellationToken: cancellationToken
         );
       }
-      catch (Exception ex) {
+      catch (Exception ex) when (ex is not OperationCanceledException) {
         throw new Mcp2221AUnavailableException(ex, usbHidDevice);
       }
 
-      device.RetrieveChipInformation(
-        ValidateHardwareRevision,
-        ValidateFirmwareRevision,
+      var logger = serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221A>();
+      var transceiver = new Mcp2221ATransceiver(
+        endPoint: usbHidEndPoint,
+        logger: logger
+      );
+      var info = Mcp2221AInfo.ReadFrom(
+        transceiver: transceiver,
         cancellationToken: cancellationToken
       );
 
-      return device;
+      return CreateFromInfoAndTransceiver(
+        transceiver: transceiver,
+        info: info,
+        logger: logger,
+        cancellationToken: cancellationToken
+      );
     }
     catch {
-      device!.Dispose();
+      usbHidEndPoint?.Dispose();
+
+      if (shouldDisposeUsbHidDevice)
+        usbHidDevice.Dispose();
 
       throw;
     }

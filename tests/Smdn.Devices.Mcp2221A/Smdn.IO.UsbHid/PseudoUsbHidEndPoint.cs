@@ -17,6 +17,9 @@ class PseudoUsbHidEndPoint : IUsbHidEndPoint {
   public Stream? WriteStream { get; private set; }
   public Stream? ReadStream { get; private set; }
 
+  public Action? OnWritingAction { get; set; }
+  public Action? OnReadingAction { get; set; }
+
   private readonly bool shouldDisposeDevice;
 
   public PseudoUsbHidEndPoint(
@@ -65,14 +68,30 @@ class PseudoUsbHidEndPoint : IUsbHidEndPoint {
   }
 
   public void Write(ReadOnlySpan<byte> buffer, CancellationToken cancellationToken = default)
-    => (WriteStream ?? throw new InvalidOperationException("not writable")).Write(buffer);
+  {
+    OnWritingAction?.Invoke();
+
+    (WriteStream ?? throw new InvalidOperationException("not writable")).Write(buffer);
+  }
 
   public ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
-    => (WriteStream ?? throw new InvalidOperationException("not writable")).WriteAsync(buffer, cancellationToken);
+  {
+    OnWritingAction?.Invoke();
+
+    return (WriteStream ?? throw new InvalidOperationException("not writable")).WriteAsync(buffer, cancellationToken);
+  }
 
   public int Read(Span<byte> buffer, CancellationToken cancellationToken = default)
-    => (ReadStream ?? throw new InvalidOperationException("not readable")).Read(buffer);
+  {
+    OnReadingAction?.Invoke();
+
+    return (ReadStream ?? throw new InvalidOperationException("not readable")).Read(buffer);
+  }
 
   public ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
-    => (ReadStream ?? throw new InvalidOperationException("not readable")).ReadAsync(buffer, cancellationToken);
+  {
+    OnReadingAction?.Invoke();
+
+    return (ReadStream ?? throw new InvalidOperationException("not readable")).ReadAsync(buffer, cancellationToken);
+  }
 }

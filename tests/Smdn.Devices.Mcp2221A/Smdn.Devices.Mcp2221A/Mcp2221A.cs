@@ -46,7 +46,7 @@ public partial class Mcp2221ATests {
 
         readStream.Write([
           // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
-          ReportInput, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x03, 0x00, 0x03, 0x14, 0x00, 0x40, 0x00, 0x10, 0x28, 0x00, 0x60, 0x01, 0x01, 0x00, 0x00, 0xF1, 0x79, 0xF0, 0x00, 0x00, 0x00, 0x30, 0x30, 0x0B, 0x30, 0x14, 0x23, 0x17, 0x7D, 0x06, 0x00, 0x00, 0x26, 0x94, 0x14, 0x41, 0x36, 0x31, 0x32, 0xFB, 0x03, 0x00, 0x00, 0xFA, 0x03, 0x76, 0x03, 0x5B, 0x02, 0x00, 0x00, 0x00, 0x00,
+          ReportInput, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x03, 0x00, 0x03, 0x14, 0x00, 0x40, 0x00, 0x10, 0x28, 0x00, 0x60, 0x01, 0x01, 0x00, 0x00, 0xF1, 0x79, 0xF0, 0x00, 0x00, 0x00, 0x30, 0x30, 0x0B, 0x30, 0x14, 0x23, 0x17, 0x7D, 0x06, 0x00, 0x00, 0x26, 0x94, 0x14, hardwareRevisionMajor, hardwareRevisionMinor, firmwareRevisionMajor, firmwareRevisionMinor, 0xFB, 0x03, 0x00, 0x00, 0xFA, 0x03, 0x76, 0x03, 0x5B, 0x02, 0x00, 0x00, 0x00, 0x00,
         ]);
 
         const int DescriptorOffset = 2;
@@ -90,27 +90,58 @@ public partial class Mcp2221ATests {
     );
 
   [Test]
-  public void OpenAsync()
+  public void CreateAsync()
   {
     Mcp2221A? device = null;
 
-    Assert.That(async () => device = await Mcp2221A.CreateAsync(CreatePseudoDevice(), shouldDisposeUsbHidDevice: true), Throws.Nothing);
+    try {
+      Assert.That(async () => device = await Mcp2221A.CreateAsync(CreatePseudoDevice(), shouldDisposeUsbHidDevice: true), Throws.Nothing);
 
-    Assert.That(device, Is.Not.Null);
-    Assert.That(device.HidDevice, Is.Not.Null);
-    Assert.That(device.FirmwareRevision, Is.Not.Null);
-    Assert.That(device.HardwareRevision, Is.Not.Null);
-    Assert.That(device.ManufacturerDescriptor, Is.Not.Null);
-    Assert.That(device.ProductDescriptor, Is.Not.Null);
-    Assert.That(device.SerialNumberDescriptor, Is.Not.Null);
-    Assert.That(device.ChipFactorySerialNumber, Is.Not.Null);
+      Assert.That(device, Is.Not.Null);
+      Assert.That(device.HidDevice, Is.Not.Null);
 
+      AssertPseudoDeviceWithDefaultConfiguration(device);
+    }
+    finally {
+      device?.Dispose();
+    }
+  }
+
+  [Test]
+  public void Create()
+  {
+    Mcp2221A? device = null;
+
+    try {
+      Assert.That(() => device = Mcp2221A.Create(CreatePseudoDevice(), shouldDisposeUsbHidDevice: true), Throws.Nothing);
+
+      Assert.That(device, Is.Not.Null);
+      Assert.That(device.HidDevice, Is.Not.Null);
+
+      AssertPseudoDeviceWithDefaultConfiguration(device);
+    }
+    finally {
+      device?.Dispose();
+    }
+  }
+
+  private static void AssertPseudoDeviceWithDefaultConfiguration(Mcp2221A device)
+  {
     Assert.That(device.FirmwareRevision, Is.EqualTo("1.2"), nameof(device.FirmwareRevision));
     Assert.That(device.HardwareRevision, Is.EqualTo("A.6"), nameof(device.HardwareRevision));
-    Assert.That(device.ManufacturerDescriptor, Is.EqualTo(DefaultManufacturer), nameof(device.ManufacturerDescriptor));
-    Assert.That(device.ProductDescriptor, Is.EqualTo(DefaultProduct), nameof(device.ProductDescriptor));
-    Assert.That(device.SerialNumberDescriptor, Is.EqualTo(DefaultSerialNumber), nameof(device.SerialNumberDescriptor));
+    Assert.That(device.Manufacturer, Is.EqualTo(DefaultManufacturer), nameof(device.Manufacturer));
+    Assert.That(device.Product, Is.EqualTo(DefaultProduct), nameof(device.Product));
+    Assert.That(device.SerialNumber, Is.EqualTo(DefaultSerialNumber), nameof(device.SerialNumber));
     Assert.That(device.ChipFactorySerialNumber, Is.EqualTo(DefaultChipFactorySerialNumber), nameof(device.ChipFactorySerialNumber));
+
+    var info = (IMcp2221AInfo)device;
+
+    Assert.That(info.FirmwareRevision, Is.EqualTo("1.2"), nameof(info.FirmwareRevision));
+    Assert.That(info.HardwareRevision, Is.EqualTo("A.6"), nameof(info.HardwareRevision));
+    Assert.That(info.Manufacturer, Is.EqualTo(DefaultManufacturer), nameof(info.Manufacturer));
+    Assert.That(info.Product, Is.EqualTo(DefaultProduct), nameof(info.Product));
+    Assert.That(info.SerialNumber, Is.EqualTo(DefaultSerialNumber), nameof(info.SerialNumber));
+    Assert.That(info.ChipFactorySerialNumber, Is.EqualTo(DefaultChipFactorySerialNumber), nameof(info.ChipFactorySerialNumber));
   }
 
   [Test]
@@ -132,18 +163,18 @@ public partial class Mcp2221ATests {
 
     Assert.That(() => _ = device.HidDevice, Throws.Nothing);
 
-    Assert.That(() =>_ = device.HardwareRevision, Throws.Nothing);
-    Assert.That(() =>_ = device.FirmwareRevision, Throws.Nothing);
-    Assert.That(() =>_ = device.ManufacturerDescriptor, Throws.Nothing);
-    Assert.That(() =>_ = device.ProductDescriptor, Throws.Nothing);
-    Assert.That(() =>_ = device.SerialNumberDescriptor, Throws.Nothing);
-    Assert.That(() =>_ = device.ChipFactorySerialNumber, Throws.Nothing);
-    Assert.That(() =>_ = device.GPs, Throws.Nothing);
-    Assert.That(() =>_ = device.GP0, Throws.Nothing);
-    Assert.That(() =>_ = device.GP1, Throws.Nothing);
-    Assert.That(() =>_ = device.GP2, Throws.Nothing);
-    Assert.That(() =>_ = device.GP3, Throws.Nothing);
-    Assert.That(() =>_ = device.I2c, Throws.Nothing);
+    Assert.That(() => _ = device.HardwareRevision, Throws.Nothing);
+    Assert.That(() => _ = device.FirmwareRevision, Throws.Nothing);
+    Assert.That(() => _ = device.Manufacturer, Throws.Nothing);
+    Assert.That(() => _ = device.Product, Throws.Nothing);
+    Assert.That(() => _ = device.SerialNumber, Throws.Nothing);
+    Assert.That(() => _ = device.ChipFactorySerialNumber, Throws.Nothing);
+    Assert.That(() => _ = device.GPs, Throws.Nothing);
+    Assert.That(() => _ = device.GP0, Throws.Nothing);
+    Assert.That(() => _ = device.GP1, Throws.Nothing);
+    Assert.That(() => _ = device.GP2, Throws.Nothing);
+    Assert.That(() => _ = device.GP3, Throws.Nothing);
+    Assert.That(() => _ = device.I2c, Throws.Nothing);
 
     var i2c = device.I2c;
 
@@ -154,9 +185,9 @@ public partial class Mcp2221ATests {
 
     Assert.That(() => _ = device.HardwareRevision, Throws.Nothing);
     Assert.That(() => _ = device.FirmwareRevision, Throws.Nothing);
-    Assert.That(() => _ = device.ManufacturerDescriptor, Throws.Nothing);
-    Assert.That(() => _ = device.ProductDescriptor, Throws.Nothing);
-    Assert.That(() => _ = device.SerialNumberDescriptor, Throws.Nothing);
+    Assert.That(() => _ = device.Manufacturer, Throws.Nothing);
+    Assert.That(() => _ = device.Product, Throws.Nothing);
+    Assert.That(() => _ = device.SerialNumber, Throws.Nothing);
     Assert.That(() => _ = device.ChipFactorySerialNumber, Throws.Nothing);
     Assert.That(() => _ = device.GPs, Throws.Nothing);
     Assert.That(() => _ = device.GP0, Throws.Nothing);
@@ -180,5 +211,85 @@ public partial class Mcp2221ATests {
     Assert.That(baseDevice.IsDisposed, Is.EqualTo(shouldDisposeUsbHidDevice), "USB-HID device disposed");
 
     Assert.That(async () => await disposeAction(device), Throws.Nothing, "dispose again");
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_Create_HardwareOrFirmwareNotSupported()
+  {
+    const bool ThrowsException = true;
+    const bool ThrowsNothing = false;
+
+    // MCP2221
+    yield return new object[] { (byte)'A', (byte)'6', (byte)'1', (byte)'1', ThrowsNothing };
+
+    // MCP2221A
+    yield return new object[] { (byte)'A', (byte)'6', (byte)'1', (byte)'2', ThrowsNothing };
+
+    // unknown hardware revision (major)
+    yield return new object[] { (byte)'B', (byte)'6', (byte)'1', (byte)'1', ThrowsException };
+
+    // unknown hardware revision (minor)
+    yield return new object[] { (byte)'A', (byte)'7', (byte)'1', (byte)'1', ThrowsException };
+
+    // unknown firmware revision (major)
+    yield return new object[] { (byte)'A', (byte)'6', (byte)'0', (byte)'1', ThrowsException };
+    yield return new object[] { (byte)'A', (byte)'6', (byte)'2', (byte)'0', ThrowsException };
+
+    // unknown firmware revision (minor)
+    yield return new object[] { (byte)'A', (byte)'6', (byte)'1', (byte)'0', ThrowsException };
+    yield return new object[] { (byte)'A', (byte)'6', (byte)'1', (byte)'3', ThrowsException };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_Create_HardwareOrFirmwareNotSupported))]
+  public void CreateAsync_HardwareOrFirmwareNotSupported(
+    char hardwareRevisionMajor,
+    char hardwareRevisionMinor,
+    char firmwareRevisionMajor,
+    char firmwareRevisionMinor,
+    bool expectExceptionThrown
+  )
+  {
+    using var baseDevice = CreatePseudoDevice(
+      hardwareRevisionMajor: (byte)hardwareRevisionMajor,
+      hardwareRevisionMinor: (byte)hardwareRevisionMinor,
+      firmwareRevisionMajor: (byte)firmwareRevisionMajor,
+      firmwareRevisionMinor: (byte)firmwareRevisionMinor
+    );
+
+    Mcp2221A? device = null;
+
+    Assert.That(
+      async () => device = await Mcp2221A.CreateAsync(baseDevice, shouldDisposeUsbHidDevice: true),
+      expectExceptionThrown ? Throws.TypeOf<Mcp2221ANotSupportedException>() : Throws.Nothing
+    );
+    Assert.That(baseDevice.IsDisposed, Is.EqualTo(expectExceptionThrown));
+
+    device?.Dispose();
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_Create_HardwareOrFirmwareNotSupported))]
+  public void Create_HardwareOrFirmwareNotSupported(
+    char hardwareRevisionMajor,
+    char hardwareRevisionMinor,
+    char firmwareRevisionMajor,
+    char firmwareRevisionMinor,
+    bool expectExceptionThrown
+  )
+  {
+    using var baseDevice = CreatePseudoDevice(
+      hardwareRevisionMajor: (byte)hardwareRevisionMajor,
+      hardwareRevisionMinor: (byte)hardwareRevisionMinor,
+      firmwareRevisionMajor: (byte)firmwareRevisionMajor,
+      firmwareRevisionMinor: (byte)firmwareRevisionMinor
+    );
+
+    Mcp2221A? device = null;
+
+    Assert.That(
+      () => device = Mcp2221A.Create(baseDevice, shouldDisposeUsbHidDevice: true),
+      expectExceptionThrown ? Throws.TypeOf<Mcp2221ANotSupportedException>() : Throws.Nothing
+    );
+    Assert.That(baseDevice.IsDisposed, Is.EqualTo(expectExceptionThrown));
+
+    device?.Dispose();
   }
 }

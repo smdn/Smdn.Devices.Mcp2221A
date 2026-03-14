@@ -76,7 +76,8 @@ Haven't tested with the actual MCP2221, but it is expected that works as same as
     - Supports `Span<byte>`/`Memory<byte>`
     - Supports `async`, `CancellationToken`
     - Supports logging with `ILogger`, [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging/) ([example](examples/Smdn.Devices.Mcp2221A/logging/))
-  - Can handle multiple MCP2221/MCP2221A by finding target with `Predicate<IUsbHidDevice>`
+  - Can handle multiple MCP2221/MCP2221A by finding target with `Predicate<IUsbHidDevice>` and/or `Predicate<IMcp2221AInfo>`. ([example](examples/Smdn.Devices.Mcp2221A/SelectDevice/))
+  - Can handle MCP2221/MCP2221A with custom VID/PID values written in the chip settings. ([example](examples/Smdn.Devices.Mcp2221A/SelectDevice/))
   - I2C bus scanning ([example](examples/Smdn.Devices.Mcp2221A/i2cscanbus/))
   - Using [HIDSharp](https://www.zer7.com/software/hidsharp) as default USB-HID driver, [LibUsbDotNet](https://www.nuget.org/packages/LibUsbDotNet/) also supported.
   - Provides an adapter for [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio/)

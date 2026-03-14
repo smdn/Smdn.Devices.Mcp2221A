@@ -25,8 +25,20 @@ public class Mcp2221ANotFoundException : InvalidOperationException {
   {
   }
 
-  internal Mcp2221ANotFoundException(IUsbHidService usbHidService, Predicate<IUsbHidDevice>? predicate)
+  internal Mcp2221ANotFoundException(
+    IUsbHidService usbHidService,
+    Predicate<IUsbHidDevice>? predicate
+  )
     : base($"{nameof(IUsbHidService)} could not find an MCP2221/MCP2221A matching the specified predicate. ({nameof(IUsbHidService)}: {usbHidService}, {nameof(predicate)}: {predicate?.ToString() ?? "null"})")
+  {
+  }
+
+  internal Mcp2221ANotFoundException(
+    IUsbHidService usbHidService,
+    Predicate<IUsbHidDevice>? usbHidDeviceFilter,
+    Predicate<IMcp2221AInfo>? mcp2221AFilter
+  )
+    : base($"{nameof(IUsbHidService)} could not find an MCP2221/MCP2221A matching the specified predicate. ({nameof(IUsbHidService)}: {usbHidService}, {nameof(usbHidDeviceFilter)}: {usbHidDeviceFilter?.ToString() ?? "null"}, {nameof(mcp2221AFilter)}: {mcp2221AFilter?.ToString() ?? "null"})")
   {
   }
 }

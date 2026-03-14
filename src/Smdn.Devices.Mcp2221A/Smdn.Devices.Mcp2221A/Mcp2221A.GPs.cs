@@ -381,7 +381,6 @@ partial class Mcp2221A {
       try {
         // retrieve current GP0-GP3 settings
         _ = await device.CommandAsync(
-          userData: default,
           arg: gpSettings.AsMemory(0, 4),
           cancellationToken: cancellationToken,
           constructCommand: GetGPSettingsCommand.ConstructCommand,
@@ -390,7 +389,6 @@ partial class Mcp2221A {
 
         // overwrite GPn settings and set GP0-GP3 settings
         _ = await device.CommandAsync(
-          userData: default,
           arg: ((ReadOnlyMemory<byte>)gpSettings.AsMemory(0, 4), GPIndex, gpDesignation, gpioInitialDirection, gpioInitialValue),
           cancellationToken: cancellationToken,
           constructCommand: SetGPSettingsCommand.ConstructCommand,
@@ -417,7 +415,6 @@ partial class Mcp2221A {
       try {
         // retrieve current GP0-GP3 settings
         device.Command(
-          userData: default,
           arg: gpSettings.AsMemory(0, 4),
           cancellationToken: cancellationToken,
           constructCommand: GetGPSettingsCommand.ConstructCommand,
@@ -426,7 +423,6 @@ partial class Mcp2221A {
 
         // overwrite GPn settings and set GP0-GP3 settings
         device.Command(
-          userData: default,
           arg: ((ReadOnlyMemory<byte>)gpSettings.AsMemory(0, 4), GPIndex, gpDesignation, gpioInitialDirection, gpioInitialValue),
           cancellationToken: cancellationToken,
           constructCommand: SetGPSettingsCommand.ConstructCommand,

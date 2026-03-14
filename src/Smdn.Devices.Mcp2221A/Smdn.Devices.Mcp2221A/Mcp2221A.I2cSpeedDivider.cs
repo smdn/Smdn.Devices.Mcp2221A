@@ -100,7 +100,7 @@ partial class Mcp2221A {
   {
     byte busSpeedDivider;
 
-    var isValid = IsMcp2221A
+    var isValid = this.IsMcp2221A
       ? TryCalculateMcp2221AI2cSpeedDivider(transmissionSpeed, out busSpeedDivider)
       : TryCalculateMcp2221I2cSpeedDivider(transmissionSpeed, out busSpeedDivider);
 
