@@ -1,0 +1,36 @@
+﻿<!--
+SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
+SPDX-License-Identifier: MIT
+-->
+<Solution>
+  <Folder Name="/Smdn.Devices.Mcp2221A/">
+    <Project Path="Smdn.Devices.Mcp2221A/i2cscanbus/i2cscanbus.csproj" />
+    <Project Path="Smdn.Devices.Mcp2221A/logging/logging.csproj" />
+    <Project Path="Smdn.Devices.Mcp2221A/read-gpio/read-gpio.csproj" />
+    <Project Path="Smdn.Devices.Mcp2221A/shiftregister/shiftregister.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/blink-csharp/">
+    <Project Path="Smdn.Devices.Mcp2221A/blink-csharp/blink.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/blink-visualbasic/">
+    <Project Path="Smdn.Devices.Mcp2221A/blink-visualbasic/blink.vbproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/GettingStarted/">
+    <Project Path="Smdn.Devices.Mcp2221A/GettingStarted/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/I2CAdapter_BME280/">
+    <Project Path="Smdn.Devices.Mcp2221A/I2CAdapter_BME280/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/I2CAdapter_HT16K33_4Digit14SegmentDisplay/">
+    <Project Path="Smdn.Devices.Mcp2221A/I2CAdapter_HT16K33_4Digit14SegmentDisplay/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/I2CAdapter_MCP23017/">
+    <Project Path="Smdn.Devices.Mcp2221A/I2CAdapter_MCP23017/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/I2CAdapter_US2066_SO1602A/">
+    <Project Path="Smdn.Devices.Mcp2221A/I2CAdapter_US2066_SO1602A/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/SelectDevice/">
+    <Project Path="Smdn.Devices.Mcp2221A/SelectDevice/Program.csproj" />
+  </Folder>
+</Solution>
