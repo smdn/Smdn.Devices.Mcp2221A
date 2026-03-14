@@ -19,17 +19,6 @@ public partial class Mcp2221A :
   IAsyncDisposable
 {
 #pragma warning restore IDE0055, CA1724
-  [Obsolete($"Use {nameof(CreateAsync)} with {nameof(IUsbHidDevice)} instead.", error: true)]
-  public static async ValueTask<Mcp2221A> OpenAsync(Func<IUsbHidDevice?> createHidDevice, IServiceProvider? serviceProvider = null)
-    => throw new NotSupportedException($"Use {nameof(CreateAsync)} with {nameof(IUsbHidDevice)} instead.");
-
-  [Obsolete($"Use {nameof(Create)} with {nameof(IUsbHidDevice)} instead.", error: true)]
-  public static Mcp2221A Open(Func<IUsbHidDevice?> createHidDevice, IServiceProvider? serviceProvider = null)
-    => throw new NotSupportedException($"Use {nameof(Create)} with {nameof(IUsbHidDevice)} instead.");
-
-  /*
-   * instance members
-   */
   private Mcp2221ATransceiver? transceiver;
   internal Mcp2221ATransceiver Transceiver => transceiver ?? throw new ObjectDisposedException(GetType().Name);
   public IUsbHidDevice HidDevice => transceiver?.EndPoint?.Device ?? throw new ObjectDisposedException(GetType().Name);
