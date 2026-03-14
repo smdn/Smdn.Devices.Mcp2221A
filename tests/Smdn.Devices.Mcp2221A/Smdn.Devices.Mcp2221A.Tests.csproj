@@ -10,6 +10,16 @@ SPDX-License-Identifier: MIT
     <TargetFrameworks Condition=" '$(EnableTargetFrameworkNetFx)' == 'true' ">net462;net481;$(TargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!--
+      Suppress warning from Microsoft.Extensions.Diagnostics.Testing:
+      Microsoft.Extensions.Diagnostics.Testing 10.4.0 doesn't support net4xy and has not been tested with it.
+    -->
+    <SuppressTfmSupportBuildWarnings
+      Condition="$(TargetFramework.StartsWith('net4'))"
+    >true</SuppressTfmSupportBuildWarnings>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" Version="10.4.0"/>
   </ItemGroup>
