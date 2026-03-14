@@ -47,6 +47,14 @@ This library provides APIs that enable .NET applications to access the functions
       <PackageReadmeFileContent><![CDATA[# $(PackageId) $(PackageVersion)
 $(Description)
 
+This library enables you to select any USB HID implementation using dependency injection.
+Depending on licensing and other requirements, you can choose any of the following implementation providers.
+
+- [Smdn.IO.UsbHid.Providers.HidSharp](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp)
+- [Smdn.IO.UsbHid.Providers.LibUsbDotNet](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNet)
+- [Smdn.IO.UsbHid.Providers.LibUsbDotNetV3](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3)
+
+Please add one of the implementation providers to the project's package references.
 
 ## Usage
 This is an example of switching the output of each pin on GP0-GP3 of the MCP2221 at specific intervals to make the connected LED blink.
