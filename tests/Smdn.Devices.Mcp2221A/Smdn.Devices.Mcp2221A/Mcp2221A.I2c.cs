@@ -31,7 +31,18 @@ partial class Mcp2221ATests {
 
       foreach (var sequence in responseSequences) {
         endpoint.ReadStream.WriteByte(ReportInput);
-        endpoint.ReadStream.Write(ToByteArray(sequence));
+
+        var sequenceBytes = ToByteArray(sequence);
+
+        endpoint.ReadStream.Write(
+#if SYSTEM_IO_STREAM_WRITE_READONLYSPAN_OF_BYTE
+          sequenceBytes
+#else
+          sequenceBytes,
+          0,
+          sequenceBytes.Length
+#endif
+        );
       }
 
       endpoint.ReadStream.Position = currentPosition;

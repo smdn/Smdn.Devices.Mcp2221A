@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 using System;
+#if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
 using System.Diagnostics.CodeAnalysis;
+#endif
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,25 +25,33 @@ class PseudoUsbHidDevice : IUsbHidDevice {
   private readonly string? serialNumber;
 
   public bool TryGetProductName(
+#if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
     [NotNullWhen(true)]
+#endif
     out string? productName
   )
     => (productName = this.productName) is not null;
 
   public bool TryGetManufacturer(
+#if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
     [NotNullWhen(true)]
+#endif
     out string? manufacturer
   )
     => (manufacturer = this.manufacturer) is not null;
 
   public bool TryGetSerialNumber(
+#if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
     [NotNullWhen(true)]
+#endif
     out string? serialNumber
   )
     => (serialNumber = this.serialNumber) is not null;
 
   public bool TryGetDeviceIdentifier(
+#if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
     [NotNullWhen(true)]
+#endif
     out string? deviceIdentifier
   )
     => (deviceIdentifier = "/dev/null") is not null;
