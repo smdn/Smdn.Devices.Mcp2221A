@@ -23,8 +23,12 @@ public static class ServiceCollectionExtensions {
     PseudoUsbHidService pseudoUsbHidService
   )
   {
+#if SYSTEM_ARGUMENTNULLEXCEPTION_THROWIFNULL
+    ArgumentNullException.ThrowIfNull(services);
+#else
     if (services is null)
       throw new ArgumentNullException(nameof(services));
+#endif
 
     if (serviceKey is null) {
       services.Add(

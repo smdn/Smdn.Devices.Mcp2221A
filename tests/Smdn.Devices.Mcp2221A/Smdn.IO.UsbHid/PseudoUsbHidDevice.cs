@@ -108,8 +108,12 @@ class PseudoUsbHidDevice : IUsbHidDevice {
     CancellationToken cancellationToken
   )
   {
+#if NET7_0_OR_GREATER
+    ObjectDisposedException.ThrowIf(IsDisposed, this);
+#else
     if (IsDisposed)
       throw new ObjectDisposedException(GetType().FullName);
+#endif
 
     OnEndPointOpeningAction?.Invoke();
 
@@ -134,8 +138,12 @@ class PseudoUsbHidDevice : IUsbHidDevice {
     CancellationToken cancellationToken
   )
   {
+#if NET7_0_OR_GREATER
+    ObjectDisposedException.ThrowIf(IsDisposed, this);
+#else
     if (IsDisposed)
       throw new ObjectDisposedException(GetType().FullName);
+#endif
 
     OnEndPointOpeningAction?.Invoke();
 

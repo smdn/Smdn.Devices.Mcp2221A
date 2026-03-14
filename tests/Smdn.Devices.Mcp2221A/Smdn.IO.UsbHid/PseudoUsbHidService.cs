@@ -14,8 +14,12 @@ public sealed class PseudoUsbHidService(IReadOnlyList<IUsbHidDevice> devices) : 
     CancellationToken cancellationToken = default
   )
   {
+#if NET7_0_OR_GREATER
+    ObjectDisposedException.ThrowIf(disposed, this);
+#else
     if (disposed)
       throw new ObjectDisposedException(GetType().FullName);
+#endif
 
     cancellationToken.ThrowIfCancellationRequested();
 
