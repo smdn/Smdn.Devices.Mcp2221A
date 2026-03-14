@@ -4,7 +4,6 @@
 #pragma warning disable CA1848, CA1873, CA2254
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,13 +24,13 @@ public sealed class Mcp2221AInfo : IMcp2221AInfo {
       comm[0] = 0x10; // Status/Set Parameter
     }
 
-    [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1316:TupleElementNamesShouldUseCorrectCasing", Justification = "Not a publicly-exposed type or member.")]
-#pragma warning disable IDE0060, SA1313 // [IDE0060] Remove unused parameter [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
     public static (
-      string firmwareRevision,
-      string hardwareRevision
-    ) ParseResponse(ReadOnlySpan<byte> resp, None _)
-#pragma warning restore IDE0060, SA1313
+      string FirmwareRevision,
+      string HardwareRevision
+    )
+#pragma warning disable SA1313 // [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
+    ParseResponse(ReadOnlySpan<byte> resp, None _)
+#pragma warning restore SA1313
       => (
         new string([(char)resp[46], '.', (char)resp[47]]),
         new string([(char)resp[48], '.', (char)resp[49]])
