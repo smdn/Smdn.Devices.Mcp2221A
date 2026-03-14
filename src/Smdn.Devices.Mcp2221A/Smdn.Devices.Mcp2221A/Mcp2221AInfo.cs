@@ -5,6 +5,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,28 +32,10 @@ public sealed class Mcp2221AInfo : IMcp2221AInfo {
       string hardwareRevision
     ) ParseResponse(ReadOnlySpan<byte> resp, None _)
 #pragma warning restore IDE0060, SA1313
-    {
-      static void CreateRevisionString(Span<char> str, (char major, char minor) revision)
-      {
-        str[0] = revision.major;
-        str[1] = '.';
-        str[2] = revision.minor;
-      }
-
-      return (
-#if false // XXX: string.Create does not accept ReadOnlySpan<T>, dotnet/runtime#30175
-        string.Create(3, resp, (str, re) => {str[0] = (char)re[46]; str[1] = '.'; str[2] = (char)re[47]; }),
-        string.Create(3, resp, (str, re) => {str[0] = (char)re[48]; str[1] = '.'; str[2] = (char)re[49]; })
-#endif
-#if SYSTEM_STRING_CREATE
-        string.Create(3, ((char)resp[46], (char)resp[47]), CreateRevisionString),
-        string.Create(3, ((char)resp[48], (char)resp[49]), CreateRevisionString)
-#else
-        new string(new[] { (char)resp[46], '.', (char)resp[47] }),
-        new string(new[] { (char)resp[48], '.', (char)resp[49] })
-#endif
+      => (
+        new string([(char)resp[46], '.', (char)resp[47]]),
+        new string([(char)resp[48], '.', (char)resp[49]])
       );
-    }
   }
 
   // [MCP2221A] 3.1.2 READ FLASH DATA
@@ -82,53 +65,59 @@ public sealed class Mcp2221AInfo : IMcp2221AInfo {
     public static string ParseResponse(ReadOnlySpan<byte> resp, ReadFlashDataSubCode subCode)
     {
       if (subCode == ReadFlashDataSubCode.ChipFactorySerialNumber) {
-#if false // XXX: string.Create does not accept ReadOnlySpan<T>, dotnet/runtime#30175
-        return string.Create((int)resp[2], resp, (str, re) => {
-          for (var i = 0; i < str.Length; i++) {
-            str[i] = (char)re[i];
+        var lengthInBytes = (int)resp[2];
+        // If lengthInBytes is invalid, an ArgumentException is thrown, so
+        // an out-of-bounds reference does not occur.
+        var bytes = resp.Slice(4, lengthInBytes);
+
+#if SYSTEM_STRING_CREATE_OF_TSTATE_ALLOWS_REF_STRUCT
+        return string.Create(
+          bytes.Length,
+          bytes,
+          static (s, by) => {
+            for (var i = 0; i < s.Length; i++) {
+              s[i] = (char)by[i];
+            }
           }
-        }
-#endif
-        var length = (int)resp[2];
-        Span<char> serialNumberChars = stackalloc char[length];
-
-        for (var i = 0; i < length; i++) {
-          serialNumberChars[i] = (char)resp[4 + i];
-        }
-
-#if SYSTEM_STRING_CTOR_READONLYSPAN_OF_CHAR
-        return new string(serialNumberChars);
+        );
 #else
-        unsafe {
-          fixed (char* ptr = serialNumberChars) {
-            return new string(ptr, 0, serialNumberChars.Length);
-          }
+        Span<char> serialNumberChars = stackalloc char[bytes.Length];
+
+        for (var i = 0; i < bytes.Length; i++) {
+          serialNumberChars[i] = (char)bytes[i];
         }
+
+#pragma warning disable SA1114
+        return new string(
+#if SYSTEM_STRING_CTOR_READONLYSPAN_OF_CHAR
+          serialNumberChars
+#else
+          serialNumberChars.ToArray(),
+          0,
+          serialNumberChars.Length
+#endif
+        );
+#pragma warning restore SA1114
 #endif
       }
       else {
         // 0x02: The number of bytes + 2 in the provided USB Manufacturer/Product/Serial Number Descriptor String.
         var lengthInBytes = resp[2] - 2;
-        var length = lengthInBytes / 2;
+        // If lengthInBytes is invalid, an ArgumentException is thrown, so
+        // an out-of-bounds reference does not occur.
+        var bytes = resp.Slice(4, lengthInBytes);
 
-        Span<char> descriptorStringChars = stackalloc char[length];
-
-        for (var i = 0; i < length; i++) {
-          var lower  = resp[4 + (2 * i) + 0];
-          var higher = resp[4 + (2 * i) + 1];
-
-          descriptorStringChars[i] = (char)(lower | (higher << 8));
-        }
-
-#if SYSTEM_STRING_CTOR_READONLYSPAN_OF_CHAR
-        return new string(descriptorStringChars);
+#pragma warning disable SA1114
+        return Encoding.Unicode.GetString(
+#if SYSTEM_TEXT_ENCODING_GETSTRING_READONLYSPAN_OF_BYTE
+          bytes
 #else
-        unsafe {
-          fixed (char* ptr = descriptorStringChars) {
-            return new string(ptr, 0, descriptorStringChars.Length);
-          }
-        }
+          bytes.ToArray(),
+          0,
+          bytes.Length
 #endif
+        );
+#pragma warning restore SA1114
       }
     }
   }

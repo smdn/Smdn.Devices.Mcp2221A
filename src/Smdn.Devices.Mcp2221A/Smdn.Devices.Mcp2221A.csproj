@@ -10,7 +10,6 @@ SPDX-License-Identifier: MIT
     <!-- <PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion> -->
     <IsAotCompatible>false</IsAotCompatible>
     <NoWarn>CS1591;$(NoWarn)</NoWarn> <!-- CS1591: Missing XML comment for publicly visible type or member 'Type_or_Member' -->
-    <AllowUnsafeBlocks Condition="'$(TargetFramework)' == 'netstandard2.0'">true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Label="package properties">
