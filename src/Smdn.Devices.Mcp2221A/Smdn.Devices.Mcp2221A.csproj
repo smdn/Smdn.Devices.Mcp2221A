@@ -57,10 +57,9 @@ This is an example of switching the output of each pin on GP0-GP3 of the MCP2221
 $([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\..\examples\$(PackageId)\GettingStarted\Program.cs').TrimEnd())
 ```
 
-The entire code is available on the [GitHub repository]($(RepositoryUrl)/tree/main/examples/$(PackageId)/).
+More examples can be found on the [GitHub repository]($(RepositoryUrl)/tree/$(SmdnWorkflowsDotNetExpectedReleaseTag)/examples/$(PackageId)/).
 
-完全なコードは[GitHubリポジトリ]($(RepositoryUrl)/tree/main/examples/$(PackageId)/)を参照してください。
-
+このほかの使用例は[GitHubリポジトリ]($(RepositoryUrl)/tree/$(SmdnWorkflowsDotNetExpectedReleaseTag)/examples/$(PackageId)/)を参照してください。
 
 ## Contributing
 This project welcomes contributions, feedbacks and suggestions. You can contribute to this project by submitting [Issues]($(RepositoryUrl)/issues/new/choose) or [Pull Requests]($(RepositoryUrl)/pulls/) on the [GitHub repository]($(RepositoryUrl)).
