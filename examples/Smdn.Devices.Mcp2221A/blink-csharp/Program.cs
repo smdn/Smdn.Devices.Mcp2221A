@@ -23,9 +23,9 @@ Console.WriteLine("[MCP2221 Device information]");
 if (device.HidDevice.TryGetSerialNumber(out var serialNumber))
   Console.WriteLine($"Serial number: {serialNumber}");
 
-Console.WriteLine($"USB Manufacturer descriptor: {device.ManufacturerDescriptor}");
-Console.WriteLine($"USB Product descriptor: {device.ProductDescriptor}");
-Console.WriteLine($"USB Serial number descriptor: {device.SerialNumberDescriptor}");
+Console.WriteLine($"USB Manufacturer descriptor: {device.Manufacturer}");
+Console.WriteLine($"USB Product descriptor: {device.Product}");
+Console.WriteLine($"USB Serial number descriptor: {device.SerialNumber}");
 Console.WriteLine($"Hardware revision: {device.HardwareRevision}");
 Console.WriteLine($"Firmware revision: {device.FirmwareRevision}");
 Console.WriteLine();
