@@ -5,14 +5,18 @@
 using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
+#if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
 using System.Diagnostics.CodeAnalysis;
+#endif
 
 using Microsoft.Extensions.Logging;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
 internal class I2cOperationStateMachine {
+#if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
   [DoesNotReturn]
+#endif
   private static OperationState ThrowUnexpectedResponseException(I2cAddress? address, byte response)
   {
     if (address.HasValue)
@@ -21,11 +25,15 @@ internal class I2cOperationStateMachine {
       throw new Mcp2221ACommandException($"unexpected response (0x{response:X2})");
   }
 
+#if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
   [DoesNotReturn]
+#endif
   private static OperationState ThrowI2cErrorException(I2cAddress address, byte? stateValue, string message, string? i2cEngineState = null)
     => throw new I2cCommandException(address, $"{message} (0x{stateValue?.ToString("X2", provider: null) ?? "??"}, {i2cEngineState ?? "(details not available)"})");
 
+#if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
   [DoesNotReturn]
+#endif
   private static OperationState ThrowUnknownEngineStateException(I2cAddress address, byte? stateValue, string? i2cEngineState = null)
     => throw new I2cCommandException(address, $"unknown I2C engine state (0x{stateValue?.ToString("X2", provider: null) ?? "??"}, {i2cEngineState ?? "(details not available)"})");
 

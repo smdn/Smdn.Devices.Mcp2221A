@@ -44,8 +44,13 @@ public sealed class Mcp2221AInfo : IMcp2221AInfo {
         string.Create(3, resp, (str, re) => {str[0] = (char)re[46]; str[1] = '.'; str[2] = (char)re[47]; }),
         string.Create(3, resp, (str, re) => {str[0] = (char)re[48]; str[1] = '.'; str[2] = (char)re[49]; })
 #endif
+#if SYSTEM_STRING_CREATE
         string.Create(3, ((char)resp[46], (char)resp[47]), CreateRevisionString),
         string.Create(3, ((char)resp[48], (char)resp[49]), CreateRevisionString)
+#else
+        new string(new[] { (char)resp[46], '.', (char)resp[47] }),
+        new string(new[] { (char)resp[48], '.', (char)resp[49] })
+#endif
       );
     }
   }
@@ -91,7 +96,15 @@ public sealed class Mcp2221AInfo : IMcp2221AInfo {
           serialNumberChars[i] = (char)resp[4 + i];
         }
 
+#if SYSTEM_STRING_CTOR_READONLYSPAN_OF_CHAR
         return new string(serialNumberChars);
+#else
+        unsafe {
+          fixed (char* ptr = serialNumberChars) {
+            return new string(ptr, 0, serialNumberChars.Length);
+          }
+        }
+#endif
       }
       else {
         // 0x02: The number of bytes + 2 in the provided USB Manufacturer/Product/Serial Number Descriptor String.
@@ -107,7 +120,15 @@ public sealed class Mcp2221AInfo : IMcp2221AInfo {
           descriptorStringChars[i] = (char)(lower | (higher << 8));
         }
 
+#if SYSTEM_STRING_CTOR_READONLYSPAN_OF_CHAR
         return new string(descriptorStringChars);
+#else
+        unsafe {
+          fixed (char* ptr = descriptorStringChars) {
+            return new string(ptr, 0, descriptorStringChars.Length);
+          }
+        }
+#endif
       }
     }
   }
