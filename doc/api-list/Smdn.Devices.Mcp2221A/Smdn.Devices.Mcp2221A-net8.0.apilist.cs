@@ -1,124 +1,98 @@
-// Smdn.Devices.MCP2221.dll (Smdn.Devices.MCP2221-0.9.4)
-//   Name: Smdn.Devices.MCP2221
-//   AssemblyVersion: 0.9.4.0
-//   InformationalVersion: 0.9.4+bcf0f60c80f47181419bd376632a2c0be172ac98
+// Smdn.Devices.Mcp2221A.dll (Smdn.Devices.Mcp2221A-1.0.0-preview1)
+//   Name: Smdn.Devices.Mcp2221A
+//   AssemblyVersion: 1.0.0.0
+//   InformationalVersion: 1.0.0-preview1+077854654720e368ee674194833ee52d976ac129
 //   TargetFramework: .NETCoreApp,Version=v8.0
 //   Configuration: Release
 //   Metadata: IsTrimmable=True
-//   Metadata: RepositoryUrl=https://github.com/smdn/Smdn.Devices.MCP2221
+//   Metadata: RepositoryUrl=https://github.com/smdn/Smdn.Devices.Mcp2221A
 //   Metadata: RepositoryBranch=main
-//   Metadata: RepositoryCommit=bcf0f60c80f47181419bd376632a2c0be172ac98
+//   Metadata: RepositoryCommit=077854654720e368ee674194833ee52d976ac129
 //   Referenced assemblies:
-//     HidSharp, Version=2.1.0.0, Culture=neutral
-//     Microsoft.Extensions.DependencyInjection.Abstractions, Version=5.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
+//     Microsoft.Extensions.DependencyInjection.Abstractions, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
 //     Microsoft.Extensions.Logging.Abstractions, Version=5.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
+//     Smdn.IO.UsbHid.Abstractions, Version=1.0.0.0, Culture=neutral
 //     System.Collections, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
 //     System.ComponentModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
 //     System.Device.Gpio, Version=1.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35
 //     System.Linq, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
 //     System.Memory, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51
 //     System.Runtime, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
-//     System.Threading.Thread, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
+#nullable enable annotations
 
 using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
+using System.Device.I2c;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Smdn.Devices.MCP2221;
-using Smdn.Devices.UsbHid;
+using Smdn.Devices.Mcp2221A;
+using Smdn.Devices.Mcp2221A.Peripherals.I2c;
+using Smdn.IO.UsbHid;
 
-namespace Smdn.Devices.MCP2221 {
-  public enum I2CBusSpeed : int {
-    Default = 0,
-    FastMode = 2,
-    LowSpeedMode = 1,
-    Speed100kBitsPerSec = 0,
-    Speed10kBitsPerSec = 1,
-    Speed400kBitsPerSec = 2,
-    StandardMode = 0,
+namespace Smdn.Devices.Mcp2221A {
+  public interface IMcp2221AInfo {
+    string ChipFactorySerialNumber { get; }
+    string FirmwareRevision { get; }
+    string HardwareRevision { get; }
+    string Manufacturer { get; }
+    string Product { get; }
+    string SerialNumber { get; }
   }
 
-  public class CommandException : InvalidOperationException {
-    public CommandException(string message) {}
-    public CommandException(string message, Exception innerException) {}
+  public static class IMcp2221AInfoExtensions {
+    extension(IMcp2221AInfo info) {
+      public bool IsMcp2221A { get; }
+    }
   }
 
-  public class DeviceNotFoundException : InvalidOperationException {
-    public DeviceNotFoundException() {}
-    public DeviceNotFoundException(string message) {}
-  }
-
-  public class I2CCommandException : CommandException {
-    public I2CCommandException(I2CAddress address, string message) {}
-    public I2CCommandException(I2CAddress address, string message, Exception innerException) {}
-    public I2CCommandException(string message) {}
-    public I2CCommandException(string message, Exception innerException) {}
-
-    public I2CAddress Address { get; }
-  }
-
-  public class I2CNAckException : I2CCommandException {
-    public I2CNAckException(I2CAddress address) {}
-    public I2CNAckException(I2CAddress address, Exception innerException) {}
-    public I2CNAckException(string message) {}
-    public I2CNAckException(string message, Exception innerException) {}
-  }
-
-  public class I2CReadException : I2CCommandException {
-    public I2CReadException(I2CAddress address, string message) {}
-    public I2CReadException(I2CAddress address, string message, Exception innerException) {}
-    public I2CReadException(string message) {}
-    public I2CReadException(string message, Exception innerException) {}
-  }
-
-  public class MCP2221 :
+  public class Mcp2221A :
     IAsyncDisposable,
-    IDisposable
+    IDisposable,
+    IMcp2221AInfo
   {
     public sealed class GP0Functionality : GPFunctionality {
-      public void ConfigureAsLEDURX(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsLEDURXAsync(CancellationToken cancellationToken = default) {}
-      public void ConfigureAsSSPND(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsSSPNDAsync(CancellationToken cancellationToken = default) {}
+      public void ConfigureAsLedUrx(CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAsLedUrxAsync(CancellationToken cancellationToken = default) {}
+      public void ConfigureAsSspnd(CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAsSspndAsync(CancellationToken cancellationToken = default) {}
     }
 
     public sealed class GP1Functionality : GPFunctionality {
-      public void ConfigureAsADC(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsADCAsync(CancellationToken cancellationToken = default) {}
+      public void ConfigureAsAdc(CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAsAdcAsync(CancellationToken cancellationToken = default) {}
       public void ConfigureAsClockOutput(CancellationToken cancellationToken = default) {}
       public ValueTask ConfigureAsClockOutputAsync(CancellationToken cancellationToken = default) {}
       public void ConfigureAsInterruptDetection(CancellationToken cancellationToken = default) {}
       public ValueTask ConfigureAsInterruptDetectionAsync(CancellationToken cancellationToken = default) {}
-      public void ConfigureAsLEDUTX(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsLEDUTXAsync(CancellationToken cancellationToken = default) {}
+      public void ConfigureAsLedUtx(CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAsLedUtxAsync(CancellationToken cancellationToken = default) {}
     }
 
     public sealed class GP2Functionality : GPFunctionality {
-      public void ConfigureAsADC(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsADCAsync(CancellationToken cancellationToken = default) {}
-      public void ConfigureAsDAC(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsDACAsync(CancellationToken cancellationToken = default) {}
-      public void ConfigureAsUSBCFG(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsUSBCFGAsync(CancellationToken cancellationToken = default) {}
+      public void ConfigureAsAdc(CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAsAdcAsync(CancellationToken cancellationToken = default) {}
+      public void ConfigureAsDac(CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAsDacAsync(CancellationToken cancellationToken = default) {}
+      public void ConfigureAsUsbCfg(CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAsUsbCfgAsync(CancellationToken cancellationToken = default) {}
     }
 
     public sealed class GP3Functionality : GPFunctionality {
-      public void ConfigureAsADC(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsADCAsync(CancellationToken cancellationToken = default) {}
-      public void ConfigureAsDAC(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsDACAsync(CancellationToken cancellationToken = default) {}
-      public void ConfigureAsLEDI2C(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsLEDI2CAsync(CancellationToken cancellationToken = default) {}
+      public void ConfigureAsAdc(CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAsAdcAsync(CancellationToken cancellationToken = default) {}
+      public void ConfigureAsDac(CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAsDacAsync(CancellationToken cancellationToken = default) {}
+      public void ConfigureAsLedI2c(CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAsLedI2cAsync(CancellationToken cancellationToken = default) {}
     }
 
     public abstract class GPFunctionality {
-      public string PinDesignation { get; }
+      public string? PinDesignation { get; }
       public string PinName { get; }
 
-      public void ConfigureAsGPIO(PinMode initialDirection = PinMode.Output, PinValue initialValue = default, CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsGPIOAsync(PinMode initialDirection = PinMode.Output, PinValue initialValue = default, CancellationToken cancellationToken = default) {}
+      public void ConfigureAsGpio(PinMode initialDirection = PinMode.Output, PinValue initialValue = default, CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAsGpioAsync(PinMode initialDirection = PinMode.Output, PinValue initialValue = default, CancellationToken cancellationToken = default) {}
       public PinMode GetDirection(CancellationToken cancellationToken = default) {}
       public ValueTask<PinMode> GetDirectionAsync(CancellationToken cancellationToken = default) {}
       public PinValue GetValue(CancellationToken cancellationToken = default) {}
@@ -129,137 +103,235 @@ namespace Smdn.Devices.MCP2221 {
       public ValueTask SetValueAsync(PinValue newValue, CancellationToken cancellationToken = default) {}
     }
 
-    public sealed class I2CFunctionality {
-      public const int MaxBlockLength = 65535;
+    public const int DefaultProductId = 221;
+    public const int DefaultVendorId = 1240;
+    public const string FirmwareRevisionMcp2221 = "1.1";
+    public const string FirmwareRevisionMcp2221A = "1.2";
+    public const string HardwareRevisionMcp2221 = "A.6";
+    public const string HardwareRevisionMcp2221A = "A.6";
 
-      public I2CBusSpeed BusSpeed { get; set; }
-
-      public int Read(I2CAddress address, Span<byte> buffer, CancellationToken cancellationToken = default) {}
-      public int Read(I2CAddress address, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
-      public ValueTask<int> ReadAsync(I2CAddress address, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
-      public async ValueTask<int> ReadAsync(I2CAddress address, Memory<byte> buffer, CancellationToken cancellationToken = default) {}
-      public int ReadByte(I2CAddress address, CancellationToken cancellationToken = default) {}
-      public async ValueTask<int> ReadByteAsync(I2CAddress address, CancellationToken cancellationToken = default) {}
-      public (IReadOnlySet<I2CAddress> WriteAddressSet, IReadOnlySet<I2CAddress> ReadAddressSet) ScanBus(I2CAddress addressRangeMin = default, I2CAddress addressRangeMax = default, IProgress<I2CScanBusProgress> progress = null, CancellationToken cancellationToken = default) {}
-      public async ValueTask<(IReadOnlySet<I2CAddress> WriteAddressSet, IReadOnlySet<I2CAddress> ReadAddressSet)> ScanBusAsync(I2CAddress addressRangeMin = default, I2CAddress addressRangeMax = default, IProgress<I2CScanBusProgress> progress = null, CancellationToken cancellationToken = default) {}
-      public void Write(I2CAddress address, ReadOnlySpan<byte> buffer, CancellationToken cancellationToken = default) {}
-      public void Write(I2CAddress address, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
-      public ValueTask WriteAsync(I2CAddress address, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
-      public async ValueTask WriteAsync(I2CAddress address, ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default) {}
-      public void WriteByte(I2CAddress address, byte @value, CancellationToken cancellationToken = default) {}
-      public async ValueTask WriteByteAsync(I2CAddress address, byte @value, CancellationToken cancellationToken = default) {}
-    }
-
-    public const int DeviceProductID = 221;
-    public const int DeviceVendorID = 1240;
-    public const string FirmwareRevisionMCP2221 = "1.1";
-    public const string FirmwareRevisionMCP2221A = "1.2";
-    public const string HardwareRevisionMCP2221 = "A.6";
-    public const string HardwareRevisionMCP2221A = "A.6";
-
-    public static MCP2221 Open(Func<IUsbHidDevice> createHidDevice, IServiceProvider serviceProvider = null) {}
-    public static MCP2221 Open(IServiceProvider serviceProvider = null) {}
-    public static MCP2221 Open(Predicate<IUsbHidDevice> findDevicePredicate, IServiceProvider serviceProvider = null) {}
-    public static ValueTask<MCP2221> OpenAsync(IServiceProvider serviceProvider = null) {}
-    public static ValueTask<MCP2221> OpenAsync(Predicate<IUsbHidDevice> findDevicePredicate, IServiceProvider serviceProvider = null) {}
-    public static async ValueTask<MCP2221> OpenAsync(Func<IUsbHidDevice> createHidDevice, IServiceProvider serviceProvider = null) {}
+    public static Mcp2221A Create(IServiceProvider serviceProvider, CancellationToken cancellationToken = default) {}
+    public static Mcp2221A Create(IServiceProvider serviceProvider, Predicate<IUsbHidDevice>? usbHidDeviceFilter, Predicate<IMcp2221AInfo>? mcp2221AFilter, CancellationToken cancellationToken = default) {}
+    public static Mcp2221A Create(IUsbHidDevice usbHidDevice, bool shouldDisposeUsbHidDevice = false, IServiceProvider? serviceProvider = null, CancellationToken cancellationToken = default) {}
+    public static Mcp2221A Create<TServiceKey>(IServiceProvider serviceProvider, TServiceKey serviceKey, CancellationToken cancellationToken = default) {}
+    public static Mcp2221A Create<TServiceKey>(IServiceProvider serviceProvider, TServiceKey serviceKey, Predicate<IUsbHidDevice>? usbHidDeviceFilter, Predicate<IMcp2221AInfo>? mcp2221AFilter, CancellationToken cancellationToken = default) {}
+    public static Mcp2221A Create<TServiceKey>(IUsbHidDevice usbHidDevice, IServiceProvider? serviceProvider, TServiceKey serviceKey, bool shouldDisposeUsbHidDevice = false, CancellationToken cancellationToken = default) {}
+    public static ValueTask<Mcp2221A> CreateAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken = default) {}
+    public static ValueTask<Mcp2221A> CreateAsync(IServiceProvider serviceProvider, Predicate<IUsbHidDevice>? usbHidDeviceFilter, Predicate<IMcp2221AInfo>? mcp2221AFilter, CancellationToken cancellationToken = default) {}
+    public static ValueTask<Mcp2221A> CreateAsync(IUsbHidDevice usbHidDevice, bool shouldDisposeUsbHidDevice = false, IServiceProvider? serviceProvider = null, CancellationToken cancellationToken = default) {}
+    public static ValueTask<Mcp2221A> CreateAsync<TServiceKey>(IServiceProvider serviceProvider, TServiceKey serviceKey, CancellationToken cancellationToken = default) {}
+    public static ValueTask<Mcp2221A> CreateAsync<TServiceKey>(IServiceProvider serviceProvider, TServiceKey serviceKey, Predicate<IUsbHidDevice>? usbHidDeviceFilter, Predicate<IMcp2221AInfo>? mcp2221AFilter, CancellationToken cancellationToken = default) {}
+    public static ValueTask<Mcp2221A> CreateAsync<TServiceKey>(IUsbHidDevice usbHidDevice, IServiceProvider? serviceProvider, TServiceKey serviceKey, bool shouldDisposeUsbHidDevice = false, CancellationToken cancellationToken = default) {}
+    [Obsolete("Use Create with IUsbHidDevice instead.", true)]
+    public static Mcp2221A Open(Func<IUsbHidDevice?> createHidDevice, IServiceProvider? serviceProvider = null) {}
+    [Obsolete("Use CreateAsync with IUsbHidDevice instead.", true)]
+    public static async ValueTask<Mcp2221A> OpenAsync(Func<IUsbHidDevice?> createHidDevice, IServiceProvider? serviceProvider = null) {}
+    public static bool TryCalculateMcp2221AI2cSpeedDivider(int i2cBusSpeedInKbps, out byte i2cSpeedDivider) {}
+    public static bool TryCalculateMcp2221I2cSpeedDivider(int i2cBusSpeedInKbps, out byte i2cSpeedDivider) {}
 
     public string ChipFactorySerialNumber { get; }
     public string FirmwareRevision { get; }
-    public MCP2221.GP0Functionality GP0 { get; }
-    public MCP2221.GP1Functionality GP1 { get; }
-    public MCP2221.GP2Functionality GP2 { get; }
-    public MCP2221.GP3Functionality GP3 { get; }
-    public IReadOnlyList<MCP2221.GPFunctionality> GPs { get; }
+    public Mcp2221A.GP0Functionality GP0 { get; }
+    public Mcp2221A.GP1Functionality GP1 { get; }
+    public Mcp2221A.GP2Functionality GP2 { get; }
+    public Mcp2221A.GP3Functionality GP3 { get; }
+    public IReadOnlyList<Mcp2221A.GPFunctionality> GPs { get; }
     public string HardwareRevision { get; }
     public IUsbHidDevice HidDevice { get; }
-    public MCP2221.I2CFunctionality I2C { get; }
-    public string ManufacturerDescriptor { get; }
-    public string ProductDescriptor { get; }
-    public string SerialNumberDescriptor { get; }
+    public Mcp2221AI2cBus I2c { get; }
+    public string Manufacturer { get; }
+    public string Product { get; }
+    public string SerialNumber { get; }
 
+    protected virtual void Dispose(bool disposing) {}
     public void Dispose() {}
     public async ValueTask DisposeAsync() {}
+    protected virtual async ValueTask DisposeAsyncCore() {}
+    private TResponse Smdn.Devices.Mcp2221A.IMcp2221ATransceiver.Command<TArg, TResponse>(ReadOnlySpan<byte> userData, TArg arg, Mcp2221AConstructCommandAction<TArg> constructCommand, Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse, CancellationToken cancellationToken) {}
+    private ValueTask<TResponse> Smdn.Devices.Mcp2221A.IMcp2221ATransceiver.CommandAsync<TArg, TResponse>(ReadOnlyMemory<byte> userData, TArg arg, Mcp2221AConstructCommandAction<TArg> constructCommand, Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse, CancellationToken cancellationToken) {}
   }
 
-  public readonly struct I2CAddress :
-    IComparable<I2CAddress>,
-    IEquatable<I2CAddress>,
+  public class Mcp2221ACommandException : InvalidOperationException {
+    public Mcp2221ACommandException() {}
+    public Mcp2221ACommandException(string? message) {}
+    public Mcp2221ACommandException(string? message, Exception? innerException) {}
+  }
+
+  public sealed class Mcp2221AInfo : IMcp2221AInfo {
+    public string ChipFactorySerialNumber { get; init; }
+    public string FirmwareRevision { get; init; }
+    public string HardwareRevision { get; init; }
+    public string Manufacturer { get; init; }
+    public string Product { get; init; }
+    public string SerialNumber { get; init; }
+  }
+
+  public class Mcp2221ANotFoundException : InvalidOperationException {
+    public Mcp2221ANotFoundException() {}
+    public Mcp2221ANotFoundException(string? message) {}
+    public Mcp2221ANotFoundException(string? message, Exception? innerException) {}
+  }
+
+  public class Mcp2221ANotSupportedException : NotSupportedException {
+    public Mcp2221ANotSupportedException() {}
+    public Mcp2221ANotSupportedException(string? message) {}
+    public Mcp2221ANotSupportedException(string? message, Exception? innerException) {}
+  }
+
+  public class Mcp2221AUnavailableException : UnauthorizedAccessException {
+    public Mcp2221AUnavailableException() {}
+    public Mcp2221AUnavailableException(Exception innerException, IUsbHidDevice? device = null) {}
+    public Mcp2221AUnavailableException(string? message) {}
+    public Mcp2221AUnavailableException(string? message, Exception? innerException) {}
+  }
+
+  public readonly struct I2cAddress :
+    IComparable<I2cAddress>,
+    IEquatable<I2cAddress>,
     IEquatable<byte>,
     IEquatable<int>
   {
-    public static readonly I2CAddress DeviceMaxValue; // = "77"
-    public static readonly I2CAddress DeviceMinValue; // = "08"
-    public static readonly I2CAddress Zero; // = "00"
+    public static readonly I2cAddress DeviceMaxValue; // = "77"
+    public static readonly I2cAddress DeviceMinValue; // = "08"
+    public static readonly I2cAddress Zero; // = "00"
 
-    public static bool operator == (I2CAddress x, I2CAddress y) {}
-    public static explicit operator byte(I2CAddress address) {}
-    public static explicit operator int(I2CAddress address) {}
-    public static bool operator > (I2CAddress left, I2CAddress right) {}
-    public static bool operator >= (I2CAddress left, I2CAddress right) {}
-    public static implicit operator I2CAddress(byte address) {}
-    public static bool operator != (I2CAddress x, I2CAddress y) {}
-    public static bool operator < (I2CAddress left, I2CAddress right) {}
-    public static bool operator <= (I2CAddress left, I2CAddress right) {}
+    public static I2cAddress FromByte(byte address) {}
+    public static bool operator == (I2cAddress x, I2cAddress y) {}
+    public static explicit operator byte(I2cAddress address) {}
+    public static explicit operator int(I2cAddress address) {}
+    public static bool operator > (I2cAddress left, I2cAddress right) {}
+    public static bool operator >= (I2cAddress left, I2cAddress right) {}
+    public static implicit operator I2cAddress(byte address) {}
+    public static bool operator != (I2cAddress x, I2cAddress y) {}
+    public static bool operator < (I2cAddress left, I2cAddress right) {}
+    public static bool operator <= (I2cAddress left, I2cAddress right) {}
 
-    public I2CAddress(int address) {}
-    public I2CAddress(int deviceAddressBits, int hardwareAddressBits) {}
+    public I2cAddress(int address) {}
+    public I2cAddress(int deviceAddressBits, int hardwareAddressBits) {}
 
-    public int CompareTo(I2CAddress other) {}
-    public bool Equals(I2CAddress other) {}
+    public int CompareTo(I2cAddress other) {}
+    public bool Equals(I2cAddress other) {}
     public bool Equals(byte other) {}
     public bool Equals(int other) {}
-    public override bool Equals(object obj) {}
+    public override bool Equals(object? obj) {}
     public override int GetHashCode() {}
+    public byte ToByte() {}
+    public int ToInt32() {}
     public override string ToString() {}
   }
+}
 
-  public readonly struct I2CScanBusProgress {
-    public I2CAddress AddressRangeMax { get; }
-    public I2CAddress AddressRangeMin { get; }
+namespace Smdn.Devices.Mcp2221A.Peripherals.I2c {
+  public interface II2cController {
+    void CancelTransfer(I2cAddress address);
+    ValueTask CancelTransferAsync(I2cAddress address);
+    int Read(I2cAddress address, int transmissionSpeedInKbps, Span<byte> buffer, CancellationToken cancellationToken);
+    ValueTask<int> ReadAsync(I2cAddress address, int transmissionSpeedInKbps, Memory<byte> buffer, CancellationToken cancellationToken);
+    void Write(I2cAddress address, int transmissionSpeedInKbps, ReadOnlySpan<byte> buffer, CancellationToken cancellationToken);
+    ValueTask WriteAsync(I2cAddress address, int transmissionSpeedInKbps, ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken);
+  }
+
+  public interface II2cDevice {
+    I2cAddress Address { get; }
+    II2cController Controller { get; }
+    int TransmissionSpeedInKbps { get; set; }
+  }
+
+  public class I2cCommandException : Mcp2221ACommandException {
+    public I2cCommandException() {}
+    public I2cCommandException(I2cAddress address, string? message) {}
+    public I2cCommandException(I2cAddress address, string? message, Exception? innerException) {}
+    public I2cCommandException(string? message) {}
+    public I2cCommandException(string? message, Exception? innerException) {}
+
+    public I2cAddress Address { get; }
+  }
+
+  public class I2cNackException : I2cCommandException {
+    public I2cNackException() {}
+    public I2cNackException(I2cAddress address) {}
+    public I2cNackException(I2cAddress address, Exception? innerException) {}
+    public I2cNackException(string? message) {}
+    public I2cNackException(string? message, Exception? innerException) {}
+  }
+
+  public class I2cReadException : I2cCommandException {
+    public I2cReadException() {}
+    public I2cReadException(I2cAddress address, string? message) {}
+    public I2cReadException(I2cAddress address, string? message, Exception? innerException) {}
+    public I2cReadException(string? message) {}
+    public I2cReadException(string? message, Exception? innerException) {}
+  }
+
+  public static class II2cControllerExtensions {
+    public static int Read(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
+    public static ValueTask<int> ReadAsync(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
+    public static int ReadByte(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, CancellationToken cancellationToken = default) {}
+    public static async ValueTask<int> ReadByteAsync(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, CancellationToken cancellationToken = default) {}
+    public static (IReadOnlySet<I2cAddress> WriteAddressSet, IReadOnlySet<I2cAddress> ReadAddressSet) ScanBus(this II2cController controller, I2cAddress addressRangeMin = default, I2cAddress addressRangeMax = default, int i2cBusTransmissionSpeedInKbps = 100, IProgress<I2cScanBusProgress>? progress = null, CancellationToken cancellationToken = default) {}
+    public static async ValueTask<(IReadOnlySet<I2cAddress> WriteAddressSet, IReadOnlySet<I2cAddress> ReadAddressSet)> ScanBusAsync(this II2cController controller, I2cAddress addressRangeMin = default, I2cAddress addressRangeMax = default, int i2cBusTransmissionSpeedInKbps = 100, IProgress<I2cScanBusProgress>? progress = null, CancellationToken cancellationToken = default) {}
+    public static void Write(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
+    public static ValueTask WriteAsync(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
+    public static void WriteByte(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte @value, CancellationToken cancellationToken = default) {}
+    public static async ValueTask WriteByteAsync(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte @value, CancellationToken cancellationToken = default) {}
+  }
+
+  public static class II2cDeviceExtensions {
+    public static void Read(this II2cDevice device, Span<byte> buffer, CancellationToken cancellationToken = default) {}
+    public static ValueTask<int> ReadAsync(this II2cDevice device, Memory<byte> buffer, CancellationToken cancellationToken = default) {}
+    public static int ReadByte(this II2cDevice device, CancellationToken cancellationToken = default) {}
+    public static ValueTask<int> ReadByteAsync(this II2cDevice device, CancellationToken cancellationToken = default) {}
+    public static void Write(this II2cDevice device, ReadOnlySpan<byte> buffer, CancellationToken cancellationToken = default) {}
+    public static ValueTask WriteAsync(this II2cDevice device, ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default) {}
+    public static void WriteByte(this II2cDevice device, byte @value, CancellationToken cancellationToken = default) {}
+    public static ValueTask WriteByteAsync(this II2cDevice device, byte @value, CancellationToken cancellationToken = default) {}
+  }
+
+  public sealed class Mcp2221AI2cBus :
+    I2cBus,
+    II2cController
+  {
+    public const int MaxBlockLength = 65535;
+
+    public Mcp2221AI2cDevice CreateDevice(I2cAddress deviceAddress, bool shouldDisposeMcp2221A = false) {}
+    public Mcp2221AI2cDevice CreateDevice(I2cAddress deviceAddress, int transmissionSpeedInKbps, bool shouldDisposeMcp2221A = false) {}
+    [PreserveBaseOverrides]
+    public virtual Mcp2221AI2cDevice CreateDevice(int deviceAddress) {}
+    public int Read(I2cAddress address, int transmissionSpeedInKbps, Span<byte> buffer, CancellationToken cancellationToken = default) {}
+    public async ValueTask<int> ReadAsync(I2cAddress address, int transmissionSpeedInKbps, Memory<byte> buffer, CancellationToken cancellationToken = default) {}
+    public override void RemoveDevice(int deviceAddress) {}
+    public void RemoveDevice(I2cAddress deviceAddress) {}
+    void II2cController.CancelTransfer(I2cAddress address) {}
+    ValueTask II2cController.CancelTransferAsync(I2cAddress address) {}
+    public void Write(I2cAddress address, int transmissionSpeedInKbps, ReadOnlySpan<byte> buffer, CancellationToken cancellationToken = default) {}
+    public async ValueTask WriteAsync(I2cAddress address, int transmissionSpeedInKbps, ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default) {}
+  }
+
+  public sealed class Mcp2221AI2cDevice :
+    I2cDevice,
+    II2cDevice
+  {
+    public override I2cConnectionSettings ConnectionSettings { get; }
+    I2cAddress II2cDevice.Address { get; }
+    II2cController II2cDevice.Controller { get; }
+    public int TransmissionSpeedInKbps { get; set; }
+
+    protected override void Dispose(bool disposing) {}
+    public override void Read(Span<byte> buffer) {}
+    public override byte ReadByte() {}
+    public Mcp2221AI2cDevice WithFastMode() {}
+    public Mcp2221AI2cDevice WithStandardMode() {}
+    public override void Write(ReadOnlySpan<byte> buffer) {}
+    public override void WriteByte(byte @value) {}
+    public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer) {}
+  }
+
+  public readonly struct I2cScanBusProgress {
+    public I2cAddress AddressRangeMax { get; }
+    public I2cAddress AddressRangeMin { get; }
     public int ProgressInPercent { get; }
-    public I2CAddress ScanningAddress { get; }
+    public I2cAddress ScanningAddress { get; }
   }
 }
-
-namespace Smdn.Devices.UsbHid {
-  public interface IUsbHidDevice :
-    IAsyncDisposable,
-    IDisposable
-  {
-    string DevicePath { get; }
-    string FileSystemName { get; }
-    string Manufacturer { get; }
-    int ProductID { get; }
-    string ProductName { get; }
-    Version ReleaseNumber { get; }
-    string SerialNumber { get; }
-    int VendorID { get; }
-
-    IUsbHidStream OpenStream();
-    ValueTask<IUsbHidStream> OpenStreamAsync();
-  }
-
-  public interface IUsbHidStream :
-    IAsyncDisposable,
-    IDisposable
-  {
-    bool RequiresPacketOnly { get; }
-
-    int Read(Span<byte> buffer);
-    ValueTask<int> ReadAsync(Memory<byte> buffer);
-    void Write(ReadOnlySpan<byte> buffer);
-    ValueTask WriteAsync(ReadOnlyMemory<byte> buffer);
-  }
-
-  public static class Log {
-    public static LogLevel NativeLibraryLogLevel { get; set; }
-  }
-
-  public class UsbHidException : InvalidOperationException {
-    public UsbHidException() {}
-    public UsbHidException(string message) {}
-  }
-}
-// API list generated by Smdn.Reflection.ReverseGenerating.ListApi.MSBuild.Tasks v1.8.1.0.
-// Smdn.Reflection.ReverseGenerating.ListApi.Core v1.6.1.0 (https://github.com/smdn/Smdn.Reflection.ReverseGenerating)
+// API list generated by Smdn.Reflection.ReverseGenerating.ListApi.MSBuild.Tasks v1.8.2.0.
+// Smdn.Reflection.ReverseGenerating.ListApi.Core v1.6.2.0 (https://github.com/smdn/Smdn.Reflection.ReverseGenerating)
