@@ -16,17 +16,17 @@ SPDX-License-Identifier: MIT
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
 
     <!-- Add HidSharp (Apache License 2.0) as the USB HID backend provider. -->
-    <PackageReference Include="Smdn.IO.UsbHid.Providers.HidSharp" Version="1.0.0-preview3" />
+    <PackageReference Include="Smdn.IO.UsbHid.Providers.HidSharp" Version="1.0.0-preview4" />
     <!-- Alternatively, you can use the following backend providers by changing the package reference. -->
 
     <!-- Add LibUsbDotNet version 2 (LGPL-3.0, stable release) as the USB HID backend provider. -->
     <!--
-    <PackageReference Include="Smdn.IO.UsbHid.Providers.LibUsbDotNet" Version="1.0.0-preview3" />
+    <PackageReference Include="Smdn.IO.UsbHid.Providers.LibUsbDotNet" Version="1.0.0-preview4" />
     -->
 
     <!-- Add LibUsbDotNet version 3 (LGPL-3.0, alpha release) as the USB HID backend provider. -->
     <!--
-    <PackageReference Include="Smdn.IO.UsbHid.Providers.LibUsbDotNetV3" Version="1.0.0-preview3" />
+    <PackageReference Include="Smdn.IO.UsbHid.Providers.LibUsbDotNetV3" Version="1.0.0-preview4" />
     -->
   </ItemGroup>
 
