@@ -1,55 +1,18 @@
-<!--
+﻿<!--
 SPDX-FileCopyrightText: 2022 smdn <smdn@smdn.jp>
 SPDX-License-Identifier: MIT
 -->
 <Project>
   <PropertyGroup>
-    <!-- enable target framework net* (.NET >= 5.0) by default -->
+    <!-- enable target framework net*.0 (.NET >= 5.0) by default -->
     <EnableTargetFrameworkDotNet>true</EnableTargetFrameworkDotNet>
     <EnableTargetFrameworkDotNet100>true</EnableTargetFrameworkDotNet100>
     <EnableTargetFrameworkDotNet80>true</EnableTargetFrameworkDotNet80>
-    <!-- enable target framework net* (.NET Framework/Mono) by default -->
-    <EnableTargetFrameworkNetFx>true</EnableTargetFrameworkNetFx>
-  </PropertyGroup>
-
-  <!--
-    Note: RuntimeInformation.RuntimeIdentifier on >= .NET 8 has been changed to return 'linux-x64' instead of 'ubuntu.20.04-x64'.
-    RuntimeInformation.OSDescription still returns 'Ubuntu 22.04' on >= .NET 8.
-  -->
-
-  <!-- On Ubuntu 22.04 -->
-  <PropertyGroup
-    Condition="
-      $([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier.StartsWith('ubuntu.22.04')) or
-      $([System.Runtime.InteropServices.RuntimeInformation]::OSDescription.StartsWith('Ubuntu 22.04'))
-    "
-  >
-    <!-- disable Mono (test runner not working on local environment?) -->
-    <EnableTargetFrameworkNetFx Condition=" '$(GITHUB_ACTIONS)' != 'true' ">false</EnableTargetFrameworkNetFx>
-  </PropertyGroup>
-
-  <!-- On Ubuntu 24.04 -->
-  <PropertyGroup
-    Condition="
-      $([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier.StartsWith('ubuntu.24.04')) or
-      $([System.Runtime.InteropServices.RuntimeInformation]::OSDescription.StartsWith('Ubuntu 24.04'))
-    "
-  >
-    <!-- disable Mono on GitHub Actions Ubuntu 24.04 runner images -->
-    <EnableTargetFrameworkNetFx Condition=" '$(GITHUB_ACTIONS)' == 'true' ">false</EnableTargetFrameworkNetFx>
-  </PropertyGroup>
-
-  <!-- On MacOS (arm64) -->
-  <PropertyGroup
-    Condition="
-      $([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier.StartsWith('osx-arm64')) or
-      (
-        $([System.OperatingSystem]::IsMacOS()) and
-        $([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.StartsWith('Arm64'))
-      )
-    "
-  >
-    <!-- disable Mono on GitHub Actions osx-arm64 runner images -->
-    <EnableTargetFrameworkNetFx Condition=" '$(GITHUB_ACTIONS)' == 'true' ">false</EnableTargetFrameworkNetFx>
+    <!-- disable target framework net4xy (.NET Framework/Mono) by default -->
+    <EnableTargetFrameworkNetFx>false</EnableTargetFrameworkNetFx>
+    <!-- enable target framework net4xy (.NET Framework) on Windows -->
+    <EnableTargetFrameworkNetFx
+      Condition="$([MSBuild]::IsOSPlatform('Windows'))"
+    >true</EnableTargetFrameworkNetFx>
   </PropertyGroup>
 </Project>

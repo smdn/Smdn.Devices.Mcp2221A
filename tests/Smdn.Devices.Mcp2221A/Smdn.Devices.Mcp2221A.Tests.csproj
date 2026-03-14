@@ -7,7 +7,17 @@ SPDX-License-Identifier: MIT
   <PropertyGroup>
     <TargetFrameworks Condition=" '$(EnableTargetFrameworkDotNet100)' == 'true' ">net10.0;$(TargetFrameworks)</TargetFrameworks>
     <TargetFrameworks Condition=" '$(EnableTargetFrameworkDotNet80)' == 'true' ">net8.0;$(TargetFrameworks)</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(EnableTargetFrameworkNetFx)' == 'true' ">$(TargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(EnableTargetFrameworkNetFx)' == 'true' ">net462;net481;$(TargetFrameworks)</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!--
+      Suppress warning from Microsoft.Extensions.Diagnostics.Testing:
+      Microsoft.Extensions.Diagnostics.Testing 10.4.0 doesn't support net4xy and has not been tested with it.
+    -->
+    <SuppressTfmSupportBuildWarnings
+      Condition="$(TargetFramework.StartsWith('net4'))"
+    >true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 
   <ItemGroup>

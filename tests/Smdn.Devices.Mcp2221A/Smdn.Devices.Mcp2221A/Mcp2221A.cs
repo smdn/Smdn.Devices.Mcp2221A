@@ -16,6 +16,8 @@ namespace Smdn.Devices.Mcp2221A;
 public partial class Mcp2221ATests {
   private const byte ReportInput = 0x00;
   private const byte ReportOutput = 0x00;
+  private const int CommandLength = 64;
+  private const int ReportLength = 1 + CommandLength;
 
   internal const string DefaultManufacturer = "Microchip Technology Inc.";
   internal const string DefaultProduct = "MCP2221 USB-I2C/UART Combo";
@@ -40,48 +42,117 @@ public partial class Mcp2221ATests {
       productName: product,
       manufacturer: manufacturer,
       serialNumber: serialNumber,
-      createWriteStream: () => new MemoryStream(capacity: (1 + 64) * 5),
+      createWriteStream: () => new MemoryStream(capacity: ReportLength * 5),
       createReadStream: () => {
-        var readStream = new MemoryStream(capacity: (1 + 64) * 5);
+        var readStream = new MemoryStream(capacity: ReportLength * 5);
 
-        readStream.Write([
+        readStream.Write(
           // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
-          ReportInput, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x03, 0x00, 0x03, 0x14, 0x00, 0x40, 0x00, 0x10, 0x28, 0x00, 0x60, 0x01, 0x01, 0x00, 0x00, 0xF1, 0x79, 0xF0, 0x00, 0x00, 0x00, 0x30, 0x30, 0x0B, 0x30, 0x14, 0x23, 0x17, 0x7D, 0x06, 0x00, 0x00, 0x26, 0x94, 0x14, hardwareRevisionMajor, hardwareRevisionMinor, firmwareRevisionMajor, firmwareRevisionMinor, 0xFB, 0x03, 0x00, 0x00, 0xFA, 0x03, 0x76, 0x03, 0x5B, 0x02, 0x00, 0x00, 0x00, 0x00,
-        ]);
+          [ReportInput, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x03, 0x00, 0x03, 0x14, 0x00, 0x40, 0x00, 0x10, 0x28, 0x00, 0x60, 0x01, 0x01, 0x00, 0x00, 0xF1, 0x79, 0xF0, 0x00, 0x00, 0x00, 0x30, 0x30, 0x0B, 0x30, 0x14, 0x23, 0x17, 0x7D, 0x06, 0x00, 0x00, 0x26, 0x94, 0x14, hardwareRevisionMajor, hardwareRevisionMinor, firmwareRevisionMajor, firmwareRevisionMinor, 0xFB, 0x03, 0x00, 0x00, 0xFA, 0x03, 0x76, 0x03, 0x5B, 0x02, 0x00, 0x00, 0x00, 0x00]
+#if !SYSTEM_IO_STREAM_WRITE_READONLYSPAN_OF_BYTE
+          ,
+          0,
+          ReportLength
+#endif
+        );
 
         const int DescriptorOffset = 2;
 
         var manufacturerDescriptor = new byte[64 - 4];
-        var manufacturerDescriptorLength = (byte)Encoding.Unicode.GetBytes(manufacturer, manufacturerDescriptor);
+        var manufacturerDescriptorLength = (byte)Encoding.Unicode.GetBytes(
+#if SYSTEM_TEXT_ENCODING_GETBYTES_READONLYSPAN_OF_CHAR
+          manufacturer,
+          manufacturerDescriptor
+#else
+          manufacturer,
+          0,
+          manufacturer.Length,
+          manufacturerDescriptor,
+          0
+#endif
+        );
 
-        readStream.Write([
+        readStream.Write(
           // [MCP2221A] 3.1.2 READ FLASH DATA - TABLE 3-7 RESPONSE STRUCTURE - READ USB MANUFACTURER DESCRIPTOR STRING SUB-COMMAND
-          ReportInput, 0xB0, 0x00, (byte)(DescriptorOffset + manufacturerDescriptorLength), 0x03, .. manufacturerDescriptor
-        ]);
+          [ReportInput, 0xB0, 0x00, (byte)(DescriptorOffset + manufacturerDescriptorLength), 0x03, .. manufacturerDescriptor]
+#if !SYSTEM_IO_STREAM_WRITE_READONLYSPAN_OF_BYTE
+          ,
+          0,
+          ReportLength
+#endif
+        );
 
         var productDescriptor = new byte[64 - 4];
-        var productDescriptorLength = Encoding.Unicode.GetBytes(product, productDescriptor);
+        var productDescriptorLength = Encoding.Unicode.GetBytes(
+#if SYSTEM_TEXT_ENCODING_GETBYTES_READONLYSPAN_OF_CHAR
+          product,
+          productDescriptor
+#else
+          product,
+          0,
+          product.Length,
+          productDescriptor,
+          0
+#endif
+        );
 
-        readStream.Write([
+        readStream.Write(
           // [MCP2221A] 3.1.2 READ FLASH DATA - TABLE 3-8 RESPONSE STRUCTURE - READ USB PRODUCT DESCRIPTOR STRING SUB-COMMAND
-          ReportInput, 0xB0, 0x00, (byte)(DescriptorOffset + productDescriptorLength), 0x03, .. productDescriptor
-        ]);
+          [ReportInput, 0xB0, 0x00, (byte)(DescriptorOffset + productDescriptorLength), 0x03, .. productDescriptor]
+#if !SYSTEM_IO_STREAM_WRITE_READONLYSPAN_OF_BYTE
+          ,
+          0,
+          ReportLength
+#endif
+        );
 
         var serialNumberDescriptor = new byte[64 - 4];
-        var serialNumberDescriptorLength = Encoding.Unicode.GetBytes(serialNumber, serialNumberDescriptor);
+        var serialNumberDescriptorLength = Encoding.Unicode.GetBytes(
+#if SYSTEM_TEXT_ENCODING_GETBYTES_READONLYSPAN_OF_CHAR
+          serialNumber,
+          serialNumberDescriptor
+#else
+          serialNumber,
+          0,
+          serialNumber.Length,
+          serialNumberDescriptor,
+          0
+#endif
+        );
 
-        readStream.Write([
+        readStream.Write(
           // [MCP2221A] 3.1.2 READ FLASH DATA - TABLE 3-9 RESPONSE STRUCTURE - READ USB SERIAL NUMBER DESCRIPTOR STRING SUB-COMMAND
-          ReportInput, 0xB0, 0x00, (byte)(DescriptorOffset + serialNumberDescriptorLength), 0x03, .. serialNumberDescriptor
-        ]);
+          [ReportInput, 0xB0, 0x00, (byte)(DescriptorOffset + serialNumberDescriptorLength), 0x03, .. serialNumberDescriptor]
+#if !SYSTEM_IO_STREAM_WRITE_READONLYSPAN_OF_BYTE
+          ,
+          0,
+          ReportLength
+#endif
+        );
 
         var chipFactorySerialNumberDescriptor = new byte[64 - 4];
-        var chipFactorySerialNumberDescriptorLength = Encoding.ASCII.GetBytes(chipFactorySerialNumber, chipFactorySerialNumberDescriptor);
+        var chipFactorySerialNumberDescriptorLength = Encoding.ASCII.GetBytes(
+#if SYSTEM_TEXT_ENCODING_GETBYTES_READONLYSPAN_OF_CHAR
+          chipFactorySerialNumber,
+          chipFactorySerialNumberDescriptor
+#else
+          chipFactorySerialNumber,
+          0,
+          chipFactorySerialNumber.Length,
+          chipFactorySerialNumberDescriptor,
+          0
+#endif
+        );
 
-        readStream.Write([
+        readStream.Write(
           // [MCP2221A] 3.1.2 READ FLASH DATA - TABLE 3-10 RESPONSE STRUCTURE - READ CHIP FACTORY SERIAL NUMBER SUB-COMMAND
-          ReportInput, 0xB0, 0x00, (byte)chipFactorySerialNumberDescriptorLength, 0x00, .. chipFactorySerialNumberDescriptor
-        ]);
+          [ReportInput, 0xB0, 0x00, (byte)chipFactorySerialNumberDescriptorLength, 0x00, .. chipFactorySerialNumberDescriptor]
+#if !SYSTEM_IO_STREAM_WRITE_READONLYSPAN_OF_BYTE
+          ,
+          0,
+          ReportLength
+#endif
+        );
 
         readStream.Position = 0L;
 
