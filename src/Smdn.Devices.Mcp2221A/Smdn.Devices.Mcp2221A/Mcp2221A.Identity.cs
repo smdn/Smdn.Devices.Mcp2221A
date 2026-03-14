@@ -19,13 +19,25 @@ public partial class Mcp2221A {
   /// </remarks>
   public const int DefaultProductId = 0x00dd;
 
-  // MCP2221 (not tested)
+  /// <summary>
+  /// The hardware revision number for the MCP2221, represented as a string.
+  /// </summary>
   public const string HardwareRevisionMcp2221 = "A.6";
-  public const string FirmwareRevisionMcp2221 = "1.1";
 
-  // MCP2221A
+  /// <summary>
+  /// The firmware revision number for the MCP2221, represented as a string.
+  /// </summary>
+  public const string FirmwareRevisionMcp2221 = "1.1"; // MCP2221 (not tested with actual device)
+
+  /// <summary>
+  /// The hardware revision number for the MCP2221A, represented as a string.
+  /// </summary>
   public const string HardwareRevisionMcp2221A = "A.6";
-  public const string FirmwareRevisionMcp2221A = "1.2";
+
+  /// <summary>
+  /// The firmware revision number for the MCP2221A, represented as a string.
+  /// </summary>
+  public const string FirmwareRevisionMcp2221A = "1.2"; // MCP2221A
 
   private static void ValidateHardwareRevision(string revision)
   {
