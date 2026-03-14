@@ -3,8 +3,21 @@
 namespace Smdn.Devices.Mcp2221A;
 
 public partial class Mcp2221A {
-  public const int DeviceVendorId = 0x04d8;
-  public const int DeviceProductId = 0x00dd;
+  /// <summary>
+  /// Represents the default Vendor ID (VID) for the MCP2221/MCP2221A.
+  /// </summary>
+  /// <remarks>
+  /// Note that a non-default Vendor ID may be configured by rewriting the device's Flash memory.
+  /// </remarks>
+  public const int DefaultVendorId = 0x04d8;
+
+  /// <summary>
+  /// Represents the default Product ID (PID) for the MCP2221/MCP2221A.
+  /// </summary>
+  /// <remarks>
+  /// Note that a non-default Product ID may be configured by rewriting the device's Flash memory.
+  /// </remarks>
+  public const int DefaultProductId = 0x00dd;
 
   // MCP2221 (not tested)
   public const string HardwareRevisionMcp2221 = "A.6";

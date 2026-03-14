@@ -468,9 +468,9 @@ public partial class Mcp2221ATests {
 
     PseudoUsbHidDevice[] devices = [
       CreatePseudoDevice(vendorId: UnrelatedDeviceVendorId), // not selected
-      CreatePseudoDevice(vendorId: Mcp2221A.DeviceVendorId, productId: 0xFFFF), // not selected
-      CreatePseudoDevice(vendorId: Mcp2221A.DeviceVendorId, productId: Mcp2221A.DeviceProductId), // selected
-      CreatePseudoDevice(vendorId: Mcp2221A.DeviceVendorId, productId: Mcp2221A.DeviceProductId), // not tested
+      CreatePseudoDevice(vendorId: Mcp2221A.DefaultVendorId, productId: 0xFFFF), // not selected
+      CreatePseudoDevice(vendorId: Mcp2221A.DefaultVendorId, productId: Mcp2221A.DefaultProductId), // selected
+      CreatePseudoDevice(vendorId: Mcp2221A.DefaultVendorId, productId: Mcp2221A.DefaultProductId), // not tested
     ];
 
     var services = new ServiceCollection();
@@ -489,8 +489,8 @@ public partial class Mcp2221ATests {
       default
     ).ConfigureAwait(false);
 
-    Assert.That(mcp2221A.HidDevice.VendorId, Is.EqualTo(Mcp2221A.DeviceVendorId));
-    Assert.That(mcp2221A.HidDevice.ProductId, Is.EqualTo(Mcp2221A.DeviceProductId));
+    Assert.That(mcp2221A.HidDevice.VendorId, Is.EqualTo(Mcp2221A.DefaultVendorId));
+    Assert.That(mcp2221A.HidDevice.ProductId, Is.EqualTo(Mcp2221A.DefaultProductId));
 
     Assert.That(devices[0].IsDisposed, Is.True, "USB HID devices that were listed but not selected must be disposed.");
     Assert.That(devices[1].IsDisposed, Is.True, "USB HID devices that were listed but not selected must be disposed.");

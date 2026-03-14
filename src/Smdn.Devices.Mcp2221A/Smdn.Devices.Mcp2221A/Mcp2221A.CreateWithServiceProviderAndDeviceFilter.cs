@@ -368,8 +368,8 @@ partial class Mcp2221A {
     // Considerations for cases where custom VID/PID is set are handled
     // through the use of filters.
     var mcp2221AUsbHidDevices = usbHidService.FindAllDevices(
-      vendorId: usbHidDeviceFilter is null ? Mcp2221A.DeviceVendorId : null,
-      productId: usbHidDeviceFilter is null ? Mcp2221A.DeviceProductId : null,
+      vendorId: usbHidDeviceFilter is null ? Mcp2221A.DefaultVendorId : null,
+      productId: usbHidDeviceFilter is null ? Mcp2221A.DefaultProductId : null,
       predicate: usbHidDeviceFilter,
       cancellationToken: cancellationToken
     );

@@ -371,8 +371,8 @@ public partial class Mcp2221ATests {
   )
   {
     PseudoUsbHidDevice[] devices = [
-      CreatePseudoDevice(vendorId: Mcp2221A.DeviceVendorId, productId: 0xFFFF), // not match
-      CreatePseudoDevice(vendorId: 0xFFFF, productId: Mcp2221A.DeviceProductId), // not match
+      CreatePseudoDevice(vendorId: Mcp2221A.DefaultVendorId, productId: 0xFFFF), // not match
+      CreatePseudoDevice(vendorId: 0xFFFF, productId: Mcp2221A.DefaultProductId), // not match
       CreatePseudoDevice(vendorId: 0xFFFF, productId: 0xFFFF), // not match
     ];
 

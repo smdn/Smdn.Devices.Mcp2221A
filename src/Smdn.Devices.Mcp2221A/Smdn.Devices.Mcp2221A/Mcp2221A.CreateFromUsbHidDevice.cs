@@ -305,8 +305,8 @@ partial class Mcp2221A {
     // filtering by VID/PID is not performed here when Predicate<IUsbHidDevice>
     // is provided; instead, it is delegated to Predicate<IUsbHidDevice>.
     var usbHidDevice = usbHidService.FindDevice(
-      vendorId: usbHidDeviceFilter is null ? Mcp2221A.DeviceVendorId : null,
-      productId: usbHidDeviceFilter is null ? Mcp2221A.DeviceProductId : null,
+      vendorId: usbHidDeviceFilter is null ? Mcp2221A.DefaultVendorId : null,
+      productId: usbHidDeviceFilter is null ? Mcp2221A.DefaultProductId : null,
       predicate: usbHidDeviceFilter,
       cancellationToken: cancellationToken
     );

@@ -23,8 +23,8 @@ public partial class Mcp2221ATests {
   internal const string DefaultChipFactorySerialNumber = "01234567";
 
   internal static PseudoUsbHidDevice CreatePseudoDevice(
-    int vendorId = Mcp2221A.DeviceVendorId,
-    int productId = Mcp2221A.DeviceProductId,
+    int vendorId = Mcp2221A.DefaultVendorId,
+    int productId = Mcp2221A.DefaultProductId,
     byte hardwareRevisionMajor = (byte)'A', // = MCP2221/MCP2221A,
     byte hardwareRevisionMinor = (byte)'6', // = MCP2221/MCP2221A,
     byte firmwareRevisionMajor = (byte)'1', // = MCP2221/MCP2221A,
