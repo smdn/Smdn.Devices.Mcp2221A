@@ -11,30 +11,32 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 #pragma warning disable IDE0040
 partial class GpController : IGpioController {
 #pragma warning restore IDE0040
+  /// <inheritdoc/>
   [CLSCompliant(false)]
   public ValueTask ConfigureAsGpioAsync(
-    PinMode initialDirection = PinMode.Output,
+    PinMode mode = PinMode.Output,
     PinValue initialValue = default,
     CancellationToken cancellationToken = default
   )
-    => ConfigureGPDesignationAsync(
-      pinDesignation: $"GPIO{GPIndex}",
-      gpDesignation: GPDesignation.GpioOperation,
-      gpioInitialDirection: initialDirection,
+    => ConfigureGpDesignationAsync(
+      pinDesignation: $"GPIO{GpPinNumber}",
+      gpDesignation: GpDesignation.GpioOperation,
+      gpioInitialDirection: mode,
       gpioInitialValue: initialValue,
       cancellationToken: cancellationToken
     );
 
+  /// <inheritdoc/>
   [CLSCompliant(false)]
   public void ConfigureAsGpio(
-    PinMode initialDirection = PinMode.Output,
+    PinMode mode = PinMode.Output,
     PinValue initialValue = default,
     CancellationToken cancellationToken = default
   )
-    => ConfigureGPDesignation(
-      pinDesignation: $"GPIO{GPIndex}",
-      gpDesignation: GPDesignation.GpioOperation,
-      gpioInitialDirection: initialDirection,
+    => ConfigureGpDesignation(
+      pinDesignation: $"GPIO{GpPinNumber}",
+      gpDesignation: GpDesignation.GpioOperation,
+      gpioInitialDirection: mode,
       gpioInitialValue: initialValue,
       cancellationToken: cancellationToken
     );
@@ -49,22 +51,24 @@ partial class GpController : IGpioController {
       => throw new NotImplementedException();
   }
 
+  /// <inheritdoc/>
   [CLSCompliant(false)]
-  public ValueTask<PinMode> GetDirectionAsync(
+  public ValueTask<PinMode> GetModeAsync(
     CancellationToken cancellationToken = default
   )
-    => device.CommandAsync(
+    => transceiver.CommandAsync(
       arg: this,
       cancellationToken: cancellationToken,
       constructCommand: GetDirectionCommand.ConstructCommand,
       parseResponse: GetDirectionCommand.ParseResponse
     );
 
+  /// <inheritdoc/>
   [CLSCompliant(false)]
-  public PinMode GetDirection(
+  public PinMode GetMode(
     CancellationToken cancellationToken = default
   )
-    => device.Command(
+    => transceiver.Command(
       arg: this,
       cancellationToken: cancellationToken,
       constructCommand: GetDirectionCommand.ConstructCommand,
@@ -84,29 +88,39 @@ partial class GpController : IGpioController {
       => throw new NotImplementedException();
   }
 
+  /// <inheritdoc/>
   [CLSCompliant(false)]
-  public ValueTask SetDirectionAsync(
-    PinMode newDirection,
+  public ValueTask SetModeAsync(
+    PinMode mode,
     CancellationToken cancellationToken = default
   )
-    => device.CommandAsync(
-      arg: (this, newDirection),
+  {
+    transceiver.ThrowIfDisposed();
+
+    return transceiver.CommandAsync(
+      arg: (this, mode),
       cancellationToken: cancellationToken,
       constructCommand: SetDirectionCommand.ConstructCommand,
       parseResponse: SetDirectionCommand.ParseResponse
     ).AsValueTask();
+  }
 
+  /// <inheritdoc/>
   [CLSCompliant(false)]
-  public void SetDirection(
-    PinMode newDirection,
+  public void SetMode(
+    PinMode mode,
     CancellationToken cancellationToken = default
   )
-    => device.Command(
-      arg: (this, newDirection),
+  {
+    transceiver.ThrowIfDisposed();
+
+    transceiver.Command(
+      arg: (this, mode),
       cancellationToken: cancellationToken,
       constructCommand: SetDirectionCommand.ConstructCommand,
       parseResponse: SetDirectionCommand.ParseResponse
     );
+  }
 
   private static class GetValueCommand {
 #pragma warning disable IDE0060 // [IDE0060] Remove unused parameter
@@ -122,8 +136,8 @@ partial class GpController : IGpioController {
       if (resp[1] != 0x00) // Command completed successfully
         throw new Mcp2221ACommandException($"unexpected command response ({resp[1]:X2})");
 
-      var gpPinValue        = resp[2 + (2 * gp.GPIndex)];
-      var gpDirectionValue  = resp[3 + (2 * gp.GPIndex)];
+      var gpPinValue        = resp[2 + (2 * gp.GpPinNumber)];
+      var gpDirectionValue  = resp[3 + (2 * gp.GpPinNumber)];
 
       if (gpPinValue == 0xEF || gpDirectionValue == 0xEF)
         throw new Mcp2221ACommandException($"{gp.PinName} is not set for GPIO operation");
@@ -132,22 +146,24 @@ partial class GpController : IGpioController {
     }
   }
 
+  /// <inheritdoc/>
   [CLSCompliant(false)]
-  public ValueTask<PinValue> GetValueAsync(
+  public ValueTask<PinValue> ReadAsync(
     CancellationToken cancellationToken = default
   )
-    => device.CommandAsync(
+    => transceiver.CommandAsync(
       arg: this,
       cancellationToken: cancellationToken,
       constructCommand: GetValueCommand.ConstructCommand,
       parseResponse: GetValueCommand.ParseResponse
     );
 
+  /// <inheritdoc/>
   [CLSCompliant(false)]
-  public PinValue GetValue(
+  public PinValue Read(
     CancellationToken cancellationToken = default
   )
-    => device.Command(
+    => transceiver.Command(
       arg: this,
       cancellationToken: cancellationToken,
       constructCommand: GetValueCommand.ConstructCommand,
@@ -165,8 +181,8 @@ partial class GpController : IGpioController {
       comm[1] = 0x00; // Don't care
 
       // GP<n>
-      comm[2 + (4 * args.gp.GPIndex)] = 0xFF; // Alter GP<n> Output = alter
-      comm[3 + (4 * args.gp.GPIndex)] = (byte)args.newValue; // GP<n> output value
+      comm[2 + (4 * args.gp.GpPinNumber)] = 0xFF; // Alter GP<n> Output = alter
+      comm[3 + (4 * args.gp.GpPinNumber)] = (byte)args.newValue; // GP<n> output value
     }
 
     [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1316:TupleElementNamesShouldUseCorrectCasing", Justification = "Not a publicly-exposed type or member.")]
@@ -176,10 +192,10 @@ partial class GpController : IGpioController {
         throw new Mcp2221ACommandException($"unexpected command response ({resp[1]:X2})");
 
       if (
-        resp[2 + (4 * args.gp.GPIndex)] == 0xEE ||
-        resp[3 + (4 * args.gp.GPIndex)] == 0xEE ||
-        resp[4 + (4 * args.gp.GPIndex)] == 0xEE ||
-        resp[5 + (4 * args.gp.GPIndex)] == 0xEE
+        resp[2 + (4 * args.gp.GpPinNumber)] == 0xEE ||
+        resp[3 + (4 * args.gp.GpPinNumber)] == 0xEE ||
+        resp[4 + (4 * args.gp.GpPinNumber)] == 0xEE ||
+        resp[5 + (4 * args.gp.GpPinNumber)] == 0xEE
       ) {
         throw new Mcp2221ACommandException($"{args.gp.PinName} is not set for GPIO operation");
       }
@@ -188,27 +204,37 @@ partial class GpController : IGpioController {
     }
   }
 
+  /// <inheritdoc/>
   [CLSCompliant(false)]
-  public ValueTask SetValueAsync(
-    PinValue newValue,
+  public ValueTask WriteAsync(
+    PinValue value,
     CancellationToken cancellationToken = default
   )
-    => device.CommandAsync(
-      arg: (this, newValue),
+  {
+    transceiver.ThrowIfDisposed();
+
+    return transceiver.CommandAsync(
+      arg: (this, value),
       cancellationToken: cancellationToken,
       constructCommand: SetValueCommand.ConstructCommand,
       parseResponse: SetValueCommand.ParseResponse
     ).AsValueTask();
+  }
 
+  /// <inheritdoc/>
   [CLSCompliant(false)]
-  public void SetValue(
-    PinValue newValue,
+  public void Write(
+    PinValue value,
     CancellationToken cancellationToken = default
   )
-    => device.Command(
-      arg: (this, newValue),
+  {
+    transceiver.ThrowIfDisposed();
+
+    transceiver.Command(
+      arg: (this, value),
       cancellationToken: cancellationToken,
       constructCommand: SetValueCommand.ConstructCommand,
       parseResponse: SetValueCommand.ParseResponse
     );
+  }
 }

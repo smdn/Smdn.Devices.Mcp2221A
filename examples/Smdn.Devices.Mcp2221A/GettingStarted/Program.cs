@@ -1,5 +1,3 @@
-using System.Device.Gpio;
-
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -46,26 +44,26 @@ using var serviceProvider = services.BuildServiceProvider();
 using var device = Mcp2221A.Create(serviceProvider);
 
 // Configure the GP pins (GP0-GP3) as GPIO output.
-device.GP0.ConfigureAsGpio(PinMode.Output);
-device.GP1.ConfigureAsGpio(PinMode.Output);
-device.GP2.ConfigureAsGpio(PinMode.Output);
-device.GP3.ConfigureAsGpio(PinMode.Output);
+device.GpPin0.ConfigureAsGpioOutput();
+device.GpPin1.ConfigureAsGpioOutput();
+device.GpPin2.ConfigureAsGpioOutput();
+device.GpPin3.ConfigureAsGpioOutput();
 
 // Blink the configured GPIO pins.
 //
 // This example assumes an LED is connected to each pin.
 // See this code in action in the YouTube video:
 // https://www.youtube.com/watch?v=MnIunESm71E
-foreach (var gp in device.GPs) {
-  Console.WriteLine($"Blinking {gp.PinDesignation}");
+foreach (var gp in device.GpPins) {
+  Console.WriteLine($"Blinking {gp.PinName}");
 
   for (var n = 0; n < 10; n++) {
     // Set the pin output to Low (logic 0)
-    gp.SetValue(false);
+    gp.Write(false);
     Thread.Sleep(100);
 
     // Set the pin output to High (logic 0)
-    gp.SetValue(true);
+    gp.Write(true);
     Thread.Sleep(100);
   }
 }

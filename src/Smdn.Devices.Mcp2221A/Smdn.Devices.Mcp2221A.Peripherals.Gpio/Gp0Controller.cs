@@ -6,38 +6,44 @@ using System.Threading.Tasks;
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 public sealed class Gp0Controller : GpController {
-  private protected override int GPIndex => 0;
+  private protected override int GpPinNumber => 0;
 
-  internal Gp0Controller(Mcp2221A device)
-    : base(device)
+  /// <inheritdoc/>
+  /// <value>
+  /// Always <c>GP0</c>.
+  /// </value>
+  public override string PinName { get; } = "GP0";
+
+  internal Gp0Controller(Mcp2221ATransceiver transceiver)
+    : base(transceiver)
   {
   }
 
-  public ValueTask ConfigureAsLedUrxAsync(CancellationToken cancellationToken = default)
-    => ConfigureGPDesignationAsync(
+  public ValueTask ConfigureAsUrxLedOutputAsync(CancellationToken cancellationToken = default)
+    => ConfigureGpDesignationAsync(
       pinDesignation: "LED_URX",
-      gpDesignation: GPDesignation.AlternateFunction0,
+      gpDesignation: GpDesignation.AlternateFunction0,
       cancellationToken: cancellationToken
     );
 
-  public void ConfigureAsLedUrx(CancellationToken cancellationToken = default)
-    => ConfigureGPDesignation(
+  public void ConfigureAsUrxLedOutput(CancellationToken cancellationToken = default)
+    => ConfigureGpDesignation(
       pinDesignation: "LED_URX",
-      gpDesignation: GPDesignation.AlternateFunction0,
+      gpDesignation: GpDesignation.AlternateFunction0,
       cancellationToken: cancellationToken
     );
 
-  public ValueTask ConfigureAsSspndAsync(CancellationToken cancellationToken = default)
-    => ConfigureGPDesignationAsync(
+  public ValueTask ConfigureAsUsbSuspendStatusAsync(CancellationToken cancellationToken = default)
+    => ConfigureGpDesignationAsync(
       pinDesignation: "SSPND",
-      gpDesignation: GPDesignation.DedicatedFunctionOperation,
+      gpDesignation: GpDesignation.DedicatedFunctionOperation,
       cancellationToken: cancellationToken
     );
 
-  public void ConfigureAsSspnd(CancellationToken cancellationToken = default)
-    => ConfigureGPDesignation(
+  public void ConfigureAsUsbSuspendStatus(CancellationToken cancellationToken = default)
+    => ConfigureGpDesignation(
       pinDesignation: "SSPND",
-      gpDesignation: GPDesignation.DedicatedFunctionOperation,
+      gpDesignation: GpDesignation.DedicatedFunctionOperation,
       cancellationToken: cancellationToken
     );
 }

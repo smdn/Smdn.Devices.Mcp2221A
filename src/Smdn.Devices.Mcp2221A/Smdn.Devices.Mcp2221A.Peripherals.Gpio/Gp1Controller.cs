@@ -13,66 +13,76 @@ public sealed class Gp1Controller :
   IClockController
 {
 #pragma warning restore IDE0055
-  private protected override int GPIndex => 1;
+  private protected override int GpPinNumber => 1;
 
-  internal Gp1Controller(Mcp2221A device)
-    : base(device)
+  /// <inheritdoc/>
+  /// <value>
+  /// Always <c>GP1</c>.
+  /// </value>
+  public override string PinName { get; } = "GP1";
+
+  internal Gp1Controller(Mcp2221ATransceiver transceiver)
+    : base(transceiver)
   {
   }
 
-  public ValueTask ConfigureAsInterruptDetectionAsync(CancellationToken cancellationToken = default)
-    => ConfigureGPDesignationAsync(
+  public ValueTask ConfigureAsExternalInterruptAsync(CancellationToken cancellationToken = default)
+    => ConfigureGpDesignationAsync(
       pinDesignation: "Interrupt Detection",
-      gpDesignation: GPDesignation.AlternateFunction2,
+      gpDesignation: GpDesignation.AlternateFunction2,
       cancellationToken: cancellationToken
     );
 
-  public void ConfigureAsInterruptDetection(CancellationToken cancellationToken = default)
-    => ConfigureGPDesignation(
+  public void ConfigureAsExternalInterrupt(CancellationToken cancellationToken = default)
+    => ConfigureGpDesignation(
       pinDesignation: "Interrupt Detection",
-      gpDesignation: GPDesignation.AlternateFunction2,
+      gpDesignation: GpDesignation.AlternateFunction2,
       cancellationToken: cancellationToken
     );
 
-  public ValueTask ConfigureAsLedUtxAsync(CancellationToken cancellationToken = default)
-    => ConfigureGPDesignationAsync(
+  public ValueTask ConfigureAsUtxLedOutputAsync(CancellationToken cancellationToken = default)
+    => ConfigureGpDesignationAsync(
       pinDesignation: "LED_UTX",
-      gpDesignation: GPDesignation.AlternateFunction1,
+      gpDesignation: GpDesignation.AlternateFunction1,
       cancellationToken: cancellationToken
     );
 
-  public void ConfigureAsLedUtx(CancellationToken cancellationToken = default)
-    => ConfigureGPDesignation(
+  public void ConfigureAsUtxLedOutput(CancellationToken cancellationToken = default)
+    => ConfigureGpDesignation(
       pinDesignation: "LED_UTX",
-      gpDesignation: GPDesignation.AlternateFunction1,
+      gpDesignation: GpDesignation.AlternateFunction1,
       cancellationToken: cancellationToken
     );
 
+  /// <inheritdoc/>
   public ValueTask ConfigureAsAdcAsync(CancellationToken cancellationToken = default)
-    => ConfigureGPDesignationAsync(
+    => ConfigureGpDesignationAsync(
       pinDesignation: "ADC1",
-      gpDesignation: GPDesignation.AlternateFunction0,
+      gpDesignation: GpDesignation.AlternateFunction0,
       cancellationToken: cancellationToken
     );
 
+  /// <inheritdoc/>
   public void ConfigureAsAdc(CancellationToken cancellationToken = default)
-    => ConfigureGPDesignation(
+    => ConfigureGpDesignation(
       pinDesignation: "ADC1",
-      gpDesignation: GPDesignation.AlternateFunction0,
+      gpDesignation: GpDesignation.AlternateFunction0,
       cancellationToken: cancellationToken
     );
 
+  /// <inheritdoc/>
   public ValueTask ConfigureAsClockOutputAsync(CancellationToken cancellationToken = default)
-    => ConfigureGPDesignationAsync(
+    => ConfigureGpDesignationAsync(
       pinDesignation: "Clock Output",
-      gpDesignation: GPDesignation.DedicatedFunctionOperation,
+      gpDesignation: GpDesignation.DedicatedFunctionOperation,
       cancellationToken: cancellationToken
     );
 
+  /// <inheritdoc/>
   public void ConfigureAsClockOutput(CancellationToken cancellationToken = default)
-    => ConfigureGPDesignation(
+    => ConfigureGpDesignation(
       pinDesignation: "Clock Output",
-      gpDesignation: GPDesignation.DedicatedFunctionOperation,
+      gpDesignation: GpDesignation.DedicatedFunctionOperation,
       cancellationToken: cancellationToken
     );
 }

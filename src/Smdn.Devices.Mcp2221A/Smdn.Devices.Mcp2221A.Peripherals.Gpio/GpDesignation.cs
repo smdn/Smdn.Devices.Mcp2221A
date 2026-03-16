@@ -6,7 +6,7 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 // [MCP2221A] 3.1.13 SET SRAM SETTINGS
 // Byte Index 8-11 GP0-3 Settings
 // Bit 2-0: GP<n> Designation
-internal enum GPDesignation : byte {
+internal enum GpDesignation : byte {
   AlternateFunction2 = 0b_000_0_0_100,
   AlternateFunction1 = 0b_000_0_0_011,
   AlternateFunction0 = 0b_000_0_0_010,

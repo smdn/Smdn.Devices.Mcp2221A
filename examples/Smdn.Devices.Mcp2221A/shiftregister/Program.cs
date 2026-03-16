@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 using System;
-using System.Device.Gpio;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -19,15 +18,15 @@ using var serviceProvider = services.BuildServiceProvider();
 using var device = Mcp2221A.Create(serviceProvider);
 
 // configure GP0-GP3 as GPIO output
-device.GP0.ConfigureAsGpio(PinMode.Output);
-device.GP1.ConfigureAsGpio(PinMode.Output);
-device.GP2.ConfigureAsGpio(PinMode.Output);
+device.GpPin0.ConfigureAsGpioOutput();
+device.GpPin1.ConfigureAsGpioOutput();
+device.GpPin2.ConfigureAsGpioOutput();
 
 // construct shift register
 var shiftRegister = new ShiftRegister(
-  gpioLatch: device.GP0,
-  gpioClock: device.GP1,
-  gpioData: device.GP2
+  gpioLatch: device.GpPin0,
+  gpioClock: device.GpPin1,
+  gpioData: device.GpPin2
 );
 
 const int maxBits = 16;

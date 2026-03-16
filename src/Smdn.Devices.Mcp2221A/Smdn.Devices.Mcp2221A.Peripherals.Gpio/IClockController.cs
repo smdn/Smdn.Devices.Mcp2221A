@@ -7,9 +7,18 @@ using System.Threading.Tasks;
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 internal interface IClockController {
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// The default value is <see cref="CancellationToken.None"/>.
+  /// </param>
   ValueTask ConfigureAsClockOutputAsync(
     CancellationToken cancellationToken = default
   );
+
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// The default value is <see cref="CancellationToken.None"/>.
+  /// </param>
   void ConfigureAsClockOutput(
     CancellationToken cancellationToken = default
   );

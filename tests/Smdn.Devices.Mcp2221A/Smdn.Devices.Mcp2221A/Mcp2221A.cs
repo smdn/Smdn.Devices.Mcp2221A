@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 using NUnit.Framework;
 
+using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
@@ -240,18 +241,27 @@ public partial class Mcp2221ATests {
     Assert.That(() => _ = device.Product, Throws.Nothing);
     Assert.That(() => _ = device.SerialNumber, Throws.Nothing);
     Assert.That(() => _ = device.ChipFactorySerialNumber, Throws.Nothing);
-    Assert.That(() => _ = device.GPs, Throws.Nothing);
-    Assert.That(() => _ = device.GP0, Throws.Nothing);
-    Assert.That(() => _ = device.GP1, Throws.Nothing);
-    Assert.That(() => _ = device.GP2, Throws.Nothing);
-    Assert.That(() => _ = device.GP3, Throws.Nothing);
+    Assert.That(() => _ = device.GpPins, Throws.Nothing);
+    Assert.That(() => _ = device.GpPin0, Throws.Nothing);
+    Assert.That(() => _ = device.GpPin1, Throws.Nothing);
+    Assert.That(() => _ = device.GpPin2, Throws.Nothing);
+    Assert.That(() => _ = device.GpPin3, Throws.Nothing);
     Assert.That(() => _ = device.I2c, Throws.Nothing);
 
     var i2c = device.I2c;
+    var gp0 = device.GpPin0;
+    var gp1 = device.GpPin1;
+    var gp2 = device.GpPin2;
+    var gp3 = device.GpPin3;
 
     await disposeAction(device);
 
     Assert.That(() => _ = device.HidDevice, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = device.GpPins, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = device.GpPin0, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = device.GpPin1, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = device.GpPin2, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = device.GpPin3, Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => _ = device.I2c, Throws.TypeOf<ObjectDisposedException>());
 
     Assert.That(() => _ = device.HardwareRevision, Throws.Nothing);
@@ -260,18 +270,15 @@ public partial class Mcp2221ATests {
     Assert.That(() => _ = device.Product, Throws.Nothing);
     Assert.That(() => _ = device.SerialNumber, Throws.Nothing);
     Assert.That(() => _ = device.ChipFactorySerialNumber, Throws.Nothing);
-    Assert.That(() => _ = device.GPs, Throws.Nothing);
-    Assert.That(() => _ = device.GP0, Throws.Nothing);
-    Assert.That(() => _ = device.GP1, Throws.Nothing);
-    Assert.That(() => _ = device.GP2, Throws.Nothing);
-    Assert.That(() => _ = device.GP3, Throws.Nothing);
 
-    Assert.That(async () => await device.GP0.SetValueAsync(default), Throws.TypeOf<ObjectDisposedException>());
-    Assert.That(() => device.GP0.SetValueAsync(default), Throws.TypeOf<ObjectDisposedException>());
-    Assert.That(() => device.GP0.SetValue(default), Throws.TypeOf<ObjectDisposedException>());
-    Assert.That(async () => await device.GP0.GetValueAsync(), Throws.TypeOf<ObjectDisposedException>());
-    Assert.That(() => device.GP0.GetValueAsync(), Throws.TypeOf<ObjectDisposedException>());
-    Assert.That(() => device.GP0.GetValue(), Throws.TypeOf<ObjectDisposedException>());
+    foreach (var gp in new GpController[] { gp0, gp1, gp2, gp3 }) {
+      Assert.That(async () => await gp.WriteAsync(default), Throws.TypeOf<ObjectDisposedException>());
+      Assert.That(() => gp.WriteAsync(default), Throws.TypeOf<ObjectDisposedException>());
+      Assert.That(() => gp.Write(default), Throws.TypeOf<ObjectDisposedException>());
+      Assert.That(async () => await gp.ReadAsync(), Throws.TypeOf<ObjectDisposedException>());
+      Assert.That(() => gp.ReadAsync(), Throws.TypeOf<ObjectDisposedException>());
+      Assert.That(() => gp.Read(), Throws.TypeOf<ObjectDisposedException>());
+    }
 
     Assert.That(async () => await i2c.WriteAsync(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => i2c.WriteAsync(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
@@ -362,5 +369,60 @@ public partial class Mcp2221ATests {
     Assert.That(baseDevice.IsDisposed, Is.EqualTo(expectExceptionThrown));
 
     device?.Dispose();
+  }
+
+  [Test]
+  public async ValueTask GpPins()
+  {
+    await using var mcp2221A = await Mcp2221A.CreateAsync(
+      CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(mcp2221A.GpPins, Is.Not.Null);
+    Assert.That(mcp2221A.GpPins.Count, Is.EqualTo(4));
+  }
+
+  [Test]
+  public async ValueTask GpPins_IReadOnlyList_Items()
+  {
+    await using var mcp2221A = await Mcp2221A.CreateAsync(
+      CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(mcp2221A.GpPins[0], Is.TypeOf<Gp0Controller>());
+    Assert.That(mcp2221A.GpPins[1], Is.TypeOf<Gp1Controller>());
+    Assert.That(mcp2221A.GpPins[2], Is.TypeOf<Gp2Controller>());
+    Assert.That(mcp2221A.GpPins[3], Is.TypeOf<Gp3Controller>());
+
+    Assert.That(() => _ = mcp2221A.GpPins[int.MinValue], Throws.TypeOf<ArgumentOutOfRangeException>());
+    Assert.That(() => _ = mcp2221A.GpPins[-1], Throws.TypeOf<ArgumentOutOfRangeException>());
+    Assert.That(() => _ = mcp2221A.GpPins[4], Throws.TypeOf<ArgumentOutOfRangeException>());
+    Assert.That(() => _ = mcp2221A.GpPins[int.MaxValue], Throws.TypeOf<ArgumentOutOfRangeException>());
+  }
+
+  [Test]
+  public async ValueTask GpPins_IEnumerable()
+  {
+    await using var mcp2221A = await Mcp2221A.CreateAsync(
+      CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(
+      mcp2221A.GpPins,
+      Is.EqualTo(new GpController[] { mcp2221A.GpPin0, mcp2221A.GpPin1, mcp2221A.GpPin2, mcp2221A.GpPin3 }).AsCollection
+    );
+
+    Assert.That(
+      (System.Collections.Generic.IEnumerable<GpController>)mcp2221A.GpPins,
+      Is.EqualTo(new GpController[] { mcp2221A.GpPin0, mcp2221A.GpPin1, mcp2221A.GpPin2, mcp2221A.GpPin3 }).AsCollection
+    );
+
+    Assert.That(
+      (System.Collections.IEnumerable)mcp2221A.GpPins,
+      Is.EqualTo(new GpController[] { mcp2221A.GpPin0, mcp2221A.GpPin1, mcp2221A.GpPin2, mcp2221A.GpPin3 }).AsCollection
+    );
   }
 }

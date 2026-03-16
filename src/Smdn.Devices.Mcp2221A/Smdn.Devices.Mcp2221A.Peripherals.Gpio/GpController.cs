@@ -12,19 +12,24 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 #pragma warning disable IDE0040
 public abstract partial class GpController {
 #pragma warning restore IDE0040
-  private const int NumberOfGPs = 4;
+  internal const int NumberOfGpPins = 4;
 
-  private readonly Mcp2221A device;
-  private protected abstract int GPIndex { get; }
-  public string PinName => $"GP{GPIndex}";
+  private readonly Mcp2221ATransceiver transceiver;
+
+  private protected abstract int GpPinNumber { get; }
+
+  /// <summary>
+  /// Gets the GP pin name represented by the current instance.
+  /// </summary>
+  public abstract string PinName { get; }
   public string? PinDesignation { get; private set; }
 
-  private protected GpController(Mcp2221A device)
+  private protected GpController(Mcp2221ATransceiver transceiver)
   {
-    this.device = device;
+    this.transceiver = transceiver;
   }
 
-  private static class GetGPSettingsCommand {
+  private static class GetGpSettingsCommand {
 #pragma warning disable IDE0060 // [IDE0060] Remove unused parameter
     public static void ConstructCommand(Span<byte> comm, ReadOnlySpan<byte> userData, Memory<byte> gpSettings)
 #pragma warning restore IDE0060
@@ -41,7 +46,7 @@ public abstract partial class GpController {
     }
   }
 
-  private static class SetGPSettingsCommand {
+  private static class SetGpSettingsCommand {
     [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1316:TupleElementNamesShouldUseCorrectCasing", Justification = "Not a publicly-exposed type or member.")]
     public static void ConstructCommand(
       Span<byte> comm,
@@ -49,7 +54,7 @@ public abstract partial class GpController {
       (
         ReadOnlyMemory<byte> gpSettings,
         int gpIndex,
-        GPDesignation gpDesignation,
+        GpDesignation gpDesignation,
         PinMode gpioDirection,
         PinValue gpioValue
       ) args
@@ -70,7 +75,7 @@ public abstract partial class GpController {
       const int FirstIndexOfGPSettings = 8; // GP0 Settings
 
       // copy current GP0-GP3 settings
-      args.gpSettings.Span.CopyTo(comm.Slice(FirstIndexOfGPSettings, NumberOfGPs));
+      args.gpSettings.Span.CopyTo(comm.Slice(FirstIndexOfGPSettings, NumberOfGpPins));
 
       // construct new GP<n> settings
       var bitsGpioOutputValue = (bool)args.gpioValue
@@ -80,10 +85,8 @@ public abstract partial class GpController {
         PinMode.Input => 0b_000_0_1_000,
         PinMode.Output => 0b_000_0_0_000,
 
-        _ => throw new ArgumentOutOfRangeException(
-          paramName: nameof(args),
-          actualValue: args.gpioDirection,
-          message: $"must be {nameof(PinMode.Input)} or {nameof(PinMode.Output)}"
+        _ => throw new NotSupportedException(
+          message: $"The GPIO direction cannot be set to either {nameof(PinMode.InputPullUp)} or {nameof(PinMode.InputPullDown)}"
         ),
       };
       var bitsGPnDesignation = (byte)args.gpDesignation & 0b_000_0_0_111;
@@ -105,7 +108,7 @@ public abstract partial class GpController {
       (
         ReadOnlyMemory<byte>,
         int,
-        GPDesignation,
+        GpDesignation,
         PinMode,
         PinValue
       ) _
@@ -119,31 +122,31 @@ public abstract partial class GpController {
     }
   }
 
-  private protected async ValueTask ConfigureGPDesignationAsync(
+  private protected async ValueTask ConfigureGpDesignationAsync(
     string pinDesignation,
-    GPDesignation gpDesignation,
+    GpDesignation gpDesignation,
     PinMode gpioInitialDirection = default,
     PinValue gpioInitialValue = default,
     CancellationToken cancellationToken = default
   )
   {
-    var gpSettings = ArrayPool<byte>.Shared.Rent(NumberOfGPs);
+    var gpSettings = ArrayPool<byte>.Shared.Rent(NumberOfGpPins);
 
     try {
       // retrieve current GP0-GP3 settings
-      _ = await device.CommandAsync(
+      _ = await transceiver.CommandAsync(
         arg: gpSettings.AsMemory(0, 4),
         cancellationToken: cancellationToken,
-        constructCommand: GetGPSettingsCommand.ConstructCommand,
-        parseResponse: GetGPSettingsCommand.ParseResponse
+        constructCommand: GetGpSettingsCommand.ConstructCommand,
+        parseResponse: GetGpSettingsCommand.ParseResponse
       ).ConfigureAwait(false);
 
       // overwrite GPn settings and set GP0-GP3 settings
-      _ = await device.CommandAsync(
-        arg: ((ReadOnlyMemory<byte>)gpSettings.AsMemory(0, 4), GPIndex, gpDesignation, gpioInitialDirection, gpioInitialValue),
+      _ = await transceiver.CommandAsync(
+        arg: ((ReadOnlyMemory<byte>)gpSettings.AsMemory(0, 4), GpPinNumber, gpDesignation, gpioInitialDirection, gpioInitialValue),
         cancellationToken: cancellationToken,
-        constructCommand: SetGPSettingsCommand.ConstructCommand,
-        parseResponse: SetGPSettingsCommand.ParseResponse
+        constructCommand: SetGpSettingsCommand.ConstructCommand,
+        parseResponse: SetGpSettingsCommand.ParseResponse
       ).ConfigureAwait(false);
 
       PinDesignation = pinDesignation;
@@ -153,9 +156,9 @@ public abstract partial class GpController {
     }
   }
 
-  private protected void ConfigureGPDesignation(
+  private protected void ConfigureGpDesignation(
     string pinDesignation,
-    GPDesignation gpDesignation,
+    GpDesignation gpDesignation,
     PinMode gpioInitialDirection = default,
     PinValue gpioInitialValue = default,
     CancellationToken cancellationToken = default
@@ -165,19 +168,19 @@ public abstract partial class GpController {
 
     try {
       // retrieve current GP0-GP3 settings
-      device.Command(
+      _ = transceiver.Command(
         arg: gpSettings.AsMemory(0, 4),
         cancellationToken: cancellationToken,
-        constructCommand: GetGPSettingsCommand.ConstructCommand,
-        parseResponse: GetGPSettingsCommand.ParseResponse
+        constructCommand: GetGpSettingsCommand.ConstructCommand,
+        parseResponse: GetGpSettingsCommand.ParseResponse
       );
 
       // overwrite GPn settings and set GP0-GP3 settings
-      device.Command(
-        arg: ((ReadOnlyMemory<byte>)gpSettings.AsMemory(0, 4), GPIndex, gpDesignation, gpioInitialDirection, gpioInitialValue),
+      _ = transceiver.Command(
+        arg: ((ReadOnlyMemory<byte>)gpSettings.AsMemory(0, 4), GpPinNumber, gpDesignation, gpioInitialDirection, gpioInitialValue),
         cancellationToken: cancellationToken,
-        constructCommand: SetGPSettingsCommand.ConstructCommand,
-        parseResponse: SetGPSettingsCommand.ParseResponse
+        constructCommand: SetGpSettingsCommand.ConstructCommand,
+        parseResponse: SetGpSettingsCommand.ParseResponse
       );
 
       PinDesignation = pinDesignation;

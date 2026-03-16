@@ -21,7 +21,7 @@ using var serviceProvider = services.BuildServiceProvider();
 
 await using var device = await Mcp2221A.CreateAsync(serviceProvider);
 
-await device.GP3.ConfigureAsLedI2cAsync();
+await device.GpPin3.ConfigureAsI2cLedOutputAsync();
 
 // If an I2cCommandException is thrown when using the
 // HidSharp backend, try WithFastMode() instead of WithStandardMode().

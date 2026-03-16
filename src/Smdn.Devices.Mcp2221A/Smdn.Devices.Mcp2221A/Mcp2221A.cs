@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 using System;
-using System.Collections.Generic;
 #if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -33,12 +32,17 @@ public partial class Mcp2221A :
     }
   }
 
-  public IReadOnlyList<GpController> GpPins { get; }
+  public IGpControllerGroup GpPins {
+    get {
+      ThrowIfDisposed();
+      return field;
+    }
+  }
 
-  public Gp0Controller GpPin0 { get; }
-  public Gp1Controller GpPin1 { get; }
-  public Gp2Controller GpPin2 { get; }
-  public Gp3Controller GpPin3 { get; }
+  public Gp0Controller GpPin0 => GpPins.Gp0;
+  public Gp1Controller GpPin1 => GpPins.Gp1;
+  public Gp2Controller GpPin2 => GpPins.Gp2;
+  public Gp3Controller GpPin3 => GpPins.Gp3;
 
   private Mcp2221A(
     Mcp2221ATransceiver transceiver,
@@ -49,17 +53,7 @@ public partial class Mcp2221A :
     this.transceiver = transceiver ?? throw new ArgumentNullException(nameof(transceiver));
     this.info = info ?? throw new ArgumentNullException(nameof(info));
 
-    GpPin0 = new Gp0Controller(this);
-    GpPin1 = new Gp1Controller(this);
-    GpPin2 = new Gp2Controller(this);
-    GpPin3 = new Gp3Controller(this);
-    GpPins = [
-      GpPin0,
-      GpPin1,
-      GpPin2,
-      GpPin3,
-    ];
-
+    GpPins = new Mcp2221AGpioDriver(transceiver: transceiver);
     I2c = new(this, logger);
   }
 
