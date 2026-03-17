@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,6 +20,24 @@ public sealed class Gp2Controller :
   /// </value>
   public override string PinName { get; } = "GP2";
 
+  /// <inheritdoc/>
+  public override GpFunction CurrentFunction => CurrentGpDesignation switch {
+    GpDesignation.GpioOperation => GpFunction.Gpio, // GPIO
+    GpDesignation.DedicatedFunctionOperation => GpFunction.UsbConfigureStatus, // USBCFG
+    GpDesignation.AlternateFunction0 => GpFunction.Adc, // ADC2
+    GpDesignation.AlternateFunction1 => GpFunction.Dac, // DAC1
+    _ => throw new NotSupportedException(),
+  };
+
+  /// <inheritdoc/>
+  public override string CurrentDesignation => CurrentGpDesignation switch {
+    GpDesignation.GpioOperation => "GPIO2",
+    GpDesignation.DedicatedFunctionOperation => "USBCFG",
+    GpDesignation.AlternateFunction0 => "ADC2",
+    GpDesignation.AlternateFunction1 => "DAC1",
+    _ => throw new NotSupportedException(),
+  };
+
   internal Gp2Controller(Mcp2221ATransceiver transceiver)
     : base(transceiver)
   {
@@ -27,7 +46,6 @@ public sealed class Gp2Controller :
   /// <inheritdoc/>
   public ValueTask ConfigureAsDacAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
-      pinDesignation: "DAC1",
       gpDesignation: GpDesignation.AlternateFunction1,
       cancellationToken: cancellationToken
     );
@@ -35,7 +53,6 @@ public sealed class Gp2Controller :
   /// <inheritdoc/>
   public void ConfigureAsDac(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(
-      pinDesignation: "DAC1",
       gpDesignation: GpDesignation.AlternateFunction1,
       cancellationToken: cancellationToken
     );
@@ -43,7 +60,6 @@ public sealed class Gp2Controller :
   /// <inheritdoc/>
   public ValueTask ConfigureAsAdcAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
-      pinDesignation: "ADC2",
       gpDesignation: GpDesignation.AlternateFunction0,
       cancellationToken: cancellationToken
     );
@@ -51,21 +67,20 @@ public sealed class Gp2Controller :
   /// <inheritdoc/>
   public void ConfigureAsAdc(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(
-      pinDesignation: "ADC2",
       gpDesignation: GpDesignation.AlternateFunction0,
       cancellationToken: cancellationToken
     );
 
+  /// <seealso cref="GpFunction.UsbConfigureStatus"/>
   public ValueTask ConfigureAsUsbConfigureStatusAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
-      pinDesignation: "USBCFG",
       gpDesignation: GpDesignation.DedicatedFunctionOperation,
       cancellationToken: cancellationToken
     );
 
+  /// <seealso cref="GpFunction.UsbConfigureStatus"/>
   public void ConfigureAsUsbConfigureStatus(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(
-      pinDesignation: "USBCFG",
       gpDesignation: GpDesignation.DedicatedFunctionOperation,
       cancellationToken: cancellationToken
     );

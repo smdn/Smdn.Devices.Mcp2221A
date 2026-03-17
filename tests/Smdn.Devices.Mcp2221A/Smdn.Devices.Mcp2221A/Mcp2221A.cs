@@ -35,7 +35,11 @@ public partial class Mcp2221ATests {
     string manufacturer = DefaultManufacturer,
     string product = DefaultProduct,
     string serialNumber = DefaultSerialNumber,
-    string chipFactorySerialNumber = DefaultChipFactorySerialNumber
+    string chipFactorySerialNumber = DefaultChipFactorySerialNumber,
+    byte gp0Settings = 0b_000_1_0_010, // Output: HIGH, Alternate Function 0 (LED UART RX)
+    byte gp1Settings = 0b_000_1_0_011, // Output: HIGH, Alternate Function 1 (LED UART TX)
+    byte gp2Settings = 0b_000_1_0_001, // Output: HIGH, Dedicated function operation (USBCFG)
+    byte gp3Settings = 0b_000_1_0_001 // Output: HIGH, Dedicated function operation (LED I2C)
   )
     => new(
       vendorId: vendorId,
@@ -148,6 +152,30 @@ public partial class Mcp2221ATests {
         readStream.Write(
           // [MCP2221A] 3.1.2 READ FLASH DATA - TABLE 3-10 RESPONSE STRUCTURE - READ CHIP FACTORY SERIAL NUMBER SUB-COMMAND
           [ReportInput, 0xB0, 0x00, (byte)chipFactorySerialNumberDescriptorLength, 0x00, .. chipFactorySerialNumberDescriptor]
+#if !SYSTEM_IO_STREAM_WRITE_READONLYSPAN_OF_BYTE
+          ,
+          0,
+          ReportLength
+#endif
+        );
+
+        var vendorIdHigh = (byte)(vendorId >> 8);
+        var vendorIdLow = (byte)vendorId;
+        var productIdHigh = (byte)(productId >> 8);
+        var productIdLow = (byte)productId;
+
+        readStream.Write(
+          // [MCP2221A] 3.1.14 GET SRAM SETTINGS
+          [
+            ReportInput,
+            0x61, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            vendorIdHigh, vendorIdLow, productIdHigh, productIdLow,
+            0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            gp0Settings, gp1Settings, gp2Settings, gp3Settings,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+          ]
 #if !SYSTEM_IO_STREAM_WRITE_READONLYSPAN_OF_BYTE
           ,
           0,
@@ -424,5 +452,73 @@ public partial class Mcp2221ATests {
       (System.Collections.IEnumerable)mcp2221A.GpPins,
       Is.EqualTo(new GpController[] { mcp2221A.GpPin0, mcp2221A.GpPin1, mcp2221A.GpPin2, mcp2221A.GpPin3 }).AsCollection
     );
+  }
+
+  [TestCase(0b_000_1_0_010, GpFunction.LedOutput, "LED_URX")]
+  [TestCase(0b_000_1_0_001, GpFunction.UsbSuspendStatus, "SSPND")]
+  [TestCase(0b_000_1_0_000, GpFunction.Gpio, "GPIO0")]
+  public async ValueTask GpPin0(byte gp0Settings, GpFunction expectedGpFunction, string expectedGpDesignation)
+  {
+    await using var mcp2221A = await Mcp2221A.CreateAsync(
+      CreatePseudoDevice(gp0Settings: gp0Settings),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(mcp2221A.GpPin0, Is.TypeOf<Gp0Controller>());
+    Assert.That(mcp2221A.GpPin0.PinName, Is.EqualTo("GP0"));
+    Assert.That(mcp2221A.GpPin0.CurrentFunction, Is.EqualTo(expectedGpFunction));
+    Assert.That(mcp2221A.GpPin0.CurrentDesignation, Is.EqualTo(expectedGpDesignation));
+  }
+
+  [TestCase(0b_000_1_0_100, GpFunction.ExternalInterrupt, "IOC")]
+  [TestCase(0b_000_1_0_011, GpFunction.LedOutput, "LED_UTX")]
+  [TestCase(0b_000_1_0_010, GpFunction.Adc, "ADC1")]
+  [TestCase(0b_000_1_0_001, GpFunction.ClockOutput, "CLK OUT")]
+  [TestCase(0b_000_1_0_000, GpFunction.Gpio, "GPIO1")]
+  public async ValueTask GpPin1(byte gp1Settings, GpFunction expectedGpFunction, string expectedGpDesignation)
+  {
+    await using var mcp2221A = await Mcp2221A.CreateAsync(
+      CreatePseudoDevice(gp1Settings: gp1Settings),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(mcp2221A.GpPin1, Is.TypeOf<Gp1Controller>());
+    Assert.That(mcp2221A.GpPin1.PinName, Is.EqualTo("GP1"));
+    Assert.That(mcp2221A.GpPin1.CurrentFunction, Is.EqualTo(expectedGpFunction));
+    Assert.That(mcp2221A.GpPin1.CurrentDesignation, Is.EqualTo(expectedGpDesignation));
+  }
+
+  [TestCase(0b_000_1_0_011, GpFunction.Dac, "DAC1")]
+  [TestCase(0b_000_1_0_010, GpFunction.Adc, "ADC2")]
+  [TestCase(0b_000_1_0_001, GpFunction.UsbConfigureStatus, "USBCFG")]
+  [TestCase(0b_000_1_0_000, GpFunction.Gpio, "GPIO2")]
+  public async ValueTask GpPin2(byte gp2Settings, GpFunction expectedGpFunction, string expectedGpDesignation)
+  {
+    await using var mcp2221A = await Mcp2221A.CreateAsync(
+      CreatePseudoDevice(gp2Settings: gp2Settings),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(mcp2221A.GpPin2, Is.TypeOf<Gp2Controller>());
+    Assert.That(mcp2221A.GpPin2.PinName, Is.EqualTo("GP2"));
+    Assert.That(mcp2221A.GpPin2.CurrentFunction, Is.EqualTo(expectedGpFunction));
+    Assert.That(mcp2221A.GpPin2.CurrentDesignation, Is.EqualTo(expectedGpDesignation));
+  }
+
+  [TestCase(0b_000_1_0_011, GpFunction.Dac, "DAC2")]
+  [TestCase(0b_000_1_0_010, GpFunction.Adc, "ADC3")]
+  [TestCase(0b_000_1_0_001, GpFunction.LedOutput, "LED_I2C")]
+  [TestCase(0b_000_1_0_000, GpFunction.Gpio, "GPIO3")]
+  public async ValueTask GpPin3(byte gp3Settings, GpFunction expectedGpFunction, string expectedGpDesignation)
+  {
+    await using var mcp2221A = await Mcp2221A.CreateAsync(
+      CreatePseudoDevice(gp3Settings: gp3Settings),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(mcp2221A.GpPin3, Is.TypeOf<Gp3Controller>());
+    Assert.That(mcp2221A.GpPin3.PinName, Is.EqualTo("GP3"));
+    Assert.That(mcp2221A.GpPin3.CurrentFunction, Is.EqualTo(expectedGpFunction));
+    Assert.That(mcp2221A.GpPin3.CurrentDesignation, Is.EqualTo(expectedGpDesignation));
   }
 }

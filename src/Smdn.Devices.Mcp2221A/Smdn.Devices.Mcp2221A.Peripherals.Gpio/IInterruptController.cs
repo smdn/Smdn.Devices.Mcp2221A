@@ -11,6 +11,7 @@ internal interface IInterruptController {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
+  /// <seealso cref="GpFunction.ExternalInterrupt"/>
   ValueTask ConfigureAsExternalInterruptAsync(
     CancellationToken cancellationToken = default
   );
@@ -19,6 +20,7 @@ internal interface IInterruptController {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
+  /// <seealso cref="GpFunction.ExternalInterrupt"/>
   void ConfigureAsExternalInterrupt(
     CancellationToken cancellationToken = default
   );

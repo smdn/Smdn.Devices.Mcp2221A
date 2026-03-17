@@ -386,12 +386,12 @@ partial class Mcp2221A {
         cancellationToken: cancellationToken
       ).ConfigureAwait(false);
 
-      return CreateFromInfoAndTransceiver(
+      return await CreateFromInfoAndTransceiverAsync(
         transceiver: transceiver,
         info: info,
         logger: logger,
         cancellationToken: cancellationToken
-      );
+      ).ConfigureAwait(false);
     }
     catch {
       if (usbHidEndPoint is not null)

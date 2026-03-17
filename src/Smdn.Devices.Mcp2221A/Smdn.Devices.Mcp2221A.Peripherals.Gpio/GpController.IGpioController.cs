@@ -11,6 +11,12 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 #pragma warning disable IDE0040
 partial class GpController : IGpioController {
 #pragma warning restore IDE0040
+  protected void ThrowIfInvalidConfiguration(GpFunction requiredFunction)
+  {
+    if (CurrentFunction != requiredFunction)
+      throw new InvalidOperationException($"{requiredFunction} operation cannot be performed with the pin currently configured as {CurrentFunction} ({CurrentDesignation}).");
+  }
+
   /// <inheritdoc/>
   [CLSCompliant(false)]
   public ValueTask ConfigureAsGpioAsync(
@@ -19,7 +25,6 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
     => ConfigureGpDesignationAsync(
-      pinDesignation: $"GPIO{GpPinNumber}",
       gpDesignation: GpDesignation.GpioOperation,
       gpioInitialDirection: mode,
       gpioInitialValue: initialValue,
@@ -34,7 +39,6 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
     => ConfigureGpDesignation(
-      pinDesignation: $"GPIO{GpPinNumber}",
       gpDesignation: GpDesignation.GpioOperation,
       gpioInitialDirection: mode,
       gpioInitialValue: initialValue,
@@ -97,6 +101,8 @@ partial class GpController : IGpioController {
   {
     transceiver.ThrowIfDisposed();
 
+    ThrowIfInvalidConfiguration(GpFunction.Gpio);
+
     return transceiver.CommandAsync(
       arg: (this, mode),
       cancellationToken: cancellationToken,
@@ -113,6 +119,8 @@ partial class GpController : IGpioController {
   )
   {
     transceiver.ThrowIfDisposed();
+
+    ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
     transceiver.Command(
       arg: (this, mode),
@@ -213,6 +221,8 @@ partial class GpController : IGpioController {
   {
     transceiver.ThrowIfDisposed();
 
+    ThrowIfInvalidConfiguration(GpFunction.Gpio);
+
     return transceiver.CommandAsync(
       arg: (this, value),
       cancellationToken: cancellationToken,
@@ -229,6 +239,8 @@ partial class GpController : IGpioController {
   )
   {
     transceiver.ThrowIfDisposed();
+
+    ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
     transceiver.Command(
       arg: (this, value),

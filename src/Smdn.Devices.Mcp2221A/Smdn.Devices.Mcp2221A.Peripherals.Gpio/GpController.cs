@@ -17,12 +17,46 @@ public abstract partial class GpController {
   private readonly Mcp2221ATransceiver transceiver;
 
   private protected abstract int GpPinNumber { get; }
+  internal GpDesignation CurrentGpDesignation { get; set; }
 
   /// <summary>
   /// Gets the GP pin name represented by the current instance.
   /// </summary>
   public abstract string PinName { get; }
-  public string? PinDesignation { get; private set; }
+
+  /// <summary>
+  /// Gets the current function assigned to the GP pin.
+  /// </summary>
+  /// <value>
+  /// A <see cref="GpFunction"/> value indicating the current function of the pin.
+  /// </value>
+  /// <remarks>
+  /// This value changes when a configuration method, such as
+  /// <see cref="ConfigureAsGpio(PinMode, PinValue, CancellationToken)"/>,
+  /// is successfully called.
+  /// </remarks>
+  /// <seealso cref="CurrentDesignation"/>
+  /// <seealso href="https://www.microchip.com/en-us/product/mcp2221a">
+  /// [MCP2221A] 1.7.1 CONFIGURABLE PIN FUNCTIONS
+  /// [MCP2221A] TABLE 1-5: GP DESIGNATION TABLE
+  /// </seealso>
+  public abstract GpFunction CurrentFunction { get; }
+
+  /// <summary>
+  /// Gets the specific hardware designation label currently assigned to the GP pin.
+  /// </summary>
+  /// <value>
+  /// A <see cref="string"/> representing the hardware-specific function name
+  /// (e.g., <c>GPIO</c>, <c>ADC1</c>, <c>SSPND</c>, <c>LED_I2C</c>).
+  /// </value>
+  /// <remarks>
+  /// This property returns the label corresponding to the current <see cref="CurrentFunction"/>,
+  /// taking into account the specific GP pin index. For example, if <see cref="CurrentFunction"/>
+  /// is <see cref="GpFunction.LedOutput"/>, this property may return <c>LED_URX</c>,
+  /// <c>LED_UTX</c>, or <c>LED_I2C</c> depending on the pin.
+  /// </remarks>
+  /// <seealso cref="CurrentFunction"/>
+  public abstract string CurrentDesignation { get; }
 
   private protected GpController(Mcp2221ATransceiver transceiver)
   {
@@ -123,7 +157,6 @@ public abstract partial class GpController {
   }
 
   private protected async ValueTask ConfigureGpDesignationAsync(
-    string pinDesignation,
     GpDesignation gpDesignation,
     PinMode gpioInitialDirection = default,
     PinValue gpioInitialValue = default,
@@ -149,7 +182,7 @@ public abstract partial class GpController {
         parseResponse: SetGpSettingsCommand.ParseResponse
       ).ConfigureAwait(false);
 
-      PinDesignation = pinDesignation;
+      CurrentGpDesignation = gpDesignation;
     }
     finally {
       ArrayPool<byte>.Shared.Return(gpSettings);
@@ -157,7 +190,6 @@ public abstract partial class GpController {
   }
 
   private protected void ConfigureGpDesignation(
-    string pinDesignation,
     GpDesignation gpDesignation,
     PinMode gpioInitialDirection = default,
     PinValue gpioInitialValue = default,
@@ -183,7 +215,7 @@ public abstract partial class GpController {
         parseResponse: SetGpSettingsCommand.ParseResponse
       );
 
-      PinDesignation = pinDesignation;
+      CurrentGpDesignation = gpDesignation;
     }
     finally {
       ArrayPool<byte>.Shared.Return(gpSettings);

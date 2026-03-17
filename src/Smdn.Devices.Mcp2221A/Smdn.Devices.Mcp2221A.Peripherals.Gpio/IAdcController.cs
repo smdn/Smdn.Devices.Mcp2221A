@@ -11,6 +11,7 @@ internal interface IAdcController {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
+  /// <seealso cref="GpFunction.Adc"/>
   ValueTask ConfigureAsAdcAsync(
     CancellationToken cancellationToken = default
   );
@@ -19,6 +20,7 @@ internal interface IAdcController {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
+  /// <seealso cref="GpFunction.Adc"/>
   void ConfigureAsAdc(
     CancellationToken cancellationToken = default
   );

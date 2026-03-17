@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,35 +22,55 @@ public sealed class Gp1Controller :
   /// </value>
   public override string PinName { get; } = "GP1";
 
+  /// <inheritdoc/>
+  public override GpFunction CurrentFunction => CurrentGpDesignation switch {
+    GpDesignation.GpioOperation => GpFunction.Gpio, // GPIO
+    GpDesignation.DedicatedFunctionOperation => GpFunction.ClockOutput, // CLK OUT
+    GpDesignation.AlternateFunction0 => GpFunction.Adc, // ADC1
+    GpDesignation.AlternateFunction1 => GpFunction.LedOutput, // LED_UTX
+    GpDesignation.AlternateFunction2 => GpFunction.ExternalInterrupt, // IOC
+    _ => throw new NotSupportedException(),
+  };
+
+  /// <inheritdoc/>
+  public override string CurrentDesignation => CurrentGpDesignation switch {
+    GpDesignation.GpioOperation => "GPIO1",
+    GpDesignation.DedicatedFunctionOperation => "CLK OUT",
+    GpDesignation.AlternateFunction0 => "ADC1",
+    GpDesignation.AlternateFunction1 => "LED_UTX",
+    GpDesignation.AlternateFunction2 => "IOC",
+    _ => throw new NotSupportedException(),
+  };
+
   internal Gp1Controller(Mcp2221ATransceiver transceiver)
     : base(transceiver)
   {
   }
 
+  /// <inheritdoc/>
   public ValueTask ConfigureAsExternalInterruptAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
-      pinDesignation: "Interrupt Detection",
       gpDesignation: GpDesignation.AlternateFunction2,
       cancellationToken: cancellationToken
     );
 
+  /// <inheritdoc/>
   public void ConfigureAsExternalInterrupt(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(
-      pinDesignation: "Interrupt Detection",
       gpDesignation: GpDesignation.AlternateFunction2,
       cancellationToken: cancellationToken
     );
 
+  /// <seealso cref="GpFunction.LedOutput"/>
   public ValueTask ConfigureAsUtxLedOutputAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
-      pinDesignation: "LED_UTX",
       gpDesignation: GpDesignation.AlternateFunction1,
       cancellationToken: cancellationToken
     );
 
+  /// <seealso cref="GpFunction.LedOutput"/>
   public void ConfigureAsUtxLedOutput(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(
-      pinDesignation: "LED_UTX",
       gpDesignation: GpDesignation.AlternateFunction1,
       cancellationToken: cancellationToken
     );
@@ -57,7 +78,6 @@ public sealed class Gp1Controller :
   /// <inheritdoc/>
   public ValueTask ConfigureAsAdcAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
-      pinDesignation: "ADC1",
       gpDesignation: GpDesignation.AlternateFunction0,
       cancellationToken: cancellationToken
     );
@@ -65,7 +85,6 @@ public sealed class Gp1Controller :
   /// <inheritdoc/>
   public void ConfigureAsAdc(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(
-      pinDesignation: "ADC1",
       gpDesignation: GpDesignation.AlternateFunction0,
       cancellationToken: cancellationToken
     );
@@ -73,7 +92,6 @@ public sealed class Gp1Controller :
   /// <inheritdoc/>
   public ValueTask ConfigureAsClockOutputAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
-      pinDesignation: "Clock Output",
       gpDesignation: GpDesignation.DedicatedFunctionOperation,
       cancellationToken: cancellationToken
     );
@@ -81,7 +99,6 @@ public sealed class Gp1Controller :
   /// <inheritdoc/>
   public void ConfigureAsClockOutput(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(
-      pinDesignation: "Clock Output",
       gpDesignation: GpDesignation.DedicatedFunctionOperation,
       cancellationToken: cancellationToken
     );

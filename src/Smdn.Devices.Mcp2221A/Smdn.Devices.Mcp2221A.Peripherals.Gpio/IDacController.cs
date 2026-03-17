@@ -11,6 +11,7 @@ internal interface IDacController {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
+  /// <seealso cref="GpFunction.Dac"/>
   ValueTask ConfigureAsDacAsync(
     CancellationToken cancellationToken = default
   );
@@ -19,9 +20,11 @@ internal interface IDacController {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
+  /// <seealso cref="GpFunction.Dac"/>
   void ConfigureAsDac(
     CancellationToken cancellationToken = default
   );
+
 #if __FUTURE_VERSION
   int DacValue { set; }
 #endif

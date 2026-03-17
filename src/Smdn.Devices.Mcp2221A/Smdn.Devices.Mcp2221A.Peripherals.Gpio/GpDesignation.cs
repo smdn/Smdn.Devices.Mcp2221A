@@ -12,4 +12,5 @@ internal enum GpDesignation : byte {
   AlternateFunction0 = 0b_000_0_0_010,
   DedicatedFunctionOperation = 0b_000_0_0_001,
   GpioOperation = 0b_000_0_0_000,
+  BitMask = 0b_000_0_0_111,
 }

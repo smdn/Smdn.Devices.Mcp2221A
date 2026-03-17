@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,35 +15,51 @@ public sealed class Gp0Controller : GpController {
   /// </value>
   public override string PinName { get; } = "GP0";
 
+  /// <inheritdoc/>
+  public override GpFunction CurrentFunction => CurrentGpDesignation switch {
+    GpDesignation.GpioOperation => GpFunction.Gpio, // GPIO
+    GpDesignation.DedicatedFunctionOperation => GpFunction.UsbSuspendStatus, // SSPND
+    GpDesignation.AlternateFunction0 => GpFunction.LedOutput, // LED_URX
+    _ => throw new NotSupportedException(),
+  };
+
+  /// <inheritdoc/>
+  public override string CurrentDesignation => CurrentGpDesignation switch {
+    GpDesignation.GpioOperation => "GPIO0",
+    GpDesignation.DedicatedFunctionOperation => "SSPND",
+    GpDesignation.AlternateFunction0 => "LED_URX",
+    _ => throw new NotSupportedException(),
+  };
+
   internal Gp0Controller(Mcp2221ATransceiver transceiver)
     : base(transceiver)
   {
   }
 
+  /// <seealso cref="GpFunction.LedOutput"/>
   public ValueTask ConfigureAsUrxLedOutputAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
-      pinDesignation: "LED_URX",
       gpDesignation: GpDesignation.AlternateFunction0,
       cancellationToken: cancellationToken
     );
 
+  /// <seealso cref="GpFunction.LedOutput"/>
   public void ConfigureAsUrxLedOutput(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(
-      pinDesignation: "LED_URX",
       gpDesignation: GpDesignation.AlternateFunction0,
       cancellationToken: cancellationToken
     );
 
+  /// <seealso cref="GpFunction.UsbSuspendStatus"/>
   public ValueTask ConfigureAsUsbSuspendStatusAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
-      pinDesignation: "SSPND",
       gpDesignation: GpDesignation.DedicatedFunctionOperation,
       cancellationToken: cancellationToken
     );
 
+  /// <seealso cref="GpFunction.UsbSuspendStatus"/>
   public void ConfigureAsUsbSuspendStatus(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(
-      pinDesignation: "SSPND",
       gpDesignation: GpDesignation.DedicatedFunctionOperation,
       cancellationToken: cancellationToken
     );

@@ -11,6 +11,7 @@ internal interface IClockController {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
+  /// <seealso cref="GpFunction.ClockOutput"/>
   ValueTask ConfigureAsClockOutputAsync(
     CancellationToken cancellationToken = default
   );
@@ -19,9 +20,11 @@ internal interface IClockController {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
+  /// <seealso cref="GpFunction.ClockOutput"/>
   void ConfigureAsClockOutput(
     CancellationToken cancellationToken = default
   );
+
 #if __FUTURE_VERSION
   int ClockFrequency { get; set; }
 #endif

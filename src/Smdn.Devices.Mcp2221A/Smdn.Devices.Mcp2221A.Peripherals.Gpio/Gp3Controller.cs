@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,6 +20,24 @@ public sealed class Gp3Controller :
   /// </value>
   public override string PinName { get; } = "GP3";
 
+  /// <inheritdoc/>
+  public override GpFunction CurrentFunction => CurrentGpDesignation switch {
+    GpDesignation.GpioOperation => GpFunction.Gpio, // GPIO
+    GpDesignation.DedicatedFunctionOperation => GpFunction.LedOutput, // LED_I2C
+    GpDesignation.AlternateFunction0 => GpFunction.Adc, // ADC3
+    GpDesignation.AlternateFunction1 => GpFunction.Dac, // DAC2
+    _ => throw new NotSupportedException(),
+  };
+
+  /// <inheritdoc/>
+  public override string CurrentDesignation => CurrentGpDesignation switch {
+    GpDesignation.GpioOperation => "GPIO3",
+    GpDesignation.DedicatedFunctionOperation => "LED_I2C",
+    GpDesignation.AlternateFunction0 => "ADC3",
+    GpDesignation.AlternateFunction1 => "DAC2",
+    _ => throw new NotSupportedException(),
+  };
+
   internal Gp3Controller(Mcp2221ATransceiver transceiver)
     : base(transceiver)
   {
@@ -27,7 +46,6 @@ public sealed class Gp3Controller :
   /// <inheritdoc/>
   public ValueTask ConfigureAsDacAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
-      pinDesignation: "DAC2",
       gpDesignation: GpDesignation.AlternateFunction1,
       cancellationToken: cancellationToken
     );
@@ -35,7 +53,6 @@ public sealed class Gp3Controller :
   /// <inheritdoc/>
   public void ConfigureAsDac(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(
-      pinDesignation: "DAC2",
       gpDesignation: GpDesignation.AlternateFunction1,
       cancellationToken: cancellationToken
     );
@@ -43,7 +60,6 @@ public sealed class Gp3Controller :
   /// <inheritdoc/>
   public ValueTask ConfigureAsAdcAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
-      pinDesignation: "ADC3",
       gpDesignation: GpDesignation.AlternateFunction0,
       cancellationToken: cancellationToken
     );
@@ -51,21 +67,20 @@ public sealed class Gp3Controller :
   /// <inheritdoc/>
   public void ConfigureAsAdc(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(
-      pinDesignation: "ADC3",
       gpDesignation: GpDesignation.AlternateFunction0,
       cancellationToken: cancellationToken
     );
 
+  /// <seealso cref="GpFunction.LedOutput"/>
   public ValueTask ConfigureAsI2cLedOutputAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
-      pinDesignation: "LED_I2C",
       gpDesignation: GpDesignation.DedicatedFunctionOperation,
       cancellationToken: cancellationToken
     );
 
+  /// <seealso cref="GpFunction.LedOutput"/>
   public void ConfigureAsI2cLedOutput(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(
-      pinDesignation: "LED_I2C",
       gpDesignation: GpDesignation.DedicatedFunctionOperation,
       cancellationToken: cancellationToken
     );

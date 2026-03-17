@@ -41,6 +41,7 @@ public interface IGpioController {
   /// the pin operates in a high-impedance state. Note that the MCP2221/MCP2221A does
   /// not support internal pull-up or pull-down resistors.
   /// </remarks>
+  /// <seealso cref="GpFunction.Gpio"/>
   ValueTask ConfigureAsGpioAsync(
     PinMode mode,
     PinValue initialValue,
@@ -71,6 +72,7 @@ public interface IGpioController {
   /// the pin operates in a high-impedance state. Note that the MCP2221/MCP2221A does
   /// not support internal pull-up or pull-down resistors.
   /// </remarks>
+  /// <seealso cref="GpFunction.Gpio"/>
   void ConfigureAsGpio(
     PinMode mode,
     PinValue initialValue,
