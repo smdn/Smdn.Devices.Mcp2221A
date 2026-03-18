@@ -238,6 +238,35 @@ public partial class Mcp2221ATests {
     endPoint.ReadStream.Position = currentPosition;
   }
 
+  internal static void ClearSentCommands(Mcp2221A mcp2221A)
+  {
+    var endPoint = (mcp2221A.HidDevice as PseudoUsbHidDevice)!.EndPoint!;
+
+    endPoint.WriteStream!.Position = 0L;
+  }
+
+  internal static ReadOnlyMemory<byte> GetSentCommand(Mcp2221A mcp2221A)
+  {
+    var endPoint = (mcp2221A.HidDevice as PseudoUsbHidDevice)!.EndPoint!;
+
+    if (endPoint.WriteStream!.Length < ReportLength)
+      throw new InvalidOperationException("report too short");
+
+    var buffer = new byte[ReportLength];
+
+    endPoint.WriteStream.Position = 0L;
+
+#if NET7_0_OR_GREATER
+    endPoint.WriteStream.ReadExactly(buffer.AsSpan(0, ReportLength));
+#else
+    endPoint.WriteStream.Read(buffer, 0, ReportLength);
+#endif
+
+    endPoint.WriteStream.Position = 0L;
+
+    return buffer.AsMemory(1); // except report
+  }
+
   [Test]
   public void CreateAsync()
   {

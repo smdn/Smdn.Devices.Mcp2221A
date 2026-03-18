@@ -29,7 +29,6 @@ See [Smdn.Devices.Mcp2221A examples](examples/Smdn.Devices.Mcp2221A/).
   - [x] GPIO
     - [x] GPIO read/write value
     - [x] GPIO get/set direction
-      - ⚠ Some methods throw NotImplementedException
   - [ ] ADC inputs
   - [ ] DAC outputs
   - [ ] Clock output

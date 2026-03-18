@@ -36,8 +36,12 @@ public class Mcp2221ATransceiverTests {
     Func<Mcp2221A, ValueTask<PinValue>> getGp0ReadAsyncFunc
   )
   {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation (GPIO0)
+
     using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(),
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings
+      ),
       shouldDisposeUsbHidDevice: true
     );
 
@@ -96,8 +100,12 @@ public class Mcp2221ATransceiverTests {
 
     using var serviceProvider = services.BuildServiceProvider();
 
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation (GPIO0)
+
     using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(),
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings
+      ),
       shouldDisposeUsbHidDevice: true,
       serviceProvider: serviceProvider
     );
@@ -157,6 +165,8 @@ public class Mcp2221ATransceiverTests {
     Func<Mcp2221A, ValueTask<PinValue>> getGp0ReadAsyncFunc
   )
   {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation (GPIO0)
+
     var loggerProvider = new FakeLoggerProvider();
     var services = new ServiceCollection();
 
@@ -165,7 +175,9 @@ public class Mcp2221ATransceiverTests {
     using var serviceProvider = services.BuildServiceProvider();
 
     using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(),
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings
+      ),
       shouldDisposeUsbHidDevice: true,
       serviceProvider: serviceProvider
     );

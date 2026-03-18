@@ -105,17 +105,18 @@ partial class Mcp2221AGpioDriver {
   )
   {
     var newGpSettingsArray = ArrayPool<byte>.Shared.Rent(NumberOfGpPins);
-    var newGpSettingsBytes = newGpSettingsArray.AsMemory(0, NumberOfGpPins);
-
-    ConstructNewGpSettingsBytes(
-      destination: newGpSettingsBytes.Span,
-      gp: gp,
-      gpDesignation: gpDesignation,
-      gpioDirection: gpioDirection,
-      gpioValue: gpioValue
-    );
 
     try {
+      var newGpSettingsBytes = newGpSettingsArray.AsMemory(0, NumberOfGpPins);
+
+      ConstructNewGpSettingsBytes(
+        destination: newGpSettingsBytes.Span,
+        gp: gp,
+        gpDesignation: gpDesignation,
+        gpioDirection: gpioDirection,
+        gpioValue: gpioValue
+      );
+
       // attempt to set new GP0-GP3 settings
       _ = await Transceiver.CommandAsync<ReadOnlyMemory<byte>, bool>(
         arg: newGpSettingsBytes,
@@ -141,17 +142,18 @@ partial class Mcp2221AGpioDriver {
   )
   {
     var newGpSettingsArray = ArrayPool<byte>.Shared.Rent(NumberOfGpPins);
-    var newGpSettingsBytes = newGpSettingsArray.AsMemory(0, NumberOfGpPins);
-
-    ConstructNewGpSettingsBytes(
-      destination: newGpSettingsBytes.Span,
-      gp: gp,
-      gpDesignation: gpDesignation,
-      gpioDirection: gpioDirection,
-      gpioValue: gpioValue
-    );
 
     try {
+      var newGpSettingsBytes = newGpSettingsArray.AsMemory(0, NumberOfGpPins);
+
+      ConstructNewGpSettingsBytes(
+        destination: newGpSettingsBytes.Span,
+        gp: gp,
+        gpDesignation: gpDesignation,
+        gpioDirection: gpioDirection,
+        gpioValue: gpioValue
+      );
+
       // attempt to set new GP0-GP3 settings
       _ = Transceiver.Command<ReadOnlyMemory<byte>, bool>(
         arg: newGpSettingsBytes,
@@ -186,10 +188,7 @@ partial class Mcp2221AGpioDriver {
     var bitsGpioDirection = gpioDirection switch {
       PinMode.Input => 0b_000_0_1_000,
       PinMode.Output => 0b_000_0_0_000,
-
-      _ => throw new NotSupportedException(
-        message: $"The GPIO direction cannot be set to either {nameof(PinMode.InputPullUp)} or {nameof(PinMode.InputPullDown)}"
-      ),
+      var unsupportedMode => GpController.ThrowDirectionNotSupportedException(unsupportedMode),
     };
     var bitsGpDesignation = (byte)(gpDesignation & GpDesignation.BitMask);
 

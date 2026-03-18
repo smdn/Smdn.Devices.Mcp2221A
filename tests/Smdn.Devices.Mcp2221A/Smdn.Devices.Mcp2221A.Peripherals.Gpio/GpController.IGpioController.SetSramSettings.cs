@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 using System;
+using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -8,6 +9,10 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using NUnit.Framework;
+
+using Smdn.IO.UsbHid;
+
+using SequenceIs = Smdn.Test.NUnit.Constraints.Buffers.Is;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
@@ -63,8 +68,19 @@ partial class GpControllerTests {
     var currentGpSettings = new byte[4] { InitialGp0Settings, InitialGp1Settings, InitialGp2Settings, InitialGp3Settings };
 
     foreach (var gp in mcp2221A.GpPins) {
+      Mcp2221ATests.AppendPseudoResponse(
+        mcp2221A,
+        // [MCP2221A] 3.1.13 SET SRAM SETTINGS
+        // [1] 0x00: Command completed successfully
+        // [2-63] Don't care
+        "60-00-" + string.Join("-", Enumerable.Repeat("00", 62))
+      );
+      Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+      expectedAssignments[gp.Index] = GpFunction.Gpio;
+
       var expectedOutputValueBits = (bool)initialValue switch {
-        true => (mode == PinMode.Output) ? 0b_000_1_0_000 : 0b_000_0_0_000,
+        true => 0b_000_1_0_000,
         false => 0b_000_0_0_000,
       };
       var expectedDirectionBits = mode switch {
@@ -89,11 +105,23 @@ partial class GpControllerTests {
         "00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00"
       );
 
-      expectedAssignments[gp.Index] = GpFunction.Gpio;
+      var expectedSentCommand = new byte[64];
+
+      expectedSentCommand[0] = 0x60; // [0] SET SRAM SETTINGS
+      // [1-6] don't care
+      expectedSentCommand[7] = 0b10000000; // [7] Alter GPIO configuration = Alter the GP designation (1)
+      expectedSentCommand[8] = currentGpSettings[0]; // [8] GP0 settings
+      expectedSentCommand[9] = currentGpSettings[1]; // [9] GP1 settings
+      expectedSentCommand[10] = currentGpSettings[2]; // [10] GP2 settings
+      expectedSentCommand[11] = currentGpSettings[3]; // [11] GP3 settings
 
       Assert.That(
         async () => await configureAsGpioAsyncFunc(gp, mode, initialValue),
         Throws.Nothing
+      );
+      Assert.That(
+        Mcp2221ATests.GetSentCommand(mcp2221A),
+        SequenceIs.EqualTo(expectedSentCommand)
       );
 
       Assert.That(gp.CurrentFunction, Is.EqualTo(GpFunction.Gpio));
@@ -106,18 +134,21 @@ partial class GpControllerTests {
     }
   }
 
-  [TestCase(PinMode.InputPullUp)]
-  [TestCase(PinMode.InputPullDown)]
-  [TestCase(-1)]
+  private static IEnumerable<PinMode> YieldTestCases_UnsupportedPinMode()
+  {
+    yield return PinMode.InputPullUp;
+    yield return PinMode.InputPullDown;
+    yield return (PinMode)(-1);
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_UnsupportedPinMode))]
   public void ConfigureAsGpioAsync_UnsupportedPinMode(PinMode mode)
     => ConfigureAsGpioSyncOrAsync_UnsupportedPinMode(
       mode,
       static async (gp, m) => await gp.ConfigureAsGpioAsync(mode: m).ConfigureAwait(false)
     );
 
-  [TestCase(PinMode.InputPullUp)]
-  [TestCase(PinMode.InputPullDown)]
-  [TestCase(-1)]
+  [TestCaseSource(nameof(YieldTestCases_UnsupportedPinMode))]
   public void ConfigureAsGpio_UnsupportedPinMode(PinMode mode)
     => ConfigureAsGpioSyncOrAsync_UnsupportedPinMode(
       mode,
@@ -246,165 +277,5 @@ partial class GpControllerTests {
         $"object disposed ({gp.PinName})"
       );
     }
-  }
-
-  [TestCase(0b_000_1_0_010)] // LED_URX
-  [TestCase(0b_000_1_0_001)] // SSPND
-  public void SetMode_GPO_InvalidConfiguration(byte gp0Settings)
-  {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(gp0Settings: gp0Settings),
-      shouldDisposeUsbHidDevice: true
-    );
-
-    Assert.That(
-      () => mcp2221A.GpPin0.SetMode(default),
-      Throws.InvalidOperationException
-    );
-    Assert.That(
-      async () => await mcp2221A.GpPin0.SetModeAsync(default),
-      Throws.InvalidOperationException
-    );
-  }
-
-  [TestCase(0b_000_1_0_010)] // LED_URX
-  [TestCase(0b_000_1_0_001)] // SSPND
-  public void Write_GPO_InvalidConfiguration(byte gp0Settings)
-  {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(gp0Settings: gp0Settings),
-      shouldDisposeUsbHidDevice: true
-    );
-
-    Assert.That(
-      () => mcp2221A.GpPin0.Write(true, default),
-      Throws.InvalidOperationException
-    );
-    Assert.That(
-      async () => await mcp2221A.GpPin0.WriteAsync(true, default),
-      Throws.InvalidOperationException
-    );
-  }
-
-  [TestCase(0b_000_1_0_100)] // IOC
-  [TestCase(0b_000_1_0_011)] // LED_UTX
-  [TestCase(0b_000_1_0_010)] // ADC1
-  [TestCase(0b_000_1_0_001)] // CLK OUT
-  public void SetMode_GP1_InvalidConfiguration(byte gp1Settings)
-  {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(gp1Settings: gp1Settings),
-      shouldDisposeUsbHidDevice: true
-    );
-
-    Assert.That(
-      () => mcp2221A.GpPin1.SetMode(default),
-      Throws.InvalidOperationException
-    );
-    Assert.That(
-      async () => await mcp2221A.GpPin1.SetModeAsync(default),
-      Throws.InvalidOperationException
-    );
-  }
-
-  [TestCase(0b_000_1_0_100)] // IOC
-  [TestCase(0b_000_1_0_011)] // LED_UTX
-  [TestCase(0b_000_1_0_010)] // ADC1
-  [TestCase(0b_000_1_0_001)] // CLK OUT
-  public void Write_GP1_InvalidConfiguration(byte gp1Settings)
-  {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(gp1Settings: gp1Settings),
-      shouldDisposeUsbHidDevice: true
-    );
-
-    Assert.That(
-      () => mcp2221A.GpPin1.Write(true, default),
-      Throws.InvalidOperationException
-    );
-    Assert.That(
-      async () => await mcp2221A.GpPin1.WriteAsync(true, default),
-      Throws.InvalidOperationException
-    );
-  }
-
-  [TestCase(0b_000_1_0_011)] // DAC1
-  [TestCase(0b_000_1_0_010)] // ADC2
-  [TestCase(0b_000_1_0_001)] // USBCFG
-  public void SetMode_GP2_InvalidConfiguration(byte gp2Settings)
-  {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(gp2Settings: gp2Settings),
-      shouldDisposeUsbHidDevice: true
-    );
-
-    Assert.That(
-      () => mcp2221A.GpPin2.SetMode(default),
-      Throws.InvalidOperationException
-    );
-    Assert.That(
-      async () => await mcp2221A.GpPin2.SetModeAsync(default),
-      Throws.InvalidOperationException
-    );
-  }
-
-  [TestCase(0b_000_1_0_011)] // DAC1
-  [TestCase(0b_000_1_0_010)] // ADC2
-  [TestCase(0b_000_1_0_001)] // USBCFG
-  public void Write_GP2_InvalidConfiguration(byte gp2Settings)
-  {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(gp2Settings: gp2Settings),
-      shouldDisposeUsbHidDevice: true
-    );
-
-    Assert.That(
-      () => mcp2221A.GpPin2.Write(true, default),
-      Throws.InvalidOperationException
-    );
-    Assert.That(
-      async () => await mcp2221A.GpPin2.WriteAsync(true, default),
-      Throws.InvalidOperationException
-    );
-  }
-
-  [TestCase(0b_000_1_0_011)] // DAC2
-  [TestCase(0b_000_1_0_010)] // ADC3
-  [TestCase(0b_000_1_0_001)] // LED_I2C
-  public void SetMode_GP3_InvalidConfiguration(byte gp3Settings)
-  {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(gp3Settings: gp3Settings),
-      shouldDisposeUsbHidDevice: true
-    );
-
-    Assert.That(
-      () => mcp2221A.GpPin3.SetMode(default),
-      Throws.InvalidOperationException
-    );
-    Assert.That(
-      async () => await mcp2221A.GpPin3.SetModeAsync(default),
-      Throws.InvalidOperationException
-    );
-  }
-
-  [TestCase(0b_000_1_0_011)] // DAC2
-  [TestCase(0b_000_1_0_010)] // ADC3
-  [TestCase(0b_000_1_0_001)] // LED_I2C
-  public void Write_GP3_InvalidConfiguration(byte gp3Settings)
-  {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(gp3Settings: gp3Settings),
-      shouldDisposeUsbHidDevice: true
-    );
-
-    Assert.That(
-      () => mcp2221A.GpPin3.Write(true, default),
-      Throws.InvalidOperationException
-    );
-    Assert.That(
-      async () => await mcp2221A.GpPin3.WriteAsync(true, default),
-      Throws.InvalidOperationException
-    );
   }
 }
