@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
+using System;
 using System.Device.Gpio;
 using System.Threading;
 using System.Threading.Tasks;
@@ -63,6 +64,88 @@ public abstract partial class GpController {
   /// <seealso cref="CurrentFunction"/>
   public abstract string CurrentDesignation { get; }
 
+  /// <summary>
+  /// Gets the digital logic level of the GP pin obtained during the
+  /// last successful communication.
+  /// </summary>
+  /// <value>
+  /// The <see cref="PinValue"/> captured from the device at the time of
+  /// the last fetch operation.
+  /// </value>
+  /// <remarks>
+  /// <para>
+  /// This property returns a cached value and does not perform new
+  /// I/O communication. To retrieve the most up-to-date status directly from
+  /// the hardware, call
+  /// <see cref="IGpioController.ReadAsync(System.Threading.CancellationToken)"/> or
+  /// <see cref="IGpioController.GetModeAsync(System.Threading.CancellationToken)"/>
+  /// (and their synchronous counterparts).
+  /// </para>
+  /// <para>
+  /// The MCP2221A retrieves the logic levels and I/O modes for all GP pins (GP0-GP3)
+  /// simultaneously in a single command. Therefore, whenever any read or mode-retrieving
+  /// method is executed for any of the GP pins, both <see cref="LastFetchedValue"/>
+  /// and <see cref="LastFetchedMode"/> are updated for all pins at once.
+  /// </para>
+  /// <para>
+  /// When you need to obtain the status of multiple GP pins at the same time,
+  /// you can minimize communication overhead by calling a retrieval method on just one
+  /// pin and then referencing this property for the other pins, rather than calling
+  /// methods on each pin individually.
+  /// </para>
+  /// </remarks>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when the current <see cref="CurrentFunction"/> of the pin is not
+  /// <see cref="GpFunction.Gpio"/>.
+  /// </exception>
+  /// <seealso cref="IGpControllerGroup.FetchGpioStates"/>
+  /// <seealso cref="IGpControllerGroup.FetchGpioStatesAsync"/>
+  /// <seealso cref="Read(CancellationToken)"/>
+  /// <seealso cref="ReadAsync(CancellationToken)"/>
+  [CLSCompliant(false)]
+  public PinValue LastFetchedValue => gpio.GetLastFetchedValue(gp: Index);
+
+  /// <summary>
+  /// Gets the I/O direction (mode) of the GP pin obtained during the
+  /// last successful communication.
+  /// </summary>
+  /// <value>
+  /// The <see cref="PinMode"/> captured from the device at the time of
+  /// the last fetch operation.
+  /// </value>
+  /// <remarks>
+  /// <para>
+  /// This property returns a cached value and does not perform new
+  /// I/O communication. To retrieve the most up-to-date status directly from
+  /// the hardware, call
+  /// <see cref="IGpioController.ReadAsync(System.Threading.CancellationToken)"/> or
+  /// <see cref="IGpioController.GetModeAsync(System.Threading.CancellationToken)"/>
+  /// (and their synchronous counterparts).
+  /// </para>
+  /// <para>
+  /// The MCP2221A retrieves the logic levels and I/O modes for all GP pins (GP0-GP3)
+  /// simultaneously in a single command. Therefore, whenever any read or mode-retrieving
+  /// method is executed for any of the GP pins, both <see cref="LastFetchedValue"/>
+  /// and <see cref="LastFetchedMode"/> are updated for all pins at once.
+  /// </para>
+  /// <para>
+  /// When you need to obtain the status of multiple GP pins at the same time,
+  /// you can minimize communication overhead by calling a retrieval method on just one
+  /// pin and then referencing this property for the other pins, rather than calling
+  /// methods on each pin individually.
+  /// </para>
+  /// </remarks>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when the current <see cref="CurrentFunction"/> of the pin is not
+  /// <see cref="GpFunction.Gpio"/>.
+  /// </exception>
+  /// <seealso cref="IGpControllerGroup.FetchGpioStates"/>
+  /// <seealso cref="IGpControllerGroup.FetchGpioStatesAsync"/>
+  /// <seealso cref="GetMode(CancellationToken)"/>
+  /// <seealso cref="GetModeAsync(CancellationToken)"/>
+  [CLSCompliant(false)]
+  public PinMode LastFetchedMode => gpio.GetLastFetchedDirection(gp: Index);
+
   private protected GpController(Mcp2221AGpioDriver gpio)
   {
     this.gpio = gpio;
@@ -92,28 +175,28 @@ public abstract partial class GpController {
 
   private protected ValueTask ConfigureGpDesignationAsync(
     GpDesignation gpDesignation,
-    PinMode gpioInitialDirection = default,
-    PinValue gpioInitialValue = default,
+    PinMode? gpioDirection = null,
+    PinValue? gpioInitialValue = null,
     CancellationToken cancellationToken = default
   )
     => gpio.ConfigureGpDesignationAsync(
       gp: Index,
       gpDesignation: gpDesignation,
-      gpioDirection: gpioInitialDirection,
+      gpioDirection: gpioDirection,
       gpioValue: gpioInitialValue,
       cancellationToken: cancellationToken
     );
 
   private protected void ConfigureGpDesignation(
     GpDesignation gpDesignation,
-    PinMode gpioInitialDirection = default,
-    PinValue gpioInitialValue = default,
+    PinMode? gpioDirection = null,
+    PinValue? gpioInitialValue = null,
     CancellationToken cancellationToken = default
   )
     => gpio.ConfigureGpDesignation(
       gp: Index,
       gpDesignation: gpDesignation,
-      gpioDirection: gpioInitialDirection,
+      gpioDirection: gpioDirection,
       gpioValue: gpioInitialValue,
       cancellationToken: cancellationToken
     );

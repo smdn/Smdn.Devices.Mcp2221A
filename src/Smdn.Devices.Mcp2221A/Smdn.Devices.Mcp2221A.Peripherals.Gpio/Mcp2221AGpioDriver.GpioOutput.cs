@@ -22,6 +22,14 @@ partial class Mcp2221AGpioDriver {
   // [1 + 2n]: GP<n> direction value
   private readonly Memory<byte> gpioValueBytes = new byte[LengthOfGpioValues];
 
+  private const byte GpioValueLow = 0x00;
+  private const byte GpioValueHigh = 0x01;
+  private const byte GpioValueInvalid = 0xEE; // 0xEE if GP<n> is not set for GPIO operation
+
+  private const byte GpioDirectionOutput = 0x00;
+  private const byte GpioDirectionInput = 0x01;
+  private const byte GpioDirectionInvalid = 0xEF;
+
   private static class SetGpioOutputValuesCommand {
 #pragma warning disable IDE0060 // [IDE0060] Remove unused parameter
     public static void ConstructCommand(
@@ -51,8 +59,7 @@ partial class Mcp2221AGpioDriver {
       // [3 + 4n]: GP<n> output value status
       // [4 + 4n]: Alter GP<n> pin direction (enable/disable)
       // [5 + 4n]: GP<n> pin direction (input or output)
-      const byte ErrorValue = 0xEE; // 0xEE if GP<n> is not set for GPIO operation
-      var indexOfErrorResponse = resp.Slice(2, LengthOfGpioOutputValues).IndexOf(ErrorValue);
+      var indexOfErrorResponse = resp.Slice(2, LengthOfGpioOutputValues).IndexOf(GpioValueInvalid);
 
       if (0 <= indexOfErrorResponse)
         throw new Mcp2221ACommandException($"GP{indexOfErrorResponse / 4} is not set for GPIO operation");
@@ -185,37 +192,118 @@ partial class Mcp2221AGpioDriver {
     }
   }
 
-  internal async ValueTask UpdateCurrentGpioValuesAsync(CancellationToken cancellationToken)
-    => _ = await Transceiver.CommandAsync(
+  /// <inheritdoc/>
+  public async ValueTask FetchGpioStatesAsync(
+    Memory<PinValuePair> pinValuePairs = default,
+    Memory<PinModePair> pinModePairs = default,
+    CancellationToken cancellationToken = default
+  )
+  {
+    _ = await Transceiver.CommandAsync(
       arg: gpioValueBytes,
       cancellationToken: cancellationToken,
       constructCommand: GetGpioValuesCommand.ConstructCommand,
       parseResponse: GetGpioValuesCommand.ParseResponse
     ).ConfigureAwait(false);
 
-  internal void UpdateCurrentGpioValues(CancellationToken cancellationToken)
-    => _ = Transceiver.Command(
+    if (!pinValuePairs.IsEmpty)
+      GetLastFetchedValues(pinValuePairs.Span);
+
+    if (!pinModePairs.IsEmpty)
+      GetLastFetchedModes(pinModePairs.Span);
+  }
+
+  /// <inheritdoc/>
+  public void FetchGpioStates(
+    Span<PinValuePair> pinValuePairs = default,
+    Span<PinModePair> pinModePairs = default,
+    CancellationToken cancellationToken = default
+  )
+  {
+    _ = Transceiver.Command(
       arg: gpioValueBytes,
       cancellationToken: cancellationToken,
       constructCommand: GetGpioValuesCommand.ConstructCommand,
       parseResponse: GetGpioValuesCommand.ParseResponse
     );
 
-  internal PinValue GetCurrentPinValue(int gp)
+    if (!pinValuePairs.IsEmpty)
+      GetLastFetchedValues(pinValuePairs);
+
+    if (!pinModePairs.IsEmpty)
+      GetLastFetchedModes(pinModePairs);
+  }
+
+  private void GetLastFetchedValues(Span<PinValuePair> pinValuePairs)
+  {
+    for (var i = 0; i < pinValuePairs.Length; i++) {
+      ref var p = ref pinValuePairs[i];
+
+      if (p.PinNumber is < 0 or >= NumberOfGpPins)
+        throw new InvalidOperationException($"The GP pin number must be in range of 0 to {NumberOfGpPins}.");
+
+      p = new(
+        p.PinNumber,
+        GetLastFetchedValue(p.PinNumber)
+      );
+    }
+  }
+
+  private void GetLastFetchedModes(Span<PinModePair> pinModePairs)
+  {
+    for (var i = 0; i < pinModePairs.Length; i++) {
+      ref var p = ref pinModePairs[i];
+
+      if (p.PinNumber is < 0 or >= NumberOfGpPins)
+        throw new InvalidOperationException($"The GP pin number must be in range of 0 to {NumberOfGpPins}.");
+
+      p = new(
+        p.PinNumber,
+        GetLastFetchedDirection(p.PinNumber)
+      );
+    }
+  }
+
+  internal PinValue GetLastFetchedValue(int gp)
     // 0 + 2n: GP<n> pin value
     => gpioValueBytes.Span[0 + (gp * 2)] switch {
-      0x00 => PinValue.Low,
-      0x01 => PinValue.High,
-      0xEE => throw new InvalidOperationException($"GP{gp} is not set for GPIO operation"),
+      GpioValueLow => PinValue.Low,
+      GpioValueHigh => PinValue.High,
+      GpioValueInvalid => throw new InvalidOperationException($"GP{gp} is not set for GPIO operation"),
       var unknown => throw new NotSupportedException($"unknown GP pin value: {unknown:X2}"),
     };
 
-  internal PinMode GetCurrentDirection(int gp)
+  internal PinMode GetLastFetchedDirection(int gp)
     // 1 + 2n: GP<n> direction value
     => gpioValueBytes.Span[1 + (gp * 2)] switch {
-      0x00 => PinMode.Output,
-      0x01 => PinMode.Input,
-      0xEF => throw new InvalidOperationException($"GP{gp} is not set for GPIO operation"),
+      GpioDirectionOutput => PinMode.Output,
+      GpioDirectionInput => PinMode.Input,
+      GpioDirectionInvalid => throw new InvalidOperationException($"GP{gp} is not set for GPIO operation"),
       var unknown => throw new NotSupportedException($"unknown GP direction value: {unknown:X2}"),
     };
+
+  /// <summary>
+  /// Synchronize the GPIO values (<see cref="gpioValueBytes"/>) cache based on
+  /// the updated SRAM settings (<see cref="gpSettingsBytes"/>).
+  /// </summary>
+  /// <remarks>
+  /// When using the 'GET SRAM SETTINGS' or 'SET SRAM SETTINGS' commands, setting
+  /// or getting SRAM settings updates not only the designation of GP0-GP3 but
+  /// also the GPIO direction and value.
+  /// Therefore, this method updates the <see cref="gpioValueBytes"/> based on
+  /// the SRAM settings.
+  /// </remarks>
+  private void SyncGpioValues(ReadOnlySpan<byte> gpSettings)
+  {
+    const byte GpSettingsGpioOutputValueMask = 0b_000_1_0_000;
+    const byte GpSettingsGpioDirectionMask = 0b_000_0_1_000;
+
+    for (int gp = 0, i = 0; gp < NumberOfGpPins; gp++) {
+      // 0 + 2n: GP<n> pin value
+      gpioValueBytes.Span[i++] = ((gpSettings[gp] & GpSettingsGpioOutputValueMask) == 0) ? GpioValueLow : GpioValueHigh;
+
+      // 1 + 2n: GP<n> direction value
+      gpioValueBytes.Span[i++] = ((gpSettings[gp] & GpSettingsGpioDirectionMask) == 0) ? GpioDirectionOutput : GpioDirectionInput;
+    }
+  }
 }

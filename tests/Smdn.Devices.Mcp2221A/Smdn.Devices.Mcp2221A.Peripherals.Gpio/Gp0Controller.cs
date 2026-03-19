@@ -42,4 +42,98 @@ public class Gp0ControllerTests {
 
     Assert.That(mcp2221A.GpPin0.IsFunctionSupported(function), Is.EqualTo(expected));
   }
+
+  private static IEnumerable<(byte, PinValue, PinMode, GpFunction, string)> YieldTestCases_Gp0Settings()
+  {
+    yield return (0b_000_0_0_000, PinValue.Low, PinMode.Output, GpFunction.Gpio, "GPIO0");
+    yield return (0b_000_0_0_001, PinValue.Low, PinMode.Output, GpFunction.UsbSuspendStatus, "SSPND");
+    yield return (0b_000_0_0_010, PinValue.Low, PinMode.Output, GpFunction.LedOutput, "LED_URX");
+
+    yield return (0b_000_0_0_000, PinValue.Low, PinMode.Output, GpFunction.Gpio, "GPIO0");
+    yield return (0b_000_0_1_000, PinValue.Low, PinMode.Input, GpFunction.Gpio, "GPIO0");
+    yield return (0b_000_1_0_000, PinValue.High, PinMode.Output, GpFunction.Gpio, "GPIO0");
+    yield return (0b_000_1_1_000, PinValue.High, PinMode.Input, GpFunction.Gpio, "GPIO0");
+
+    yield return (0b_000_1_1_010, PinValue.High, PinMode.Input, GpFunction.LedOutput, "LED_URX");
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_LastFetchedValue_AtStartup()
+  {
+    foreach (var (gp0Settings, pinValue, _, _, _) in YieldTestCases_Gp0Settings()) {
+      yield return new object[] { gp0Settings, pinValue };
+    }
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_LastFetchedValue_AtStartup))]
+  public void LastFetchedValue_AtStartup(byte gp0Settings, PinValue expected)
+  {
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: gp0Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(mcp2221A.GpPin0.LastFetchedValue, Is.EqualTo(expected));
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_LastFetchedMode_AtStartup()
+  {
+    foreach (var (gp0Settings, _, pinMode, _, _) in YieldTestCases_Gp0Settings()) {
+      yield return new object[] { gp0Settings, pinMode };
+    }
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_LastFetchedMode_AtStartup))]
+  public void LastFetchedMode_AtStartup(byte gp0Settings, PinMode expected)
+  {
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: gp0Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(mcp2221A.GpPin0.LastFetchedMode, Is.EqualTo(expected));
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_CurrentFunction_AtStartup()
+  {
+    foreach (var (gp0Settings, _, _, function, _) in YieldTestCases_Gp0Settings()) {
+      yield return new object[] { gp0Settings, function };
+    }
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_CurrentFunction_AtStartup))]
+  public void CurrentFunction_AtStartup(byte gp0Settings, GpFunction expected)
+  {
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: gp0Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(mcp2221A.GpPin0.CurrentFunction, Is.EqualTo(expected));
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_CurrentDesignation_AtStartup()
+  {
+    foreach (var (gp0Settings, _, _, _, designation) in YieldTestCases_Gp0Settings()) {
+      yield return new object[] { gp0Settings, designation };
+    }
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_CurrentDesignation_AtStartup))]
+  public void CurrentDesignation_AtStartup(byte gp0Settings, string expected)
+  {
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: gp0Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(mcp2221A.GpPin0.CurrentDesignation, Is.EqualTo(expected));
+  }
 }

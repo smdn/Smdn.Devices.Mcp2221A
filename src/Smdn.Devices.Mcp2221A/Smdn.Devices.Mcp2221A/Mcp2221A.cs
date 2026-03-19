@@ -32,6 +32,7 @@ public partial class Mcp2221A :
     }
   }
 
+  [CLSCompliant(false)]
   public IGpControllerGroup GpPins {
     get {
       ThrowIfDisposed();

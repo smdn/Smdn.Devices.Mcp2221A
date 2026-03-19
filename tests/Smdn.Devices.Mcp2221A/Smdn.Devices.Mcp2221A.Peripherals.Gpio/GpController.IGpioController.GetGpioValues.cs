@@ -212,7 +212,17 @@ partial class GpControllerTests {
     expectedSentCommand[0] = 0x51; // GET GPIO VALUES
 
     Assert.That(
+      gp.LastFetchedMode,
+      Is.EqualTo(PinMode.Output),
+      "initial mode"
+    );
+
+    Assert.That(
       gp.GetMode(),
+      Is.EqualTo(expectedMode)
+    );
+    Assert.That(
+      gp.LastFetchedMode,
       Is.EqualTo(expectedMode)
     );
     Assert.That(
@@ -226,6 +236,10 @@ partial class GpControllerTests {
 
     Assert.That(
       await gp.GetModeAsync(),
+      Is.EqualTo(expectedMode)
+    );
+    Assert.That(
+      gp.LastFetchedMode,
       Is.EqualTo(expectedMode)
     );
     Assert.That(
@@ -406,6 +420,12 @@ partial class GpControllerTests {
         new(1, PinMode.Input),
         new(2, PinMode.Input),
         new(3, PinMode.Input),
+      ],
+      initialValues: [
+        new(0, PinValue.Low),
+        new(1, PinValue.Low),
+        new(2, PinValue.Low),
+        new(3, PinValue.Low),
       ]
     );
 
@@ -429,7 +449,17 @@ partial class GpControllerTests {
     Mcp2221ATests.ClearSentCommands(mcp2221A);
 
     Assert.That(
+      gp.LastFetchedValue,
+      Is.EqualTo(PinValue.Low),
+      "initial value"
+    );
+
+    Assert.That(
       gp.Read(),
+      Is.EqualTo(expectedValue)
+    );
+    Assert.That(
+      gp.LastFetchedValue,
       Is.EqualTo(expectedValue)
     );
     Assert.That(
@@ -443,6 +473,10 @@ partial class GpControllerTests {
 
     Assert.That(
       await gp.ReadAsync(),
+      Is.EqualTo(expectedValue)
+    );
+    Assert.That(
+      gp.LastFetchedValue,
       Is.EqualTo(expectedValue)
     );
     Assert.That(

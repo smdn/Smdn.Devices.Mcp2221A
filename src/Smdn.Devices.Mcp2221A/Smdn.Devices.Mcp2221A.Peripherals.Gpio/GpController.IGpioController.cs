@@ -37,7 +37,7 @@ partial class GpController : IGpioController {
   )
     => ConfigureGpDesignationAsync(
       gpDesignation: GpDesignation.GpioOperation,
-      gpioInitialDirection: mode,
+      gpioDirection: mode,
       gpioInitialValue: initialValue,
       cancellationToken: cancellationToken
     );
@@ -51,12 +51,14 @@ partial class GpController : IGpioController {
   )
     => ConfigureGpDesignation(
       gpDesignation: GpDesignation.GpioOperation,
-      gpioInitialDirection: mode,
+      gpioDirection: mode,
       gpioInitialValue: initialValue,
       cancellationToken: cancellationToken
     );
 
   /// <inheritdoc/>
+  /// <seealso cref="LastFetchedMode"/>
+  /// <seealso cref="LastFetchedValue"/>
   [CLSCompliant(false)]
   public async ValueTask<PinMode> GetModeAsync(
     CancellationToken cancellationToken = default
@@ -66,12 +68,14 @@ partial class GpController : IGpioController {
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
-    await gpio.UpdateCurrentGpioValuesAsync(cancellationToken).ConfigureAwait(false);
+    await gpio.FetchGpioStatesAsync(default, default, cancellationToken).ConfigureAwait(false);
 
-    return gpio.GetCurrentDirection(gp: Index);
+    return gpio.GetLastFetchedDirection(gp: Index);
   }
 
   /// <inheritdoc/>
+  /// <seealso cref="LastFetchedMode"/>
+  /// <seealso cref="LastFetchedValue"/>
   [CLSCompliant(false)]
   public PinMode GetMode(
     CancellationToken cancellationToken = default
@@ -81,9 +85,9 @@ partial class GpController : IGpioController {
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
-    gpio.UpdateCurrentGpioValues(cancellationToken);
+    gpio.FetchGpioStates(default, default, cancellationToken);
 
-    return gpio.GetCurrentDirection(gp: Index);
+    return gpio.GetLastFetchedDirection(gp: Index);
   }
 
   /// <inheritdoc/>
@@ -132,6 +136,8 @@ partial class GpController : IGpioController {
   }
 
   /// <inheritdoc/>
+  /// <seealso cref="LastFetchedMode"/>
+  /// <seealso cref="LastFetchedValue"/>
   [CLSCompliant(false)]
   public async ValueTask<PinValue> ReadAsync(
     CancellationToken cancellationToken = default
@@ -141,12 +147,14 @@ partial class GpController : IGpioController {
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
-    await gpio.UpdateCurrentGpioValuesAsync(cancellationToken).ConfigureAwait(false);
+    await gpio.FetchGpioStatesAsync(default, default, cancellationToken).ConfigureAwait(false);
 
-    return gpio.GetCurrentPinValue(gp: Index);
+    return gpio.GetLastFetchedValue(gp: Index);
   }
 
   /// <inheritdoc/>
+  /// <seealso cref="LastFetchedMode"/>
+  /// <seealso cref="LastFetchedValue"/>
   [CLSCompliant(false)]
   public PinValue Read(
     CancellationToken cancellationToken = default
@@ -156,9 +164,9 @@ partial class GpController : IGpioController {
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
-    gpio.UpdateCurrentGpioValues(cancellationToken);
+    gpio.FetchGpioStates(default, default, cancellationToken);
 
-    return gpio.GetCurrentPinValue(gp: Index);
+    return gpio.GetLastFetchedValue(gp: Index);
   }
 
   /// <inheritdoc/>

@@ -42,4 +42,99 @@ public class Gp3ControllerTests {
 
     Assert.That(mcp2221A.GpPin3.IsFunctionSupported(function), Is.EqualTo(expected));
   }
+
+  private static IEnumerable<(byte, PinValue, PinMode, GpFunction, string)> YieldTestCases_Gp3Settings()
+  {
+    yield return (0b_000_0_0_000, PinValue.Low, PinMode.Output, GpFunction.Gpio, "GPIO3");
+    yield return (0b_000_0_0_001, PinValue.Low, PinMode.Output, GpFunction.LedOutput, "LED_I2C");
+    yield return (0b_000_0_0_010, PinValue.Low, PinMode.Output, GpFunction.Adc, "ADC3");
+    yield return (0b_000_0_0_011, PinValue.Low, PinMode.Output, GpFunction.Dac, "DAC2");
+
+    yield return (0b_000_0_0_000, PinValue.Low, PinMode.Output, GpFunction.Gpio, "GPIO3");
+    yield return (0b_000_0_1_000, PinValue.Low, PinMode.Input, GpFunction.Gpio, "GPIO3");
+    yield return (0b_000_1_0_000, PinValue.High, PinMode.Output, GpFunction.Gpio, "GPIO3");
+    yield return (0b_000_1_1_000, PinValue.High, PinMode.Input, GpFunction.Gpio, "GPIO3");
+
+    yield return (0b_000_1_1_001, PinValue.High, PinMode.Input, GpFunction.LedOutput, "LED_I2C");
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_LastFetchedValue_AtStartup()
+  {
+    foreach (var (gp3Settings, pinValue, _, _, _) in YieldTestCases_Gp3Settings()) {
+      yield return new object[] { gp3Settings, pinValue };
+    }
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_LastFetchedValue_AtStartup))]
+  public void LastFetchedValue_AtStartup(byte gp3Settings, PinValue expected)
+  {
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp3Settings: gp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(mcp2221A.GpPin3.LastFetchedValue, Is.EqualTo(expected));
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_LastFetchedMode_AtStartup()
+  {
+    foreach (var (gp3Settings, _, pinMode, _, _) in YieldTestCases_Gp3Settings()) {
+      yield return new object[] { gp3Settings, pinMode };
+    }
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_LastFetchedMode_AtStartup))]
+  public void LastFetchedMode_AtStartup(byte gp3Settings, PinMode expected)
+  {
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp3Settings: gp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(mcp2221A.GpPin3.LastFetchedMode, Is.EqualTo(expected));
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_CurrentFunction_AtStartup()
+  {
+    foreach (var (gp3Settings, _, _, function, _) in YieldTestCases_Gp3Settings()) {
+      yield return new object[] { gp3Settings, function };
+    }
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_CurrentFunction_AtStartup))]
+  public void CurrentFunction_AtStartup(byte gp3Settings, GpFunction expected)
+  {
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp3Settings: gp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(mcp2221A.GpPin3.CurrentFunction, Is.EqualTo(expected));
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_CurrentDesignation_AtStartup()
+  {
+    foreach (var (gp3Settings, _, _, _, designation) in YieldTestCases_Gp3Settings()) {
+      yield return new object[] { gp3Settings, designation };
+    }
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_CurrentDesignation_AtStartup))]
+  public void CurrentDesignation_AtStartup(byte gp3Settings, string expected)
+  {
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp3Settings: gp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(mcp2221A.GpPin3.CurrentDesignation, Is.EqualTo(expected));
+  }
 }

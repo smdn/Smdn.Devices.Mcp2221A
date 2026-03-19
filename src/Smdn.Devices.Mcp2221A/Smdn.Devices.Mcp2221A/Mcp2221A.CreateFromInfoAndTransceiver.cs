@@ -26,7 +26,7 @@ partial class Mcp2221A {
       cancellationToken: cancellationToken
     );
 
-    await ((Mcp2221AGpioDriver)mcp2221A.GpPins).UpdateCurrentGpDesignationAsync(
+    await ((Mcp2221AGpioDriver)mcp2221A.GpPins).FetchGpSettingsAsync(
       cancellationToken: cancellationToken
     ).ConfigureAwait(false);
 
@@ -47,7 +47,7 @@ partial class Mcp2221A {
       cancellationToken: cancellationToken
     );
 
-    ((Mcp2221AGpioDriver)mcp2221A.GpPins).UpdateCurrentGpDesignation(
+    ((Mcp2221AGpioDriver)mcp2221A.GpPins).FetchGpSettings(
       cancellationToken: cancellationToken
     );
 

@@ -12,6 +12,14 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 partial class Mcp2221AGpioDriver {
 #pragma warning restore IDE0040
+  private readonly record struct GpSettings(
+    GpDesignation? Designation = default,
+    PinMode? Direction = default,
+    PinValue? OutputValue = default
+  ) {
+    public bool IsNull => Designation == null && Direction == null && OutputValue == null;
+  }
+
   private readonly Memory<byte> gpSettingsBytes = new byte[NumberOfGpPins];
 
   internal GpDesignation GetCurrentGpDesignation(int gp)
@@ -80,30 +88,81 @@ partial class Mcp2221AGpioDriver {
     }
   }
 
-  internal async ValueTask UpdateCurrentGpDesignationAsync(CancellationToken cancellationToken)
-    => _ = await Transceiver.CommandAsync(
+  internal async ValueTask FetchGpSettingsAsync(CancellationToken cancellationToken)
+  {
+    _ = await Transceiver.CommandAsync(
       arg: gpSettingsBytes,
       cancellationToken: cancellationToken,
       constructCommand: GetGpSettingsCommand.ConstructCommand,
       parseResponse: GetGpSettingsCommand.ParseResponse
     ).ConfigureAwait(false);
 
-  internal void UpdateCurrentGpDesignation(CancellationToken cancellationToken)
-    => _ = Transceiver.Command(
+    SyncGpioValues(gpSettingsBytes.Span);
+  }
+
+  internal void FetchGpSettings(CancellationToken cancellationToken)
+  {
+    _ = Transceiver.Command(
       arg: gpSettingsBytes,
       cancellationToken: cancellationToken,
       constructCommand: GetGpSettingsCommand.ConstructCommand,
       parseResponse: GetGpSettingsCommand.ParseResponse
     );
 
-  internal async ValueTask ConfigureGpDesignationAsync(
+    SyncGpioValues(gpSettingsBytes.Span);
+  }
+
+  internal ValueTask ConfigureGpDesignationAsync(
     int gp,
     GpDesignation gpDesignation,
-    PinMode gpioDirection,
-    PinValue gpioValue,
+    PinMode? gpioDirection,
+    PinValue? gpioValue,
+    CancellationToken cancellationToken
+  )
+    => SetGpSettingsAsync(
+      allGpSettings: (
+        Gp0Settings: gp == 0 ? new(gpDesignation, gpioDirection, gpioValue) : default,
+        Gp1Settings: gp == 1 ? new(gpDesignation, gpioDirection, gpioValue) : default,
+        Gp2Settings: gp == 2 ? new(gpDesignation, gpioDirection, gpioValue) : default,
+        Gp3Settings: gp == 3 ? new(gpDesignation, gpioDirection, gpioValue) : default
+      ),
+      cancellationToken: cancellationToken
+    );
+
+  internal void ConfigureGpDesignation(
+    int gp,
+    GpDesignation gpDesignation,
+    PinMode? gpioDirection,
+    PinValue? gpioValue,
+    CancellationToken cancellationToken
+  )
+    => SetGpSettings(
+      allGpSettings: (
+        Gp0Settings: gp == 0 ? new(gpDesignation, gpioDirection, gpioValue) : default,
+        Gp1Settings: gp == 1 ? new(gpDesignation, gpioDirection, gpioValue) : default,
+        Gp2Settings: gp == 2 ? new(gpDesignation, gpioDirection, gpioValue) : default,
+        Gp3Settings: gp == 3 ? new(gpDesignation, gpioDirection, gpioValue) : default
+      ),
+      cancellationToken: cancellationToken
+    );
+
+  private async ValueTask SetGpSettingsAsync(
+    (
+      GpSettings Gp0Settings,
+      GpSettings Gp1Settings,
+      GpSettings Gp2Settings,
+      GpSettings Gp3Settings
+    ) allGpSettings,
     CancellationToken cancellationToken
   )
   {
+    var (gp0Settings, gp1Settings, gp2Settings, gp3Settings) = allGpSettings;
+
+    if (gp0Settings.IsNull && gp1Settings.IsNull && gp2Settings.IsNull && gp3Settings.IsNull)
+      return; // nothing to configure, do nothing and just return
+
+    cancellationToken.ThrowIfCancellationRequested();
+
     var newGpSettingsArray = ArrayPool<byte>.Shared.Rent(NumberOfGpPins);
 
     try {
@@ -111,10 +170,10 @@ partial class Mcp2221AGpioDriver {
 
       ConstructNewGpSettingsBytes(
         destination: newGpSettingsBytes.Span,
-        gp: gp,
-        gpDesignation: gpDesignation,
-        gpioDirection: gpioDirection,
-        gpioValue: gpioValue
+        gp0Settings: gp0Settings,
+        gp1Settings: gp1Settings,
+        gp2Settings: gp2Settings,
+        gp3Settings: gp3Settings
       );
 
       // attempt to set new GP0-GP3 settings
@@ -127,20 +186,31 @@ partial class Mcp2221AGpioDriver {
 
       // save the successfully configured settings as the current state
       newGpSettingsBytes.CopyTo(gpSettingsBytes);
+
+      SyncGpioValues(gpSettingsBytes.Span);
     }
     finally {
       ArrayPool<byte>.Shared.Return(newGpSettingsArray);
     }
   }
 
-  internal void ConfigureGpDesignation(
-    int gp,
-    GpDesignation gpDesignation,
-    PinMode gpioDirection,
-    PinValue gpioValue,
+  private void SetGpSettings(
+    (
+      GpSettings Gp0Settings,
+      GpSettings Gp1Settings,
+      GpSettings Gp2Settings,
+      GpSettings Gp3Settings
+    ) allGpSettings,
     CancellationToken cancellationToken
   )
   {
+    var (gp0Settings, gp1Settings, gp2Settings, gp3Settings) = allGpSettings;
+
+    if (gp0Settings.IsNull && gp1Settings.IsNull && gp2Settings.IsNull && gp3Settings.IsNull)
+      return; // nothing to configure, do nothing and just return
+
+    cancellationToken.ThrowIfCancellationRequested();
+
     var newGpSettingsArray = ArrayPool<byte>.Shared.Rent(NumberOfGpPins);
 
     try {
@@ -148,10 +218,10 @@ partial class Mcp2221AGpioDriver {
 
       ConstructNewGpSettingsBytes(
         destination: newGpSettingsBytes.Span,
-        gp: gp,
-        gpDesignation: gpDesignation,
-        gpioDirection: gpioDirection,
-        gpioValue: gpioValue
+        gp0Settings: gp0Settings,
+        gp1Settings: gp1Settings,
+        gp2Settings: gp2Settings,
+        gp3Settings: gp3Settings
       );
 
       // attempt to set new GP0-GP3 settings
@@ -164,6 +234,8 @@ partial class Mcp2221AGpioDriver {
 
       // save the successfully configured settings as the current state
       newGpSettingsBytes.CopyTo(gpSettingsBytes);
+
+      SyncGpioValues(gpSettingsBytes.Span);
     }
     finally {
       ArrayPool<byte>.Shared.Return(newGpSettingsArray);
@@ -172,32 +244,52 @@ partial class Mcp2221AGpioDriver {
 
   private void ConstructNewGpSettingsBytes(
     Span<byte> destination,
-    int gp,
-    GpDesignation gpDesignation,
-    PinMode gpioDirection,
-    PinValue gpioValue
+    GpSettings gp0Settings,
+    GpSettings gp1Settings,
+    GpSettings gp2Settings,
+    GpSettings gp3Settings
   )
   {
     // copy current GP0-GP3 settings
     gpSettingsBytes.Span.CopyTo(destination);
 
-    // construct new GP<n> settings
-    var bitsGpioOutputValue = (bool)gpioValue
-      ? 0b_000_1_0_000
-      : 0b_000_0_0_000;
-    var bitsGpioDirection = gpioDirection switch {
-      PinMode.Input => 0b_000_0_1_000,
-      PinMode.Output => 0b_000_0_0_000,
-      var unsupportedMode => GpController.ThrowDirectionNotSupportedException(unsupportedMode),
-    };
-    var bitsGpDesignation = (byte)(gpDesignation & GpDesignation.BitMask);
+    ReadOnlySpan<GpSettings> allGpSettings = [
+      gp0Settings,
+      gp1Settings,
+      gp2Settings,
+      gp3Settings
+    ];
 
-    // overwrite GP<n> settings and set GP0-GP3 settings
-    destination[gp] = (byte)(
-      // 0b_000_0_0_000 | // Bit 7-5: Don't care
-      bitsGpioOutputValue | // Bit 4: GPIO Output value
-      bitsGpioDirection | // Bit 3: GPIO Direction
-      bitsGpDesignation // Bit 2-0: GP<n> Designation
-    );
+    // construct new GP0-GP3 settings
+    for (var i = 0; i < NumberOfGpPins; i++) {
+      // construct new GP<n> settings
+      byte gpSettingsBits = 0b_000_0_0_000;
+
+      // Bit 2-0: GP<n> Designation
+      gpSettingsBits |= allGpSettings[i].Designation switch {
+        null => (byte)(destination[i] & (byte)GpDesignation.BitMask), // maintain the current settings
+        GpDesignation designation => (byte)(designation & GpDesignation.BitMask),
+      };
+
+      // Bit 3: GPIO Direction
+      gpSettingsBits |= allGpSettings[i].Direction switch {
+        null => (byte)(destination[i] & 0b_000_0_1_000), // maintain the current settings
+        PinMode.Input => 0b_000_0_1_000,
+        PinMode.Output => 0b_000_0_0_000,
+        PinMode unsupportedMode => (byte)GpController.ThrowDirectionNotSupportedException(unsupportedMode),
+      };
+
+      // Bit 4: GPIO Output value
+      gpSettingsBits |= allGpSettings[i].OutputValue switch {
+        null => (byte)(destination[i] & 0b_000_1_0_000), // maintain the current settings
+        PinValue val => (byte)(val.IsHigh ? 0b_000_1_0_000 : 0b_000_0_0_000),
+      };
+
+      // Bit 7-5: Don't care
+      // gpSettings |= 0b_000_0_0_000;
+
+      // overwrite GP<n> settings
+      destination[i] = gpSettingsBits;
+    }
   }
 }
