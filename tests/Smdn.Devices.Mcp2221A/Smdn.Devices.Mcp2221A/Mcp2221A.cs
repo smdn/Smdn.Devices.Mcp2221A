@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -188,6 +189,54 @@ public partial class Mcp2221ATests {
         return readStream;
       }
     );
+
+  internal static void AppendPseudoResponse(
+    Mcp2221A mcp2221A,
+    params string[] responseSequences
+  )
+    => AppendPseudoResponse(
+      mcp2221A,
+      verifyCommandLength: true,
+      responseSequences
+    );
+
+  internal static void AppendPseudoResponse(
+    Mcp2221A mcp2221A,
+    bool verifyCommandLength,
+    params string[] responseSequences
+  )
+  {
+    static byte[] ToByteArray(string hexByteSequence)
+      => hexByteSequence.Length == 0 ? Array.Empty<byte>() : hexByteSequence.Split('-').Select(hex => Convert.ToByte(hex, 16)).ToArray();
+
+    var endPoint = (mcp2221A.HidDevice as PseudoUsbHidDevice)!.EndPoint;
+
+    if (!endPoint.CanRead)
+      throw new InvalidOperationException("endpoint does not support reading");
+
+    var currentPosition = endPoint.ReadStream!.Position;
+
+    foreach (var sequence in responseSequences) {
+      endPoint.ReadStream.WriteByte(ReportInput);
+
+      var sequenceBytes = ToByteArray(sequence);
+
+      if (verifyCommandLength && sequenceBytes.Length != CommandLength)
+        throw new InvalidCastException($"response sequence must be {CommandLength}-byte length (length: {sequenceBytes.Length}, sequence: '{sequence}')");
+
+      endPoint.ReadStream.Write(
+#if SYSTEM_IO_STREAM_WRITE_READONLYSPAN_OF_BYTE
+        sequenceBytes
+#else
+        sequenceBytes,
+        0,
+        sequenceBytes.Length
+#endif
+      );
+    }
+
+    endPoint.ReadStream.Position = currentPosition;
+  }
 
   [Test]
   public void CreateAsync()

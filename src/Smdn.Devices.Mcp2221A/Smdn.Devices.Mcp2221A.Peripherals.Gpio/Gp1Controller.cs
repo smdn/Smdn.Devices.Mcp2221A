@@ -14,7 +14,11 @@ public sealed class Gp1Controller :
   IClockController
 {
 #pragma warning restore IDE0055
-  private protected override int GpPinNumber => 1;
+  /// <inheritdoc/>
+  /// <value>
+  /// Always <c>1</c>.
+  /// </value>
+  public override int Index { get; } = 1;
 
   /// <inheritdoc/>
   /// <value>
@@ -42,8 +46,8 @@ public sealed class Gp1Controller :
     _ => throw new NotSupportedException(),
   };
 
-  internal Gp1Controller(Mcp2221ATransceiver transceiver)
-    : base(transceiver)
+  internal Gp1Controller(Mcp2221AGpioDriver gpio)
+    : base(gpio)
   {
   }
 

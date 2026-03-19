@@ -7,7 +7,11 @@ using System.Threading.Tasks;
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 public sealed class Gp0Controller : GpController {
-  private protected override int GpPinNumber => 0;
+  /// <inheritdoc/>
+  /// <value>
+  /// Always <c>0</c>.
+  /// </value>
+  public override int Index { get; } = 0;
 
   /// <inheritdoc/>
   /// <value>
@@ -31,8 +35,8 @@ public sealed class Gp0Controller : GpController {
     _ => throw new NotSupportedException(),
   };
 
-  internal Gp0Controller(Mcp2221ATransceiver transceiver)
-    : base(transceiver)
+  internal Gp0Controller(Mcp2221AGpioDriver gpio)
+    : base(gpio)
   {
   }
 

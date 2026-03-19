@@ -13,7 +13,11 @@ public sealed class Gp2Controller :
   IDacController
 {
 #pragma warning restore IDE0055
-  private protected override int GpPinNumber => 2;
+  /// <inheritdoc/>
+  /// <value>
+  /// Always <c>2</c>.
+  /// </value>
+  public override int Index { get; } = 2;
 
   /// <value>
   /// Always <c>GP2</c>.
@@ -38,8 +42,8 @@ public sealed class Gp2Controller :
     _ => throw new NotSupportedException(),
   };
 
-  internal Gp2Controller(Mcp2221ATransceiver transceiver)
-    : base(transceiver)
+  internal Gp2Controller(Mcp2221AGpioDriver gpio)
+    : base(gpio)
   {
   }
 

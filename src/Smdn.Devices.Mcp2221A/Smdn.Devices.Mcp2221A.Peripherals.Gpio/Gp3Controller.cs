@@ -13,7 +13,11 @@ public sealed class Gp3Controller :
   IDacController
 {
 #pragma warning restore IDE0055
-  private protected override int GpPinNumber => 3;
+  /// <inheritdoc/>
+  /// <value>
+  /// Always <c>3</c>.
+  /// </value>
+  public override int Index { get; } = 3;
 
   /// <value>
   /// Always <c>GP3</c>.
@@ -38,8 +42,8 @@ public sealed class Gp3Controller :
     _ => throw new NotSupportedException(),
   };
 
-  internal Gp3Controller(Mcp2221ATransceiver transceiver)
-    : base(transceiver)
+  internal Gp3Controller(Mcp2221AGpioDriver gpio)
+    : base(gpio)
   {
   }
 
