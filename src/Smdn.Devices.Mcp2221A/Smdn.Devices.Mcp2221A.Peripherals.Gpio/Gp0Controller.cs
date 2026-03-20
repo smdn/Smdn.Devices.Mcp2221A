@@ -40,6 +40,14 @@ public sealed class Gp0Controller : GpController {
   {
   }
 
+  private protected override GpDesignation? GetDesignationForFunction(GpFunction function)
+    => function switch {
+      GpFunction.Gpio => GpDesignation.GpioOperation, // GPIO
+      GpFunction.UsbSuspendStatus => GpDesignation.DedicatedFunctionOperation, // SSPND
+      GpFunction.LedOutput => GpDesignation.AlternateFunction0, // LED_URX
+      _ => null,
+    };
+
   /// <seealso cref="GpFunction.LedOutput"/>
   public ValueTask ConfigureAsUrxLedOutputAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(

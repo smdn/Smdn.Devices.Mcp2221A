@@ -68,6 +68,28 @@ public abstract partial class GpController {
     this.gpio = gpio;
   }
 
+  /// <summary>
+  /// Indicates whether the specified GP function is supported by this pin.
+  /// </summary>
+  /// <param name="function">
+  /// The <see cref="GpFunction"/> to check for support.
+  /// </param>
+  /// <returns>
+  /// <see langword="true"/> if the pin supports the specified <paramref name="function"/>;
+  /// otherwise, <see langword="false"/>.
+  /// </returns>
+  /// <remarks>
+  /// <para>
+  /// MCP2221A pins (GP0 to GP3) have different hardware capabilities. While all pins
+  /// support GPIO, certain functions like ADC, DAC, Clock Output, or Interrupt-on-Change
+  /// are exclusive to specific pins.
+  /// </para>
+  /// </remarks>
+  public bool IsFunctionSupported(GpFunction function)
+    => GetDesignationForFunction(function).HasValue;
+
+  private protected abstract GpDesignation? GetDesignationForFunction(GpFunction function);
+
   private protected ValueTask ConfigureGpDesignationAsync(
     GpDesignation gpDesignation,
     PinMode gpioInitialDirection = default,

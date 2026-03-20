@@ -47,6 +47,15 @@ public sealed class Gp2Controller :
   {
   }
 
+  private protected override GpDesignation? GetDesignationForFunction(GpFunction function)
+    => function switch {
+      GpFunction.Gpio => GpDesignation.GpioOperation, // GPIO
+      GpFunction.UsbConfigureStatus => GpDesignation.DedicatedFunctionOperation, // USBCFG
+      GpFunction.Adc => GpDesignation.AlternateFunction0, // ADC2
+      GpFunction.Dac => GpDesignation.AlternateFunction1, // DAC1
+      _ => null,
+    };
+
   /// <inheritdoc/>
   public ValueTask ConfigureAsDacAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(

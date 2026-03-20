@@ -6,6 +6,7 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 /// <summary>
 /// Defines the functions that can be assigned to the General Purpose (GP) pins.
 /// </summary>
+/// <seealso cref="GpController.IsFunctionSupported"/>
 public enum GpFunction {
   /// <summary>
   /// General Purpose Input/Output (GPIO).
@@ -13,6 +14,10 @@ public enum GpFunction {
   /// <remarks>
   /// Supported on: GP0, GP1, GP2, GP3.
   /// </remarks>
+  /// <seealso cref="Mcp2221A.GpPin0"/>
+  /// <seealso cref="Mcp2221A.GpPin1"/>
+  /// <seealso cref="Mcp2221A.GpPin2"/>
+  /// <seealso cref="Mcp2221A.GpPin3"/>
   Gpio,
 
   /// <summary>
@@ -26,6 +31,9 @@ public enum GpFunction {
   /// <item><description>GP3 (ADC3)</description></item>
   /// </list>
   /// </remarks>
+  /// <seealso cref="Mcp2221A.GpPin1"/>
+  /// <seealso cref="Mcp2221A.GpPin2"/>
+  /// <seealso cref="Mcp2221A.GpPin3"/>
   Adc,
 
   /// <summary>
@@ -38,6 +46,8 @@ public enum GpFunction {
   /// <item><description>GP3 (DAC2)</description></item>
   /// </list>
   /// </remarks>
+  /// <seealso cref="Mcp2221A.GpPin2"/>
+  /// <seealso cref="Mcp2221A.GpPin3"/>
   Dac,
 
   /// <summary>
@@ -46,6 +56,7 @@ public enum GpFunction {
   /// <remarks>
   /// Supported on: GP1 (IOC).
   /// </remarks>
+  /// <seealso cref="Mcp2221A.GpPin1"/>
   ExternalInterrupt,
 
   /// <summary>
@@ -59,6 +70,9 @@ public enum GpFunction {
   /// <item><description>GP3 (LED_I2C)</description></item>
   /// </list>
   /// </remarks>
+  /// <seealso cref="Mcp2221A.GpPin0"/>
+  /// <seealso cref="Mcp2221A.GpPin1"/>
+  /// <seealso cref="Mcp2221A.GpPin3"/>
   LedOutput,
 
   /// <summary>
@@ -67,6 +81,7 @@ public enum GpFunction {
   /// <remarks>
   /// Supported on: GP1 (CLK_OUT).
   /// </remarks>
+  /// <seealso cref="Mcp2221A.GpPin1"/>
   ClockOutput,
 
   /// <summary>
@@ -75,6 +90,7 @@ public enum GpFunction {
   /// <remarks>
   /// Supported on: GP0 (SSPND).
   /// </remarks>
+  /// <seealso cref="Mcp2221A.GpPin0"/>
   UsbSuspendStatus,
 
   /// <summary>
@@ -83,5 +99,6 @@ public enum GpFunction {
   /// <remarks>
   /// Supported on: GP2 (USBCFG).
   /// </remarks>
+  /// <seealso cref="Mcp2221A.GpPin2"/>
   UsbConfigureStatus,
 }

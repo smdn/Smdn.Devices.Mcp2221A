@@ -51,6 +51,16 @@ public sealed class Gp1Controller :
   {
   }
 
+  private protected override GpDesignation? GetDesignationForFunction(GpFunction function)
+    => function switch {
+      GpFunction.Gpio => GpDesignation.GpioOperation, // GPIO
+      GpFunction.ClockOutput => GpDesignation.DedicatedFunctionOperation, // CLK OUT
+      GpFunction.Adc => GpDesignation.AlternateFunction0, // ADC1
+      GpFunction.LedOutput => GpDesignation.AlternateFunction1, // LED_UTX
+      GpFunction.ExternalInterrupt => GpDesignation.AlternateFunction2, // IOC
+      _ => null,
+    };
+
   /// <inheritdoc/>
   public ValueTask ConfigureAsExternalInterruptAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
