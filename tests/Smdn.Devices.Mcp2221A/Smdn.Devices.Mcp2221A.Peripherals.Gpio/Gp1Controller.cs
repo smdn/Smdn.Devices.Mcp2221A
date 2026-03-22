@@ -43,31 +43,30 @@ public class Gp1ControllerTests {
     Assert.That(mcp2221A.GpPin1.IsFunctionSupported(function), Is.EqualTo(expected));
   }
 
-  private static IEnumerable<(byte, PinValue, PinMode, GpFunction, string)> YieldTestCases_Gp1Settings()
+  private static IEnumerable<(byte, PinValue?, PinMode?, GpFunction, string)> YieldTestCases_Gp1Settings()
   {
-    yield return (0b_000_0_0_000, PinValue.Low, PinMode.Output, GpFunction.Gpio, "GPIO1");
-    yield return (0b_000_0_0_001, PinValue.Low, PinMode.Output, GpFunction.ClockOutput, "CLK OUT");
-    yield return (0b_000_0_0_010, PinValue.Low, PinMode.Output, GpFunction.Adc, "ADC1");
-    yield return (0b_000_0_0_011, PinValue.Low, PinMode.Output, GpFunction.LedOutput, "LED_UTX");
-    yield return (0b_000_0_0_100, PinValue.Low, PinMode.Output, GpFunction.ExternalInterrupt, "IOC");
+    yield return (0b_000_0_0_001, null, null, GpFunction.ClockOutput, "CLK OUT");
+    yield return (0b_000_0_0_010, null, null, GpFunction.Adc, "ADC1");
+    yield return (0b_000_0_0_011, null, null, GpFunction.LedOutput, "LED_UTX");
+    yield return (0b_000_0_0_100, null, null, GpFunction.ExternalInterrupt, "IOC");
 
     yield return (0b_000_0_0_000, PinValue.Low, PinMode.Output, GpFunction.Gpio, "GPIO1");
     yield return (0b_000_0_1_000, PinValue.Low, PinMode.Input, GpFunction.Gpio, "GPIO1");
     yield return (0b_000_1_0_000, PinValue.High, PinMode.Output, GpFunction.Gpio, "GPIO1");
     yield return (0b_000_1_1_000, PinValue.High, PinMode.Input, GpFunction.Gpio, "GPIO1");
 
-    yield return (0b_000_1_1_011, PinValue.High, PinMode.Input, GpFunction.LedOutput, "LED_UTX");
+    yield return (0b_000_1_1_011, null, null, GpFunction.LedOutput, "LED_UTX");
   }
 
   private static System.Collections.IEnumerable YieldTestCases_LastFetchedValue_AtStartup()
   {
     foreach (var (gp1Settings, pinValue, _, _, _) in YieldTestCases_Gp1Settings()) {
-      yield return new object[] { gp1Settings, pinValue };
+      yield return new object?[] { gp1Settings, pinValue };
     }
   }
 
   [TestCaseSource(nameof(YieldTestCases_LastFetchedValue_AtStartup))]
-  public void LastFetchedValue_AtStartup(byte gp1Settings, PinValue expected)
+  public void LastFetchedValue_AtStartup(byte gp1Settings, PinValue? expected)
   {
     using var mcp2221A = Mcp2221A.Create(
       Mcp2221ATests.CreatePseudoDevice(
@@ -76,18 +75,21 @@ public class Gp1ControllerTests {
       shouldDisposeUsbHidDevice: true
     );
 
-    Assert.That(mcp2221A.GpPin1.LastFetchedValue, Is.EqualTo(expected));
+    if (expected.HasValue)
+      Assert.That(mcp2221A.GpPin1.LastFetchedValue, Is.EqualTo(expected.Value));
+    else
+      Assert.That(() => _ = mcp2221A.GpPin1.LastFetchedValue, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP1"));
   }
 
   private static System.Collections.IEnumerable YieldTestCases_LastFetchedMode_AtStartup()
   {
     foreach (var (gp1Settings, _, pinMode, _, _) in YieldTestCases_Gp1Settings()) {
-      yield return new object[] { gp1Settings, pinMode };
+      yield return new object?[] { gp1Settings, pinMode };
     }
   }
 
   [TestCaseSource(nameof(YieldTestCases_LastFetchedMode_AtStartup))]
-  public void LastFetchedMode_AtStartup(byte gp1Settings, PinMode expected)
+  public void LastFetchedMode_AtStartup(byte gp1Settings, PinMode? expected)
   {
     using var mcp2221A = Mcp2221A.Create(
       Mcp2221ATests.CreatePseudoDevice(
@@ -96,13 +98,16 @@ public class Gp1ControllerTests {
       shouldDisposeUsbHidDevice: true
     );
 
-    Assert.That(mcp2221A.GpPin1.LastFetchedMode, Is.EqualTo(expected));
+    if (expected.HasValue)
+      Assert.That(mcp2221A.GpPin1.LastFetchedMode, Is.EqualTo(expected.Value));
+    else
+      Assert.That(() => _ = mcp2221A.GpPin1.LastFetchedMode, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP1"));
   }
 
   private static System.Collections.IEnumerable YieldTestCases_CurrentFunction_AtStartup()
   {
     foreach (var (gp1Settings, _, _, function, _) in YieldTestCases_Gp1Settings()) {
-      yield return new object[] { gp1Settings, function };
+      yield return new object?[] { gp1Settings, function };
     }
   }
 

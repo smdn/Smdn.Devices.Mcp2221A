@@ -43,30 +43,29 @@ public class Gp2ControllerTests {
     Assert.That(mcp2221A.GpPin2.IsFunctionSupported(function), Is.EqualTo(expected));
   }
 
-  private static IEnumerable<(byte, PinValue, PinMode, GpFunction, string)> YieldTestCases_Gp2Settings()
+  private static IEnumerable<(byte, PinValue?, PinMode?, GpFunction, string)> YieldTestCases_Gp2Settings()
   {
-    yield return (0b_000_0_0_000, PinValue.Low, PinMode.Output, GpFunction.Gpio, "GPIO2");
-    yield return (0b_000_0_0_001, PinValue.Low, PinMode.Output, GpFunction.UsbConfigureStatus, "USBCFG");
-    yield return (0b_000_0_0_010, PinValue.Low, PinMode.Output, GpFunction.Adc, "ADC2");
-    yield return (0b_000_0_0_011, PinValue.Low, PinMode.Output, GpFunction.Dac, "DAC1");
+    yield return (0b_000_0_0_001, null, null, GpFunction.UsbConfigureStatus, "USBCFG");
+    yield return (0b_000_0_0_010, null, null, GpFunction.Adc, "ADC2");
+    yield return (0b_000_0_0_011, null, null, GpFunction.Dac, "DAC1");
 
     yield return (0b_000_0_0_000, PinValue.Low, PinMode.Output, GpFunction.Gpio, "GPIO2");
     yield return (0b_000_0_1_000, PinValue.Low, PinMode.Input, GpFunction.Gpio, "GPIO2");
     yield return (0b_000_1_0_000, PinValue.High, PinMode.Output, GpFunction.Gpio, "GPIO2");
     yield return (0b_000_1_1_000, PinValue.High, PinMode.Input, GpFunction.Gpio, "GPIO2");
 
-    yield return (0b_000_1_1_001, PinValue.High, PinMode.Input, GpFunction.UsbConfigureStatus, "USBCFG");
+    yield return (0b_000_1_1_001, null, null, GpFunction.UsbConfigureStatus, "USBCFG");
   }
 
   private static System.Collections.IEnumerable YieldTestCases_LastFetchedValue_AtStartup()
   {
     foreach (var (gp2Settings, pinValue, _, _, _) in YieldTestCases_Gp2Settings()) {
-      yield return new object[] { gp2Settings, pinValue };
+      yield return new object?[] { gp2Settings, pinValue };
     }
   }
 
   [TestCaseSource(nameof(YieldTestCases_LastFetchedValue_AtStartup))]
-  public void LastFetchedValue_AtStartup(byte gp2Settings, PinValue expected)
+  public void LastFetchedValue_AtStartup(byte gp2Settings, PinValue? expected)
   {
     using var mcp2221A = Mcp2221A.Create(
       Mcp2221ATests.CreatePseudoDevice(
@@ -75,18 +74,21 @@ public class Gp2ControllerTests {
       shouldDisposeUsbHidDevice: true
     );
 
-    Assert.That(mcp2221A.GpPin2.LastFetchedValue, Is.EqualTo(expected));
+    if (expected.HasValue)
+      Assert.That(mcp2221A.GpPin2.LastFetchedValue, Is.EqualTo(expected.Value));
+    else
+      Assert.That(() => _ = mcp2221A.GpPin2.LastFetchedValue, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP2"));
   }
 
   private static System.Collections.IEnumerable YieldTestCases_LastFetchedMode_AtStartup()
   {
     foreach (var (gp2Settings, _, pinMode, _, _) in YieldTestCases_Gp2Settings()) {
-      yield return new object[] { gp2Settings, pinMode };
+      yield return new object?[] { gp2Settings, pinMode };
     }
   }
 
   [TestCaseSource(nameof(YieldTestCases_LastFetchedMode_AtStartup))]
-  public void LastFetchedMode_AtStartup(byte gp2Settings, PinMode expected)
+  public void LastFetchedMode_AtStartup(byte gp2Settings, PinMode? expected)
   {
     using var mcp2221A = Mcp2221A.Create(
       Mcp2221ATests.CreatePseudoDevice(
@@ -95,7 +97,10 @@ public class Gp2ControllerTests {
       shouldDisposeUsbHidDevice: true
     );
 
-    Assert.That(mcp2221A.GpPin2.LastFetchedMode, Is.EqualTo(expected));
+    if (expected.HasValue)
+      Assert.That(mcp2221A.GpPin2.LastFetchedMode, Is.EqualTo(expected.Value));
+    else
+      Assert.That(() => _ = mcp2221A.GpPin2.LastFetchedMode, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP2"));
   }
 
   private static System.Collections.IEnumerable YieldTestCases_CurrentFunction_AtStartup()

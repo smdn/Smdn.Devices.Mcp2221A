@@ -167,11 +167,22 @@ public abstract partial class GpController {
   /// support GPIO, certain functions like ADC, DAC, Clock Output, or Interrupt-on-Change
   /// are exclusive to specific pins.
   /// </para>
+  /// <para>
+  /// Use this method to verify compatibility before calling configuration methods such as
+  /// <see cref="IGpControllerGroup.ConfigureAllGpSettings"/> to avoid a
+  /// <see cref="NotSupportedException"/>.
+  /// </para>
   /// </remarks>
   public bool IsFunctionSupported(GpFunction function)
     => GetDesignationForFunction(function).HasValue;
 
   private protected abstract GpDesignation? GetDesignationForFunction(GpFunction function);
+
+  internal GpDesignation GetDesignationForFunctionOrThrow(GpFunction function)
+    => GetDesignationForFunction(function)
+      ?? throw new NotSupportedException(
+        message: $"{PinName} does not support the GP function '{function}'."
+      );
 
   private protected ValueTask ConfigureGpDesignationAsync(
     GpDesignation gpDesignation,

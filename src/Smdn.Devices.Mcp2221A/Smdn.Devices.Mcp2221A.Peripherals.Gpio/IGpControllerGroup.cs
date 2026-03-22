@@ -8,6 +8,22 @@ using System.Threading.Tasks;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
+/// <summary>
+/// Provides a logical group of GP (General Purpose) pin controllers for the MCP2221A.
+/// </summary>
+/// <remarks>
+/// <para>
+/// This interface treats the four GP pins (<c>GP0</c> to <c>GP3</c>) as a single
+/// unit, providing efficient bulk operations that leverage the MCP2221A's hardware
+/// capabilities. It extends <see cref="IReadOnlyList{GpController}"/>, allowing
+/// indexed access to each GP pin controller.
+/// </para>
+/// <para>
+/// Use this interface when you need to perform atomic status synchronization
+/// (via <see cref="FetchGpioStates"/>) or when you want to access specific pin
+/// controllers through the <see cref="Gp0"/> to <see cref="Gp3"/> properties.
+/// </para>
+/// </remarks>
 [CLSCompliant(false)]
 public interface IGpControllerGroup : IReadOnlyList<GpController> {
   /// <summary>
@@ -45,6 +61,117 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
   /// </value>
   /// <seealso cref="Gp3Controller"/>
   Gp3Controller Gp3 { get; }
+
+  /// <summary>
+  /// Configures all settings for GP pins (GP0-GP3), including functions, modes,
+  /// and initial values, in a single communication.
+  /// </summary>
+  /// <param name="gp0Function">
+  /// The function to assign to GP0. If <see langword="null"/>,
+  /// the current function is maintained.
+  /// </param>
+  /// <param name="gp0Mode">
+  /// The mode for GP0. This is applied only when GP0 is
+  /// set to <see cref="GpFunction.Gpio"/>. Otherwise, it is ignored.
+  /// </param>
+  /// <param name="gp0InitialValue">
+  /// The initial value for GP0. This is applied only when GP0 is
+  /// set to <see cref="GpFunction.Gpio"/>. Otherwise, it is ignored.
+  /// </param>
+  /// <param name="gp1Function">
+  /// The function to assign to GP1. If <see langword="null"/>,
+  /// the current function is maintained.
+  /// </param>
+  /// <param name="gp1Mode">
+  /// The mode for GP1. This is applied only when GP1 is
+  /// set to <see cref="GpFunction.Gpio"/>. Otherwise, it is ignored.
+  /// </param>
+  /// <param name="gp1InitialValue">
+  /// The initial value for GP1. This is applied only when GP1 is
+  /// set to <see cref="GpFunction.Gpio"/>. Otherwise, it is ignored.
+  /// </param>
+  /// <param name="gp2Function">
+  /// The function to assign to GP2. If <see langword="null"/>,
+  /// the current function is maintained.
+  /// </param>
+  /// <param name="gp2Mode">
+  /// The mode for GP2. This is applied only when GP2 is
+  /// set to <see cref="GpFunction.Gpio"/>. Otherwise, it is ignored.
+  /// </param>
+  /// <param name="gp2InitialValue">
+  /// The initial value for GP2. This is applied only when GP2 is
+  /// set to <see cref="GpFunction.Gpio"/>. Otherwise, it is ignored.
+  /// </param>
+  /// <param name="gp3Function">
+  /// The function to assign to GP3. If <see langword="null"/>,
+  /// the current function is maintained.
+  /// </param>
+  /// <param name="gp3Mode">
+  /// The mode for GP3. This is applied only when GP3 is
+  /// set to <see cref="GpFunction.Gpio"/>. Otherwise, it is ignored.
+  /// </param>
+  /// <param name="gp3InitialValue">
+  /// The initial value for GP3. This is applied only when GP3 is
+  /// set to <see cref="GpFunction.Gpio"/>. Otherwise, it is ignored.
+  /// </param>
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// </param>
+  /// <remarks>
+  /// <para>
+  /// If a parameter is <see langword="null"/>, the corresponding setting
+  /// in the device is preserved. Parameters <paramref name="gp0InitialValue"/>-<paramref name="gp3InitialValue"/>
+  /// and <paramref name="gp0Mode"/>-<paramref name="gp3Mode"/> are only effective
+  /// when the pin is configured as <see cref="GpFunction.Gpio"/>. For other
+  /// functions, these parameters behave as if <see langword="null"/> was specified.
+  /// </para>
+  /// <para>
+  /// If all parameters are <see langword="null"/>, the method returns immediately
+  /// without transmitting any command to the device.
+  /// </para>
+  /// </remarks>
+  /// <exception cref="NotSupportedException">
+  /// Thrown when a function is not supported by the specified GP pin.
+  /// </exception>
+  void ConfigureAllGpSettings(
+    GpFunction? gp0Function = default,
+    PinMode? gp0Mode = default,
+    PinValue? gp0InitialValue = default,
+    GpFunction? gp1Function = default,
+    PinMode? gp1Mode = default,
+    PinValue? gp1InitialValue = default,
+    GpFunction? gp2Function = default,
+    PinMode? gp2Mode = default,
+    PinValue? gp2InitialValue = default,
+    GpFunction? gp3Function = default,
+    PinMode? gp3Mode = default,
+    PinValue? gp3InitialValue = default,
+    CancellationToken cancellationToken = default
+  );
+
+  /// <summary>
+  /// Asynchronously configures all settings for GP pins (GP0-GP3)
+  /// in a single communication.
+  /// </summary>
+  /// <inheritdoc cref="ConfigureAllGpSettings(GpFunction?, PinMode?, PinValue?, GpFunction?, PinMode?, PinValue?, GpFunction?, PinMode?, PinValue?, GpFunction?, PinMode?, PinValue?, CancellationToken)"/>
+  /// <returns>
+  /// A <see cref="ValueTask"/> representing the asynchronous operation.
+  /// </returns>
+  ValueTask ConfigureAllGpSettingsAsync(
+    GpFunction? gp0Function = default,
+    PinMode? gp0Mode = default,
+    PinValue? gp0InitialValue = default,
+    GpFunction? gp1Function = default,
+    PinMode? gp1Mode = default,
+    PinValue? gp1InitialValue = default,
+    GpFunction? gp2Function = default,
+    PinMode? gp2Mode = default,
+    PinValue? gp2InitialValue = default,
+    GpFunction? gp3Function = default,
+    PinMode? gp3Mode = default,
+    PinValue? gp3InitialValue = default,
+    CancellationToken cancellationToken = default
+  );
 
   /// <summary>
   /// Fetches the current digital logic levels and I/O modes for all
@@ -123,9 +250,6 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
   /// <seealso cref="GpController.LastFetchedValue"/>
   /// <seealso cref="IGpioController.GetModeAsync"/>
   /// <seealso cref="IGpioController.ReadAsync"/>
-  /// <seealso href="https://www.microchip.com/en-us/product/mcp2221a">
-  /// [MCP2221A] 3.1.12 GET GPIO VALUES
-  /// </seealso>
   ValueTask FetchGpioStatesAsync(
     Memory<PinValuePair> pinValuePairs,
     Memory<PinModePair> pinModePairs,

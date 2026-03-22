@@ -60,11 +60,19 @@ partial class GpControllerTests {
 
     Assert.That(
       () => gp.SetMode(default),
-      Throws.InvalidOperationException
+      Throws
+        .InvalidOperationException
+        .With
+        .Property(nameof(InvalidOperationException.Message))
+        .Contains($"GP{gp.Index}")
     );
     Assert.That(
       async () => await gp.SetModeAsync(default),
-      Throws.InvalidOperationException
+      Throws
+        .InvalidOperationException
+        .With
+        .Property(nameof(InvalidOperationException.Message))
+        .Contains($"GP{gp.Index}")
     );
   }
 
@@ -330,11 +338,19 @@ partial class GpControllerTests {
 
     Assert.That(
       () => gp.Write(true, default),
-      Throws.InvalidOperationException
+      Throws
+        .InvalidOperationException
+        .With
+        .Property(nameof(InvalidOperationException.Message))
+        .Contains($"GP{gp.Index}")
     );
     Assert.That(
       async () => await gp.WriteAsync(true, default),
-      Throws.InvalidOperationException
+      Throws
+        .InvalidOperationException
+        .With
+        .Property(nameof(InvalidOperationException.Message))
+        .Contains($"GP{gp.Index}")
     );
   }
 
@@ -411,7 +427,7 @@ partial class GpControllerTests {
     // [5 + 4n]: GP<n> pin direction: 0x00=output, (any other value)=input
     for (var n = 0; n < 4; n++) {
       expectedSentCommand[2 + 4 * n] = (byte)(n == gp.Index ? 0xFF : 0x00);
-      expectedSentCommand[3 + 4 * n] = (byte)((n == gp.Index) ? ((bool)value ? 0x01 : 0x00) : 0x00);
+      expectedSentCommand[3 + 4 * n] = (byte)((n == gp.Index) ? ((bool)value ? 0xFF : 0x00) : 0x00);
       expectedSentCommand[4 + 4 * n] = 0x00;
       expectedSentCommand[5 + 4 * n] = 0x00;
     }

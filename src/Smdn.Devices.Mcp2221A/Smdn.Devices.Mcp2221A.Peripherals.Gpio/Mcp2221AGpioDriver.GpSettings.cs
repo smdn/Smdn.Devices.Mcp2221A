@@ -121,10 +121,10 @@ partial class Mcp2221AGpioDriver {
   )
     => SetGpSettingsAsync(
       allGpSettings: (
-        Gp0Settings: gp == 0 ? new(gpDesignation, gpioDirection, gpioValue) : default,
-        Gp1Settings: gp == 1 ? new(gpDesignation, gpioDirection, gpioValue) : default,
-        Gp2Settings: gp == 2 ? new(gpDesignation, gpioDirection, gpioValue) : default,
-        Gp3Settings: gp == 3 ? new(gpDesignation, gpioDirection, gpioValue) : default
+        Gp0Settings: gp == 0 ? ConstructGpSettings(gpDesignation, gpioDirection, gpioValue) : default,
+        Gp1Settings: gp == 1 ? ConstructGpSettings(gpDesignation, gpioDirection, gpioValue) : default,
+        Gp2Settings: gp == 2 ? ConstructGpSettings(gpDesignation, gpioDirection, gpioValue) : default,
+        Gp3Settings: gp == 3 ? ConstructGpSettings(gpDesignation, gpioDirection, gpioValue) : default
       ),
       cancellationToken: cancellationToken
     );
@@ -138,13 +138,140 @@ partial class Mcp2221AGpioDriver {
   )
     => SetGpSettings(
       allGpSettings: (
-        Gp0Settings: gp == 0 ? new(gpDesignation, gpioDirection, gpioValue) : default,
-        Gp1Settings: gp == 1 ? new(gpDesignation, gpioDirection, gpioValue) : default,
-        Gp2Settings: gp == 2 ? new(gpDesignation, gpioDirection, gpioValue) : default,
-        Gp3Settings: gp == 3 ? new(gpDesignation, gpioDirection, gpioValue) : default
+        Gp0Settings: gp == 0 ? ConstructGpSettings(gpDesignation, gpioDirection, gpioValue) : default,
+        Gp1Settings: gp == 1 ? ConstructGpSettings(gpDesignation, gpioDirection, gpioValue) : default,
+        Gp2Settings: gp == 2 ? ConstructGpSettings(gpDesignation, gpioDirection, gpioValue) : default,
+        Gp3Settings: gp == 3 ? ConstructGpSettings(gpDesignation, gpioDirection, gpioValue) : default
       ),
       cancellationToken: cancellationToken
     );
+
+  private static GpSettings ConstructGpSettings(
+    GpDesignation gpDesignation,
+    PinMode? gpioDirection,
+    PinValue? gpioValue
+  )
+    => new(
+      Designation: gpDesignation,
+      // applies only when GP<n> is set to GPIO
+      Direction: gpDesignation == GpDesignation.GpioOperation ? gpioDirection : null,
+      // applies only when GP<n> is set to GPIO
+      OutputValue: gpDesignation == GpDesignation.GpioOperation ? gpioValue : null
+    );
+
+  /// <inheritdoc/>
+  public ValueTask ConfigureAllGpSettingsAsync(
+    GpFunction? gp0Function = default,
+    PinMode? gp0Mode = default,
+    PinValue? gp0InitialValue = default,
+    GpFunction? gp1Function = default,
+    PinMode? gp1Mode = default,
+    PinValue? gp1InitialValue = default,
+    GpFunction? gp2Function = default,
+    PinMode? gp2Mode = default,
+    PinValue? gp2InitialValue = default,
+    GpFunction? gp3Function = default,
+    PinMode? gp3Mode = default,
+    PinValue? gp3InitialValue = default,
+    CancellationToken cancellationToken = default
+  )
+    => SetGpSettingsAsync(
+        allGpSettings: ConstructGpSettings(
+          gp0Function,
+          gp0Mode,
+          gp0InitialValue,
+          gp1Function,
+          gp1Mode,
+          gp1InitialValue,
+          gp2Function,
+          gp2Mode,
+          gp2InitialValue,
+          gp3Function,
+          gp3Mode,
+          gp3InitialValue
+        ),
+        cancellationToken: cancellationToken
+      );
+
+  /// <inheritdoc/>
+  public void ConfigureAllGpSettings(
+    GpFunction? gp0Function = default,
+    PinMode? gp0Mode = default,
+    PinValue? gp0InitialValue = default,
+    GpFunction? gp1Function = default,
+    PinMode? gp1Mode = default,
+    PinValue? gp1InitialValue = default,
+    GpFunction? gp2Function = default,
+    PinMode? gp2Mode = default,
+    PinValue? gp2InitialValue = default,
+    GpFunction? gp3Function = default,
+    PinMode? gp3Mode = default,
+    PinValue? gp3InitialValue = default,
+    CancellationToken cancellationToken = default
+  )
+    => SetGpSettings(
+        allGpSettings: ConstructGpSettings(
+          gp0Function,
+          gp0Mode,
+          gp0InitialValue,
+          gp1Function,
+          gp1Mode,
+          gp1InitialValue,
+          gp2Function,
+          gp2Mode,
+          gp2InitialValue,
+          gp3Function,
+          gp3Mode,
+          gp3InitialValue
+        ),
+        cancellationToken: cancellationToken
+      );
+
+  private
+  (
+    GpSettings Gp0Settings,
+    GpSettings Gp1Settings,
+    GpSettings Gp2Settings,
+    GpSettings Gp3Settings
+  )
+  ConstructGpSettings(
+    GpFunction? gp0Function,
+    PinMode? gp0Mode,
+    PinValue? gp0InitialValue,
+    GpFunction? gp1Function,
+    PinMode? gp1Mode,
+    PinValue? gp1InitialValue,
+    GpFunction? gp2Function,
+    PinMode? gp2Mode,
+    PinValue? gp2InitialValue,
+    GpFunction? gp3Function,
+    PinMode? gp3Mode,
+    PinValue? gp3InitialValue
+  )
+  {
+    static GpSettings ConstructGpSettings(
+      GpController gp,
+      GpFunction? gpFunction,
+      PinMode? gpMode,
+      PinValue? gpInitialValue
+    )
+      => gpFunction is { } gpFunc
+        ? new(
+            Designation: gp.GetDesignationForFunctionOrThrow(gpFunc),
+            // applies only when GP<n> is set to GPIO
+            Direction: gpFunc == GpFunction.Gpio ? gpMode : null,
+            // applies only when GP<n> is set to GPIO
+            OutputValue: gpFunc == GpFunction.Gpio ? gpInitialValue : null
+          )
+        : default; // maintains current designation/direction/value
+
+    return (
+      Gp0Settings: ConstructGpSettings(Gp0, gp0Function, gp0Mode, gp0InitialValue),
+      Gp1Settings: ConstructGpSettings(Gp1, gp1Function, gp1Mode, gp1InitialValue),
+      Gp2Settings: ConstructGpSettings(Gp2, gp2Function, gp2Mode, gp2InitialValue),
+      Gp3Settings: ConstructGpSettings(Gp3, gp3Function, gp3Mode, gp3InitialValue)
+    );
+  }
 
   private async ValueTask SetGpSettingsAsync(
     (

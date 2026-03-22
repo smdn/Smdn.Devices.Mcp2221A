@@ -11,6 +11,12 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 #pragma warning disable IDE0040
 
 partial class Mcp2221AGpioDriver {
+  internal static void ThrowIfInvalidGpIndex(int gp)
+  {
+    if (gp is < 0 or >= NumberOfGpPins)
+      throw new InvalidOperationException($"The index of GP pin must be in range of 0 to {NumberOfGpPins - 1} (Specified pin index: {gp}).");
+  }
+
   // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
   private const int LengthOfGpioOutputValues = 4 * NumberOfGpPins;
 
@@ -142,14 +148,18 @@ partial class Mcp2221AGpioDriver {
     destination.Clear();
 
     foreach (var (gp, value) in values) {
+      ThrowIfInvalidGpIndex(gp);
+
       // [0 + 4n]: Alter GP<n> output: (value other than 0)=enable
       destination[0 + (gp * 4)] = 0xFF;
 
       // [1 + 4n]: GP<n> output value: 0x00=L, (any other value)=H
-      destination[1 + (gp * 4)] = (byte)value;
+      destination[1 + (gp * 4)] = (byte)(value.IsLow ? 0x00 : 0xFF);
     }
 
     foreach (var (gp, mode) in modes) {
+      ThrowIfInvalidGpIndex(gp);
+
       // [2 + 4n]: Alter GP<n> pin direction: (value other than 0)=enable
       destination[2 + (gp * 4)] = 0xFF;
 
@@ -239,8 +249,7 @@ partial class Mcp2221AGpioDriver {
     for (var i = 0; i < pinValuePairs.Length; i++) {
       ref var p = ref pinValuePairs[i];
 
-      if (p.PinNumber is < 0 or >= NumberOfGpPins)
-        throw new InvalidOperationException($"The GP pin number must be in range of 0 to {NumberOfGpPins}.");
+      ThrowIfInvalidGpIndex(p.PinNumber);
 
       p = new(
         p.PinNumber,
@@ -254,8 +263,7 @@ partial class Mcp2221AGpioDriver {
     for (var i = 0; i < pinModePairs.Length; i++) {
       ref var p = ref pinModePairs[i];
 
-      if (p.PinNumber is < 0 or >= NumberOfGpPins)
-        throw new InvalidOperationException($"The GP pin number must be in range of 0 to {NumberOfGpPins}.");
+      ThrowIfInvalidGpIndex(p.PinNumber);
 
       p = new(
         p.PinNumber,
@@ -299,11 +307,17 @@ partial class Mcp2221AGpioDriver {
     const byte GpSettingsGpioDirectionMask = 0b_000_0_1_000;
 
     for (int gp = 0, i = 0; gp < NumberOfGpPins; gp++) {
+      var isGpio = (GpDesignation)(gpSettings[gp] & (byte)GpDesignation.BitMask) == GpDesignation.GpioOperation;
+
       // 0 + 2n: GP<n> pin value
-      gpioValueBytes.Span[i++] = ((gpSettings[gp] & GpSettingsGpioOutputValueMask) == 0) ? GpioValueLow : GpioValueHigh;
+      gpioValueBytes.Span[i++] = isGpio
+        ? ((gpSettings[gp] & GpSettingsGpioOutputValueMask) == 0) ? GpioValueLow : GpioValueHigh
+        : GpioValueInvalid;
 
       // 1 + 2n: GP<n> direction value
-      gpioValueBytes.Span[i++] = ((gpSettings[gp] & GpSettingsGpioDirectionMask) == 0) ? GpioDirectionOutput : GpioDirectionInput;
+      gpioValueBytes.Span[i++] = isGpio
+        ? ((gpSettings[gp] & GpSettingsGpioDirectionMask) == 0) ? GpioDirectionOutput : GpioDirectionInput
+        : GpioDirectionInvalid;
     }
   }
 }

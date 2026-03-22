@@ -130,11 +130,19 @@ partial class GpControllerTests {
 
     Assert.That(
       () => _ = gp.GetMode(default),
-      Throws.InvalidOperationException
+      Throws
+        .InvalidOperationException
+        .With
+        .Property(nameof(InvalidOperationException.Message))
+        .Contains($"GP{gp.Index}")
     );
     Assert.That(
       async () => _ = await gp.GetModeAsync(default),
-      Throws.InvalidOperationException
+      Throws
+        .InvalidOperationException
+        .With
+        .Property(nameof(InvalidOperationException.Message))
+        .Contains($"GP{gp.Index}")
     );
   }
 
@@ -290,11 +298,19 @@ partial class GpControllerTests {
 
     Assert.That(
       () => _ = gp.Read(default),
-      Throws.InvalidOperationException
+      Throws
+        .InvalidOperationException
+        .With
+        .Property(nameof(InvalidOperationException.Message))
+        .Contains($"GP{gp.Index}")
     );
     Assert.That(
       async () => _ = await gp.ReadAsync(default),
-      Throws.InvalidOperationException
+      Throws
+        .InvalidOperationException
+        .With
+        .Property(nameof(InvalidOperationException.Message))
+        .Contains($"GP{gp.Index}")
     );
   }
 
