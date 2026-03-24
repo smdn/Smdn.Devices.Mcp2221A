@@ -765,4 +765,367 @@ partial class Mcp2221AGpioDriverTests {
       SequenceIs.EqualTo(expectedSentCommand)
     );
   }
+
+  [Test]
+  public void ApplyGpioStatesAsync_Disposed()
+    => ApplyGpioStatesSyncOrAsync_Disposed(
+      static async gpPins => await gpPins.ApplyGpioStatesAsync(default, default, default).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void ApplyGpioStates_Disposed()
+    => ApplyGpioStatesSyncOrAsync_Disposed(
+      static gpPins => {
+        gpPins.ApplyGpioStates(default, default, default);
+        return default;
+      }
+    );
+
+  private void ApplyGpioStatesSyncOrAsync_Disposed(
+    Func<IGpControllerGroup, ValueTask> applyGpioStatesAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    mcp2221A.Dispose();
+
+    Assert.That(
+      async () => await applyGpioStatesAsyncFunc(mcp2221A.GpPins),
+      Throws.TypeOf<ObjectDisposedException>()
+    );
+  }
+
+  [Test]
+  public void ApplyGpioStatesAsync_CancellationRequested()
+    => ApplyGpioStatesSyncOrAsync_CancellationRequested(
+      static async (gpPins, ct) => await gpPins.ApplyGpioStatesAsync(default, default, ct).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void ApplyGpioStates_CancellationRequested()
+    => ApplyGpioStatesSyncOrAsync_CancellationRequested(
+      static (gpPins, ct) => {
+        gpPins.ApplyGpioStates(default, default, ct);
+        return default;
+      }
+    );
+
+  private void ApplyGpioStatesSyncOrAsync_CancellationRequested(
+    Func<IGpControllerGroup, CancellationToken, ValueTask> applyGpioStatesAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+    using var cts = new CancellationTokenSource();
+
+    cts.Cancel();
+
+    // command should not be sent
+    // Mcp2221ATests.AppendPseudoResponse(...);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await applyGpioStatesAsyncFunc(mcp2221A.GpPins, cts.Token),
+      Throws
+        .TypeOf<OperationCanceledException>()
+        .With
+        .Property(nameof(OperationCanceledException.CancellationToken))
+        .EqualTo(cts.Token)
+    );
+
+    Assert.That(
+      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+  }
+
+  [Test]
+  public void ApplyGpioStatesAsync_Empty()
+    => ApplyGpioStatesSyncOrAsync_Empty(
+      static async gpPins => await gpPins.ApplyGpioStatesAsync(default, default).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void ApplyGpioStates_Empty()
+    => ApplyGpioStatesSyncOrAsync_Empty(
+      static gpPins => {
+        gpPins.ApplyGpioStates(default, default);
+        return default;
+      }
+    );
+
+  private void ApplyGpioStatesSyncOrAsync_Empty(
+    Func<IGpControllerGroup, ValueTask> applyGpioStatesAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_1_0_000; // HIGH - OUTPUT - GPIO operation (GPIO0)
+    const byte InitialGp1Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO1)
+    const byte InitialGp2Settings = 0b_000_1_0_000; // HIGH - OUTPUT - GPIO operation (GPIO2)
+    const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
+
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+      // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
+    var setGpioOutputValuesResponse = string.Concat(
+      "50-00-",
+      "00-00-00-00-",
+      "00-00-00-00-",
+      "00-00-00-00-",
+      "00-00-00-00-",
+      string.Join("-", Enumerable.Repeat("00", 64 - 18))
+    );
+
+    Mcp2221ATests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64]; // [1-64]: don't care
+
+    expectedSentCommand[0] = 0x50; // SET GPIO OUTPUT VALUES
+    expectedSentCommand[1] = 0x00; // Command completed successfully
+
+    Assert.That(
+      async () => await applyGpioStatesAsyncFunc(mcp2221A.GpPins),
+      Throws.Nothing
+    );
+    Assert.That(
+      Mcp2221ATests.GetSentCommand(mcp2221A),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+    Assert.That(mcp2221A.GpPin0.LastFetchedValue, Is.EqualTo(PinValue.High), $"internal cache must not be changed (GP0)");
+    Assert.That(mcp2221A.GpPin1.LastFetchedValue, Is.EqualTo(PinValue.Low), $"internal cache must not be changed (GP1)");
+    Assert.That(mcp2221A.GpPin2.LastFetchedValue, Is.EqualTo(PinValue.High), $"internal cache must not be changed (GP2)");
+    Assert.That(mcp2221A.GpPin3.LastFetchedValue, Is.EqualTo(PinValue.Low), $"internal cache must not be changed (GP3)");
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_ApplyGpioStatesSyncOrAsync_NotSetForGpioOperation()
+  {
+    // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
+    // [0 + 4n]: Alter GP<n> output: (value other than 0)=enable
+    // [1 + 4n]: GP<n> output value: 0x00=L, (any other value)=H
+    // [2 + 4n]: Alter GP<n> pin direction: (value other than 0)=enable
+    // [3 + 4n]: GP<n> pin direction: 0x00=output, (any other value)=input
+
+    const byte GpLO = 0x00; // GP<n> pin value: LOW
+    const byte GpHI = 0x01; // GP<n> pin value: HIGH
+    const byte GpOP = 0x00; // GP<n> direction value: OUTPUT
+    const byte GpIP = 0x01; // GP<n> direction value: INPUT
+    const byte GpEE = 0xEE; // GP<n> pin/direction value: GP<n> is not set for GPIO operation
+    const byte Gp00 = 0x00; // Alter GP<n> output/pin direction: disable
+    const byte GpFF = 0xFF; // Alter GP<n> output/pin direction: enable
+
+    static byte[] Gp0(byte alterOutput, byte output, byte alterDirection, byte direction) => [alterOutput, output, alterDirection, direction];
+    static byte[] Gp1(byte alterOutput, byte output, byte alterDirection, byte direction) => [alterOutput, output, alterDirection, direction];
+    static byte[] Gp2(byte alterOutput, byte output, byte alterDirection, byte direction) => [alterOutput, output, alterDirection, direction];
+    static byte[] Gp3(byte alterOutput, byte output, byte alterDirection, byte direction) => [alterOutput, output, alterDirection, direction];
+    static byte[] GpioOutputValues(ReadOnlySpan<byte> gp0, ReadOnlySpan<byte> gp1, ReadOnlySpan<byte> gp2, ReadOnlySpan<byte> gp3)
+      => [.. gp0, .. gp1, .. gp2, .. gp3];
+    static byte[] GpioOutputResponse(ReadOnlySpan<byte> gp0, ReadOnlySpan<byte> gp1, ReadOnlySpan<byte> gp2, ReadOnlySpan<byte> gp3)
+      => [.. gp0, .. gp1, .. gp2, .. gp3];
+
+#pragma warning disable CA1825
+    // InvalidOperationException will be thrown
+    yield return new object?[] {
+      new PinValuePair[] { new(0, PinValue.High) },
+      new PinModePair[] { },
+      GpioOutputResponse(Gp0(GpFF, GpEE, Gp00, GpOP), Gp1(Gp00, GpHI, Gp00, GpOP), Gp2(Gp00, GpHI, Gp00, GpOP), Gp3(Gp00, GpHI, Gp00, GpOP)),
+      GpioOutputValues(Gp0(0xFF, 0xFF, 0x00, 0x00), Gp1(0x00, 0x00, 0x00, 0x00), Gp2(0x00, 0x00, 0x00, 0x00), Gp3(0x00, 0x00, 0x00, 0x00)),
+      0
+    };
+    yield return new object?[] {
+      new PinValuePair[] { },
+      new PinModePair[] { new(0, PinMode.Input) },
+      GpioOutputResponse(Gp0(Gp00, GpHI, GpFF, GpEE), Gp1(Gp00, GpHI, Gp00, GpOP), Gp2(Gp00, GpHI, Gp00, GpOP), Gp3(Gp00, GpHI, Gp00, GpOP)),
+      GpioOutputValues(Gp0(0x00, 0x00, 0xFF, 0xFF), Gp1(0x00, 0x00, 0x00, 0x00), Gp2(0x00, 0x00, 0x00, 0x00), Gp3(0x00, 0x00, 0x00, 0x00)),
+      0
+    };
+    yield return new object?[] {
+      new PinValuePair[] { new(1, PinValue.High) },
+      new PinModePair[] { },
+      GpioOutputResponse(Gp0(Gp00, GpHI, Gp00, GpOP), Gp1(GpFF, GpEE, Gp00, GpOP), Gp2(Gp00, GpHI, Gp00, GpOP), Gp3(Gp00, GpHI, Gp00, GpOP)),
+      GpioOutputValues(Gp0(0x00, 0x00, 0x00, 0x00), Gp1(0xFF, 0xFF, 0x00, 0x00), Gp2(0x00, 0x00, 0x00, 0x00), Gp3(0x00, 0x00, 0x00, 0x00)),
+      1
+    };
+    yield return new object?[] {
+      new PinValuePair[] { },
+      new PinModePair[] { new(1, PinMode.Input) },
+      GpioOutputResponse(Gp0(Gp00, GpHI, Gp00, GpOP), Gp1(Gp00, GpHI, GpFF, GpEE), Gp2(Gp00, GpHI, Gp00, GpOP), Gp3(Gp00, GpHI, Gp00, GpOP)),
+      GpioOutputValues(Gp0(0x00, 0x00, 0x00, 0x00), Gp1(0x00, 0x00, 0xFF, 0xFF), Gp2(0x00, 0x00, 0x00, 0x00), Gp3(0x00, 0x00, 0x00, 0x00)),
+      1
+    };
+    yield return new object?[] {
+      new PinValuePair[] { new(2, PinValue.High) },
+      new PinModePair[] { },
+      GpioOutputResponse(Gp0(Gp00, GpHI, Gp00, GpOP), Gp1(Gp00, GpHI, Gp00, GpOP), Gp2(GpFF, GpEE, Gp00, GpOP), Gp3(Gp00, GpHI, Gp00, GpOP)),
+      GpioOutputValues(Gp0(0x00, 0x00, 0x00, 0x00), Gp1(0x00, 0x00, 0x00, 0x00), Gp2(0xFF, 0xFF, 0x00, 0x00), Gp3(0x00, 0x00, 0x00, 0x00)),
+      2
+    };
+    yield return new object?[] {
+      new PinValuePair[] { },
+      new PinModePair[] { new(2, PinMode.Input) },
+      GpioOutputResponse(Gp0(Gp00, GpHI, Gp00, GpOP), Gp1(Gp00, GpHI, Gp00, GpOP), Gp2(Gp00, GpHI, GpFF, GpEE), Gp3(Gp00, GpHI, Gp00, GpOP)),
+      GpioOutputValues(Gp0(0x00, 0x00, 0x00, 0x00), Gp1(0x00, 0x00, 0x00, 0x00), Gp2(0x00, 0x00, 0xFF, 0xFF), Gp3(0x00, 0x00, 0x00, 0x00)),
+      2
+    };
+    yield return new object?[] {
+      new PinValuePair[] { new(3, PinValue.High) },
+      new PinModePair[] { },
+      GpioOutputResponse(Gp0(Gp00, GpHI, Gp00, GpOP), Gp1(Gp00, GpHI, Gp00, GpOP), Gp2(Gp00, GpHI, Gp00, GpOP), Gp3(GpFF, GpEE, Gp00, GpOP)),
+      GpioOutputValues(Gp0(0x00, 0x00, 0x00, 0x00), Gp1(0x00, 0x00, 0x00, 0x00), Gp2(0x00, 0x00, 0x00, 0x00), Gp3(0xFF, 0xFF, 0x00, 0x00)),
+      3
+    };
+    yield return new object?[] {
+      new PinValuePair[] { },
+      new PinModePair[] { new(3, PinMode.Input) },
+      GpioOutputResponse(Gp0(Gp00, GpHI, Gp00, GpOP), Gp1(Gp00, GpHI, Gp00, GpOP), Gp2(Gp00, GpHI, Gp00, GpOP), Gp3(Gp00, GpHI, GpFF, GpEE)),
+      GpioOutputValues(Gp0(0x00, 0x00, 0x00, 0x00), Gp1(0x00, 0x00, 0x00, 0x00), Gp2(0x00, 0x00, 0x00, 0x00), Gp3(0x00, 0x00, 0xFF, 0xFF)),
+      3
+    };
+
+    // no exception will be thrown
+    yield return new object?[] {
+      new PinValuePair[] { },
+      new PinModePair[] { },
+      GpioOutputResponse(Gp0(Gp00, GpEE, Gp00, GpEE), Gp1(Gp00, GpEE, Gp00, GpEE), Gp2(Gp00, GpEE, Gp00, GpEE), Gp3(Gp00, GpEE, Gp00, GpEE)),
+      GpioOutputValues(Gp0(0x00, 0x00, 0x00, 0x00), Gp1(0x00, 0x00, 0x00, 0x00), Gp2(0x00, 0x00, 0x00, 0x00), Gp3(0x00, 0x00, 0x00, 0x00)),
+      null
+    };
+    yield return new object?[] {
+      new PinValuePair[] { new(1, PinValue.High), new(2, PinValue.Low), new(3, PinValue.High) },
+      new PinModePair[] { new(1, PinMode.Output), new(2, PinMode.Input), new(3, PinMode.Output) },
+      GpioOutputResponse(Gp0(Gp00, GpEE, Gp00, GpEE), Gp1(GpFF, GpHI, GpFF, GpOP), Gp2(GpFF, GpLO, GpFF, GpIP), Gp3(GpFF, GpHI, GpFF, GpOP)),
+      GpioOutputValues(Gp0(0x00, 0x00, 0x00, 0x00), Gp1(0xFF, 0xFF, 0xFF, 0x00), Gp2(0xFF, 0x00, 0xFF, 0xFF), Gp3(0xFF, 0xFF, 0xFF, 0x00)),
+      null
+    };
+    yield return new object?[] {
+      new PinValuePair[] { new(0, PinValue.Low), new(2, PinValue.Low), new(3, PinValue.High) },
+      new PinModePair[] { new(0, PinMode.Input), new(2, PinMode.Input), new(3, PinMode.Output) },
+      GpioOutputResponse(Gp0(GpFF, GpLO, GpFF, GpIP), Gp1(Gp00, GpEE, Gp00, GpEE), Gp2(GpFF, GpLO, GpFF, GpIP), Gp3(GpFF, GpHI, GpFF, GpOP)),
+      GpioOutputValues(Gp0(0xFF, 0x00, 0xFF, 0xFF), Gp1(0x00, 0x00, 0x00, 0x00), Gp2(0xFF, 0x00, 0xFF, 0xFF), Gp3(0xFF, 0xFF, 0xFF, 0x00)),
+      null
+    };
+    yield return new object?[] {
+      new PinValuePair[] { new(0, PinValue.Low), new(1, PinValue.High), new(3, PinValue.High) },
+      new PinModePair[] { new(0, PinMode.Input), new(1, PinMode.Output), new(3, PinMode.Output) },
+      GpioOutputResponse(Gp0(GpFF, GpLO, GpFF, GpIP), Gp1(GpFF, GpHI, GpFF, GpOP), Gp2(GpFF, Gp00, GpEE, Gp00), Gp3(GpEE, GpHI, GpFF, GpOP)),
+      GpioOutputValues(Gp0(0xFF, 0x00, 0xFF, 0xFF), Gp1(0xFF, 0xFF, 0xFF, 0x00), Gp2(0x00, 0x00, 0x00, 0x00), Gp3(0xFF, 0xFF, 0xFF, 0x00)),
+      null
+    };
+    yield return new object?[] {
+      new PinValuePair[] { new(0, PinValue.Low), new(1, PinValue.High), new(2, PinValue.Low) },
+      new PinModePair[] { new(0, PinMode.Input), new(1, PinMode.Output), new(2, PinMode.Input) },
+      GpioOutputResponse(Gp0(GpFF, GpLO, GpFF, GpIP), Gp1(GpFF, GpHI, GpFF, GpOP), Gp2(GpFF, GpLO, GpFF, GpIP), Gp3(Gp00, GpEE, Gp00, GpEE)),
+      GpioOutputValues(Gp0(0xFF, 0x00, 0xFF, 0xFF), Gp1(0xFF, 0xFF, 0xFF, 0x00), Gp2(0xFF, 0x00, 0xFF, 0xFF), Gp3(0x00, 0x00, 0x00, 0x00)),
+      null
+    };
+#pragma warning restore CA1825
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_ApplyGpioStatesSyncOrAsync_NotSetForGpioOperation))]
+  public void ApplyGpioStatesAsync_NotSetForGpioOperation(
+    PinValuePair[] pinValuePairsToApply,
+    PinModePair[] pinModePairsToApply,
+    byte[] pinAndDirectionValuesOfSetGpioOutputValuesResponse,
+    byte[] gpioOutputsInExpectedSentCommand,
+    int? expectedGpIndexInThrownException
+  )
+    => ApplyGpioStatesSyncOrAsync_NotSetForGpioOperation(
+      pinValuePairsToApply,
+      pinModePairsToApply,
+      pinAndDirectionValuesOfSetGpioOutputValuesResponse,
+      gpioOutputsInExpectedSentCommand,
+      expectedGpIndexInThrownException,
+      static async (gpPins, pinValuePairsToApply, pinModePairsToApply)
+        => await gpPins.ApplyGpioStatesAsync(pinValuePairsToApply, pinModePairsToApply).ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_ApplyGpioStatesSyncOrAsync_NotSetForGpioOperation))]
+  public void ApplyGpioStates_NotSetForGpioOperation(
+    PinValuePair[] pinValuePairsToApply,
+    PinModePair[] pinModePairsToApply,
+    byte[] pinAndDirectionValuesOfSetGpioOutputValuesResponse,
+    byte[] gpioOutputsInExpectedSentCommand,
+    int? expectedGpIndexInThrownException
+  )
+    => ApplyGpioStatesSyncOrAsync_NotSetForGpioOperation(
+      pinValuePairsToApply,
+      pinModePairsToApply,
+      pinAndDirectionValuesOfSetGpioOutputValuesResponse,
+      gpioOutputsInExpectedSentCommand,
+      expectedGpIndexInThrownException,
+      static (gpPins, pinValuePairsToApply, pinModePairsToApply) => {
+        gpPins.ApplyGpioStates(pinValuePairsToApply.Span, pinModePairsToApply.Span);
+        return default;
+      }
+    );
+
+  private void ApplyGpioStatesSyncOrAsync_NotSetForGpioOperation(
+    PinValuePair[] pinValuePairsToApply,
+    PinModePair[] pinModePairsToApply,
+    byte[] pinAndDirectionValuesOfSetGpioOutputValuesResponse,
+    byte[] gpioOutputsInExpectedSentCommand,
+    int? expectedGpIndexInThrownException,
+    Func<IGpControllerGroup, Memory<PinValuePair>, Memory<PinModePair>, ValueTask> applyGpioStatesAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO0)
+    const byte InitialGp1Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO1)
+    const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
+    const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
+
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
+    var setGpioOutputValuesResponse = string.Concat(
+      "50-00-",
+      BitConverter.ToString(pinAndDirectionValuesOfSetGpioOutputValuesResponse),
+      "-",
+      string.Join("-", Enumerable.Repeat("00", 64 - 18))
+    );
+
+    Mcp2221ATests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64];
+
+    expectedSentCommand[0] = 0x50; // SET GPIO OUTPUT VALUES
+    expectedSentCommand[1] = 0x00; // Command completed successfully
+    gpioOutputsInExpectedSentCommand.CopyTo(expectedSentCommand.AsSpan(2, 16));
+
+    Assert.That(
+      async () => await applyGpioStatesAsyncFunc(mcp2221A.GpPins, pinValuePairsToApply, pinModePairsToApply),
+      expectedGpIndexInThrownException.HasValue
+        ? Throws
+          .TypeOf<InvalidOperationException>()
+          .With
+          .Property(nameof(InvalidOperationException.Message))
+          .Contains($"GP{expectedGpIndexInThrownException.Value}")
+        : Throws.Nothing
+    );
+    Assert.That(
+      Mcp2221ATests.GetSentCommand(mcp2221A),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+  }
 }

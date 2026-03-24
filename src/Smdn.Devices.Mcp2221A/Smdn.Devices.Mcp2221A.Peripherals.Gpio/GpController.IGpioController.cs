@@ -106,9 +106,9 @@ partial class GpController : IGpioController {
     try {
       modes[0] = new(Index, mode);
 
-      await gpio.SetGpioOutputValuesAsync(
-        values: default,
-        modes: modes.AsMemory(0, 1),
+      await gpio.ApplyGpioStatesAsync(
+        pinValuePairs: default,
+        pinModePairs: modes.AsMemory(0, 1),
         cancellationToken: cancellationToken
       ).ConfigureAwait(false);
     }
@@ -128,9 +128,9 @@ partial class GpController : IGpioController {
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
-    gpio.SetGpioOutputValues(
-      values: default,
-      modes: [new(Index, mode)],
+    gpio.ApplyGpioStates(
+      pinValuePairs: default,
+      pinModePairs: [new(Index, mode)],
       cancellationToken: cancellationToken
     );
   }
@@ -185,9 +185,9 @@ partial class GpController : IGpioController {
     try {
       values[0] = new(Index, value);
 
-      await gpio.SetGpioOutputValuesAsync(
-        values: values.AsMemory(0, 1),
-        modes: default,
+      await gpio.ApplyGpioStatesAsync(
+        pinValuePairs: values.AsMemory(0, 1),
+        pinModePairs: default,
         cancellationToken: cancellationToken
       ).ConfigureAwait(false);
     }
@@ -207,9 +207,9 @@ partial class GpController : IGpioController {
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
-    gpio.SetGpioOutputValues(
-      values: [new(Index, value)],
-      modes: default,
+    gpio.ApplyGpioStates(
+      pinValuePairs: [new(Index, value)],
+      pinModePairs: default,
       cancellationToken: cancellationToken
     );
   }

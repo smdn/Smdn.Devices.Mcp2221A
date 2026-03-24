@@ -255,4 +255,73 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
     Memory<PinModePair> pinModePairs,
     CancellationToken cancellationToken = default
   );
+
+  /// <summary>
+  /// Applies the specified digital logic levels and I/O modes to the
+  /// GP pins (GP0-GP3) in a single communication.
+  /// </summary>
+  /// <param name="pinValuePairs">
+  /// A read-only span of <see cref="PinValuePair"/> structures containing
+  /// the logic levels to be applied. The <see cref="PinValuePair.PinNumber"/>
+  /// specifies the target GP index (0 to 3). This parameter can be empty if
+  /// no logic level changes are required.
+  /// </param>
+  /// <param name="pinModePairs">
+  /// A read-only span of <see cref="PinModePair"/> structures containing
+  /// the I/O modes to be applied. The <see cref="PinModePair.PinNumber"/>
+  /// specifies the target GP index (0 to 3). This parameter can be empty if
+  /// no mode changes are required.
+  /// </param>
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// </param>
+  /// <remarks>
+  /// <para>
+  /// This method performs an atomic update operation using the MCP2221A's
+  /// <c>SET GPIO OUTPUT VALUES</c> command. It sends the specified values and
+  /// modes to the device while maintaining the consistency of the internal cache.
+  /// </para>
+  /// <para>
+  /// If both <paramref name="pinValuePairs"/> and <paramref name="pinModePairs"/>
+  /// are empty, the command is still transmitted using the current internal
+  /// cached states. This can be used to explicitly refresh the physical device
+  /// state with the latest known values.
+  /// </para>
+  /// <para>
+  /// Compared to calling <see cref="IGpioController.Write"/> or <see cref="IGpioController.SetMode"/>
+  /// for each pin individually, this method reduces communication overhead by
+  /// consolidating multiple updates into a single USB HID transaction.
+  /// </para>
+  /// </remarks>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when any of the specified pins are not currently configured as GPIO,
+  /// or when an invalid GP index (outside the range 0-3) is detected before
+  /// transmitting the command to the device.
+  /// </exception>
+  /// <seealso cref="IGpioController.SetMode"/>
+  /// <seealso cref="IGpioController.Write"/>
+  /// <seealso href="https://www.microchip.com/en-us/product/mcp2221a">
+  /// [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
+  /// </seealso>
+  void ApplyGpioStates(
+    ReadOnlySpan<PinValuePair> pinValuePairs,
+    ReadOnlySpan<PinModePair> pinModePairs,
+    CancellationToken cancellationToken = default
+  );
+
+  /// <inheritdoc cref="ApplyGpioStates(ReadOnlySpan{PinValuePair}, ReadOnlySpan{PinModePair}, CancellationToken)"/>
+  /// <summary>
+  /// Asynchronously applies the specified digital logic levels and I/O modes
+  /// to the GP pins (GP0-GP3) in a single communication.
+  /// </summary>
+  /// <returns>
+  /// A <see cref="ValueTask"/> representing the asynchronous operation.
+  /// </returns>
+  /// <seealso cref="IGpioController.SetModeAsync"/>
+  /// <seealso cref="IGpioController.WriteAsync"/>
+  ValueTask ApplyGpioStatesAsync(
+    ReadOnlyMemory<PinValuePair> pinValuePairs,
+    ReadOnlyMemory<PinModePair> pinModePairs,
+    CancellationToken cancellationToken = default
+  );
 }

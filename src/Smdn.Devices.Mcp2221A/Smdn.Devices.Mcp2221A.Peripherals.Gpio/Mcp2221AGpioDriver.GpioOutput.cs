@@ -67,8 +67,17 @@ partial class Mcp2221AGpioDriver {
       // [5 + 4n]: GP<n> pin direction (input or output)
       var indexOfErrorResponse = resp.Slice(2, LengthOfGpioOutputValues).IndexOf(GpioValueInvalid);
 
-      if (0 <= indexOfErrorResponse)
-        throw new Mcp2221ACommandException($"GP{indexOfErrorResponse / 4} is not set for GPIO operation");
+      if (0 <= indexOfErrorResponse) {
+        var gp = indexOfErrorResponse / 4;
+        var gpioValuesBytesForGp = gpioValueBytes.Span.Slice(4 * gp, 4);
+        // whether or not a command has been issued to alter the GPIO values of GP<n>
+        var alterStatus =
+          (gpioValuesBytesForGp[0] != 0x00) || // commanded to alter GP<n> output status
+          (gpioValuesBytesForGp[2] != 0x00); // commanded to alter GP<n> pin direction
+
+        if (alterStatus)
+          throw new InvalidOperationException($"GP{gp} is not set for GPIO operation");
+      }
 
       resp.Slice(2, 4 * NumberOfGpPins).CopyTo(gpioValueBytes.Span);
 
@@ -76,9 +85,10 @@ partial class Mcp2221AGpioDriver {
     }
   }
 
-  internal async ValueTask SetGpioOutputValuesAsync(
-    ReadOnlyMemory<PinValuePair> values,
-    ReadOnlyMemory<PinModePair> modes,
+  // <inheritdoc/>
+  public async ValueTask ApplyGpioStatesAsync(
+    ReadOnlyMemory<PinValuePair> pinValuePairs,
+    ReadOnlyMemory<PinModePair> pinModePairs,
     CancellationToken cancellationToken
   )
   {
@@ -89,8 +99,8 @@ partial class Mcp2221AGpioDriver {
 
       ConstructNewGpioOutputBytes(
         destination: newGpioOutputBytes.Span,
-        values: values.Span,
-        modes: modes.Span
+        values: pinValuePairs.Span,
+        modes: pinModePairs.Span
       );
 
       _ = await Transceiver.CommandAsync(
@@ -105,9 +115,10 @@ partial class Mcp2221AGpioDriver {
     }
   }
 
-  internal void SetGpioOutputValues(
-    ReadOnlySpan<PinValuePair> values,
-    ReadOnlySpan<PinModePair> modes,
+  // <inheritdoc/>
+  public void ApplyGpioStates(
+    ReadOnlySpan<PinValuePair> pinValuePairs,
+    ReadOnlySpan<PinModePair> pinModePairs,
     CancellationToken cancellationToken
   )
   {
@@ -118,8 +129,8 @@ partial class Mcp2221AGpioDriver {
 
       ConstructNewGpioOutputBytes(
         destination: newGpioOutputBytes.Span,
-        values: values,
-        modes: modes
+        values: pinValuePairs,
+        modes: pinModePairs
       );
 
       _ = Transceiver.Command(
