@@ -229,6 +229,165 @@ public static class IGpControllerGroupExtensions {
     }
 
     /// <summary>
+    /// Configures all GP pins (GP0-GP3) to the GPIO function and sets
+    /// their modes to <see cref="PinMode.Output"/> in a single communication.
+    /// </summary>
+    /// <param name="gp0InitialValue">
+    /// The initial value for GP0.
+    /// If <see langword="null"/>, the current value in the SRAM is maintained.
+    /// </param>
+    /// <param name="gp1InitialValue">
+    /// The initial value for GP1.
+    /// If <see langword="null"/>, the current value in the SRAM is maintained.
+    /// </param>
+    /// <param name="gp2InitialValue">
+    /// The initial value for GP2.
+    /// If <see langword="null"/>, the current value in the SRAM is maintained.
+    /// </param>
+    /// <param name="gp3InitialValue">
+    /// The initial value for GP3.
+    /// If <see langword="null"/>, the current value in the SRAM is maintained.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+    /// </param>
+    /// <remarks>
+    /// This is a convenience method that calls <see cref="IGpControllerGroup.ConfigureAllGpSettings"/>
+    /// with <see cref="GpFunction.Gpio"/> and <see cref="PinMode.Output"/> for all pins.
+    /// </remarks>
+    [CLSCompliant(false)]
+    public void ConfigureAllAsGpioOutput(
+      PinValue? gp0InitialValue = null,
+      PinValue? gp1InitialValue = null,
+      PinValue? gp2InitialValue = null,
+      PinValue? gp3InitialValue = null,
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      gpPins.ConfigureAllGpSettings(
+        gp0Function: GpFunction.Gpio,
+        gp0Mode: PinMode.Output,
+        gp0InitialValue: gp0InitialValue,
+        gp1Function: GpFunction.Gpio,
+        gp1Mode: PinMode.Output,
+        gp1InitialValue: gp1InitialValue,
+        gp2Function: GpFunction.Gpio,
+        gp2Mode: PinMode.Output,
+        gp2InitialValue: gp2InitialValue,
+        gp3Function: GpFunction.Gpio,
+        gp3Mode: PinMode.Output,
+        gp3InitialValue: gp3InitialValue,
+        cancellationToken: cancellationToken
+      );
+    }
+
+    /// <inheritdoc cref="ConfigureAllAsGpioOutput(IGpControllerGroup, PinValue?, PinValue?, PinValue?, PinValue?, CancellationToken)"/>
+    /// <summary>
+    /// Asynchronously configures all GP pins (GP0-GP3) to the GPIO function
+    /// and sets their modes to <see cref="PinMode.Output"/>.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="ValueTask"/> representing the asynchronous operation.
+    /// </returns>
+    [CLSCompliant(false)]
+    public ValueTask ConfigureAllAsGpioOutputAsync(
+      PinValue? gp0InitialValue = null,
+      PinValue? gp1InitialValue = null,
+      PinValue? gp2InitialValue = null,
+      PinValue? gp3InitialValue = null,
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      return gpPins.ConfigureAllGpSettingsAsync(
+        gp0Function: GpFunction.Gpio,
+        gp0Mode: PinMode.Output,
+        gp0InitialValue: gp0InitialValue,
+        gp1Function: GpFunction.Gpio,
+        gp1Mode: PinMode.Output,
+        gp1InitialValue: gp1InitialValue,
+        gp2Function: GpFunction.Gpio,
+        gp2Mode: PinMode.Output,
+        gp2InitialValue: gp2InitialValue,
+        gp3Function: GpFunction.Gpio,
+        gp3Mode: PinMode.Output,
+        gp3InitialValue: gp3InitialValue,
+        cancellationToken: cancellationToken
+      );
+    }
+
+    /// <summary>
+    /// Configures all GP pins (GP0-GP3) to the GPIO function and sets
+    /// their modes to <see cref="PinMode.Input"/> in a single communication.
+    /// </summary>
+    /// <param name="cancellationToken">
+    /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+    /// </param>
+    /// <remarks>
+    /// This is a convenience method that calls <see cref="IGpControllerGroup.ConfigureAllGpSettings"/>
+    /// with <see cref="GpFunction.Gpio"/> and <see cref="PinMode.Input"/> for all pins.
+    /// The logic levels (initial values) in the SRAM settings are maintained as-is.
+    /// </remarks>
+    [CLSCompliant(false)]
+    public void ConfigureAllAsGpioInput(
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      gpPins.ConfigureAllGpSettings(
+        gp0Function: GpFunction.Gpio,
+        gp0Mode: PinMode.Input,
+        gp0InitialValue: null,
+        gp1Function: GpFunction.Gpio,
+        gp1Mode: PinMode.Input,
+        gp1InitialValue: null,
+        gp2Function: GpFunction.Gpio,
+        gp2Mode: PinMode.Input,
+        gp2InitialValue: null,
+        gp3Function: GpFunction.Gpio,
+        gp3Mode: PinMode.Input,
+        gp3InitialValue: null,
+        cancellationToken: cancellationToken
+      );
+    }
+
+    /// <inheritdoc cref="ConfigureAllAsGpioInput(IGpControllerGroup, CancellationToken)"/>
+    /// <summary>
+    /// Asynchronously configures all GP pins (GP0-GP3) to the GPIO function
+    /// and sets their modes to <see cref="PinMode.Input"/>.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="ValueTask"/> representing the asynchronous operation.
+    /// </returns>
+    [CLSCompliant(false)]
+    public ValueTask ConfigureAllAsGpioInputAsync(
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      return gpPins.ConfigureAllGpSettingsAsync(
+        gp0Function: GpFunction.Gpio,
+        gp0Mode: PinMode.Input,
+        gp0InitialValue: null,
+        gp1Function: GpFunction.Gpio,
+        gp1Mode: PinMode.Input,
+        gp1InitialValue: null,
+        gp2Function: GpFunction.Gpio,
+        gp2Mode: PinMode.Input,
+        gp2InitialValue: null,
+        gp3Function: GpFunction.Gpio,
+        gp3Mode: PinMode.Input,
+        gp3InitialValue: null,
+        cancellationToken: cancellationToken
+      );
+    }
+
+    /// <summary>
     /// Reads the current digital logic levels for the specified pins
     /// in a single communication.
     /// </summary>
