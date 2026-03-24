@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 using System;
+using System.Buffers;
 using System.Device.Gpio;
 using System.Threading;
 using System.Threading.Tasks;
@@ -225,6 +226,306 @@ public static class IGpControllerGroupExtensions {
         gp3InitialValue: gp3InitialValue,
         cancellationToken: cancellationToken
       );
+    }
+
+    /// <summary>
+    /// Reads the current digital logic levels for the specified pins
+    /// in a single communication.
+    /// </summary>
+    /// <param name="pinValuePairs">
+    /// A span of <see cref="PinValuePair"/> to specify target pins and
+    /// receive their logic levels.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+    /// </param>
+    /// <remarks>
+    /// <para>
+    /// This method calls <see cref="IGpControllerGroup.FetchGpioStates"/> with an
+    /// empty mode span. Even if <paramref name="pinValuePairs"/> is empty,
+    /// it still performs the communication to re-fetch the device settings and
+    /// synchronize the internal cache states. The I/O modes of the pins are
+    /// maintained and not changed.
+    /// </para>
+    /// </remarks>
+    /// <seealso cref="IGpControllerGroup.FetchGpioStates"/>
+    [CLSCompliant(false)]
+    public void Read(
+      Span<PinValuePair> pinValuePairs,
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      gpPins.FetchGpioStates(
+        pinValuePairs: pinValuePairs,
+        pinModePairs: default,
+        cancellationToken: cancellationToken
+      );
+    }
+
+    /// <summary>
+    /// Asynchronously reads the current digital logic levels for the
+    /// specified pins in a single communication.
+    /// </summary>
+    /// <inheritdoc cref="Read(IGpControllerGroup, Span{PinValuePair}, CancellationToken)"/>
+    /// <seealso cref="IGpControllerGroup.FetchGpioStatesAsync"/>
+    [CLSCompliant(false)]
+    public ValueTask ReadAsync(
+      Memory<PinValuePair> pinValuePairs,
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      return gpPins.FetchGpioStatesAsync(
+        pinValuePairs: pinValuePairs,
+        pinModePairs: default,
+        cancellationToken: cancellationToken
+      );
+    }
+
+    /// <summary>
+    /// Reads the current digital logic levels for all GP pins (GP0-GP3)
+    /// in a single communication and returns them as a tuple.
+    /// </summary>
+    /// <param name="cancellationToken">
+    /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+    /// </param>
+    /// <returns>
+    /// A tuple containing the <see cref="PinValue"/> of all GP pins.
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// This is a convenience method that synchronizes the state of all pins
+    /// and returns their values at once.
+    /// </para>
+    /// <para>
+    /// This method calls <see cref="IGpControllerGroup.FetchGpioStates"/> with an
+    /// empty mode span. It performs the communication to re-fetch the device
+    /// settings and synchronize the internal cache states. The I/O modes of
+    /// the pins are maintained and not changed.
+    /// </para>
+    /// </remarks>
+    /// <seealso cref="IGpControllerGroup.FetchGpioStates"/>
+    [CLSCompliant(false)]
+    public
+    (PinValue Gp0Value, PinValue Gp1Value, PinValue Gp2Value, PinValue Gp3Value)
+    Read(CancellationToken cancellationToken = default)
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      gpPins.FetchGpioStates(
+        pinValuePairs: default,
+        pinModePairs: default,
+        cancellationToken: cancellationToken
+      );
+
+      return (
+        gpPins.Gp0.LastFetchedValue,
+        gpPins.Gp1.LastFetchedValue,
+        gpPins.Gp2.LastFetchedValue,
+        gpPins.Gp3.LastFetchedValue
+      );
+    }
+
+    /// <summary>
+    /// Asynchronously reads the current digital logic levels for all
+    /// GP pins (GP0-GP3) and returns them as a tuple.
+    /// </summary>
+    /// <inheritdoc cref="Read(IGpControllerGroup, CancellationToken)"/>
+    /// <seealso cref="IGpControllerGroup.FetchGpioStatesAsync"/>
+    [CLSCompliant(false)]
+    public async
+    ValueTask<(PinValue Gp0Value, PinValue Gp1Value, PinValue Gp2Value, PinValue Gp3Value)>
+    ReadAsync(CancellationToken cancellationToken = default)
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      await gpPins.FetchGpioStatesAsync(
+        pinValuePairs: default,
+        pinModePairs: default,
+        cancellationToken: cancellationToken
+      ).ConfigureAwait(false);
+
+      return (
+        gpPins.Gp0.LastFetchedValue,
+        gpPins.Gp1.LastFetchedValue,
+        gpPins.Gp2.LastFetchedValue,
+        gpPins.Gp3.LastFetchedValue
+      );
+    }
+
+    /// <summary>
+    /// Writes the digital logic levels for the specified pins
+    /// in a single communication.
+    /// </summary>
+    /// <param name="pinValuePairs">
+    /// A read-only span of <see cref="PinValuePair"/> containing the
+    /// logic levels to be applied.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+    /// </param>
+    /// <remarks>
+    /// <para>
+    /// This method calls <see cref="IGpControllerGroup.ApplyGpioStates"/> with
+    /// an empty mode span.
+    /// </para>
+    /// <para>
+    /// Even if <paramref name="pinValuePairs"/> is empty, it still performs
+    /// the communication to re-apply the current internally cached states to
+    /// the physical device. The I/O modes of the pins are maintained and not
+    /// changed during this operation.
+    /// </para>
+    /// </remarks>
+    /// <seealso cref="IGpControllerGroup.ApplyGpioStates"/>
+    [CLSCompliant(false)]
+    public void Write(
+      ReadOnlySpan<PinValuePair> pinValuePairs,
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      gpPins.ApplyGpioStates(
+        pinValuePairs: pinValuePairs,
+        pinModePairs: default,
+        cancellationToken: cancellationToken
+      );
+    }
+
+    /// <summary>
+    /// Asynchronously writes the digital logic levels for the
+    /// specified pins in a single communication.
+    /// </summary>
+    /// <inheritdoc cref="Write(IGpControllerGroup, ReadOnlySpan{PinValuePair}, CancellationToken)"/>
+    /// <seealso cref="IGpControllerGroup.ApplyGpioStatesAsync"/>
+    [CLSCompliant(false)]
+    public ValueTask WriteAsync(
+      ReadOnlyMemory<PinValuePair> pinValuePairs,
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      return gpPins.ApplyGpioStatesAsync(
+        pinValuePairs: pinValuePairs,
+        pinModePairs: default,
+        cancellationToken: cancellationToken
+      );
+    }
+
+    /// <summary>
+    /// Writes the digital logic levels for the specified pins
+    /// using optional parameters.
+    /// </summary>
+    /// <param name="gp0Value">
+    /// The value for GP0. If <see langword="null"/>, the current state
+    /// of the pin is maintained.
+    /// </param>
+    /// <param name="gp1Value">
+    /// The value for GP1. If <see langword="null"/>, the current state
+    /// of the pin is maintained.
+    /// </param>
+    /// <param name="gp2Value">
+    /// The value for GP2. If <see langword="null"/>, the current state
+    /// of the pin is maintained.
+    /// </param>
+    /// <param name="gp3Value">
+    /// The value for GP3. If <see langword="null"/>, the current state
+    /// of the pin is maintained.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+    /// </param>
+    /// <remarks>
+    /// <para>
+    /// This method is optimized for named argument usage. It updates only the
+    /// specified pins while preserving the current settings for any parameters
+    /// that are <see langword="null"/>.
+    /// </para>
+    /// <para>
+    /// Even if all value parameters are <see langword="null"/>, it still calls
+    /// <see cref="IGpControllerGroup.ApplyGpioStates"/> to re-apply the current
+    /// internally cached states to the physical device. The I/O modes are
+    /// maintained and not changed during this operation.
+    /// </para>
+    /// </remarks>
+    /// <seealso cref="IGpControllerGroup.ApplyGpioStates"/>
+    [CLSCompliant(false)]
+    public void Write(
+      PinValue? gp0Value = default,
+      PinValue? gp1Value = default,
+      PinValue? gp2Value = default,
+      PinValue? gp3Value = default,
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      Span<PinValuePair> pinValuePairs = stackalloc PinValuePair[Mcp2221AGpioDriver.NumberOfGpPins];
+      var pinValuePairCount = 0;
+
+      if (gp0Value.HasValue)
+        pinValuePairs[pinValuePairCount++] = new(0, gp0Value.Value);
+
+      if (gp1Value.HasValue)
+        pinValuePairs[pinValuePairCount++] = new(1, gp1Value.Value);
+
+      if (gp2Value.HasValue)
+        pinValuePairs[pinValuePairCount++] = new(2, gp2Value.Value);
+
+      if (gp3Value.HasValue)
+        pinValuePairs[pinValuePairCount++] = new(3, gp3Value.Value);
+
+      gpPins.Write(
+        pinValuePairs: pinValuePairs.Slice(0, pinValuePairCount),
+        cancellationToken: cancellationToken
+      );
+    }
+
+    /// <summary>
+    /// Asynchronously writes the digital logic levels for the specified
+    /// pins using optional parameters.
+    /// </summary>
+    /// <inheritdoc cref="Write(IGpControllerGroup, PinValue?, PinValue?, PinValue?, PinValue?, CancellationToken)"/>
+    /// <seealso cref="IGpControllerGroup.ApplyGpioStatesAsync"/>
+    [CLSCompliant(false)]
+    public async ValueTask WriteAsync(
+      PinValue? gp0Value = default,
+      PinValue? gp1Value = default,
+      PinValue? gp2Value = default,
+      PinValue? gp3Value = default,
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      var pinValuePairArray = ArrayPool<PinValuePair>.Shared.Rent(Mcp2221AGpioDriver.NumberOfGpPins);
+      var pinValuePairCount = 0;
+
+      if (gp0Value.HasValue)
+        pinValuePairArray[pinValuePairCount++] = new(0, gp0Value.Value);
+
+      if (gp1Value.HasValue)
+        pinValuePairArray[pinValuePairCount++] = new(1, gp1Value.Value);
+
+      if (gp2Value.HasValue)
+        pinValuePairArray[pinValuePairCount++] = new(2, gp2Value.Value);
+
+      if (gp3Value.HasValue)
+        pinValuePairArray[pinValuePairCount++] = new(3, gp3Value.Value);
+
+      try {
+        await gpPins.WriteAsync(
+          pinValuePairs: pinValuePairArray.AsMemory(0, pinValuePairCount),
+          cancellationToken: cancellationToken
+        ).ConfigureAwait(false);
+      }
+      finally {
+        ArrayPool<PinValuePair>.Shared.Return(pinValuePairArray);
+      }
     }
   }
 }

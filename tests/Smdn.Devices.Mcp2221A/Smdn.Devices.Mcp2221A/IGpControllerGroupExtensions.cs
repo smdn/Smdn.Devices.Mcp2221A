@@ -1253,4 +1253,1169 @@ public class IGpControllerGroupExtensionsTests {
     Assert.That(mcp2221A.GpPin3.LastFetchedValue, Is.EqualTo(gp3Value ?? initialGp3Value));
     Assert.That(mcp2221A.GpPin3.LastFetchedMode, Is.EqualTo(gp3Mode ?? initialGp3Mode));
   }
+
+  [Test]
+  public void ReadAsync_WithPinValuePairs_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => gpPins!.ReadAsync(default),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void Read_WithPinValuePairs_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => gpPins!.Read(default),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void ReadAsync_WithPinValuePairs_CancellationRequested()
+    => ReadSyncOrAsync_WithPinValuePairs_CancellationRequested(
+      static async (gpPins, ct) => await gpPins.ReadAsync(default, ct).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void Read_WithPinValuePairs_CancellationRequested()
+    => ReadSyncOrAsync_WithPinValuePairs_CancellationRequested(
+      static (gpPins, ct) => {
+        gpPins.Read(default, ct);
+        return default;
+      }
+    );
+
+  private void ReadSyncOrAsync_WithPinValuePairs_CancellationRequested(
+    Func<IGpControllerGroup, CancellationToken, ValueTask> readAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+    using var cts = new CancellationTokenSource();
+
+    cts.Cancel();
+
+    // command should not be sent
+    // Mcp2221ATests.AppendPseudoResponse(...);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await readAsyncFunc(mcp2221A.GpPins, cts.Token),
+      Throws
+        .TypeOf<OperationCanceledException>()
+        .With
+        .Property(nameof(OperationCanceledException.CancellationToken))
+        .EqualTo(cts.Token)
+    );
+
+    Assert.That(
+      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_ReadSyncOrAsync_WithPinValuePairs()
+  {
+    // [MCP2221A] 3.1.12 GET GPIO VALUES
+    const byte GpL = 0x00; // GP<n> value: LOW
+    const byte GpH = 0x01; // GP<n> value: HIGH
+
+    yield return new object[] { GpL, GpL, GpL, GpL, new int[] { 0 }, new PinValue[] { PinValue.Low } };
+    yield return new object[] { GpH, GpL, GpL, GpL, new int[] { 0 }, new PinValue[] { PinValue.High } };
+    yield return new object[] { GpL, GpL, GpL, GpL, new int[] { 1 }, new PinValue[] { PinValue.Low } };
+    yield return new object[] { GpL, GpH, GpL, GpL, new int[] { 1 }, new PinValue[] { PinValue.High } };
+    yield return new object[] { GpL, GpL, GpL, GpL, new int[] { 2 }, new PinValue[] { PinValue.Low } };
+    yield return new object[] { GpL, GpL, GpH, GpL, new int[] { 2 }, new PinValue[] { PinValue.High } };
+    yield return new object[] { GpL, GpL, GpL, GpL, new int[] { 3 }, new PinValue[] { PinValue.Low } };
+    yield return new object[] { GpL, GpL, GpL, GpH, new int[] { 3 }, new PinValue[] { PinValue.High } };
+
+    yield return new object[] { GpL, GpH, GpH, GpH, new int[] { 0, 1 }, new PinValue[] { PinValue.Low, PinValue.High } };
+    yield return new object[] { GpL, GpL, GpH, GpH, new int[] { 0, 1, 2 }, new PinValue[] { PinValue.Low, PinValue.Low, PinValue.High } };
+    yield return new object[] { GpL, GpL, GpL, GpH, new int[] { 0, 1, 2, 3 }, new PinValue[] { PinValue.Low, PinValue.Low, PinValue.Low, PinValue.High } };
+
+    yield return new object[] { GpL, GpH, GpH, GpH, new int[] { 0, 1, 2, 3 }, new PinValue[] { PinValue.Low, PinValue.High, PinValue.High, PinValue.High } };
+    yield return new object[] { GpH, GpL, GpH, GpH, new int[] { 0, 1, 2, 3 }, new PinValue[] { PinValue.High, PinValue.Low, PinValue.High, PinValue.High } };
+    yield return new object[] { GpH, GpH, GpL, GpH, new int[] { 0, 1, 2, 3 }, new PinValue[] { PinValue.High, PinValue.High, PinValue.Low, PinValue.High } };
+    yield return new object[] { GpH, GpH, GpH, GpL, new int[] { 0, 1, 2, 3 }, new PinValue[] { PinValue.High, PinValue.High, PinValue.High, PinValue.Low } };
+
+    yield return new object[] { GpL, GpH, GpH, GpH, new int[] { 3, 2, 1, 0 }, new PinValue[] { PinValue.High, PinValue.High, PinValue.High, PinValue.Low } };
+    yield return new object[] { GpH, GpL, GpH, GpH, new int[] { 3, 2, 1, 0 }, new PinValue[] { PinValue.High, PinValue.High, PinValue.Low, PinValue.High } };
+    yield return new object[] { GpH, GpH, GpL, GpH, new int[] { 3, 2, 1, 0 }, new PinValue[] { PinValue.High, PinValue.Low, PinValue.High, PinValue.High } };
+    yield return new object[] { GpH, GpH, GpH, GpL, new int[] { 3, 2, 1, 0 }, new PinValue[] { PinValue.Low, PinValue.High, PinValue.High, PinValue.High } };
+
+    yield return new object[] { GpH, GpL, GpH, GpL, new int[] { 0, 1, 0 }, new PinValue[] { PinValue.High, PinValue.Low, PinValue.High } };
+    yield return new object[] { GpH, GpL, GpH, GpL, new int[] { 2, 2, 2, 2, 3 }, new PinValue[] { PinValue.High, PinValue.High, PinValue.High, PinValue.High, PinValue.Low } };
+    yield return new object[] { GpH, GpL, GpH, GpL, new int[] { 1, 1, 0, 0, 1, 1 }, new PinValue[] { PinValue.Low, PinValue.Low, PinValue.High, PinValue.High, PinValue.Low, PinValue.Low } };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_ReadSyncOrAsync_WithPinValuePairs))]
+  public void ReadAsync_WithPinValuePairs(
+    byte gp0PinValue,
+    byte gp1PinValue,
+    byte gp2PinValue,
+    byte gp3PinValue,
+    int[] pinNumbers,
+    PinValue[] expectedPinValues
+  )
+    => ReadSyncOrAsync_WithPinValuePairs(
+      gp0PinValue, gp1PinValue, gp2PinValue, gp3PinValue, pinNumbers, expectedPinValues,
+      static async (gpPins, pinValuePairs) => await gpPins.ReadAsync(pinValuePairs: pinValuePairs).ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_ReadSyncOrAsync_WithPinValuePairs))]
+  public void Read_WithPinValuePairs(
+    byte gp0PinValue,
+    byte gp1PinValue,
+    byte gp2PinValue,
+    byte gp3PinValue,
+    int[] pinNumbers,
+    PinValue[] expectedPinValues
+  )
+    => ReadSyncOrAsync_WithPinValuePairs(
+      gp0PinValue, gp1PinValue, gp2PinValue, gp3PinValue, pinNumbers, expectedPinValues,
+      static (gpPins, pinValuePairs) => {
+        gpPins.Read(pinValuePairs: pinValuePairs.Span);
+        return default;
+      }
+    );
+
+  private void ReadSyncOrAsync_WithPinValuePairs(
+    byte gp0PinValue,
+    byte gp1PinValue,
+    byte gp2PinValue,
+    byte gp3PinValue,
+    int[] pinNumbers,
+    PinValue[] expectedPinValues,
+    Func<IGpControllerGroup, Memory<PinValuePair>, ValueTask> readAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO0)
+    const byte InitialGp1Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO1)
+    const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
+    const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
+
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    // [MCP2221A] 3.1.12 GET GPIO VALUES
+    var getGpioValuesResponse = string.Concat(
+      "51-00-",
+      $"{gp0PinValue:X2}-01-", // LOW/HIGH - INPUT
+      $"{gp1PinValue:X2}-01-", // LOW/HIGH - INPUT
+      $"{gp2PinValue:X2}-01-", // LOW/HIGH - INPUT
+      $"{gp3PinValue:X2}-01-", // LOW/HIGH - INPUT
+      string.Join("-", Enumerable.Repeat("00", 64 - 10))
+    );
+
+    Mcp2221ATests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64]; // [1-64]: don't care
+
+    expectedSentCommand[0] = 0x51; // GET GPIO VALUES
+
+    var pinValuePairs = pinNumbers.Select(static number => new PinValuePair(number, default)).ToArray();
+
+    Assert.That(
+      async () => await readAsyncFunc(mcp2221A.GpPins, pinValuePairs),
+      Throws.Nothing
+    );
+    Assert.That(
+      pinValuePairs.Select(static pair => pair.PinValue),
+      Is.EqualTo(expectedPinValues).AsCollection
+    );
+    Assert.That(
+      Mcp2221ATests.GetSentCommand(mcp2221A),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+
+    Assert.That(
+      mcp2221A.GpPin0.LastFetchedValue,
+      Is.EqualTo(gp0PinValue == 0x00 ? PinValue.Low : PinValue.High)
+    );
+    Assert.That(
+      mcp2221A.GpPin1.LastFetchedValue,
+      Is.EqualTo(gp1PinValue == 0x00 ? PinValue.Low : PinValue.High)
+    );
+    Assert.That(
+      mcp2221A.GpPin2.LastFetchedValue,
+      Is.EqualTo(gp2PinValue == 0x00 ? PinValue.Low : PinValue.High)
+    );
+    Assert.That(
+      mcp2221A.GpPin3.LastFetchedValue,
+      Is.EqualTo(gp3PinValue == 0x00 ? PinValue.Low : PinValue.High)
+    );
+  }
+
+  [Test]
+  public void ReadAsync_WithPinValuePairs_Empty()
+    => ReadSyncOrAsync_WithPinValuePairs_Empty(
+      static async gpPins => await gpPins.ReadAsync(pinValuePairs: default).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void Read_WithPinValuePairs_Empty()
+    => ReadSyncOrAsync_WithPinValuePairs_Empty(
+      static gpPins => {
+        gpPins.Read(pinValuePairs: default);
+        return default;
+      }
+    );
+
+  private void ReadSyncOrAsync_WithPinValuePairs_Empty(
+    Func<IGpControllerGroup, ValueTask> readAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO0)
+    const byte InitialGp1Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO1)
+    const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
+    const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
+
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    // [MCP2221A] 3.1.12 GET GPIO VALUES
+    var getGpioValuesResponse = string.Concat(
+      "51-00-",
+      "00-01-", // LOW - INPUT
+      "01-01-", // HIGH - INPUT
+      "00-01-", // LOW - INPUT
+      "01-01-", // HIGH - INPUT
+      string.Join("-", Enumerable.Repeat("00", 64 - 10))
+    );
+
+    Mcp2221ATests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64]; // [1-64]: don't care
+
+    expectedSentCommand[0] = 0x51; // GET GPIO VALUES
+
+    Assert.That(
+      async () => await readAsyncFunc(mcp2221A.GpPins),
+      Throws.Nothing
+    );
+    Assert.That(
+      Mcp2221ATests.GetSentCommand(mcp2221A),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+    Assert.That(mcp2221A.GpPin0.LastFetchedValue, Is.EqualTo(PinValue.Low), $"internal cache must be updated (GP0)");
+    Assert.That(mcp2221A.GpPin1.LastFetchedValue, Is.EqualTo(PinValue.High), $"internal cache must be updated (GP1)");
+    Assert.That(mcp2221A.GpPin2.LastFetchedValue, Is.EqualTo(PinValue.Low), $"internal cache must be updated (GP2)");
+    Assert.That(mcp2221A.GpPin3.LastFetchedValue, Is.EqualTo(PinValue.High), $"internal cache must be updated (GP3)");
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_ReadSyncOrAsync_WithPinValuePairs_InvalidGpIndex()
+  {
+    yield return new object[] { new int[] { -1 }, -1 };
+    yield return new object[] { new int[] { 5 }, 5 };
+    yield return new object[] { new int[] { int.MaxValue }, int.MaxValue };
+    yield return new object[] { new int[] { int.MinValue }, int.MinValue };
+
+    yield return new object[] { new int[] { 0, -1 }, -1 };
+    yield return new object[] { new int[] { 0, 5 }, 5 };
+    yield return new object[] { new int[] { 0, int.MaxValue }, int.MaxValue };
+    yield return new object[] { new int[] { 0, int.MinValue }, int.MinValue };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_ReadSyncOrAsync_WithPinValuePairs_InvalidGpIndex))]
+  public void ReadAsync_WithPinValuePairs_InvalidGpIndex(
+    int[] pinNumbers,
+    int expectedInvalidGpIndex
+  )
+    => ReadSyncOrAsync_WithPinValuePairs_InvalidGpIndex(
+      pinNumbers,
+      expectedInvalidGpIndex,
+      static async (gpPins, pinValuePairs) => await gpPins.ReadAsync(pinValuePairs: pinValuePairs).ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_ReadSyncOrAsync_WithPinValuePairs_InvalidGpIndex))]
+  public void Read_WithPinValuePairs_InvalidGpIndex(
+    int[] pinNumbers,
+    int expectedInvalidGpIndex
+  )
+    => ReadSyncOrAsync_WithPinValuePairs_InvalidGpIndex(
+      pinNumbers,
+      expectedInvalidGpIndex,
+      static (gpPins, pinValuePairs) => {
+        gpPins.Read(pinValuePairs: pinValuePairs.Span);
+        return default;
+      }
+    );
+
+  private void ReadSyncOrAsync_WithPinValuePairs_InvalidGpIndex(
+    int[] pinNumbers,
+    int expectedInvalidGpIndex,
+    Func<IGpControllerGroup, Memory<PinValuePair>, ValueTask> readAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO0)
+    const byte InitialGp1Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO1)
+    const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
+    const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
+
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    // [MCP2221A] 3.1.12 GET GPIO VALUES
+    var getGpioValuesResponse = string.Concat(
+      "51-00-",
+      "00-01-", // LOW - INPUT
+      "01-01-", // HIGH - INPUT
+      "00-01-", // LOW - INPUT
+      "01-01-", // HIGH - INPUT
+      string.Join("-", Enumerable.Repeat("00", 64 - 10))
+    );
+
+    Mcp2221ATests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64]; // [1-64]: don't care
+
+    expectedSentCommand[0] = 0x51; // GET GPIO VALUES
+
+    var pinValuePairs = pinNumbers.Select(static number => new PinValuePair(number, default)).ToArray();
+
+    Assert.That(
+      async () => await readAsyncFunc(mcp2221A.GpPins, pinValuePairs),
+      Throws
+        .InvalidOperationException
+        .With
+        .Property(nameof(InvalidOperationException.Message))
+        .Contains($"pin index: {expectedInvalidGpIndex}")
+    );
+    Assert.That(
+      Mcp2221ATests.GetSentCommand(mcp2221A),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+
+    Assert.That(mcp2221A.GpPin0.LastFetchedValue, Is.EqualTo(PinValue.Low), $"internal cache must be updated (GP0)");
+    Assert.That(mcp2221A.GpPin1.LastFetchedValue, Is.EqualTo(PinValue.High), $"internal cache must be updated (GP1)");
+    Assert.That(mcp2221A.GpPin2.LastFetchedValue, Is.EqualTo(PinValue.Low), $"internal cache must be updated (GP2)");
+    Assert.That(mcp2221A.GpPin3.LastFetchedValue, Is.EqualTo(PinValue.High), $"internal cache must be updated (GP3)");
+  }
+
+  [Test]
+  public void ReadAsync_AsTupleOfPinValue_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => gpPins!.ReadAsync(),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void Read_AsTupleOfPinValue_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => _ = gpPins!.Read(),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void ReadAsync_AsTupleOfPinValue_CancellationRequested()
+    => ReadSyncOrAsync_AsTupleOfPinValue_CancellationRequested(
+      static async (gpPins, ct) => _ = await gpPins.ReadAsync(ct).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void Read_AsTupleOfPinValue_CancellationRequested()
+    => ReadSyncOrAsync_AsTupleOfPinValue_CancellationRequested(
+      static (gpPins, ct) => {
+        _ = gpPins.Read(ct);
+        return default;
+      }
+    );
+
+  private void ReadSyncOrAsync_AsTupleOfPinValue_CancellationRequested(
+    Func<IGpControllerGroup, CancellationToken, ValueTask> readAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+    using var cts = new CancellationTokenSource();
+
+    cts.Cancel();
+
+    // command should not be sent
+    // Mcp2221ATests.AppendPseudoResponse(...);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await readAsyncFunc(mcp2221A.GpPins, cts.Token),
+      Throws
+        .TypeOf<OperationCanceledException>()
+        .With
+        .Property(nameof(OperationCanceledException.CancellationToken))
+        .EqualTo(cts.Token)
+    );
+
+    Assert.That(
+      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_ReadSyncOrAsync_AsTupleOfPinValue()
+  {
+    // [MCP2221A] 3.1.12 GET GPIO VALUES
+    const byte GpL = 0x00; // GP<n> value: LOW
+    const byte GpH = 0x01; // GP<n> value: HIGH
+
+    yield return new object[] { GpL, GpL, GpL, GpL, new PinValue[] { PinValue.Low, PinValue.Low, PinValue.Low, PinValue.Low } };
+    yield return new object[] { GpH, GpL, GpL, GpL, new PinValue[] { PinValue.High, PinValue.Low, PinValue.Low, PinValue.Low } };
+    yield return new object[] { GpH, GpH, GpL, GpL, new PinValue[] { PinValue.High, PinValue.High, PinValue.Low, PinValue.Low } };
+    yield return new object[] { GpH, GpH, GpH, GpL, new PinValue[] { PinValue.High, PinValue.High, PinValue.High, PinValue.Low } };
+    yield return new object[] { GpH, GpH, GpH, GpH, new PinValue[] { PinValue.High, PinValue.High, PinValue.High, PinValue.High } };
+    yield return new object[] { GpL, GpH, GpH, GpH, new PinValue[] { PinValue.Low, PinValue.High, PinValue.High, PinValue.High } };
+    yield return new object[] { GpL, GpL, GpH, GpH, new PinValue[] { PinValue.Low, PinValue.Low, PinValue.High, PinValue.High } };
+    yield return new object[] { GpL, GpL, GpL, GpH, new PinValue[] { PinValue.Low, PinValue.Low, PinValue.Low, PinValue.High } };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_ReadSyncOrAsync_AsTupleOfPinValue))]
+  public void ReadAsync_AsTupleOfPinValue(
+    byte gp0PinValue,
+    byte gp1PinValue,
+    byte gp2PinValue,
+    byte gp3PinValue,
+    PinValue[] expectedPinValues
+  )
+    => ReadSyncOrAsync_AsTupleOfPinValue(
+      gp0PinValue, gp1PinValue, gp2PinValue, gp3PinValue,
+      (expectedPinValues[0], expectedPinValues[1], expectedPinValues[2], expectedPinValues[3]),
+      static async gpPins => await gpPins.ReadAsync().ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_ReadSyncOrAsync_AsTupleOfPinValue))]
+  public void Read_AsTupleOfPinValue(
+    byte gp0PinValue,
+    byte gp1PinValue,
+    byte gp2PinValue,
+    byte gp3PinValue,
+    PinValue[] expectedPinValues
+  )
+    => ReadSyncOrAsync_AsTupleOfPinValue(
+      gp0PinValue, gp1PinValue, gp2PinValue, gp3PinValue,
+      (expectedPinValues[0], expectedPinValues[1], expectedPinValues[2], expectedPinValues[3]),
+      static gpPins => new(gpPins.Read())
+    );
+
+  private void ReadSyncOrAsync_AsTupleOfPinValue(
+    byte gp0PinValue,
+    byte gp1PinValue,
+    byte gp2PinValue,
+    byte gp3PinValue,
+    (PinValue, PinValue, PinValue, PinValue) expectedPinValues,
+    Func<IGpControllerGroup, ValueTask<(PinValue, PinValue, PinValue, PinValue)>> readAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO0)
+    const byte InitialGp1Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO1)
+    const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
+    const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
+
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    // [MCP2221A] 3.1.12 GET GPIO VALUES
+    var getGpioValuesResponse = string.Concat(
+      "51-00-",
+      $"{gp0PinValue:X2}-01-", // LOW/HIGH - INPUT
+      $"{gp1PinValue:X2}-01-", // LOW/HIGH - INPUT
+      $"{gp2PinValue:X2}-01-", // LOW/HIGH - INPUT
+      $"{gp3PinValue:X2}-01-", // LOW/HIGH - INPUT
+      string.Join("-", Enumerable.Repeat("00", 64 - 10))
+    );
+
+    Mcp2221ATests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64]; // [1-64]: don't care
+
+    expectedSentCommand[0] = 0x51; // GET GPIO VALUES
+
+    (PinValue, PinValue, PinValue, PinValue) pinValues = default;
+
+    Assert.That(
+      async () => pinValues = await readAsyncFunc(mcp2221A.GpPins),
+      Throws.Nothing
+    );
+    Assert.That(
+      pinValues,
+      Is.EqualTo(expectedPinValues)
+    );
+    Assert.That(
+      Mcp2221ATests.GetSentCommand(mcp2221A),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+
+    Assert.That(
+      mcp2221A.GpPin0.LastFetchedValue,
+      Is.EqualTo(gp0PinValue == 0x00 ? PinValue.Low : PinValue.High)
+    );
+    Assert.That(
+      mcp2221A.GpPin1.LastFetchedValue,
+      Is.EqualTo(gp1PinValue == 0x00 ? PinValue.Low : PinValue.High)
+    );
+    Assert.That(
+      mcp2221A.GpPin2.LastFetchedValue,
+      Is.EqualTo(gp2PinValue == 0x00 ? PinValue.Low : PinValue.High)
+    );
+    Assert.That(
+      mcp2221A.GpPin3.LastFetchedValue,
+      Is.EqualTo(gp3PinValue == 0x00 ? PinValue.Low : PinValue.High)
+    );
+  }
+
+  [Test]
+  public void WriteAsync_WithPinValuePairs_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => gpPins!.WriteAsync(pinValuePairs: default),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void Write_WithPinValuePairs_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => gpPins!.Write(pinValuePairs: default),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void WriteAsync_WithPinValuePairs_CancellationRequested()
+    => WriteSyncOrAsync_WithPinValuePairs_CancellationRequested(
+      static async (gpPins, ct) => await gpPins.WriteAsync(default, ct).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void Write_WithPinValuePairs_CancellationRequested()
+    => WriteSyncOrAsync_WithPinValuePairs_CancellationRequested(
+      static (gpPins, ct) => {
+        gpPins.Write(default, ct);
+        return default;
+      }
+    );
+
+  private void WriteSyncOrAsync_WithPinValuePairs_CancellationRequested(
+    Func<IGpControllerGroup, CancellationToken, ValueTask> writeAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+    using var cts = new CancellationTokenSource();
+
+    cts.Cancel();
+
+    // command should not be sent
+    // Mcp2221ATests.AppendPseudoResponse(...);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await writeAsyncFunc(mcp2221A.GpPins, cts.Token),
+      Throws
+        .TypeOf<OperationCanceledException>()
+        .With
+        .Property(nameof(OperationCanceledException.CancellationToken))
+        .EqualTo(cts.Token)
+    );
+
+    Assert.That(
+      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_WriteSyncOrAsync_WithPinValuePairs()
+  {
+    // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
+    // [0 + 4n]: Alter GP<n> output: (value other than 0)=enable
+    // [1 + 4n]: GP<n> output value: 0x00=L, (any other value)=H
+    // [2 + 4n]: Alter GP<n> pin direction: (value other than 0)=enable
+    // [3 + 4n]: GP<n> pin direction: 0x00=output, (any other value)=input
+    yield return new object[] { new PinValuePair[] { new(0, PinValue.Low) }, new byte[] { 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValuePair[] { new(0, PinValue.High) }, new byte[] { 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValuePair[] { new(1, PinValue.Low) }, new byte[] { 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValuePair[] { new(1, PinValue.High) }, new byte[] { 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValuePair[] { new(2, PinValue.Low) }, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValuePair[] { new(2, PinValue.High) }, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValuePair[] { new(3, PinValue.Low) }, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValuePair[] { new(3, PinValue.High) }, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00 } };
+
+    yield return new object[] {
+      new PinValuePair[] { new(0, PinValue.High), new(1, PinValue.High) },
+      new byte[] { 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+    };
+    yield return new object[] {
+      new PinValuePair[] { new(0, PinValue.High), new(1, PinValue.High), new(2, PinValue.High) },
+      new byte[] { 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+    };
+    yield return new object[] {
+      new PinValuePair[] { new(0, PinValue.High), new(1, PinValue.High), new(2, PinValue.High), new(3, PinValue.High) },
+      new byte[] { 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00 }
+    };
+
+    yield return new object[] { new PinValuePair[] { new(3, PinValue.High), new(2, PinValue.High), new(1, PinValue.High), new(0, PinValue.Low) }, new byte[] { 0xFF, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00 } };
+    yield return new object[] { new PinValuePair[] { new(3, PinValue.High), new(2, PinValue.High), new(1, PinValue.Low), new(0, PinValue.High) }, new byte[] { 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00 } };
+    yield return new object[] { new PinValuePair[] { new(3, PinValue.High), new(2, PinValue.Low), new(1, PinValue.High), new(0, PinValue.High) }, new byte[] { 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00 } };
+    yield return new object[] { new PinValuePair[] { new(3, PinValue.Low), new(2, PinValue.High), new(1, PinValue.High), new(0, PinValue.High) }, new byte[] { 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00 } };
+
+    yield return new object[] {
+      new PinValuePair[] { new(0, PinValue.High), new(0, PinValue.Low) },
+      new byte[] { 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+    };
+    yield return new object[] {
+      new PinValuePair[] { new(0, PinValue.High), new(1, PinValue.High), new(1, PinValue.Low) },
+      new byte[] { 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+    };
+    yield return new object[] {
+      new PinValuePair[] { new(0, PinValue.High), new(1, PinValue.High), new(2, PinValue.High), new(2, PinValue.Low) },
+      new byte[] { 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+    };
+    yield return new object[] {
+      new PinValuePair[] { new(0, PinValue.High), new(1, PinValue.High), new(2, PinValue.High), new(3, PinValue.High), new(3, PinValue.Low) },
+      new byte[] { 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00 }
+    };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_WriteSyncOrAsync_WithPinValuePairs))]
+  public void WriteAsync_WithPinValuePairs(
+    PinValuePair[] pinValuePairs,
+    byte[] gpioOutputsInExpectedSentCommand
+  )
+    => WriteSyncOrAsync_WithPinValuePairs(
+      pinValuePairs,
+      gpioOutputsInExpectedSentCommand,
+      static async (gpPins, pinValuePairs) => await gpPins.WriteAsync(pinValuePairs: pinValuePairs).ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_WriteSyncOrAsync_WithPinValuePairs))]
+  public void Write_WithPinValuePairs(
+    PinValuePair[] pinValuePairs,
+    byte[] gpioOutputsInExpectedSentCommand
+  )
+    => WriteSyncOrAsync_WithPinValuePairs(
+      pinValuePairs,
+      gpioOutputsInExpectedSentCommand,
+      static (gpPins, pinValuePairs) => {
+        gpPins.Write(pinValuePairs: pinValuePairs.Span);
+        return default;
+      }
+    );
+
+  private void WriteSyncOrAsync_WithPinValuePairs(
+    PinValuePair[] pinValuePairs,
+    byte[] gpioOutputsInExpectedSentCommand,
+    Func<IGpControllerGroup, ReadOnlyMemory<PinValuePair>, ValueTask> writeAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO0)
+    const byte InitialGp1Settings = 0b_000_1_0_000; // HIGH - OUTPUT - GPIO operation (GPIO1)
+    const byte InitialGp2Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO2)
+    const byte InitialGp3Settings = 0b_000_1_0_000; // HIGH - OUTPUT - GPIO operation (GPIO3)
+
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
+    var setGpioOutputValuesResponse = string.Concat(
+      "50-00-",
+      BitConverter.ToString(gpioOutputsInExpectedSentCommand) + "-",
+      string.Join("-", Enumerable.Repeat("00", 64 - 18))
+    );
+
+    Mcp2221ATests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64];
+
+    expectedSentCommand[0] = 0x50; // SET GPIO OUTPUT VALUES
+    expectedSentCommand[1] = 0x00; // Command completed successfully
+    gpioOutputsInExpectedSentCommand.CopyTo(expectedSentCommand.AsSpan(2, 16));
+
+    Assert.That(
+      async () => await writeAsyncFunc(mcp2221A.GpPins, pinValuePairs),
+      Throws.Nothing
+    );
+    Assert.That(
+      Mcp2221ATests.GetSentCommand(mcp2221A),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+  }
+
+  [Test]
+  public void WriteAsync_WithPinValuePairs_Empty()
+    => WriteSyncOrAsync_WithPinValuePairs_Empty(
+      static async gpPins => await gpPins.WriteAsync(
+        pinValuePairs: default,
+        cancellationToken: default
+      ).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void Write_WithPinValuePairs_Empty()
+    => WriteSyncOrAsync_WithPinValuePairs_Empty(
+      static gpPins => {
+        gpPins.Write(
+          pinValuePairs: default,
+          cancellationToken: default
+        );
+        return default;
+      }
+    );
+
+  private void WriteSyncOrAsync_WithPinValuePairs_Empty(
+    Func<IGpControllerGroup, ValueTask> writeAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_1_0_000; // HIGH - OUTPUT - GPIO operation (GPIO0)
+    const byte InitialGp1Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO1)
+    const byte InitialGp2Settings = 0b_000_1_0_000; // HIGH - OUTPUT - GPIO operation (GPIO2)
+    const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
+
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
+    var setGpioOutputValuesResponse = string.Concat(
+      "50-00-",
+      "00-00-00-00-",
+      "00-00-00-00-",
+      "00-00-00-00-",
+      "00-00-00-00-",
+      string.Join("-", Enumerable.Repeat("00", 64 - 18))
+    );
+
+    Mcp2221ATests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64];
+
+    expectedSentCommand[0] = 0x50; // SET GPIO OUTPUT VALUES
+    expectedSentCommand[1] = 0x00; // Command completed successfully
+
+    Assert.That(
+      async () => await writeAsyncFunc(mcp2221A.GpPins),
+      Throws.Nothing
+    );
+    Assert.That(
+      Mcp2221ATests.GetSentCommand(mcp2221A),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+    Assert.That(mcp2221A.GpPin0.LastFetchedValue, Is.EqualTo(PinValue.High), $"internal cache must not be changed (GP0)");
+    Assert.That(mcp2221A.GpPin1.LastFetchedValue, Is.EqualTo(PinValue.Low), $"internal cache must not be changed (GP1)");
+    Assert.That(mcp2221A.GpPin2.LastFetchedValue, Is.EqualTo(PinValue.High), $"internal cache must not be changed (GP2)");
+    Assert.That(mcp2221A.GpPin3.LastFetchedValue, Is.EqualTo(PinValue.Low), $"internal cache must not be changed (GP3)");
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_WriteSyncOrAsync_WithPinValuePairs_InvalidGpIndex()
+  {
+    yield return new object[] { new int[] { -1 }, -1 };
+    yield return new object[] { new int[] { 5 }, 5 };
+    yield return new object[] { new int[] { int.MaxValue }, int.MaxValue };
+    yield return new object[] { new int[] { int.MinValue }, int.MinValue };
+
+    yield return new object[] { new int[] { 0, -1 }, -1 };
+    yield return new object[] { new int[] { 0, 5 }, 5 };
+    yield return new object[] { new int[] { 0, int.MaxValue }, int.MaxValue };
+    yield return new object[] { new int[] { 0, int.MinValue }, int.MinValue };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_WriteSyncOrAsync_WithPinValuePairs_InvalidGpIndex))]
+  public void WriteAsync_WithPinValuePairs_InvalidGpIndex(
+    int[] pinNumbers,
+    int expectedInvalidGpIndex
+  )
+    => WriteSyncOrAsync_WithPinValuePairs_InvalidGpIndex(
+      pinNumbers,
+      expectedInvalidGpIndex,
+      static async (gpPins, pinValuePairs) => await gpPins.WriteAsync(pinValuePairs: pinValuePairs).ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_WriteSyncOrAsync_WithPinValuePairs_InvalidGpIndex))]
+  public void Write_WithPinValuePairs_InvalidGpIndex(
+    int[] pinNumbers,
+    int expectedInvalidGpIndex
+  )
+    => WriteSyncOrAsync_WithPinValuePairs_InvalidGpIndex(
+      pinNumbers,
+      expectedInvalidGpIndex,
+      static (gpPins, pinValuePairs) => {
+        gpPins.Write(pinValuePairs: pinValuePairs.Span);
+        return default;
+      }
+    );
+
+  private void WriteSyncOrAsync_WithPinValuePairs_InvalidGpIndex(
+    int[] pinNumbers,
+    int expectedInvalidGpIndex,
+    Func<IGpControllerGroup, ReadOnlyMemory<PinValuePair>, ValueTask> writeAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    // command should not be sent
+    // Mcp2221ATests.AppendPseudoResponse(...);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    var pinValuePairs = pinNumbers.Select(static number => new PinValuePair(number, default)).ToArray();
+
+    Assert.That(
+      async () => await writeAsyncFunc(mcp2221A.GpPins, pinValuePairs),
+      Throws
+        .InvalidOperationException
+        .With
+        .Property(nameof(InvalidOperationException.Message))
+        .Contains($"pin index: {expectedInvalidGpIndex}")
+    );
+    Assert.That(
+      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+  }
+
+  [Test]
+  public void WriteAsync_SeparatePinValues_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => gpPins!.WriteAsync(gp0Value: default, gp1Value: default, gp2Value: default, gp3Value: default),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void Write_SeparatePinValues_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => gpPins!.Write(gp0Value: default, gp1Value: default, gp2Value: default, gp3Value: default),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void WriteAsync_SeparatePinValues_CancellationRequested()
+    => WriteSyncOrAsync_SeparatePinValues_CancellationRequested(
+      static async (gpPins, ct) => await gpPins.WriteAsync(cancellationToken: ct).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void Write_SeparatePinValues_CancellationRequested()
+    => WriteSyncOrAsync_SeparatePinValues_CancellationRequested(
+      static (gpPins, ct) => {
+        gpPins.Write(cancellationToken: ct);
+        return default;
+      }
+    );
+
+  private void WriteSyncOrAsync_SeparatePinValues_CancellationRequested(
+    Func<IGpControllerGroup, CancellationToken, ValueTask> writeAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+    using var cts = new CancellationTokenSource();
+
+    cts.Cancel();
+
+    // command should not be sent
+    // Mcp2221ATests.AppendPseudoResponse(...);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await writeAsyncFunc(mcp2221A.GpPins, cts.Token),
+      Throws
+        .TypeOf<OperationCanceledException>()
+        .With
+        .Property(nameof(OperationCanceledException.CancellationToken))
+        .EqualTo(cts.Token)
+    );
+
+    Assert.That(
+      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_WriteSyncOrAsync_SeparatePinValues()
+  {
+    // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
+    // [0 + 4n]: Alter GP<n> output: (value other than 0)=enable
+    // [1 + 4n]: GP<n> output value: 0x00=L, (any other value)=H
+    // [2 + 4n]: Alter GP<n> pin direction: (value other than 0)=enable
+    // [3 + 4n]: GP<n> pin direction: 0x00=output, (any other value)=input
+    yield return new object[] { new PinValue?[] { PinValue.Low, null, null, null }, new byte[] { 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValue?[] { PinValue.High, null, null, null }, new byte[] { 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValue?[] { null, PinValue.Low, null, null }, new byte[] { 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValue?[] { null, PinValue.High, null, null }, new byte[] { 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValue?[] { null, null, PinValue.Low, null }, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValue?[] { null, null, PinValue.High, null }, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValue?[] { null, null, null, PinValue.Low }, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValue?[] { null, null, null, PinValue.High }, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00 } };
+
+    yield return new object[] { new PinValue?[] { PinValue.High, PinValue.High, null, null }, new byte[] { 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValue?[] { PinValue.High, PinValue.High, PinValue.High, null }, new byte[] { 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+    yield return new object[] { new PinValue?[] { PinValue.High, PinValue.High, PinValue.High, PinValue.High }, new byte[] { 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00 } };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_WriteSyncOrAsync_SeparatePinValues))]
+  public void WriteAsync_SeparatePinValues(
+    PinValue?[] pinValues,
+    byte[] gpioOutputsInExpectedSentCommand
+  )
+    => WriteSyncOrAsync_SeparatePinValues(
+      pinValues,
+      gpioOutputsInExpectedSentCommand,
+      static async (gpPins, gp0Value, gp1Value, gp2Value, gp3Value) => await gpPins.WriteAsync(gp0Value, gp1Value, gp2Value, gp3Value).ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_WriteSyncOrAsync_SeparatePinValues))]
+  public void Write_SeparatePinValues(
+    PinValue?[] pinValues,
+    byte[] gpioOutputsInExpectedSentCommand
+  )
+    => WriteSyncOrAsync_SeparatePinValues(
+      pinValues,
+      gpioOutputsInExpectedSentCommand,
+      static (gpPins, gp0Value, gp1Value, gp2Value, gp3Value) => {
+        gpPins.Write(gp0Value, gp1Value, gp2Value, gp3Value);
+        return default;
+      }
+    );
+
+  private void WriteSyncOrAsync_SeparatePinValues(
+    PinValue?[] pinValues,
+    byte[] gpioOutputsInExpectedSentCommand,
+    Func<IGpControllerGroup, PinValue?, PinValue?, PinValue?, PinValue?, ValueTask> writeAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO0)
+    const byte InitialGp1Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO1)
+    const byte InitialGp2Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO2)
+    const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
+
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
+    var setGpioOutputValuesResponse = string.Concat(
+      "50-00-",
+      BitConverter.ToString(gpioOutputsInExpectedSentCommand) + "-",
+      string.Join("-", Enumerable.Repeat("00", 64 - 18))
+    );
+
+    Mcp2221ATests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64];
+
+    expectedSentCommand[0] = 0x50; // SET GPIO OUTPUT VALUES
+    expectedSentCommand[1] = 0x00; // Command completed successfully
+    gpioOutputsInExpectedSentCommand.CopyTo(expectedSentCommand.AsSpan(2, 16));
+
+    Assert.That(
+      async () => await writeAsyncFunc(mcp2221A.GpPins, pinValues[0], pinValues[1], pinValues[2], pinValues[3]),
+      Throws.Nothing
+    );
+    Assert.That(
+      Mcp2221ATests.GetSentCommand(mcp2221A),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+  }
+
+  [Test]
+  public void WriteAsync_SeparatePinValues_AllNull()
+    => WriteSyncOrAsync_SeparatePinValues_AllNull(
+      static async gpPins => await gpPins.WriteAsync(
+        gp0Value: null,
+        gp1Value: null,
+        gp2Value: null,
+        gp3Value: null,
+        cancellationToken: default
+      ).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void Write_SeparatePinValues_AllNull()
+    => WriteSyncOrAsync_SeparatePinValues_AllNull(
+      static gpPins => {
+        gpPins.Write(
+          gp0Value: null,
+          gp1Value: null,
+          gp2Value: null,
+          gp3Value: null,
+          cancellationToken: default
+        );
+        return default;
+      }
+    );
+
+  private void WriteSyncOrAsync_SeparatePinValues_AllNull(
+    Func<IGpControllerGroup, ValueTask> writeAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_1_0_000; // HIGH - OUTPUT - GPIO operation (GPIO0)
+    const byte InitialGp1Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO1)
+    const byte InitialGp2Settings = 0b_000_1_0_000; // HIGH - OUTPUT - GPIO operation (GPIO2)
+    const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
+
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+      // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
+    var setGpioOutputValuesResponse = string.Concat(
+      "50-00-",
+      "00-00-00-00-",
+      "00-00-00-00-",
+      "00-00-00-00-",
+      "00-00-00-00-",
+      string.Join("-", Enumerable.Repeat("00", 64 - 18))
+    );
+
+    Mcp2221ATests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
+    Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64];
+
+    expectedSentCommand[0] = 0x50; // SET GPIO OUTPUT VALUES
+    expectedSentCommand[1] = 0x00; // Command completed successfully
+
+    Assert.That(
+      async () => await writeAsyncFunc(mcp2221A.GpPins),
+      Throws.Nothing
+    );
+    Assert.That(
+      Mcp2221ATests.GetSentCommand(mcp2221A),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+    Assert.That(mcp2221A.GpPin0.LastFetchedValue, Is.EqualTo(PinValue.High), $"internal cache must not be changed (GP0)");
+    Assert.That(mcp2221A.GpPin1.LastFetchedValue, Is.EqualTo(PinValue.Low), $"internal cache must not be changed (GP1)");
+    Assert.That(mcp2221A.GpPin2.LastFetchedValue, Is.EqualTo(PinValue.High), $"internal cache must not be changed (GP2)");
+    Assert.That(mcp2221A.GpPin3.LastFetchedValue, Is.EqualTo(PinValue.Low), $"internal cache must not be changed (GP3)");
+  }
 }
