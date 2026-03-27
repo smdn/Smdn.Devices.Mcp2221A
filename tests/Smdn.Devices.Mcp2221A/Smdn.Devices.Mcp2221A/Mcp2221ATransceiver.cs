@@ -6,6 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Testing;
+
 using NUnit.Framework;
 
 using Smdn.IO.UsbHid;
@@ -14,6 +18,8 @@ namespace Smdn.Devices.Mcp2221A;
 
 [TestFixture]
 public class Mcp2221ATransceiverTests {
+  private const int LengthOfReportId = 1;
+
   [Test]
   public void CommandAsync_UnexpectedCommandEcho()
     => CommandSyncOrAsync_UnexpectedCommandEcho(
@@ -58,6 +64,133 @@ public class Mcp2221ATransceiverTests {
         .With
         .Property(nameof(Mcp2221ACommandException.Message))
         .Contains($"{ResponseCommandCode:X2}")
+    );
+  }
+
+  [TestCase(0)]
+  [TestCase(1)]
+  [TestCase(63)]
+  public void CommandAsync_ResponseReportTooShort(int actualResponseLength)
+    => CommandSyncOrAsync_ResponseReportTooShort(
+      actualResponseLength: actualResponseLength,
+      static async mcp2221A => await mcp2221A.GP0.GetValueAsync().ConfigureAwait(false)
+    );
+
+  [TestCase(0)]
+  [TestCase(1)]
+  [TestCase(63)]
+  public void Command_ResponseReportTooShort(int actualResponseLength)
+    => CommandSyncOrAsync_ResponseReportTooShort(
+      actualResponseLength: actualResponseLength,
+      static mcp2221A => new(mcp2221A.GP0.GetValue())
+    );
+
+  private void CommandSyncOrAsync_ResponseReportTooShort(
+    int actualResponseLength,
+    Func<Mcp2221A, ValueTask<PinValue>> getGp0PinValueAsyncFunc
+  )
+  {
+    var loggerProvider = new FakeLoggerProvider();
+    var services = new ServiceCollection();
+
+    services.AddSingleton<ILoggerFactory>(new LoggerFactory([loggerProvider]));
+
+    using var serviceProvider = services.BuildServiceProvider();
+
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true,
+      serviceProvider: serviceProvider
+    );
+    var endPoint = (mcp2221A.HidDevice as PseudoUsbHidDevice)!.EndPoint;
+
+    // [MCP2221A] 3.1.12 GET GPIO VALUES
+    // [0] 0x51: Get GPIO Values command code
+    // [1] 0x00: Command completed successfully
+    // [2 + 2n] 0xEE: GP<n> is not set for GPIO operation
+    // [3 + 2n] 0xEF: GP<n> is not set for GPIO operation
+    // [10-63] Don't care
+    var getGpioValuesResponseBytes =
+      new byte[] { 0x51, 0x00, 0xEE, 0xEF, 0xEE, 0xEF, 0xEE, 0xEF, 0xEE, 0xEF }
+      .Concat(Enumerable.Repeat((byte)0x00, 64 - 10))
+      .ToArray();
+
+    // Assume a scenario where a response of 64 bytes is expected,
+    // but less than 64 bytes is returned.
+    Mcp2221ATests.AppendResponse(
+      endPoint,
+      BitConverter.ToString(getGpioValuesResponseBytes.Take(actualResponseLength).ToArray())
+    );
+
+    loggerProvider.Collector.Clear();
+
+    var actualReportLength = actualResponseLength + LengthOfReportId;
+
+    Assert.That(
+      async () => _ = await getGp0PinValueAsyncFunc(mcp2221A),
+      Throws
+        .TypeOf<Mcp2221ACommandException>()
+        .With
+        .Property(nameof(Mcp2221ACommandException.Message))
+        .Contains($"{actualReportLength} bytes")
+    );
+
+    Assert.That(
+      loggerProvider.Collector.Count,
+      Is.EqualTo(2),
+      "The sent command and received response should be logged."
+    );
+  }
+
+  [Test]
+  public void CommandAsync_ResponseReportTooShort_NoResponse()
+    => CommandSyncOrAsync_ResponseReportTooShort_NoResponse(
+      static async mcp2221A => await mcp2221A.GP0.GetValueAsync().ConfigureAwait(false)
+    );
+
+  [Test]
+  public void Command_ResponseReportTooShort_NoResponse()
+    => CommandSyncOrAsync_ResponseReportTooShort_NoResponse(
+      static mcp2221A => new(mcp2221A.GP0.GetValue())
+    );
+
+  private void CommandSyncOrAsync_ResponseReportTooShort_NoResponse(
+    Func<Mcp2221A, ValueTask<PinValue>> getGp0PinValueAsyncFunc
+  )
+  {
+    var loggerProvider = new FakeLoggerProvider();
+    var services = new ServiceCollection();
+
+    services.AddSingleton<ILoggerFactory>(new LoggerFactory([loggerProvider]));
+
+    using var serviceProvider = services.BuildServiceProvider();
+
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true,
+      serviceProvider: serviceProvider
+    );
+
+    // Assume a scenario where the report is not returned and
+    // the read result from the endpoint is empty.
+    // Mcp2221ATests.AppendResponse(...);
+    const int ActualReportLength = 0;
+
+    loggerProvider.Collector.Clear();
+
+    Assert.That(
+      async () => _ = await getGp0PinValueAsyncFunc(mcp2221A),
+      Throws
+        .TypeOf<Mcp2221ACommandException>()
+        .With
+        .Property(nameof(Mcp2221ACommandException.Message))
+        .Contains($"{ActualReportLength} bytes")
+    );
+
+    Assert.That(
+      loggerProvider.Collector.Count,
+      Is.EqualTo(2),
+      "The sent command and received response should be logged."
     );
   }
 }

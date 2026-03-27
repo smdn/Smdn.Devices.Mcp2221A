@@ -19,7 +19,7 @@ partial class Mcp2221ATests {
   internal static void AppendResponse(PseudoUsbHidEndPoint endPoint, params string[] responseSequences)
   {
     static byte[] ToByteArray(string hexByteSequence)
-      => hexByteSequence.Split('-').Select(hex => Convert.ToByte(hex, 16)).ToArray();
+      => hexByteSequence.Length == 0 ? Array.Empty<byte>() : hexByteSequence.Split('-').Select(hex => Convert.ToByte(hex, 16)).ToArray();
 
     if (!endPoint.CanRead)
       throw new InvalidOperationException("endpoint does not support reading");
