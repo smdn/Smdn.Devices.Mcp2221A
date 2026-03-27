@@ -46,6 +46,8 @@ partial class Mcp2221AI2cBus {
       nameof(transmissionSpeedInKbps)
     );
 
+    cancellationToken.ThrowIfCancellationRequested();
+
     try {
       logger?.LogInformation(EventIdI2cCommand, $"I2C Write {buffer.Length} bytes to 0x{address}");
 
@@ -105,6 +107,8 @@ partial class Mcp2221AI2cBus {
       nameof(transmissionSpeedInKbps)
     );
 
+    cancellationToken.ThrowIfCancellationRequested();
+
     try {
       logger?.LogInformation(EventIdI2cCommand, $"I2C Write {buffer.Length} bytes to 0x{address}");
 
@@ -163,6 +167,8 @@ partial class Mcp2221AI2cBus {
       transmissionSpeedInKbps,
       nameof(transmissionSpeedInKbps)
     );
+
+    cancellationToken.ThrowIfCancellationRequested();
 
     try {
       logger?.LogInformation(EventIdI2cCommand, $"I2C Read {buffer.Length} bytes from 0x{address}");
@@ -241,6 +247,8 @@ partial class Mcp2221AI2cBus {
       transmissionSpeedInKbps,
       nameof(transmissionSpeedInKbps)
     );
+
+    cancellationToken.ThrowIfCancellationRequested();
 
     try {
       logger?.LogInformation(EventIdI2cCommand, $"I2C Read {buffer.Length} bytes from 0x{address}");
