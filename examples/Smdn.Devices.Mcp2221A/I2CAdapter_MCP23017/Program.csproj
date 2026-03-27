@@ -21,12 +21,12 @@ SPDX-License-Identifier: MIT
 
     <!-- Add LibUsbDotNet version 2 (LGPL-3.0, stable release) as the USB HID backend provider. -->
     <!--
-    <PackageReference Include="Smdn.IO.UsbHid.Providers.LibUsbDotNet" Version="1.0.0-preview4" />
+    <PackageReference Include="Smdn.IO.UsbHid.Providers.LibUsbDotNet" Version="1.0.0-preview5" />
     -->
 
     <!-- Add LibUsbDotNet version 3 (LGPL-3.0, alpha release) as the USB HID backend provider. -->
     <!--
-    <PackageReference Include="Smdn.IO.UsbHid.Providers.LibUsbDotNetV3" Version="1.0.0-preview4" />
+    <PackageReference Include="Smdn.IO.UsbHid.Providers.LibUsbDotNetV3" Version="1.0.0-preview5" />
     -->
   </ItemGroup>
 

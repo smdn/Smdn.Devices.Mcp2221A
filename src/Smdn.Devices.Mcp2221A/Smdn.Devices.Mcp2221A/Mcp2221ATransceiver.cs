@@ -18,14 +18,35 @@ using Smdn.IO.UsbHid;
 namespace Smdn.Devices.Mcp2221A;
 
 internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
+  private const int LengthOfReportId = 1;
+
   private const int CommandLength = 64;
   private const int ResponseLength = 64;
-  private const int CommandReportLength = 1 + CommandLength;
-  private const int ResponseReportLength = 1 + ResponseLength;
+  private const int CommandReportLength = LengthOfReportId + CommandLength;
+  private const int ResponseReportLength = LengthOfReportId + ResponseLength;
 
   private static readonly EventId EventIdCommand = new(1, "sent command");
   private static readonly EventId EventIdResponse = new(2, "received response");
 
+  private static void VerifyResponseReport(
+    ReadOnlySpan<byte> command,
+    ReadOnlySpan<byte> response,
+    int actualResponseReportLength
+  )
+  {
+    if (actualResponseReportLength != ResponseReportLength)
+      throw new Mcp2221ACommandException($"The length of the received response report does not reach the expected length; expected {ResponseReportLength} bytes, but was actually {actualResponseReportLength} bytes.");
+
+    var commandCode = command[0];
+    var commandCodeEcho = response[0];
+
+    if (commandCode != commandCodeEcho)
+      throw new Mcp2221ACommandException($"The command echo in the received response does not match; command code '{commandCode:X2}' was expected, but the actual command echo was {commandCodeEcho:X2}.");
+  }
+
+  /*
+   * instance members
+   */
   private IUsbHidEndPoint? endPoint;
   public IUsbHidEndPoint EndPoint => endPoint ?? throw new ObjectDisposedException(GetType().FullName);
 
@@ -63,8 +84,18 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
     }
   }
 
-  private static string ConvertByteSequenceToString(ReadOnlySpan<byte> sequence)
+  private static string ConvertByteSequenceToString(
+    ReadOnlySpan<byte> sequence,
+    int? actualLength = default
+  )
   {
+    if (actualLength is int actualSequenceLength) {
+      if (actualSequenceLength <= 0)
+        return string.Empty;
+
+      sequence = sequence.Slice(0, actualSequenceLength);
+    }
+
     var buffer = ArrayPool<byte>.Shared.Rent(sequence.Length);
 
     try {
@@ -104,13 +135,15 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
 
       cancellationToken.ThrowIfCancellationRequested();
 
+      var commandSpan = commandReportMemory.Slice(LengthOfReportId, CommandLength).Span; // span except first byte (report IN)
+
       constructCommand(
-        commandReportMemory.Span.Slice(1, CommandLength),
+        commandSpan,
         userData.Span,
         arg
       );
 
-      logger?.LogTrace(EventIdCommand, "> " + ConvertByteSequenceToString(commandReportMemory.Span.Slice(1, CommandLength)));
+      logger?.LogTrace(EventIdCommand, "> " + ConvertByteSequenceToString(commandSpan));
 
       try {
         await
@@ -131,8 +164,10 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
         throw new Mcp2221ACommandException("writing command report failed", ex);
       }
 
+      int readReportLength = default;
+
       try {
-        await endPoint.ReadAsync(
+        readReportLength = await endPoint.ReadAsync(
           responseReportMemory,
           cancellationToken
         ).ConfigureAwait(false);
@@ -144,15 +179,19 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
         throw new Mcp2221ACommandException("reading response report failed", ex);
       }
 
-      logger?.LogTrace(EventIdResponse, "< " + ConvertByteSequenceToString(responseReportMemory.Span.Slice(1, ResponseLength)));
+      // recreate and reassign Span/ReadOnlySpan since they cannot cross await boundaries
+      commandSpan = commandReportMemory.Slice(LengthOfReportId, CommandLength).Span; // span except first byte (report IN)
 
-      if (commandReportMemory.Span[0] != responseReportMemory.Span[0])
-        throw new Mcp2221ACommandException($"unexpected command echo (command code: {commandReportMemory.Span[0]:X2}, command code echo: {responseReportMemory.Span[0]:X2})");
+      var responseSpan = responseReportMemory.Slice(LengthOfReportId, ResponseLength).Span; // span except first byte (report OUT)
 
-      return parseResponse(
-        responseReportMemory.Span.Slice(1, ResponseLength),
-        arg
+      logger?.LogTrace(
+        EventIdResponse,
+        "< " + ConvertByteSequenceToString(responseSpan, readReportLength - LengthOfReportId)
       );
+
+      VerifyResponseReport(commandSpan, responseSpan, readReportLength);
+
+      return parseResponse(responseSpan, arg);
     }
     finally {
       ArrayPool<byte>.Shared.Return(commandReport);
@@ -183,13 +222,16 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
 
     cancellationToken.ThrowIfCancellationRequested();
 
+    var commandSpan = commandReport.Slice(LengthOfReportId, CommandLength); // span except first byte (report IN)
+    var responseSpan = responseReport.Slice(LengthOfReportId, ResponseLength); // span except first byte (report OUT)
+
     constructCommand(
-      commandReport.Slice(1),
+      commandSpan,
       userData,
       arg
     );
 
-    logger?.LogTrace(EventIdCommand, "> " + ConvertByteSequenceToString(commandReport.Slice(1)));
+    logger?.LogTrace(EventIdCommand, "> " + ConvertByteSequenceToString(commandSpan));
 
     try {
 #if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
@@ -209,8 +251,10 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
       throw new Mcp2221ACommandException("writing command report failed", ex);
     }
 
+    int readReportLength = default;
+
     try {
-      endPoint.Read(
+      readReportLength = endPoint.Read(
         responseReport,
         cancellationToken
       );
@@ -222,14 +266,13 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
       throw new Mcp2221ACommandException("reading response report failed", ex);
     }
 
-    logger?.LogTrace(EventIdResponse, "< " + ConvertByteSequenceToString(responseReport.Slice(1)));
-
-    if (commandReport[0] != responseReport[0])
-      throw new Mcp2221ACommandException($"unexpected command echo (command code: {commandReport[0]:X2}, command code echo: {responseReport[0]:X2})");
-
-    return parseResponse(
-      responseReport.Slice(1),
-      arg
+    logger?.LogTrace(
+      EventIdResponse,
+      "< " + ConvertByteSequenceToString(responseSpan, readReportLength - LengthOfReportId)
     );
+
+    VerifyResponseReport(commandSpan, responseSpan, readReportLength);
+
+    return parseResponse(responseSpan, arg);
   }
 }
