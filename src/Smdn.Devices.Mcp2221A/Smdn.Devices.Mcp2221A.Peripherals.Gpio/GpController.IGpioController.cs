@@ -57,8 +57,8 @@ partial class GpController : IGpioController {
     );
 
   /// <inheritdoc/>
-  /// <seealso cref="LastFetchedMode"/>
-  /// <seealso cref="LastFetchedValue"/>
+  /// <seealso cref="CurrentMode"/>
+  /// <seealso cref="LastUpdatedValue"/>
   [CLSCompliant(false)]
   public async ValueTask<PinMode> GetModeAsync(
     CancellationToken cancellationToken = default
@@ -70,12 +70,12 @@ partial class GpController : IGpioController {
 
     await gpio.FetchGpioStatesAsync(default, default, cancellationToken).ConfigureAwait(false);
 
-    return gpio.GetLastFetchedDirection(gp: Index);
+    return gpio.GetLastUpdatedDirectionOrThrow(gp: Index);
   }
 
   /// <inheritdoc/>
-  /// <seealso cref="LastFetchedMode"/>
-  /// <seealso cref="LastFetchedValue"/>
+  /// <seealso cref="CurrentMode"/>
+  /// <seealso cref="LastUpdatedValue"/>
   [CLSCompliant(false)]
   public PinMode GetMode(
     CancellationToken cancellationToken = default
@@ -87,7 +87,7 @@ partial class GpController : IGpioController {
 
     gpio.FetchGpioStates(default, default, cancellationToken);
 
-    return gpio.GetLastFetchedDirection(gp: Index);
+    return gpio.GetLastUpdatedDirectionOrThrow(gp: Index);
   }
 
   /// <inheritdoc/>
@@ -136,8 +136,8 @@ partial class GpController : IGpioController {
   }
 
   /// <inheritdoc/>
-  /// <seealso cref="LastFetchedMode"/>
-  /// <seealso cref="LastFetchedValue"/>
+  /// <seealso cref="CurrentMode"/>
+  /// <seealso cref="LastUpdatedValue"/>
   [CLSCompliant(false)]
   public async ValueTask<PinValue> ReadAsync(
     CancellationToken cancellationToken = default
@@ -149,12 +149,12 @@ partial class GpController : IGpioController {
 
     await gpio.FetchGpioStatesAsync(default, default, cancellationToken).ConfigureAwait(false);
 
-    return gpio.GetLastFetchedValue(gp: Index);
+    return gpio.GetLastUpdatedValueOrThrow(gp: Index);
   }
 
   /// <inheritdoc/>
-  /// <seealso cref="LastFetchedMode"/>
-  /// <seealso cref="LastFetchedValue"/>
+  /// <seealso cref="CurrentMode"/>
+  /// <seealso cref="LastUpdatedValue"/>
   [CLSCompliant(false)]
   public PinValue Read(
     CancellationToken cancellationToken = default
@@ -166,7 +166,7 @@ partial class GpController : IGpioController {
 
     gpio.FetchGpioStates(default, default, cancellationToken);
 
-    return gpio.GetLastFetchedValue(gp: Index);
+    return gpio.GetLastUpdatedValueOrThrow(gp: Index);
   }
 
   /// <inheritdoc/>

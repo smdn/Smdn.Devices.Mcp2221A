@@ -146,49 +146,57 @@ partial class GpControllerTests {
     );
   }
 
-  private static System.Collections.IEnumerable YieldTestCases_GetMode()
+  private static System.Collections.IEnumerable YieldTestCases_GetMode_Read()
   {
-    yield return new object[] { "00-00-", PinMode.Output }; // LOW - OUTPUT
-    yield return new object[] { "00-01-", PinMode.Input }; // LOW - INPUT
-    yield return new object[] { "01-01-", PinMode.Input }; // HIGH - INPUT
+    foreach (var (gpPinValueAndDirectionResponse, expectedValue, expectedMode) in new[] {
+      ("00-00-", PinValue.Low, PinMode.Output),
+      ("00-01-", PinValue.Low, PinMode.Input),
+      ("01-00-", PinValue.High, PinMode.Output),
+      ("01-01-", PinValue.High, PinMode.Input),
+    }) {
+      yield return new object[] { gpPinValueAndDirectionResponse, expectedValue, expectedMode, (SelectGpControllerFunc)SelectGp0Controller };
+      yield return new object[] { gpPinValueAndDirectionResponse, expectedValue, expectedMode, (SelectGpControllerFunc)SelectGp1Controller };
+      yield return new object[] { gpPinValueAndDirectionResponse, expectedValue, expectedMode, (SelectGpControllerFunc)SelectGp2Controller };
+      yield return new object[] { gpPinValueAndDirectionResponse, expectedValue, expectedMode, (SelectGpControllerFunc)SelectGp3Controller };
+    }
   }
 
-  [TestCaseSource(nameof(YieldTestCases_GetMode))]
-  public ValueTask GetMode_GPO(string gpPinValueAndDirectionResponse, PinMode expectedMode)
-    => GetModeSyncAndAsync(
-      gpPinValueAndDirectionResponse: gpPinValueAndDirectionResponse,
-      expectedMode: expectedMode,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin0
-    );
-
-  [TestCaseSource(nameof(YieldTestCases_GetMode))]
-  public ValueTask GetMode_GP1(string gpPinValueAndDirectionResponse, PinMode expectedMode)
-    => GetModeSyncAndAsync(
-      gpPinValueAndDirectionResponse: gpPinValueAndDirectionResponse,
-      expectedMode: expectedMode,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin1
-    );
-
-  [TestCaseSource(nameof(YieldTestCases_GetMode))]
-  public ValueTask GetMode_GP2(string gpPinValueAndDirectionResponse, PinMode expectedMode)
-    => GetModeSyncAndAsync(
-      gpPinValueAndDirectionResponse: gpPinValueAndDirectionResponse,
-      expectedMode: expectedMode,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin2
-    );
-
-  [TestCaseSource(nameof(YieldTestCases_GetMode))]
-  public ValueTask GetMode_GP3(string gpPinValueAndDirectionResponse, PinMode expectedMode)
-    => GetModeSyncAndAsync(
-      gpPinValueAndDirectionResponse: gpPinValueAndDirectionResponse,
-      expectedMode: expectedMode,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin3
-    );
-
-  private async ValueTask GetModeSyncAndAsync(
+  [TestCaseSource(nameof(YieldTestCases_GetMode_Read))]
+  public ValueTask GetMode(
     string gpPinValueAndDirectionResponse,
+    PinValue expectedValue,
     PinMode expectedMode,
-    Func<Mcp2221A, GpController> selectGpPin
+    SelectGpControllerFunc selectGpPin
+  )
+    => GetModeSyncOrAsync(
+      gpPinValueAndDirectionResponse: gpPinValueAndDirectionResponse,
+      expectedValue: expectedValue,
+      expectedMode: expectedMode,
+      selectGpPin: selectGpPin,
+      getModeAsyncFunc: static gp => new(gp.GetMode(default))
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_GetMode_Read))]
+  public ValueTask GetModeAsync(
+    string gpPinValueAndDirectionResponse,
+    PinValue expectedValue,
+    PinMode expectedMode,
+    SelectGpControllerFunc selectGpPin
+  )
+    => GetModeSyncOrAsync(
+      gpPinValueAndDirectionResponse: gpPinValueAndDirectionResponse,
+      expectedValue: expectedValue,
+      expectedMode: expectedMode,
+      selectGpPin: selectGpPin,
+      getModeAsyncFunc: static gp => gp.GetModeAsync(default)
+    );
+
+  private async ValueTask GetModeSyncOrAsync(
+    string gpPinValueAndDirectionResponse,
+    PinValue expectedValue,
+    PinMode expectedMode,
+    SelectGpControllerFunc selectGpPin,
+    Func<GpController, ValueTask<PinMode>> getModeAsyncFunc
   )
   {
     using var mcp2221A = CreateMcp2221AConfiguredAsGpio(
@@ -220,40 +228,27 @@ partial class GpControllerTests {
     expectedSentCommand[0] = 0x51; // GET GPIO VALUES
 
     Assert.That(
-      gp.LastFetchedMode,
+      gp.CurrentMode,
       Is.EqualTo(PinMode.Output),
       "initial mode"
     );
 
     Assert.That(
-      gp.GetMode(),
+      await getModeAsyncFunc(gp),
       Is.EqualTo(expectedMode)
     );
     Assert.That(
-      gp.LastFetchedMode,
+      gp.CurrentMode,
       Is.EqualTo(expectedMode)
+    );
+    Assert.That(
+      gp.LastUpdatedValue,
+      Is.EqualTo(expectedValue)
     );
     Assert.That(
       Mcp2221ATests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand),
       $"sent command from {nameof(gp.GetMode)}"
-    );
-
-    Mcp2221ATests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
-
-    Assert.That(
-      await gp.GetModeAsync(),
-      Is.EqualTo(expectedMode)
-    );
-    Assert.That(
-      gp.LastFetchedMode,
-      Is.EqualTo(expectedMode)
-    );
-    Assert.That(
-      Mcp2221ATests.GetSentCommand(mcp2221A),
-      SequenceIs.EqualTo(expectedSentCommand),
-      $"sent command from {nameof(gp.GetModeAsync)}"
     );
   }
 
@@ -384,50 +379,42 @@ partial class GpControllerTests {
     }
   }
 
-  private static System.Collections.IEnumerable YieldTestCases_Read()
-  {
-    yield return new object[] { "00-01-", PinValue.Low }; // LOW - INPUT
-    yield return new object[] { "01-01-", PinValue.High }; // HIGH - INPUT
-    yield return new object[] { "00-00-", PinValue.Low }; // LOW - OUTPUT
-    yield return new object[] { "01-00-", PinValue.High }; // HIGH - OUTPUT
-  }
-
-  [TestCaseSource(nameof(YieldTestCases_Read))]
-  public ValueTask Read_GPO(string gpPinValueAndDirectionResponse, PinValue expectedValue)
-    => ReadSyncAndAsync(
-      gpPinValueAndDirectionResponse: gpPinValueAndDirectionResponse,
-      expectedValue: expectedValue,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin0
-    );
-
-  [TestCaseSource(nameof(YieldTestCases_Read))]
-  public ValueTask Read_GP1(string gpPinValueAndDirectionResponse, PinValue expectedValue)
-    => ReadSyncAndAsync(
-      gpPinValueAndDirectionResponse: gpPinValueAndDirectionResponse,
-      expectedValue: expectedValue,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin1
-    );
-
-  [TestCaseSource(nameof(YieldTestCases_Read))]
-  public ValueTask Read_GP2(string gpPinValueAndDirectionResponse, PinValue expectedValue)
-    => ReadSyncAndAsync(
-      gpPinValueAndDirectionResponse: gpPinValueAndDirectionResponse,
-      expectedValue: expectedValue,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin2
-    );
-
-  [TestCaseSource(nameof(YieldTestCases_Read))]
-  public ValueTask Read_GP3(string gpPinValueAndDirectionResponse, PinValue expectedValue)
-    => ReadSyncAndAsync(
-      gpPinValueAndDirectionResponse: gpPinValueAndDirectionResponse,
-      expectedValue: expectedValue,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin3
-    );
-
-  private async ValueTask ReadSyncAndAsync(
+  [TestCaseSource(nameof(YieldTestCases_GetMode_Read))]
+  public ValueTask Read(
     string gpPinValueAndDirectionResponse,
     PinValue expectedValue,
-    Func<Mcp2221A, GpController> selectGpPin
+    PinMode expectedMode,
+    SelectGpControllerFunc selectGpPin
+  )
+    => ReadSyncOrAsync(
+      gpPinValueAndDirectionResponse: gpPinValueAndDirectionResponse,
+      expectedValue: expectedValue,
+      expectedMode: expectedMode,
+      selectGpPin: selectGpPin,
+      readAsyncFunc: static gp => new(gp.Read(default))
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_GetMode_Read))]
+  public ValueTask ReadAsync(
+    string gpPinValueAndDirectionResponse,
+    PinValue expectedValue,
+    PinMode expectedMode,
+    SelectGpControllerFunc selectGpPin
+  )
+    => ReadSyncOrAsync(
+      gpPinValueAndDirectionResponse: gpPinValueAndDirectionResponse,
+      expectedValue: expectedValue,
+      expectedMode: expectedMode,
+      selectGpPin: selectGpPin,
+      readAsyncFunc: static gp => gp.ReadAsync(default)
+    );
+
+  private async ValueTask ReadSyncOrAsync(
+    string gpPinValueAndDirectionResponse,
+    PinValue expectedValue,
+    PinMode expectedMode,
+    SelectGpControllerFunc selectGpPin,
+    Func<GpController, ValueTask<PinValue>> readAsyncFunc
   )
   {
     using var mcp2221A = CreateMcp2221AConfiguredAsGpio(
@@ -465,40 +452,27 @@ partial class GpControllerTests {
     Mcp2221ATests.ClearSentCommands(mcp2221A);
 
     Assert.That(
-      gp.LastFetchedValue,
+      gp.LastUpdatedValue,
       Is.EqualTo(PinValue.Low),
       "initial value"
     );
 
     Assert.That(
-      gp.Read(),
+      await readAsyncFunc(gp),
       Is.EqualTo(expectedValue)
     );
     Assert.That(
-      gp.LastFetchedValue,
+      gp.LastUpdatedValue,
       Is.EqualTo(expectedValue)
+    );
+    Assert.That(
+      gp.CurrentMode,
+      Is.EqualTo(expectedMode)
     );
     Assert.That(
       Mcp2221ATests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand),
       $"sent command from {nameof(gp.Read)}"
-    );
-
-    Mcp2221ATests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
-
-    Assert.That(
-      await gp.ReadAsync(),
-      Is.EqualTo(expectedValue)
-    );
-    Assert.That(
-      gp.LastFetchedValue,
-      Is.EqualTo(expectedValue)
-    );
-    Assert.That(
-      Mcp2221ATests.GetSentCommand(mcp2221A),
-      SequenceIs.EqualTo(expectedSentCommand),
-      $"sent command from {nameof(gp.ReadAsync)}"
     );
   }
 }

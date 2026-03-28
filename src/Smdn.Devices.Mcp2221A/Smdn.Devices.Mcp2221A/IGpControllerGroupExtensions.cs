@@ -481,10 +481,10 @@ public static class IGpControllerGroupExtensions {
       );
 
       return (
-        gpPins.Gp0.LastFetchedValue,
-        gpPins.Gp1.LastFetchedValue,
-        gpPins.Gp2.LastFetchedValue,
-        gpPins.Gp3.LastFetchedValue
+        gpPins.Gp0.LastUpdatedValue,
+        gpPins.Gp1.LastUpdatedValue,
+        gpPins.Gp2.LastUpdatedValue,
+        gpPins.Gp3.LastUpdatedValue
       );
     }
 
@@ -508,10 +508,10 @@ public static class IGpControllerGroupExtensions {
       ).ConfigureAwait(false);
 
       return (
-        gpPins.Gp0.LastFetchedValue,
-        gpPins.Gp1.LastFetchedValue,
-        gpPins.Gp2.LastFetchedValue,
-        gpPins.Gp3.LastFetchedValue
+        gpPins.Gp0.LastUpdatedValue,
+        gpPins.Gp1.LastUpdatedValue,
+        gpPins.Gp2.LastUpdatedValue,
+        gpPins.Gp3.LastUpdatedValue
       );
     }
 

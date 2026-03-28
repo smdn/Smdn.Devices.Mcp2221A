@@ -125,6 +125,8 @@ partial class GpControllerTests {
       );
 
       Assert.That(gp.CurrentFunction, Is.EqualTo(GpFunction.Gpio));
+      Assert.That(gp.CurrentMode, Is.EqualTo(mode));
+      Assert.That(gp.LastUpdatedValue, Is.EqualTo(initialValue));
 
       Assert.That(
         mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList(),

@@ -97,7 +97,7 @@ partial class Mcp2221AGpioDriver {
       parseResponse: GetGpSettingsCommand.ParseResponse
     ).ConfigureAwait(false);
 
-    SyncGpioValues(gpSettingsBytes.Span);
+    SyncGpioStates(gpSettingsBytes.Span);
   }
 
   internal void FetchGpSettings(CancellationToken cancellationToken)
@@ -109,7 +109,7 @@ partial class Mcp2221AGpioDriver {
       parseResponse: GetGpSettingsCommand.ParseResponse
     );
 
-    SyncGpioValues(gpSettingsBytes.Span);
+    SyncGpioStates(gpSettingsBytes.Span);
   }
 
   internal ValueTask ConfigureGpDesignationAsync(
@@ -314,7 +314,7 @@ partial class Mcp2221AGpioDriver {
       // save the successfully configured settings as the current state
       newGpSettingsBytes.CopyTo(gpSettingsBytes);
 
-      SyncGpioValues(gpSettingsBytes.Span);
+      SyncGpioStates(gpSettingsBytes.Span);
     }
     finally {
       ArrayPool<byte>.Shared.Return(newGpSettingsArray);
@@ -362,7 +362,7 @@ partial class Mcp2221AGpioDriver {
       // save the successfully configured settings as the current state
       newGpSettingsBytes.CopyTo(gpSettingsBytes);
 
-      SyncGpioValues(gpSettingsBytes.Span);
+      SyncGpioStates(gpSettingsBytes.Span);
     }
     finally {
       ArrayPool<byte>.Shared.Return(newGpSettingsArray);

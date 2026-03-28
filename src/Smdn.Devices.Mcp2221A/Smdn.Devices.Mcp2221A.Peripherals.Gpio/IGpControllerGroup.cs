@@ -207,8 +207,8 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
   /// <para>
   /// This method performs an atomic fetch operation using the MCP2221A's
   /// <c>GET GPIO VALUES</c> command. It synchronizes the internal state for all pins
-  /// simultaneously, updating both <see cref="GpController.LastFetchedValue"/> and
-  /// <see cref="GpController.LastFetchedMode"/> across all GP0-GP3 controllers.
+  /// simultaneously, updating both <see cref="GpController.LastUpdatedValue"/> and
+  /// <see cref="GpController.CurrentMode"/> across all GP0-GP3 controllers.
   /// </para>
   /// <para>
   /// Compared to calling <see cref="IGpioController.Read"/> or <see cref="IGpioController.GetMode"/>
@@ -224,8 +224,8 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
   /// or when an invalid GP index (outside the range 0-3) is encountered
   /// while populating the results from the device response.
   /// </exception>
-  /// <seealso cref="GpController.LastFetchedMode"/>
-  /// <seealso cref="GpController.LastFetchedValue"/>
+  /// <seealso cref="GpController.CurrentMode"/>
+  /// <seealso cref="GpController.LastUpdatedValue"/>
   /// <seealso cref="IGpioController.GetMode"/>
   /// <seealso cref="IGpioController.Read"/>
   /// <seealso href="https://www.microchip.com/en-us/product/mcp2221a">
@@ -246,8 +246,8 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
   /// <returns>
   /// A <see cref="ValueTask"/> representing the asynchronous operation.
   /// </returns>
-  /// <seealso cref="GpController.LastFetchedMode"/>
-  /// <seealso cref="GpController.LastFetchedValue"/>
+  /// <seealso cref="GpController.CurrentMode"/>
+  /// <seealso cref="GpController.LastUpdatedValue"/>
   /// <seealso cref="IGpioController.GetModeAsync"/>
   /// <seealso cref="IGpioController.ReadAsync"/>
   ValueTask FetchGpioStatesAsync(

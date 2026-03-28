@@ -192,43 +192,39 @@ partial class GpControllerTests {
     }
   }
 
-  private static IEnumerable<PinMode> YieldTestCases_SetMode()
+  private static System.Collections.IEnumerable YieldTestCases_SetMode()
   {
-    yield return PinMode.Output;
-    yield return PinMode.Input;
+    foreach (var mode in new[] { PinMode.Input, PinMode.Output }) {
+      yield return new object[] { mode, (SelectGpControllerFunc)SelectGp0Controller };
+      yield return new object[] { mode, (SelectGpControllerFunc)SelectGp1Controller };
+      yield return new object[] { mode, (SelectGpControllerFunc)SelectGp2Controller };
+      yield return new object[] { mode, (SelectGpControllerFunc)SelectGp3Controller };
+    }
   }
 
   [TestCaseSource(nameof(YieldTestCases_SetMode))]
-  public void SetMode_GPO(PinMode mode)
-    => SetModeSyncAndAsync(
+  public void SetMode(PinMode mode, SelectGpControllerFunc selectGpPin)
+    => SetModeSyncOrAsync(
       mode: mode,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin0
+      selectGpPin: selectGpPin,
+      setModeAsyncFunc: static (gp, mode) => {
+        gp.SetMode(mode, default);
+        return default;
+      }
     );
 
   [TestCaseSource(nameof(YieldTestCases_SetMode))]
-  public void SetMode_GP1(PinMode mode)
-    => SetModeSyncAndAsync(
+  public void SetModeAsync(PinMode mode, SelectGpControllerFunc selectGpPin)
+    => SetModeSyncOrAsync(
       mode: mode,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin1
+      selectGpPin: selectGpPin,
+      setModeAsyncFunc: static (gp, mode) => gp.SetModeAsync(mode, default)
     );
 
-  [TestCaseSource(nameof(YieldTestCases_SetMode))]
-  public void SetMode_GP2(PinMode mode)
-    => SetModeSyncAndAsync(
-      mode: mode,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin2
-    );
-
-  [TestCaseSource(nameof(YieldTestCases_SetMode))]
-  public void SetMode_GP3(PinMode mode)
-    => SetModeSyncAndAsync(
-      mode: mode,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin3
-    );
-
-  private void SetModeSyncAndAsync(
+  private void SetModeSyncOrAsync(
     PinMode mode,
-    Func<Mcp2221A, GpController> selectGpPin
+    SelectGpControllerFunc selectGpPin,
+    Func<GpController, PinMode, ValueTask> setModeAsyncFunc
   )
   {
     using var mcp2221A = CreateMcp2221AConfiguredAsGpio(
@@ -274,22 +270,10 @@ partial class GpControllerTests {
     Mcp2221ATests.ClearSentCommands(mcp2221A);
 
     Assert.That(
-      () => gp.SetMode(mode, default),
+      async () => await setModeAsyncFunc(gp, mode),
       Throws.Nothing
     );
-    Assert.That(
-      Mcp2221ATests.GetSentCommand(mcp2221A),
-      SequenceIs.EqualTo(expectedSentCommand),
-      $"sent command from {nameof(gp.SetMode)}"
-    );
-
-    Mcp2221ATests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
-
-    Assert.That(
-      async () => await gp.SetModeAsync(mode, default),
-      Throws.Nothing
-    );
+    Assert.That(gp.CurrentMode, Is.EqualTo(mode));
     Assert.That(
       Mcp2221ATests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand),
@@ -354,43 +338,39 @@ partial class GpControllerTests {
     );
   }
 
-  private static IEnumerable<PinValue> YieldTestCases_Write()
+  private static System.Collections.IEnumerable YieldTestCases_Write()
   {
-    yield return PinValue.High;
-    yield return PinValue.Low;
+    foreach (var value in new[] { PinValue.High, PinValue.Low }) {
+      yield return new object[] { value, (SelectGpControllerFunc)SelectGp0Controller };
+      yield return new object[] { value, (SelectGpControllerFunc)SelectGp1Controller };
+      yield return new object[] { value, (SelectGpControllerFunc)SelectGp2Controller };
+      yield return new object[] { value, (SelectGpControllerFunc)SelectGp3Controller };
+    }
   }
 
   [TestCaseSource(nameof(YieldTestCases_Write))]
-  public void Write_GPO(PinValue value)
-    => WriteSyncAndAsync(
+  public void Write(PinValue value, SelectGpControllerFunc selectGpPin)
+    => WriteSyncOrAsync(
       value: value,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin0
+      selectGpPin: selectGpPin,
+      writeAsyncFunc: static (gp, value) => {
+        gp.Write(value, default);
+        return default;
+      }
     );
 
   [TestCaseSource(nameof(YieldTestCases_Write))]
-  public void Write_GP1(PinValue value)
-    => WriteSyncAndAsync(
+  public void WriteAsync(PinValue value, SelectGpControllerFunc selectGpPin)
+    => WriteSyncOrAsync(
       value: value,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin1
+      selectGpPin: selectGpPin,
+      writeAsyncFunc: static (gp, value) => gp.WriteAsync(value, default)
     );
 
-  [TestCaseSource(nameof(YieldTestCases_Write))]
-  public void Write_GP2(PinValue value)
-    => WriteSyncAndAsync(
-      value: value,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin2
-    );
-
-  [TestCaseSource(nameof(YieldTestCases_Write))]
-  public void Write_GP3(PinValue value)
-    => WriteSyncAndAsync(
-      value: value,
-      selectGpPin: static mcp2221A => mcp2221A.GpPin3
-    );
-
-  private void WriteSyncAndAsync(
+  private void WriteSyncOrAsync(
     PinValue value,
-    Func<Mcp2221A, GpController> selectGpPin
+    SelectGpControllerFunc selectGpPin,
+    Func<GpController, PinValue, ValueTask> writeAsyncFunc
   )
   {
     using var mcp2221A = CreateMcp2221AConfiguredAsGpio(
@@ -436,26 +416,14 @@ partial class GpControllerTests {
     Mcp2221ATests.ClearSentCommands(mcp2221A);
 
     Assert.That(
-      () => gp.Write(value, default),
+      () => writeAsyncFunc(gp, value),
       Throws.Nothing
     );
+    Assert.That(gp.LastUpdatedValue, Is.EqualTo(value));
     Assert.That(
       Mcp2221ATests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand),
       $"sent command from {nameof(gp.Write)}"
-    );
-
-    Mcp2221ATests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
-
-    Assert.That(
-      async () => await gp.WriteAsync(value, default),
-      Throws.Nothing
-    );
-    Assert.That(
-      Mcp2221ATests.GetSentCommand(mcp2221A),
-      SequenceIs.EqualTo(expectedSentCommand),
-      $"sent command from {nameof(gp.WriteAsync)}"
     );
   }
 

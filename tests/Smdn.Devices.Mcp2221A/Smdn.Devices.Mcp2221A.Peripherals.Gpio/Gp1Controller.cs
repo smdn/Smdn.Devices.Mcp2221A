@@ -58,15 +58,15 @@ public class Gp1ControllerTests {
     yield return (0b_000_1_1_011, null, null, GpFunction.LedOutput, "LED_UTX");
   }
 
-  private static System.Collections.IEnumerable YieldTestCases_LastFetchedValue_AtStartup()
+  private static System.Collections.IEnumerable YieldTestCases_LastUpdatedValue_AtStartup()
   {
     foreach (var (gp1Settings, pinValue, _, _, _) in YieldTestCases_Gp1Settings()) {
       yield return new object?[] { gp1Settings, pinValue };
     }
   }
 
-  [TestCaseSource(nameof(YieldTestCases_LastFetchedValue_AtStartup))]
-  public void LastFetchedValue_AtStartup(byte gp1Settings, PinValue? expected)
+  [TestCaseSource(nameof(YieldTestCases_LastUpdatedValue_AtStartup))]
+  public void LastUpdatedValue_AtStartup(byte gp1Settings, PinValue? expected)
   {
     using var mcp2221A = Mcp2221A.Create(
       Mcp2221ATests.CreatePseudoDevice(
@@ -76,20 +76,20 @@ public class Gp1ControllerTests {
     );
 
     if (expected.HasValue)
-      Assert.That(mcp2221A.GpPin1.LastFetchedValue, Is.EqualTo(expected.Value));
+      Assert.That(mcp2221A.GpPin1.LastUpdatedValue, Is.EqualTo(expected.Value));
     else
-      Assert.That(() => _ = mcp2221A.GpPin1.LastFetchedValue, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP1"));
+      Assert.That(() => _ = mcp2221A.GpPin1.LastUpdatedValue, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP1"));
   }
 
-  private static System.Collections.IEnumerable YieldTestCases_LastFetchedMode_AtStartup()
+  private static System.Collections.IEnumerable YieldTestCases_CurrentMode_AtStartup()
   {
     foreach (var (gp1Settings, _, pinMode, _, _) in YieldTestCases_Gp1Settings()) {
       yield return new object?[] { gp1Settings, pinMode };
     }
   }
 
-  [TestCaseSource(nameof(YieldTestCases_LastFetchedMode_AtStartup))]
-  public void LastFetchedMode_AtStartup(byte gp1Settings, PinMode? expected)
+  [TestCaseSource(nameof(YieldTestCases_CurrentMode_AtStartup))]
+  public void CurrentMode_AtStartup(byte gp1Settings, PinMode? expected)
   {
     using var mcp2221A = Mcp2221A.Create(
       Mcp2221ATests.CreatePseudoDevice(
@@ -99,9 +99,9 @@ public class Gp1ControllerTests {
     );
 
     if (expected.HasValue)
-      Assert.That(mcp2221A.GpPin1.LastFetchedMode, Is.EqualTo(expected.Value));
+      Assert.That(mcp2221A.GpPin1.CurrentMode, Is.EqualTo(expected.Value));
     else
-      Assert.That(() => _ = mcp2221A.GpPin1.LastFetchedMode, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP1"));
+      Assert.That(() => _ = mcp2221A.GpPin1.CurrentMode, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP1"));
   }
 
   private static System.Collections.IEnumerable YieldTestCases_CurrentFunction_AtStartup()
