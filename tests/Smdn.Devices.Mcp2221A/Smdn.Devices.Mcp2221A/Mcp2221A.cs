@@ -261,12 +261,7 @@ public partial class Mcp2221ATests {
 
     stream.Position = 0L;
 
-#if NET7_0_OR_GREATER
     stream.ReadExactly(buffer.AsSpan(0, ReportLength));
-#else
-    if (ReportLength != stream.Read(buffer, 0, ReportLength))
-      throw new InvalidOperationException("invalid report length");
-#endif
 
     stream.Position = 0L;
 

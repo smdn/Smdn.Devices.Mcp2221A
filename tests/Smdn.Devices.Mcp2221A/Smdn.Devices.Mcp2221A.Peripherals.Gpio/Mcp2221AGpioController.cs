@@ -280,7 +280,11 @@ public class Mcp2221AGpioControllerTests {
 #else
     Assert.That(
       () => mcp2221A.GpioController.OpenPin(pinNumber),
-      Throws.Nothing,
+      Throws
+        .InvalidOperationException
+        .With
+        .Property(nameof(InvalidOperationException.Message))
+        .EqualTo($"Pin {pinNumber} is already open."),
       "re-open"
     );
 #endif
@@ -912,7 +916,17 @@ public class Mcp2221AGpioControllerTests {
       string.Join("-", Enumerable.Repeat("00", 64 - 18))
     );
 
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
     Mcp2221ATests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
+#else
+    // In this version, `GpioController.Write(ReadOnlySpan<PinValuePair>)` is implemented to
+    // call `Write(int, PinValue)` for each individual `PinValuePair`, so the response must
+    // also be prepared for each one.
+    Mcp2221ATests.AppendPseudoResponse(
+      mcp2221A,
+      Enumerable.Repeat(setGpioOutputValuesResponse, pinValuePairs.Length).ToArray()
+    );
+#endif
     Mcp2221ATests.ClearSentCommands(mcp2221A);
 
     var expectedSentCommand = new byte[64];
@@ -925,10 +939,15 @@ public class Mcp2221AGpioControllerTests {
       () => mcp2221A.GpioController.Write(pinValuePairs),
       Throws.Nothing
     );
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
     Assert.That(
       Mcp2221ATests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand)
     );
+#else
+    // Write(PinValuePair) is called for each individual PinValuePair.
+    // Verification of the sent command is skipped here.
+#endif
 
     foreach (var (gp, value) in pinValuePairs) {
       Assert.That(
@@ -1134,7 +1153,17 @@ public class Mcp2221AGpioControllerTests {
       string.Join("-", Enumerable.Repeat("00", 64 - 10))
     );
 
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
     Mcp2221ATests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
+#else
+    // In this version, `GpioController.Read(Span<PinValuePair>)` is implemented to
+    // call `Read(int)` for each individual `PinValuePair`, so the response must
+    // also be prepared for each one.
+    Mcp2221ATests.AppendPseudoResponse(
+      mcp2221A,
+      Enumerable.Repeat(getGpioValuesResponse, pinValuePairs.Length).ToArray()
+    );
+#endif
     Mcp2221ATests.ClearSentCommands(mcp2221A);
 
     var expectedSentCommand = new byte[64]; // [1-64]: don't care
@@ -1145,10 +1174,15 @@ public class Mcp2221AGpioControllerTests {
       () => mcp2221A.GpioController.Read(pinValuePairs),
       Throws.Nothing
     );
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
     Assert.That(
       Mcp2221ATests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand)
     );
+#else
+    // Read(PinValuePair) is called for each individual PinValuePair.
+    // Verification of the sent command is skipped here.
+#endif
 
     for (var i = 0; i < pinValuePairs.Length; i++) {
       Assert.That(
