@@ -19,10 +19,7 @@ using var serviceProvider = services.BuildServiceProvider();
 using var device = Mcp2221A.Create(serviceProvider);
 
 // configure GP0-GP3 as GPIO input
-device.GpPin0.ConfigureAsGpioInput();
-device.GpPin1.ConfigureAsGpioInput();
-device.GpPin2.ConfigureAsGpioInput();
-device.GpPin3.ConfigureAsGpioInput();
+device.GpPins.ConfigureAllAsGpioInput();
 
 // read GP0 value
 var gp0Val = device.GpPin0.Read();
@@ -36,14 +33,35 @@ byte gp2Val = (byte)device.GpPins[2].Read();
 // read GP3 value as bool (false = LOW, true = HIGH)
 bool gp3Val = (bool)device.GpPins[3].Read();
 
-// read and display GP0-GP3 pin value every 20 ms
-var initialCursorPosition = (left: Console.CursorLeft, top: Console.CursorTop);
+// read and display GP0-GP3 pin values every 20 ms
+Console.Clear();
+
+var initialCursorPosition = Console.GetCursorPosition();
+
+const string ColumnFormat = "|{0,-6}|{1,-6}|{2,-6}|{3,-6}|";
+
+var pinNames = string.Format(
+  ColumnFormat,
+  device.GpPin0.PinName,
+  device.GpPin1.PinName,
+  device.GpPin2.PinName,
+  device.GpPin3.PinName
+);
 
 while (true) {
-  Console.SetCursorPosition(initialCursorPosition.left, initialCursorPosition.top);
+  // read GP0-GP3 values all at once
+  var (gp0, gp1, gp2, gp3) = device.GpPins.Read();
 
-  Console.WriteLine(string.Join("\t", device.GpPins.Select(gp => gp.PinName)));
-  Console.WriteLine(string.Join("\t", device.GpPins.Select(gp => (bool)gp.Read() ? "H" : "L")));
+  Console.SetCursorPosition(initialCursorPosition.Left, initialCursorPosition.Top);
+
+  Console.WriteLine(pinNames);
+  Console.WriteLine(
+    ColumnFormat,
+    gp0,
+    gp1,
+    gp2,
+    gp3
+  );
 
   Thread.Sleep(20);
 }

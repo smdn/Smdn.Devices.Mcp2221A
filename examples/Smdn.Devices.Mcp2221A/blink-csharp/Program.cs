@@ -60,6 +60,14 @@ foreach (var gp in device.GpPins) {
 
 Thread.Sleep(1000);
 
+Console.WriteLine("set all GPs");
+
+device.GpPins.Write(PinValue.High, PinValue.High, PinValue.High, PinValue.High);
+
+Thread.Sleep(1000);
+
+device.GpPins.Write(PinValue.Low, PinValue.Low, PinValue.Low, PinValue.Low);
+
 // blink GP0-GP3
 foreach (var gp in device.GpPins) {
   Console.WriteLine($"blink {gp.PinName}");

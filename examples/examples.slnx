@@ -6,8 +6,6 @@ SPDX-License-Identifier: MIT
   <Folder Name="/Smdn.Devices.Mcp2221A/">
     <Project Path="Smdn.Devices.Mcp2221A/i2cscanbus/i2cscanbus.csproj" />
     <Project Path="Smdn.Devices.Mcp2221A/logging/logging.csproj" />
-    <Project Path="Smdn.Devices.Mcp2221A/read-gpio/read-gpio.csproj" />
-    <Project Path="Smdn.Devices.Mcp2221A/shiftregister/shiftregister.csproj" />
   </Folder>
   <Folder Name="/Smdn.Devices.Mcp2221A/blink-csharp/">
     <Project Path="Smdn.Devices.Mcp2221A/blink-csharp/blink.csproj" />
@@ -17,6 +15,18 @@ SPDX-License-Identifier: MIT
   </Folder>
   <Folder Name="/Smdn.Devices.Mcp2221A/GettingStarted/">
     <Project Path="Smdn.Devices.Mcp2221A/GettingStarted/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/GpioController_ShiftRegister/">
+    <Project Path="Smdn.Devices.Mcp2221A/GpioController_ShiftRegister/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/GpioController_TM1637/">
+    <Project Path="Smdn.Devices.Mcp2221A/GpioController_TM1637/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/GPIO_Read/">
+    <Project Path="Smdn.Devices.Mcp2221A/GPIO_Read/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/GPIO_ShiftRegister/">
+    <Project Path="Smdn.Devices.Mcp2221A/GPIO_ShiftRegister/Program.csproj" />
   </Folder>
   <Folder Name="/Smdn.Devices.Mcp2221A/I2CAdapter_BME280/">
     <Project Path="Smdn.Devices.Mcp2221A/I2CAdapter_BME280/Program.csproj" />

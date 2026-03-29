@@ -43,11 +43,8 @@ using var serviceProvider = services.BuildServiceProvider();
 // Find and open the first MCP2221 device connected to the USB port.
 using var device = Mcp2221A.Create(serviceProvider);
 
-// Configure the GP pins (GP0-GP3) as GPIO output.
-device.GpPin0.ConfigureAsGpioOutput();
-device.GpPin1.ConfigureAsGpioOutput();
-device.GpPin2.ConfigureAsGpioOutput();
-device.GpPin3.ConfigureAsGpioOutput();
+// Configure the all GP pins (GP0-GP3) as GPIO output.
+device.GpPins.ConfigureAllAsGpioOutput();
 
 // Blink the configured GPIO pins.
 //
@@ -62,8 +59,22 @@ foreach (var gp in device.GpPins) {
     gp.Write(false);
     Thread.Sleep(100);
 
-    // Set the pin output to High (logic 0)
+    // Set the pin output to High (logic 1)
     gp.Write(true);
     Thread.Sleep(100);
   }
+}
+
+Console.WriteLine($"Blinking {device.GpPin0.PinName}-{device.GpPin3.PinName}");
+
+// You can also set the states of GP0–GP3 all at once
+// by calling the methods of the GpPins property.
+for (var n = 0; n < 10; n++) {
+  // Set the GP0–GP3 outputs to H-L-H-L
+  device.GpPins.Write(true, false, true, false);
+  Thread.Sleep(100);
+
+  // Set the GP0–GP3 outputs to L-H-L-H
+   device.GpPins.Write(false, true, false, true);
+  Thread.Sleep(100);
 }

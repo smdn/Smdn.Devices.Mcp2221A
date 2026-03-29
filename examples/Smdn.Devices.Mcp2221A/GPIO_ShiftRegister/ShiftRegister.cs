@@ -13,8 +13,8 @@ using Smdn.Devices.Mcp2221A;
 using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 enum BitOrder {
-  LSBFirst,
-  HSBFirst,
+  LsbFirst,
+  HsbFirst,
 }
 
 enum Endianness {
@@ -48,8 +48,8 @@ class ShiftRegister {
   )
   {
     var (firstBitMask, shiftAmount) = bitOrder switch {
-      BitOrder.LSBFirst => (0b_00000001u, +1),
-      BitOrder.HSBFirst => (0b_10000000u, -1),
+      BitOrder.LsbFirst => (0b_00000001u, +1),
+      BitOrder.HsbFirst => (0b_10000000u, -1),
       _ => throw new ArgumentException($"undefined bit order ({bitOrder})", nameof(bitOrder)),
     };
 
@@ -75,8 +75,8 @@ class ShiftRegister {
   )
   {
     var (firstBitMask, shiftAmount) = bitOrder switch {
-      BitOrder.LSBFirst => (0b_00000001u, +1),
-      BitOrder.HSBFirst => (0b_10000000u, -1),
+      BitOrder.LsbFirst => (0b_00000001u, +1),
+      BitOrder.HsbFirst => (0b_10000000u, -1),
       _ => throw new ArgumentException($"undefined bit order ({bitOrder})", nameof(bitOrder)),
     };
 
