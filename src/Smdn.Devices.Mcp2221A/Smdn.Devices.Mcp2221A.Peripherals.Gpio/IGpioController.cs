@@ -36,6 +36,9 @@ public interface IGpioController {
   /// or <see cref="PinMode.InputPullDown"/> as these modes are not
   /// supported by the device.
   /// </exception>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <remarks>
   /// When <paramref name="mode"/> is set to <see cref="PinMode.Input"/>,
   /// the pin operates in a high-impedance state. Note that the MCP2221/MCP2221A does
@@ -66,6 +69,9 @@ public interface IGpioController {
   /// Thrown when <paramref name="mode"/> is set to <see cref="PinMode.InputPullUp"/>
   /// or <see cref="PinMode.InputPullDown"/> as these modes are not
   /// supported by the device.
+  /// </exception>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
   /// </exception>
   /// <remarks>
   /// When <paramref name="mode"/> is set to <see cref="PinMode.Input"/>,
@@ -126,6 +132,9 @@ public interface IGpioController {
   /// or <see cref="PinMode.InputPullDown"/> as these modes are not
   /// supported by the device.
   /// </exception>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <remarks>
   /// When <paramref name="mode"/> is set to <see cref="PinMode.Input"/>,
   /// the pin operates in a high-impedance state. Note that the MCP2221/MCP2221A does
@@ -150,6 +159,9 @@ public interface IGpioController {
   /// Thrown when <paramref name="mode"/> is set to <see cref="PinMode.InputPullUp"/>
   /// or <see cref="PinMode.InputPullDown"/> as these modes are not
   /// supported by the device.
+  /// </exception>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
   /// </exception>
   /// <remarks>
   /// When <paramref name="mode"/> is set to <see cref="PinMode.Input"/>,
@@ -203,6 +215,9 @@ public interface IGpioController {
   /// <returns>
   /// A <see cref="ValueTask"/> representing the asynchronous operation.
   /// </returns>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   ValueTask WriteAsync(
     PinValue value,
     CancellationToken cancellationToken = default
@@ -218,6 +233,9 @@ public interface IGpioController {
   /// <param name="cancellationToken">
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// </param>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   void Write(
     PinValue value,
     CancellationToken cancellationToken = default

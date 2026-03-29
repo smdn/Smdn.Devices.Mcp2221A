@@ -84,6 +84,9 @@ public sealed class Gp2Controller :
       cancellationToken: cancellationToken
     );
 
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <seealso cref="GpFunction.UsbConfigureStatus"/>
   public ValueTask ConfigureAsUsbConfigureStatusAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
@@ -91,6 +94,9 @@ public sealed class Gp2Controller :
       cancellationToken: cancellationToken
     );
 
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <seealso cref="GpFunction.UsbConfigureStatus"/>
   public void ConfigureAsUsbConfigureStatus(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(

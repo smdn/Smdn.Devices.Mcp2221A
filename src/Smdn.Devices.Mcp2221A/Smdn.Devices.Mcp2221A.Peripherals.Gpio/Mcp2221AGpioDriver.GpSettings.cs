@@ -126,6 +126,7 @@ partial class Mcp2221AGpioDriver {
         Gp2Settings: gp == 2 ? ConstructGpSettings(gpDesignation, gpioDirection, gpioValue) : default,
         Gp3Settings: gp == 3 ? ConstructGpSettings(gpDesignation, gpioDirection, gpioValue) : default
       ),
+      shouldThrowIfUsedByGpioController: true,
       cancellationToken: cancellationToken
     );
 
@@ -143,6 +144,7 @@ partial class Mcp2221AGpioDriver {
         Gp2Settings: gp == 2 ? ConstructGpSettings(gpDesignation, gpioDirection, gpioValue) : default,
         Gp3Settings: gp == 3 ? ConstructGpSettings(gpDesignation, gpioDirection, gpioValue) : default
       ),
+      shouldThrowIfUsedByGpioController: true,
       cancellationToken: cancellationToken
     );
 
@@ -190,6 +192,7 @@ partial class Mcp2221AGpioDriver {
           gp3Mode,
           gp3InitialValue
         ),
+        shouldThrowIfUsedByGpioController: true,
         cancellationToken: cancellationToken
       );
 
@@ -224,6 +227,7 @@ partial class Mcp2221AGpioDriver {
           gp3Mode,
           gp3InitialValue
         ),
+        shouldThrowIfUsedByGpioController: true,
         cancellationToken: cancellationToken
       );
 
@@ -280,6 +284,7 @@ partial class Mcp2221AGpioDriver {
       GpSettings Gp2Settings,
       GpSettings Gp3Settings
     ) allGpSettings,
+    bool shouldThrowIfUsedByGpioController,
     CancellationToken cancellationToken
   )
   {
@@ -300,7 +305,8 @@ partial class Mcp2221AGpioDriver {
         gp0Settings: gp0Settings,
         gp1Settings: gp1Settings,
         gp2Settings: gp2Settings,
-        gp3Settings: gp3Settings
+        gp3Settings: gp3Settings,
+        shouldThrowIfUsedByGpioController: shouldThrowIfUsedByGpioController
       );
 
       // attempt to set new GP0-GP3 settings
@@ -328,6 +334,7 @@ partial class Mcp2221AGpioDriver {
       GpSettings Gp2Settings,
       GpSettings Gp3Settings
     ) allGpSettings,
+    bool shouldThrowIfUsedByGpioController,
     CancellationToken cancellationToken
   )
   {
@@ -348,7 +355,8 @@ partial class Mcp2221AGpioDriver {
         gp0Settings: gp0Settings,
         gp1Settings: gp1Settings,
         gp2Settings: gp2Settings,
-        gp3Settings: gp3Settings
+        gp3Settings: gp3Settings,
+        shouldThrowIfUsedByGpioController: shouldThrowIfUsedByGpioController
       );
 
       // attempt to set new GP0-GP3 settings
@@ -374,7 +382,8 @@ partial class Mcp2221AGpioDriver {
     GpSettings gp0Settings,
     GpSettings gp1Settings,
     GpSettings gp2Settings,
-    GpSettings gp3Settings
+    GpSettings gp3Settings,
+    bool shouldThrowIfUsedByGpioController
   )
   {
     // copy current GP0-GP3 settings
@@ -389,6 +398,9 @@ partial class Mcp2221AGpioDriver {
 
     // construct new GP0-GP3 settings
     for (var i = 0; i < NumberOfGpPins; i++) {
+      if (shouldThrowIfUsedByGpioController && !allGpSettings[i].IsNull)
+        ThrowIfUsedByGpioController(gp: i);
+
       // construct new GP<n> settings
       byte gpSettingsBits = 0b_000_0_0_000;
 

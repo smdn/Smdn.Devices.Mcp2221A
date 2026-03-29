@@ -62,6 +62,10 @@ public static class IGpControllerGroupExtensions {
     /// <exception cref="NotSupportedException">
     /// Thrown when a function is not supported by the specified GP pin.
     /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when any of the GP pins (GP0-GP3) have <see cref="GpController.IsUsedByGpioController"/>
+    /// set to <see langword="true"/>.
+    /// </exception>
     [CLSCompliant(false)]
     public void ConfigureAllGpFunctions(
       GpFunction? gp0Function = default,
@@ -149,6 +153,10 @@ public static class IGpControllerGroupExtensions {
     /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
     /// The default value is <see cref="CancellationToken.None"/>.
     /// </param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when any of the GP pins (GP0-GP3) have <see cref="GpController.IsUsedByGpioController"/>
+    /// set to <see langword="true"/>.
+    /// </exception>
     /// <remarks>
     /// <para>
     /// This method ensures that all GP pins are assigned the GPIO function.
@@ -251,6 +259,10 @@ public static class IGpControllerGroupExtensions {
     /// <param name="cancellationToken">
     /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
     /// </param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when any of the GP pins (GP0-GP3) have <see cref="GpController.IsUsedByGpioController"/>
+    /// set to <see langword="true"/>.
+    /// </exception>
     /// <remarks>
     /// This is a convenience method that calls <see cref="IGpControllerGroup.ConfigureAllGpSettings"/>
     /// with <see cref="GpFunction.Gpio"/> and <see cref="PinMode.Output"/> for all pins.
@@ -326,6 +338,10 @@ public static class IGpControllerGroupExtensions {
     /// <param name="cancellationToken">
     /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
     /// </param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when any of the GP pins (GP0-GP3) have <see cref="GpController.IsUsedByGpioController"/>
+    /// set to <see langword="true"/>.
+    /// </exception>
     /// <remarks>
     /// This is a convenience method that calls <see cref="IGpControllerGroup.ConfigureAllGpSettings"/>
     /// with <see cref="GpFunction.Gpio"/> and <see cref="PinMode.Input"/> for all pins.
@@ -526,6 +542,10 @@ public static class IGpControllerGroupExtensions {
     /// <param name="cancellationToken">
     /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
     /// </param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when any of the GP pins (GP0-GP3) have <see cref="GpController.IsUsedByGpioController"/>
+    /// set to <see langword="true"/>.
+    /// </exception>
     /// <remarks>
     /// <para>
     /// This method calls <see cref="IGpControllerGroup.ApplyGpioStates"/> with
@@ -598,6 +618,10 @@ public static class IGpControllerGroupExtensions {
     /// <param name="cancellationToken">
     /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
     /// </param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when any of the GP pins (GP0-GP3) have <see cref="GpController.IsUsedByGpioController"/>
+    /// set to <see langword="true"/>.
+    /// </exception>
     /// <remarks>
     /// <para>
     /// This method is optimized for named argument usage. It updates only the

@@ -6,7 +6,20 @@ using System.Collections.Generic;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
-internal sealed partial class Mcp2221AGpioDriver : /* System.Device.Gpio.GpioDriver, */ IGpControllerGroup {
+internal sealed partial class Mcp2221AGpioDriver : IGpControllerGroup {
+  internal static int ThrowIfIndexOfGpPinIsOutOfRange(int index, string paramName)
+  {
+    if (index is < 0 or >= NumberOfGpPins) {
+      throw new ArgumentOutOfRangeException(
+        paramName: paramName,
+        actualValue: index,
+        message: $"The index of GP pin must be in range of 0 to {NumberOfGpPins - 1}."
+      );
+    }
+
+    return index;
+  }
+
   internal const int NumberOfGpPins = 4;
 
   internal Mcp2221ATransceiver Transceiver { get; }
@@ -17,12 +30,12 @@ internal sealed partial class Mcp2221AGpioDriver : /* System.Device.Gpio.GpioDri
   public Gp3Controller Gp3 { get; }
 
   public GpController this[int index]
-    => index switch {
+    => ThrowIfIndexOfGpPinIsOutOfRange(index, nameof(index)) switch {
       0 => Gp0,
       1 => Gp1,
       2 => Gp2,
       3 => Gp3,
-      _ => throw new ArgumentOutOfRangeException(paramName: nameof(index), actualValue: index, message: null),
+      _ => throw new NotImplementedException(), // never happen
     };
 
   public int Count => NumberOfGpPins;
@@ -38,6 +51,9 @@ internal sealed partial class Mcp2221AGpioDriver : /* System.Device.Gpio.GpioDri
     Gp2 = new(this);
     Gp3 = new(this);
   }
+
+  internal void ThrowIfDisposed()
+    => Transceiver.ThrowIfDisposed();
 
   IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

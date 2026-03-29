@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 using System;
+using System.Device.Gpio;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -340,7 +341,17 @@ public partial class Mcp2221ATests {
 
   private async Task TestDispose(bool shouldDisposeUsbHidDevice, Func<Mcp2221A, Task> disposeAction)
   {
-    using var baseDevice = CreatePseudoDevice();
+    const byte InitialGp0Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO0)
+    const byte InitialGp1Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO1)
+    const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
+    const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
+
+    using var baseDevice = CreatePseudoDevice(
+      gp0Settings: InitialGp0Settings,
+      gp1Settings: InitialGp1Settings,
+      gp2Settings: InitialGp2Settings,
+      gp3Settings: InitialGp3Settings
+    );
     await using var device = await Mcp2221A.CreateAsync(baseDevice, shouldDisposeUsbHidDevice: shouldDisposeUsbHidDevice);
 
     Assert.That(() => _ = device.HidDevice, Throws.Nothing);
@@ -357,12 +368,18 @@ public partial class Mcp2221ATests {
     Assert.That(() => _ = device.GpPin2, Throws.Nothing);
     Assert.That(() => _ = device.GpPin3, Throws.Nothing);
     Assert.That(() => _ = device.I2c, Throws.Nothing);
+    Assert.That(() => _ = device.GpioController, Throws.Nothing);
 
     var i2c = device.I2c;
     var gp0 = device.GpPin0;
     var gp1 = device.GpPin1;
     var gp2 = device.GpPin2;
     var gp3 = device.GpPin3;
+    var gpioController = device.GpioController;
+
+    // To test the GetMode/SetMode and Read/Write method calls on the GpioController,
+    // ensure the pin is open.
+    _ = device.GpioController.OpenPin(0);
 
     await disposeAction(device);
 
@@ -373,6 +390,7 @@ public partial class Mcp2221ATests {
     Assert.That(() => _ = device.GpPin2, Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => _ = device.GpPin3, Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => _ = device.I2c, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = device.GpioController, Throws.TypeOf<ObjectDisposedException>());
 
     Assert.That(() => _ = device.HardwareRevision, Throws.Nothing);
     Assert.That(() => _ = device.FirmwareRevision, Throws.Nothing);
@@ -396,6 +414,14 @@ public partial class Mcp2221ATests {
     Assert.That(async () => await i2c.ReadAsync(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => i2c.ReadAsync(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => i2c.Read(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
+
+    Assert.That(() => gpioController.OpenPin(1, PinMode.Output), Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => gpioController.ClosePin(0), Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => gpioController.SetPinMode(0, PinMode.Output), Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => gpioController.GetPinMode(0), Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => gpioController.Write(0, PinValue.High), Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => gpioController.Read(0), Throws.TypeOf<ObjectDisposedException>());
+
     Assert.That(baseDevice.IsDisposed, Is.EqualTo(shouldDisposeUsbHidDevice), "USB HID device disposed");
 
     Assert.That(async () => await disposeAction(device), Throws.Nothing, "dispose again");
@@ -505,11 +531,30 @@ public partial class Mcp2221ATests {
     Assert.That(mcp2221A.GpPins[1], Is.TypeOf<Gp1Controller>());
     Assert.That(mcp2221A.GpPins[2], Is.TypeOf<Gp2Controller>());
     Assert.That(mcp2221A.GpPins[3], Is.TypeOf<Gp3Controller>());
+  }
 
-    Assert.That(() => _ = mcp2221A.GpPins[int.MinValue], Throws.TypeOf<ArgumentOutOfRangeException>());
-    Assert.That(() => _ = mcp2221A.GpPins[-1], Throws.TypeOf<ArgumentOutOfRangeException>());
-    Assert.That(() => _ = mcp2221A.GpPins[4], Throws.TypeOf<ArgumentOutOfRangeException>());
-    Assert.That(() => _ = mcp2221A.GpPins[int.MaxValue], Throws.TypeOf<ArgumentOutOfRangeException>());
+  [TestCase(int.MinValue)]
+  [TestCase(-1)]
+  [TestCase(4)]
+  [TestCase(int.MaxValue)]
+  public async ValueTask GpPins_IReadOnlyList_Items_IndexOutOfRange(int index)
+  {
+    await using var mcp2221A = await Mcp2221A.CreateAsync(
+      CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(
+      () => _ = mcp2221A.GpPins[index],
+      Throws
+        .TypeOf<ArgumentOutOfRangeException>()
+        .With
+        .Property(nameof(ArgumentOutOfRangeException.ParamName))
+        .EqualTo("index")
+        .And
+        .Property(nameof(ArgumentOutOfRangeException.ActualValue))
+        .EqualTo(index)
+    );
   }
 
   [Test]

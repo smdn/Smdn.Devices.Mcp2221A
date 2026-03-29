@@ -166,6 +166,38 @@ public abstract partial class GpController {
   [CLSCompliant(false)]
   public PinMode CurrentMode => gpio.GetLastUpdatedDirectionOrThrow(gp: Index);
 
+  /// <summary>
+  /// Gets a value indicating whether the GP pin is currently being
+  /// used by <see cref="Mcp2221A.GpioController"/>.
+  /// </summary>
+  /// <value>
+  /// <see langword="true"/> if the pin has been opened by <see cref="GpioController.OpenPin(int)"/>
+  /// and has not yet been closed by <see cref="GpioController.ClosePin(int)"/>;
+  /// otherwise, <see langword="false"/>.
+  /// </value>
+  /// <remarks>
+  /// <para>
+  /// To prevent configuration conflicts and maintain hardware integrity,
+  /// <see cref="GpController"/> restricts direct modifications to the GP pin
+  /// while it is under the management of a <see cref="GpioController"/>.
+  /// </para>
+  /// <para>
+  /// When this property is <see langword="true"/>, any attempt to change the pin's
+  /// function (e.g., via <see cref="ConfigureAsGpio"/>), mode (e.g., via <see cref="SetMode"/>),
+  /// or logic level (e.g., via <see cref="Write"/>) will result in an
+  /// <see cref="InvalidOperationException"/>.
+  /// </para>
+  /// <para>
+  /// Internally, this safeguards all operations involving the MCP2221A commands
+  /// 'SET SRAM SETTINGS' and 'SET GPIO OUTPUT VALUES' for this specific pin.
+  /// </para>
+  /// </remarks>
+  /// <seealso cref="ConfigureAsGpio"/>
+  /// <seealso cref="Write"/>
+  /// <seealso cref="SetMode"/>
+  public bool IsUsedByGpioController
+    => gpio.IsUsedByGpioController(gp: Index);
+
   private protected GpController(Mcp2221AGpioDriver gpio)
   {
     this.gpio = gpio;

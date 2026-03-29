@@ -32,6 +32,9 @@ public static class IGpioControllerExtensions {
   /// <exception cref="ArgumentNullException">
   /// <paramref name="controller"/> is <see langword="null"/>.
   /// </exception>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <seealso cref="IGpioController.ConfigureAsGpioAsync(PinMode, PinValue, CancellationToken)"/>
   [CLSCompliant(false)]
   public static ValueTask ConfigureAsGpioOutputAsync(
@@ -57,6 +60,9 @@ public static class IGpioControllerExtensions {
   /// </returns>
   /// <exception cref="ArgumentNullException">
   /// <paramref name="controller"/> is <see langword="null"/>.
+  /// </exception>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
   /// </exception>
   /// <remarks>
   /// The pin operates in a high-impedance state. Note that the MCP2221/MCP2221A
@@ -87,6 +93,9 @@ public static class IGpioControllerExtensions {
   /// <exception cref="ArgumentNullException">
   /// <paramref name="controller"/> is <see langword="null"/>.
   /// </exception>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <seealso cref="IGpioController.ConfigureAsGpio(PinMode, PinValue, CancellationToken)"/>
   [CLSCompliant(false)]
   public static void ConfigureAsGpioOutput(
@@ -109,6 +118,9 @@ public static class IGpioControllerExtensions {
   /// </param>
   /// <exception cref="ArgumentNullException">
   /// <paramref name="controller"/> is <see langword="null"/>.
+  /// </exception>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
   /// </exception>
   /// <remarks>
   /// The pin operates in a high-impedance state. Note that the MCP2221/MCP2221A

@@ -377,10 +377,12 @@ partial class Mcp2221A {
       }
 
       var logger = serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221A>();
+#pragma warning disable CA2000
       var transceiver = new Mcp2221ATransceiver(
         endPoint: usbHidEndPoint,
         logger: logger
       );
+#pragma warning restore CA2000
       var info = await Mcp2221AInfo.ReadFromAsync(
         transceiver: transceiver,
         cancellationToken: cancellationToken
@@ -428,10 +430,12 @@ partial class Mcp2221A {
       }
 
       var logger = serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221A>();
+#pragma warning disable CA2000
       var transceiver = new Mcp2221ATransceiver(
         endPoint: usbHidEndPoint,
         logger: logger
       );
+#pragma warning restore CA2000
       var info = Mcp2221AInfo.ReadFrom(
         transceiver: transceiver,
         cancellationToken: cancellationToken

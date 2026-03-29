@@ -77,9 +77,22 @@ partial class Mcp2221AGpioDriver {
   }
 
   // <inheritdoc/>
-  public async ValueTask ApplyGpioStatesAsync(
+  public ValueTask ApplyGpioStatesAsync(
     ReadOnlyMemory<PinValuePair> pinValuePairs,
     ReadOnlyMemory<PinModePair> pinModePairs,
+    CancellationToken cancellationToken
+  )
+    => ApplyGpioStatesAsync(
+      pinValuePairs: pinValuePairs,
+      pinModePairs: pinModePairs,
+      shouldThrowIfUsedByGpioController: true,
+      cancellationToken: cancellationToken
+    );
+
+  private async ValueTask ApplyGpioStatesAsync(
+    ReadOnlyMemory<PinValuePair> pinValuePairs,
+    ReadOnlyMemory<PinModePair> pinModePairs,
+    bool shouldThrowIfUsedByGpioController,
     CancellationToken cancellationToken
   )
   {
@@ -91,7 +104,8 @@ partial class Mcp2221AGpioDriver {
       ConstructNewGpioOutputBytes(
         destination: newGpioOutputBytes.Span,
         values: pinValuePairs.Span,
-        modes: pinModePairs.Span
+        modes: pinModePairs.Span,
+        shouldThrowIfUsedByGpioController: shouldThrowIfUsedByGpioController
       );
 
       _ = await Transceiver.CommandAsync(
@@ -118,6 +132,19 @@ partial class Mcp2221AGpioDriver {
     ReadOnlySpan<PinModePair> pinModePairs,
     CancellationToken cancellationToken
   )
+    => ApplyGpioStates(
+      pinValuePairs: pinValuePairs,
+      pinModePairs: pinModePairs,
+      shouldThrowIfUsedByGpioController: true,
+      cancellationToken: cancellationToken
+    );
+
+  private void ApplyGpioStates(
+    ReadOnlySpan<PinValuePair> pinValuePairs,
+    ReadOnlySpan<PinModePair> pinModePairs,
+    bool shouldThrowIfUsedByGpioController,
+    CancellationToken cancellationToken
+  )
   {
     var newGpioOutputArray = ArrayPool<byte>.Shared.Rent(LengthOfGpioOutputValues);
 
@@ -127,7 +154,8 @@ partial class Mcp2221AGpioDriver {
       ConstructNewGpioOutputBytes(
         destination: newGpioOutputBytes.Span,
         values: pinValuePairs,
-        modes: pinModePairs
+        modes: pinModePairs,
+        shouldThrowIfUsedByGpioController: shouldThrowIfUsedByGpioController
       );
 
       _ = Transceiver.Command(
@@ -148,10 +176,11 @@ partial class Mcp2221AGpioDriver {
     }
   }
 
-  private static void ConstructNewGpioOutputBytes(
+  private void ConstructNewGpioOutputBytes(
     Span<byte> destination,
     ReadOnlySpan<PinValuePair> values,
-    ReadOnlySpan<PinModePair> modes
+    ReadOnlySpan<PinModePair> modes,
+    bool shouldThrowIfUsedByGpioController
   )
   {
     // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
@@ -164,6 +193,9 @@ partial class Mcp2221AGpioDriver {
     foreach (var (gp, value) in values) {
       ThrowIfInvalidGpIndex(gp);
 
+      if (shouldThrowIfUsedByGpioController)
+        ThrowIfUsedByGpioController(gp);
+
       // [0 + 4n]: Alter GP<n> output: (value other than 0)=enable
       destination[0 + (gp * 4)] = 0xFF;
 
@@ -173,6 +205,9 @@ partial class Mcp2221AGpioDriver {
 
     foreach (var (gp, mode) in modes) {
       ThrowIfInvalidGpIndex(gp);
+
+      if (shouldThrowIfUsedByGpioController)
+        ThrowIfUsedByGpioController(gp);
 
       // [2 + 4n]: Alter GP<n> pin direction: (value other than 0)=enable
       destination[2 + (gp * 4)] = 0xFF;
@@ -314,43 +349,55 @@ partial class Mcp2221AGpioDriver {
     ReadOnlySpan<PinModePair> modes
   )
   {
-    const byte GpIsNotSetForGpioOperation = 0xEE;
-
     // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES (response)
     // [0 + 4n]: Alter GP<n> output (enable/disable) status
     // [1 + 4n]: GP<n> output value status
     // [2 + 4n]: Alter GP<n> pin direction (enable/disable)
     // [3 + 4n]: GP<n> pin direction (input or output)
+    const byte GpIsNotSetForGpioOperation = 0xEE;
+    const byte DoNotModifyGpOutput = 0x00;
+    const byte LeaveGpDirectionAsIs = 0x00;
+
     int? firstGpIndexOfNotSetForGpioOperation = null;
 
     for (var gp = 0; gp < NumberOfGpPins; gp++) {
+      var alterGpOutputByte = gpioOutputResponseBytes[0 + (4 * gp)];
+      var gpOutputValueByte = gpioOutputResponseBytes[1 + (4 * gp)];
+
       if (
-        gpioOutputResponseBytes[0 + (4 * gp)] == GpIsNotSetForGpioOperation ||
-        gpioOutputResponseBytes[1 + (4 * gp)] == GpIsNotSetForGpioOperation
+        alterGpOutputByte == GpIsNotSetForGpioOperation ||
+        gpOutputValueByte == GpIsNotSetForGpioOperation
       ) {
         firstGpIndexOfNotSetForGpioOperation ??= gp;
       }
 
-      // 0 + 2n: GP<n> pin value
-      gpioStateBytes.Span[0 + (2 * gp)] = gpioOutputResponseBytes[1 + (4 * gp)] switch {
-        GpIsNotSetForGpioOperation => GpioValueInvalid,
-        0x00 => GpioValueLow,
-        _ => GpioValueHigh,
-      };
+      if (alterGpOutputByte != DoNotModifyGpOutput) {
+        // 0 + 2n: GP<n> pin value
+        gpioStateBytes.Span[0 + (2 * gp)] = gpOutputValueByte switch {
+          GpIsNotSetForGpioOperation => GpioValueInvalid,
+          0x00 => GpioValueLow,
+          _ => GpioValueHigh,
+        };
+      }
+
+      var alterGpDirectionByte = gpioOutputResponseBytes[2 + (4 * gp)];
+      var gpDirectionByte = gpioOutputResponseBytes[3 + (4 * gp)];
 
       if (
-        gpioOutputResponseBytes[2 + (4 * gp)] == GpIsNotSetForGpioOperation ||
-        gpioOutputResponseBytes[3 + (4 * gp)] == GpIsNotSetForGpioOperation
+        alterGpDirectionByte == GpIsNotSetForGpioOperation ||
+        gpDirectionByte == GpIsNotSetForGpioOperation
       ) {
         firstGpIndexOfNotSetForGpioOperation ??= gp;
       }
 
       // 1 + 2n: GP<n> direction value
-      gpioStateBytes.Span[1 + (2 * gp)] = gpioOutputResponseBytes[3 + (4 * gp)] switch {
-        GpIsNotSetForGpioOperation => GpioDirectionInvalid,
-        0x00 => GpioDirectionOutput,
-        _ => GpioDirectionInput,
-      };
+      if (alterGpDirectionByte != LeaveGpDirectionAsIs) {
+        gpioStateBytes.Span[1 + (2 * gp)] = gpDirectionByte switch {
+          GpIsNotSetForGpioOperation => GpioDirectionInvalid,
+          0x00 => GpioDirectionOutput,
+          _ => GpioDirectionInput,
+        };
+      }
     }
 
     if (firstGpIndexOfNotSetForGpioOperation.HasValue) {

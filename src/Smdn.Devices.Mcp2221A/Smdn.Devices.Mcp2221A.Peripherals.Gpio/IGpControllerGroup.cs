@@ -133,6 +133,10 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
   /// <exception cref="NotSupportedException">
   /// Thrown when a function is not supported by the specified GP pin.
   /// </exception>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when any of the GP pins (GP0-GP3) have <see cref="GpController.IsUsedByGpioController"/>
+  /// set to <see langword="true"/>.
+  /// </exception>
   void ConfigureAllGpSettings(
     GpFunction? gp0Function = default,
     PinMode? gp0Mode = default,
@@ -303,6 +307,10 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
   /// <seealso href="https://www.microchip.com/en-us/product/mcp2221a">
   /// [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
   /// </seealso>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when any of the GP pins (GP0-GP3) have <see cref="GpController.IsUsedByGpioController"/>
+  /// set to <see langword="true"/>.
+  /// </exception>
   void ApplyGpioStates(
     ReadOnlySpan<PinValuePair> pinValuePairs,
     ReadOnlySpan<PinModePair> pinModePairs,

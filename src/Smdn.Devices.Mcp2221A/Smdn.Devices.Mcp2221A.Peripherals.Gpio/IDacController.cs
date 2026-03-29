@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
-
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,6 +11,9 @@ internal interface IDacController {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
+  /// /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <seealso cref="GpFunction.Dac"/>
   ValueTask ConfigureAsDacAsync(
     CancellationToken cancellationToken = default
@@ -20,6 +23,9 @@ internal interface IDacController {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <seealso cref="GpFunction.Dac"/>
   void ConfigureAsDac(
     CancellationToken cancellationToken = default

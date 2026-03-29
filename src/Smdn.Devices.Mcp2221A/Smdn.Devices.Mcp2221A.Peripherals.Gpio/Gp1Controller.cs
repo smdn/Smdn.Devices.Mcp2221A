@@ -75,6 +75,9 @@ public sealed class Gp1Controller :
       cancellationToken: cancellationToken
     );
 
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <seealso cref="GpFunction.LedOutput"/>
   public ValueTask ConfigureAsUtxLedOutputAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
@@ -82,6 +85,9 @@ public sealed class Gp1Controller :
       cancellationToken: cancellationToken
     );
 
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <seealso cref="GpFunction.LedOutput"/>
   public void ConfigureAsUtxLedOutput(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(

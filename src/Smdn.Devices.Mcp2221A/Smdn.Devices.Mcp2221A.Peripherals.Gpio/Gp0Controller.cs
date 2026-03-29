@@ -48,6 +48,9 @@ public sealed class Gp0Controller : GpController {
       _ => null,
     };
 
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <seealso cref="GpFunction.LedOutput"/>
   public ValueTask ConfigureAsUrxLedOutputAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
@@ -55,6 +58,9 @@ public sealed class Gp0Controller : GpController {
       cancellationToken: cancellationToken
     );
 
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <seealso cref="GpFunction.LedOutput"/>
   public void ConfigureAsUrxLedOutput(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(
@@ -62,6 +68,9 @@ public sealed class Gp0Controller : GpController {
       cancellationToken: cancellationToken
     );
 
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <seealso cref="GpFunction.UsbSuspendStatus"/>
   public ValueTask ConfigureAsUsbSuspendStatusAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
@@ -69,6 +78,9 @@ public sealed class Gp0Controller : GpController {
       cancellationToken: cancellationToken
     );
 
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <seealso cref="GpFunction.UsbSuspendStatus"/>
   public void ConfigureAsUsbSuspendStatus(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(

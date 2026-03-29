@@ -136,6 +136,102 @@ partial class GpControllerTests {
     }
   }
 
+  [TestCase(PinMode.Input, true)]
+  [TestCase(PinMode.Input, false)]
+  [TestCase(PinMode.Output, true)]
+  [TestCase(PinMode.Output, false)]
+  public void ConfigureAsGpioAsync_ThrowsWhenUsedByGpioController(PinMode mode, bool initialValue)
+    => ConfigureAsGpioSyncOrAsync_ThrowsWhenUsedByGpioController(
+      mode,
+      (PinValue)initialValue,
+      static async (gp, m, val) => await gp.ConfigureAsGpioAsync(mode: m, initialValue: val).ConfigureAwait(false)
+    );
+
+  [TestCase(PinMode.Input, true)]
+  [TestCase(PinMode.Input, false)]
+  [TestCase(PinMode.Output, true)]
+  [TestCase(PinMode.Output, false)]
+  public void ConfigureAsGpio_ThrowsWhenUsedByGpioController(PinMode mode, bool initialValue)
+    => ConfigureAsGpioSyncOrAsync_ThrowsWhenUsedByGpioController(
+      mode,
+      (PinValue)initialValue,
+      static (gp, m, val) => {
+        gp.ConfigureAsGpio(mode: m, initialValue: val);
+        return default;
+      }
+    );
+
+  private void ConfigureAsGpioSyncOrAsync_ThrowsWhenUsedByGpioController(
+    PinMode mode,
+    PinValue initialValue,
+    Func<GpController, PinMode, PinValue, ValueTask> configureAsGpioAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_1_0_010; // Alternate Function 0 (LED UART RX)
+    const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
+    const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
+    const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
+
+    using var mcp2221A = Mcp2221A.Create(
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    var currentGpSettings = new byte[4] { InitialGp0Settings, InitialGp1Settings, InitialGp2Settings, InitialGp3Settings };
+
+    for (var gp = 0; gp < 4; gp++) {
+      currentGpSettings[gp] = (byte)(currentGpSettings[gp] & 0b_111_1_1_000);
+
+      Mcp2221ATests.AppendPseudoResponse(
+        mcp2221A,
+        // [MCP2221A] 3.1.13 SET SRAM SETTINGS
+        // [1] 0x00: Command completed successfully
+        // [22] GP0 Settings
+        // [23] GP1 Settings
+        // [24] GP2 Settings
+        // [25] GP3 Settings
+        "60-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-" +
+        $"{currentGpSettings[0]:X2}-{currentGpSettings[1]:X2}-{currentGpSettings[2]:X2}-{currentGpSettings[3]:X2}-" +
+        "00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00"
+      );
+
+      Assert.That(
+        () => _ = mcp2221A.GpioController.OpenPin(gp),
+        Throws.Nothing
+      );
+      Assert.That(mcp2221A.GpPins[gp].IsUsedByGpioController, Is.True);
+    }
+
+    foreach (var gp in mcp2221A.GpPins) {
+      // command should not be sent
+      // Mcp2221ATests.AppendPseudoResponse(...);
+      Mcp2221ATests.ClearSentCommands(mcp2221A);
+
+      Assert.That(
+        async () => await configureAsGpioAsyncFunc(gp, mode, initialValue),
+        Throws
+          .InvalidOperationException
+          .With
+          .Property(nameof(InvalidOperationException.Message))
+          .Contains($"GP{gp.Index}")
+          .And
+          .Property(nameof(InvalidOperationException.Message))
+          .Contains(nameof(GpioController))
+      );
+
+      Assert.That(
+        Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+        Is.Zero,
+        "command should not be sent"
+      );
+    }
+  }
+
   private static IEnumerable<PinMode> YieldTestCases_UnsupportedPinMode()
   {
     yield return PinMode.InputPullUp;

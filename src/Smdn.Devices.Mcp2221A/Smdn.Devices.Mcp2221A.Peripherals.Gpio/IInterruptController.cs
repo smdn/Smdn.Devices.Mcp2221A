@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
-
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,6 +11,9 @@ internal interface IInterruptController {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <seealso cref="GpFunction.ExternalInterrupt"/>
   ValueTask ConfigureAsExternalInterruptAsync(
     CancellationToken cancellationToken = default
@@ -20,6 +23,9 @@ internal interface IInterruptController {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
+  /// <exception cref="InvalidOperationException">
+  /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
   /// <seealso cref="GpFunction.ExternalInterrupt"/>
   void ConfigureAsExternalInterrupt(
     CancellationToken cancellationToken = default
