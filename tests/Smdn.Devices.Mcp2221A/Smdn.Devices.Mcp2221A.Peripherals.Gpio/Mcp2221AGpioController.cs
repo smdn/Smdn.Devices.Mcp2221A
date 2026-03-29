@@ -25,7 +25,11 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.TypeOf<ArgumentOutOfRangeException>()
     );
   }
@@ -82,12 +86,20 @@ public class Mcp2221AGpioControllerTests {
     expectedSentCommand[10] = pinNumber == 2 ? (byte)(InitialGp2Settings & 0b_111_1_1_000) : InitialGp2Settings; // [10] GP2 settings
     expectedSentCommand[11] = pinNumber == 3 ? (byte)(InitialGp3Settings & 0b_111_1_1_000) : InitialGp3Settings; // [11] GP3 settings
 
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
     GpioPin? pin = null;
 
     Assert.That(
       () => pin = mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.Nothing
     );
+#else
+    Assert.That(
+      () => mcp2221A.GpioController.OpenPin(pinNumber),
+      Throws.Nothing
+    );
+#endif
+
     Assert.That(
       Mcp2221ATests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand)
@@ -100,9 +112,11 @@ public class Mcp2221AGpioControllerTests {
 
     Assert.That(mcp2221A.GpioController.IsPinOpen(pinNumber), Is.True);
 
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
     Assert.That(pin, Is.Not.Null);
     Assert.That(pin.PinNumber, Is.EqualTo(pinNumber));
     Assert.That(pin.Controller, Is.SameAs(mcp2221A.GpioController));
+#endif
   }
 
   [Test]
@@ -128,7 +142,11 @@ public class Mcp2221AGpioControllerTests {
     mcp2221A.Dispose();
 
     Assert.That(
-      () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.TypeOf<ObjectDisposedException>()
     );
   }
@@ -170,12 +188,20 @@ public class Mcp2221AGpioControllerTests {
     // Mcp2221ATests.AppendPseudoResponse(...);
     Mcp2221ATests.ClearSentCommands(mcp2221A);
 
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
     GpioPin? pin = null;
 
     Assert.That(
       () => pin = mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.Nothing
     );
+#else
+    Assert.That(
+      () => mcp2221A.GpioController.OpenPin(pinNumber),
+      Throws.Nothing
+    );
+#endif
+
     Assert.That(
       Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
       Is.Zero,
@@ -189,9 +215,11 @@ public class Mcp2221AGpioControllerTests {
 
     Assert.That(mcp2221A.GpioController.IsPinOpen(pinNumber), Is.True);
 
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
     Assert.That(pin, Is.Not.Null);
     Assert.That(pin.PinNumber, Is.EqualTo(pinNumber));
     Assert.That(pin.Controller, Is.SameAs(mcp2221A.GpioController));
+#endif
   }
 
   [Test]
@@ -232,11 +260,16 @@ public class Mcp2221AGpioControllerTests {
     Mcp2221ATests.ClearSentCommands(mcp2221A);
 
     Assert.That(
-      () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.Nothing
     );
     Assert.That(mcp2221A.GpioController.IsPinOpen(pinNumber), Is.True);
 
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
     GpioPin? pin = null;
 
     Assert.That(
@@ -244,6 +277,14 @@ public class Mcp2221AGpioControllerTests {
       Throws.Nothing,
       "re-open"
     );
+#else
+    Assert.That(
+      () => mcp2221A.GpioController.OpenPin(pinNumber),
+      Throws.Nothing,
+      "re-open"
+    );
+#endif
+
     Assert.That(mcp2221A.GpioController.IsPinOpen(pinNumber), Is.True);
 
     Assert.That(
@@ -257,9 +298,11 @@ public class Mcp2221AGpioControllerTests {
     Assert.That(mcp2221A.GpPins[pinNumber].CurrentMode, Is.EqualTo(initialGpModes[pinNumber]));
     Assert.That(mcp2221A.GpPins[pinNumber].IsUsedByGpioController, Is.True);
 
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
     Assert.That(pin, Is.Not.Null);
     Assert.That(pin.PinNumber, Is.EqualTo(pinNumber));
     Assert.That(pin.Controller, Is.SameAs(mcp2221A.GpioController));
+#endif
   }
 
   [Test]
@@ -287,7 +330,11 @@ public class Mcp2221AGpioControllerTests {
     Mcp2221ATests.ClearSentCommands(mcp2221A);
 
     Assert.That(
-      () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.Nothing
     );
 
@@ -367,7 +414,11 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.Nothing
     );
 
@@ -435,7 +486,11 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.Nothing
     );
 
@@ -524,7 +579,11 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.Nothing
     );
 
@@ -641,7 +700,11 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.Nothing
     );
 
@@ -722,7 +785,11 @@ public class Mcp2221AGpioControllerTests {
     Mcp2221ATests.ClearSentCommands(mcp2221A);
 
     Assert.That(
-      () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.Nothing
     );
 
@@ -825,7 +892,11 @@ public class Mcp2221AGpioControllerTests {
 
     foreach (var (pinNumber, _) in pinValuePairs) {
       Assert.That(
-        () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
         Throws.Nothing
       );
     }
@@ -936,7 +1007,11 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.Nothing
     );
 
@@ -1043,7 +1118,11 @@ public class Mcp2221AGpioControllerTests {
 
     foreach (var (pinNumber, _) in pinValuePairs) {
       Assert.That(
-        () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
         Throws.Nothing
       );
     }
@@ -1083,6 +1162,7 @@ public class Mcp2221AGpioControllerTests {
     }
   }
 
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
   [Test]
   public void Toggle_NotOpen(
     [Values(0, 1, 2, 3)] int pinNumber
@@ -1150,7 +1230,11 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.Nothing
     );
 
@@ -1205,6 +1289,7 @@ public class Mcp2221AGpioControllerTests {
       Is.EqualTo(expectedValue)
     );
   }
+#endif
 
   [Test]
   public void WaitForEvent_NotOpen(
@@ -1279,7 +1364,11 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.Nothing
     );
 
@@ -1374,7 +1463,11 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.Nothing
     );
 
@@ -1461,7 +1554,11 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.Nothing
     );
 
@@ -1525,7 +1622,11 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      () => _ = mcp2221A.GpioController.OpenPin(pinNumber),
+      () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+        _ =
+#endif
+        mcp2221A.GpioController.OpenPin(pinNumber),
       Throws.Nothing
     );
 

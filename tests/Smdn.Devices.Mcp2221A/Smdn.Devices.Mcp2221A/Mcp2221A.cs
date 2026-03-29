@@ -264,7 +264,8 @@ public partial class Mcp2221ATests {
 #if NET7_0_OR_GREATER
     stream.ReadExactly(buffer.AsSpan(0, ReportLength));
 #else
-    stream.Read(buffer, 0, ReportLength);
+    if (ReportLength != stream.Read(buffer, 0, ReportLength))
+      throw new InvalidOperationException("invalid report length");
 #endif
 
     stream.Position = 0L;
@@ -379,7 +380,10 @@ public partial class Mcp2221ATests {
 
     // To test the GetMode/SetMode and Read/Write method calls on the GpioController,
     // ensure the pin is open.
-    _ = device.GpioController.OpenPin(0);
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+    _ =
+#endif
+    device.GpioController.OpenPin(0);
 
     await disposeAction(device);
 

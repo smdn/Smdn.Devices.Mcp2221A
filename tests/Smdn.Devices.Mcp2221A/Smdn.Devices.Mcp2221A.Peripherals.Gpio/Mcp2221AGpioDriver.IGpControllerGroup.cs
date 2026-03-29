@@ -148,7 +148,11 @@ partial class Mcp2221AGpioDriverTests {
     if (openByGpioController) {
       for (var gp = 0; gp < 4; gp++) {
         Assert.That(
-          () => _ = mcp2221A.GpioController.OpenPin(gp),
+          () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+          _ =
+#endif
+            mcp2221A.GpioController.OpenPin(gp),
           Throws.Nothing
         );
       }
@@ -826,7 +830,11 @@ partial class Mcp2221AGpioDriverTests {
 
     for (var i = 0; i < pinNumbersToBeOpened.Length; i++) {
       Assert.That(
-        () => _ = mcp2221A.GpioController.OpenPin(pinNumbersToBeOpened[i]),
+        () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+          _ =
+#endif
+          mcp2221A.GpioController.OpenPin(pinNumbersToBeOpened[i]),
         Throws.Nothing
       );
     }
@@ -1781,7 +1789,11 @@ partial class Mcp2221AGpioDriverTests {
 
     for (var i = 0; i < pinNumbersToBeOpened.Length; i++) {
       Assert.That(
-        () => _ = mcp2221A.GpioController.OpenPin(pinNumbersToBeOpened[i]),
+        () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+          _ =
+#endif
+          mcp2221A.GpioController.OpenPin(pinNumbersToBeOpened[i]),
         Throws.Nothing
       );
     }

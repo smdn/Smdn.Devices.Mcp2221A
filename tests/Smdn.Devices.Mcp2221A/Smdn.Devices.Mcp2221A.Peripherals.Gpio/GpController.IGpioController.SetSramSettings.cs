@@ -201,7 +201,11 @@ partial class GpControllerTests {
       );
 
       Assert.That(
-        () => _ = mcp2221A.GpioController.OpenPin(gp),
+        () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+          _ =
+#endif
+          mcp2221A.GpioController.OpenPin(gp),
         Throws.Nothing
       );
       Assert.That(mcp2221A.GpPins[gp].IsUsedByGpioController, Is.True);

@@ -11,6 +11,12 @@ SPDX-License-Identifier: MIT
   </PropertyGroup>
 
   <PropertyGroup>
+    <DefineConstants
+      Condition="!$(TargetFramework.StartsWith('net4'))"
+    >$(DefineConstants);SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <!--
       Suppress warning from Microsoft.Extensions.Diagnostics.Testing:
       Microsoft.Extensions.Diagnostics.Testing 10.4.0 doesn't support net4xy and has not been tested with it.
