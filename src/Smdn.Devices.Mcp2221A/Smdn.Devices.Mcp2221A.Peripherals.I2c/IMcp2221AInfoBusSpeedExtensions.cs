@@ -2,11 +2,36 @@
 // SPDX-License-Identifier: MIT
 using System;
 
-namespace Smdn.Devices.Mcp2221A;
+namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
-#pragma warning disable IDE0040
-partial class Mcp2221A {
-#pragma warning restore IDE0040
+internal static class IMcp2221AInfoBusSpeedExtensions {
+
+#pragma warning disable CA1034
+  extension(IMcp2221AInfo info) {
+#pragma warning restore CA1034
+    internal byte CalculateBusSpeedDividerOrThrow(
+      int transmissionSpeed,
+      string paramName
+    )
+    {
+      byte busSpeedDivider;
+
+      var isValid = info.IsMcp2221A
+        ? TryCalculateMcp2221AI2cSpeedDivider(transmissionSpeed, out busSpeedDivider)
+        : TryCalculateMcp2221I2cSpeedDivider(transmissionSpeed, out busSpeedDivider);
+
+      if (!isValid) {
+        throw new ArgumentOutOfRangeException(
+          message: $"The specified bus transmission speed '{transmissionSpeed} kbps' is out of range for this device.",
+          actualValue: transmissionSpeed,
+          paramName: paramName
+        );
+      }
+
+      return busSpeedDivider;
+    }
+  }
+
   /// <summary>
   /// Internal oscillator frequency of the MCP2221/MCP2221A chip (12 MHz).
   /// </summary>
@@ -26,7 +51,7 @@ partial class Mcp2221A {
   /// Formula: Divider = (12 MHz / I2C CLOCK RATE) - 2
   /// </code>
   /// </remarks>
-  public static bool TryCalculateMcp2221AI2cSpeedDivider(int i2cBusSpeedInKbps, out byte i2cSpeedDivider)
+  internal static bool TryCalculateMcp2221AI2cSpeedDivider(int i2cBusSpeedInKbps, out byte i2cSpeedDivider)
   {
     i2cSpeedDivider = default;
 
@@ -66,7 +91,7 @@ partial class Mcp2221A {
   /// Formula: Divider = ((12 MHz / I2C CLOCK RATE) - 20) / 4
   /// </code>
   /// </remarks>
-  public static bool TryCalculateMcp2221I2cSpeedDivider(int i2cBusSpeedInKbps, out byte i2cSpeedDivider)
+  internal static bool TryCalculateMcp2221I2cSpeedDivider(int i2cBusSpeedInKbps, out byte i2cSpeedDivider)
   {
     i2cSpeedDivider = default;
 
@@ -91,27 +116,5 @@ partial class Mcp2221A {
     i2cSpeedDivider = (byte)divider;
 
     return true;
-  }
-
-  internal byte CalculateBusSpeedDividerOrThrow(
-    int transmissionSpeed,
-    string paramName
-  )
-  {
-    byte busSpeedDivider;
-
-    var isValid = this.IsMcp2221A
-      ? TryCalculateMcp2221AI2cSpeedDivider(transmissionSpeed, out busSpeedDivider)
-      : TryCalculateMcp2221I2cSpeedDivider(transmissionSpeed, out busSpeedDivider);
-
-    if (!isValid) {
-      throw new ArgumentOutOfRangeException(
-        message: $"The specified bus transmission speed '{transmissionSpeed} kbps' is out of range for this device.",
-        actualValue: transmissionSpeed,
-        paramName: paramName
-      );
-    }
-
-    return busSpeedDivider;
   }
 }

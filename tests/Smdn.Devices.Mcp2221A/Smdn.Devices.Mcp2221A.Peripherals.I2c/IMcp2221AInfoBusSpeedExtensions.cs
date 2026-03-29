@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: MIT
 using NUnit.Framework;
 
-namespace Smdn.Devices.Mcp2221A;
+namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
-#pragma warning disable IDE0040
-partial class Mcp2221ATests {
-#pragma warning restore IDE0040
+[TestFixture]
+public class IMcp2221AInfoBusSpeedExtensionsTests {
   [TestCase(4000, true, 1)] // High speed (Max ~4MHz)
   [TestCase(400, true, 28)] // Fast Mode
   [TestCase(333, true, 35)] // represents 324.32 kbps, meaning below the input value
@@ -20,7 +19,7 @@ partial class Mcp2221ATests {
   [TestCase(int.MaxValue, false, 0)] // Out of range
   public void TryCalculateMcp2221AI2cSpeedDivider(int speedInKbps, bool expectedResult, byte expectedDivider)
   {
-    var actualResult = Mcp2221A.TryCalculateMcp2221AI2cSpeedDivider(speedInKbps, out byte calculatedDivider);
+    var actualResult = IMcp2221AInfoBusSpeedExtensions.TryCalculateMcp2221AI2cSpeedDivider(speedInKbps, out byte calculatedDivider);
 
     Assert.That(actualResult, Is.EqualTo(expectedResult));
 
@@ -46,7 +45,7 @@ partial class Mcp2221ATests {
   [TestCase(int.MaxValue, false, 0)] // Out of range
   public void TryCalculateMcp2221I2cSpeedDivider(int speedInKbps, bool expectedResult, byte expectedDivider)
   {
-    var actualResult = Mcp2221A.TryCalculateMcp2221I2cSpeedDivider(speedInKbps, out byte calculatedDivider);
+    var actualResult = IMcp2221AInfoBusSpeedExtensions.TryCalculateMcp2221I2cSpeedDivider(speedInKbps, out byte calculatedDivider);
 
     Assert.That(actualResult, Is.EqualTo(expectedResult));
 

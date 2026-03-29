@@ -28,6 +28,7 @@ SPDX-License-Identifier: MIT
 
   <ItemGroup>
     <Compile Include="$(SmdnTestTargetProjectDirectory)\System.Runtime.CompilerServices\IsExternalInit.cs"/>
+    <Compile Include="$(SmdnTestTargetProjectDirectory)\Smdn.Devices.Mcp2221A.Peripherals.I2c\IMcp2221AInfoBusSpeedExtensions.cs"/>
   </ItemGroup>
 
   <ItemGroup>
