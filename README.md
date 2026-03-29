@@ -29,7 +29,6 @@ See [Smdn.Devices.Mcp2221A examples](examples/Smdn.Devices.Mcp2221A/).
   - [x] GPIO
     - [x] GPIO read/write value
     - [x] GPIO get/set direction
-      - ⚠ Some methods throw NotImplementedException
   - [ ] ADC inputs
   - [ ] DAC outputs
   - [ ] Clock output
@@ -159,23 +158,20 @@ using var serviceProvider = services.BuildServiceProvider();
 // Find and open the first MCP2221/MCP2221A device connected to the USB port.
 using var device = Mcp2221A.Create(serviceProvider);
 
-// Configure the GP pins (GP0-GP3) as GPIO output.
-device.GP0.ConfigureAsGpio(PinMode.Output);
-device.GP1.ConfigureAsGpio(PinMode.Output);
-device.GP2.ConfigureAsGpio(PinMode.Output);
-device.GP3.ConfigureAsGpio(PinMode.Output);
+// Configure the all GP pins (GP0-GP3) as GPIO output.
+device.GpPins.ConfigureAllAsGpioOutput();
 
 // Blink the configured GPIO pins.
-foreach (var gp in device.GPs) {
-  Console.WriteLine($"Blinking {gp.PinDesignation}");
+foreach (var gp in device.GpPins) {
+  Console.WriteLine($"Blinking {gp.PinName}");
 
   for (var n = 0; n < 10; n++) {
     // Set the pin output to Low (logic 0)
-    gp.SetValue(false);
+    gp.Write(false);
     Thread.Sleep(100);
 
-    // Set the pin output to High (logic 0)
-    gp.SetValue(true);
+    // Set the pin output to High (logic 1)
+    gp.Write(true);
     Thread.Sleep(100);
   }
 }

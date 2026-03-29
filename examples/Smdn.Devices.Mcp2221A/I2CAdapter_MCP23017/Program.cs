@@ -20,7 +20,7 @@ using var serviceProvider = services.BuildServiceProvider();
 
 await using var device = await Mcp2221A.CreateAsync(serviceProvider);
 
-await device.GP3.ConfigureAsLedI2cAsync();
+await device.GpPin3.ConfigureAsI2cLedOutputAsync();
 
 const int DeviceAddressMcp23017 = 0x20; // The address of MCP23017 which is connected to MCP2221/MCP2221A
 

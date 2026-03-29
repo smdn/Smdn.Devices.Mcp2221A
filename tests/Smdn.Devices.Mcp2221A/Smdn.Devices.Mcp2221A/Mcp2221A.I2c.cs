@@ -16,35 +16,6 @@ namespace Smdn.Devices.Mcp2221A;
 #pragma warning disable IDE0040
 partial class Mcp2221ATests {
 #pragma warning restore IDE0040
-  internal static void AppendResponse(PseudoUsbHidEndPoint endPoint, params string[] responseSequences)
-  {
-    static byte[] ToByteArray(string hexByteSequence)
-      => hexByteSequence.Length == 0 ? Array.Empty<byte>() : hexByteSequence.Split('-').Select(hex => Convert.ToByte(hex, 16)).ToArray();
-
-    if (!endPoint.CanRead)
-      throw new InvalidOperationException("endpoint does not support reading");
-
-    var currentPosition = endPoint.ReadStream!.Position;
-
-    foreach (var sequence in responseSequences) {
-      endPoint.ReadStream.WriteByte(ReportInput);
-
-      var sequenceBytes = ToByteArray(sequence);
-
-      endPoint.ReadStream.Write(
-#if SYSTEM_IO_STREAM_WRITE_READONLYSPAN_OF_BYTE
-        sequenceBytes
-#else
-        sequenceBytes,
-        0,
-        sequenceBytes.Length
-#endif
-      );
-    }
-
-    endPoint.ReadStream.Position = currentPosition;
-  }
-
   private static System.Collections.IEnumerable YieldTestCases_CreateI2cDeviceAdapter()
   {
     const bool ShouldDisposeMcp2221A = true;
@@ -117,11 +88,10 @@ partial class Mcp2221ATests {
       CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true
     );
-    var endPoint = (mcp2221A.HidDevice as PseudoUsbHidDevice)!.EndPoint;
     var address = new I2cAddress(0x20);
 
-    AppendResponse(
-      endPoint,
+    AppendPseudoResponse(
+      mcp2221A,
       // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
       // [1] 0x00: Command completed successfully
       // [3] 0x20: The new I2C/SMBus communication speed is now considered

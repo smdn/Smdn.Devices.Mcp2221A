@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 using System;
+using System.Device.Gpio;
 #if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 using Smdn.Devices.Mcp2221A.Peripherals.I2c;
 using Smdn.IO.UsbHid;
 
@@ -23,8 +25,56 @@ public partial class Mcp2221A :
   internal Mcp2221ATransceiver Transceiver => transceiver ?? throw new ObjectDisposedException(GetType().Name);
   public IUsbHidDevice HidDevice => transceiver?.EndPoint?.Device ?? throw new ObjectDisposedException(GetType().Name);
 
+  /// <remarks>
+  /// Due to inheritance from <see cref="System.Device.Gpio.GpioDriver"/>,
+  /// <see cref="Mcp2221AGpioDriver"/> implements <see cref="IDisposable"/>; however,
+  /// since the only object that needs to be disposed of is <see cref="Mcp2221ATransceiver"/>,
+  /// there is no need to dispose of this object.
+  /// </remarks>
+#pragma warning disable CA2213
+  private readonly Mcp2221AGpioDriver gpioDriver;
+#pragma warning restore CA2213
+
   [CLSCompliant(false)]
   public Mcp2221AI2cBus I2c {
+    get {
+      ThrowIfDisposed();
+      return field;
+    }
+  }
+
+  [CLSCompliant(false)]
+  public IGpControllerGroup GpPins {
+    get {
+      ThrowIfDisposed();
+      return gpioDriver;
+    }
+  }
+
+  public Gp0Controller GpPin0 => GpPins.Gp0;
+  public Gp1Controller GpPin1 => GpPins.Gp1;
+  public Gp2Controller GpPin2 => GpPins.Gp2;
+  public Gp3Controller GpPin3 => GpPins.Gp3;
+
+  /// <summary>
+  /// Gets a <see cref="GpioController"/> that operates the GPIO peripherals using
+  /// the current <see cref="Mcp2221A"/> instance as the underlying <see cref="GpioDriver"/>.
+  /// </summary>
+  /// <remarks>
+  /// <para>
+  /// If the <see cref="GpioController.Dispose()"/> is called on the <see cref="GpioController"/>
+  /// returned by this property, the <see cref="GpioController"/> will be disposed of, but
+  /// the underlying <see cref="Mcp2221A"/> will remain available for use.
+  /// </para>
+  /// <para>
+  /// It is recommended that when passing an instance of this property as a <see cref="GpioController"/>
+  /// to device binding classes such as <see href="https://www.nuget.org/packages/Iot.Device.Bindings">Iot.Device.Bindings</see>,
+  /// set the <c>shouldDispose</c> parameter to <see langword="false"/> and manage the lifecycle of
+  /// the <see cref="Mcp2221A"/> instance separately.
+  /// </para>
+  /// </remarks>
+  [CLSCompliant(false)]
+  public GpioController GpioController {
     get {
       ThrowIfDisposed();
       return field;
@@ -40,18 +90,9 @@ public partial class Mcp2221A :
     this.transceiver = transceiver ?? throw new ArgumentNullException(nameof(transceiver));
     this.info = info ?? throw new ArgumentNullException(nameof(info));
 
-    this.GP0 = new GP0Functionality(this);
-    this.GP1 = new GP1Functionality(this);
-    this.GP2 = new GP2Functionality(this);
-    this.GP3 = new GP3Functionality(this);
-    this.GPs = new GPFunctionality[] {
-      this.GP0,
-      this.GP1,
-      this.GP2,
-      this.GP3,
-    };
-
+    gpioDriver = new(transceiver: transceiver);
     I2c = new(this, logger);
+    GpioController = new Mcp2221AGpioController(driver: gpioDriver);
   }
 
   public void Dispose()

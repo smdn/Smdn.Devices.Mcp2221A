@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
   <ItemGroup>
     <!-- <PackageReference Update="NUnit.Analyzers" Version="4.11.2"/> -->
-    <!-- <PackageReference Update="Smdn.Test.NUnit.Constraints" Version="4.1.0" /> -->
+    <PackageReference Update="Smdn.Test.NUnit.Constraints" Version="4.1.0" />
     <!-- <PackageReference Update="Smdn.Test.NUnit.Utils" Version="4.1.0" /> -->
   </ItemGroup>
 

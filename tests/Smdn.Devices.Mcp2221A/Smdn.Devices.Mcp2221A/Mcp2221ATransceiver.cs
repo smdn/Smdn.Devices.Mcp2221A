@@ -23,31 +23,34 @@ public class Mcp2221ATransceiverTests {
   [Test]
   public void CommandAsync_UnexpectedCommandEcho()
     => CommandSyncOrAsync_UnexpectedCommandEcho(
-      static async mcp2221A => await mcp2221A.GP0.GetValueAsync().ConfigureAwait(false)
+      static async mcp2221A => await mcp2221A.GpPin0.ReadAsync().ConfigureAwait(false)
     );
 
   [Test]
   public void Command_UnexpectedCommandEcho()
     => CommandSyncOrAsync_UnexpectedCommandEcho(
-      static mcp2221A => new(mcp2221A.GP0.GetValue())
+      static mcp2221A => new(mcp2221A.GpPin0.Read())
     );
 
   private void CommandSyncOrAsync_UnexpectedCommandEcho(
-    Func<Mcp2221A, ValueTask<PinValue>> getGp0PinValueAsyncFunc
+    Func<Mcp2221A, ValueTask<PinValue>> getGp0ReadAsyncFunc
   )
   {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation (GPIO0)
+
     using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(),
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings
+      ),
       shouldDisposeUsbHidDevice: true
     );
-    var endPoint = (mcp2221A.HidDevice as PseudoUsbHidDevice)!.EndPoint;
 
     // Assume a scenario where 0xFF is returned instead of the
     // expected 0x51 for the 'Get GPIO Values' command code
     const byte ResponseCommandCode = 0xFF;
 
-    Mcp2221ATests.AppendResponse(
-      endPoint,
+    Mcp2221ATests.AppendPseudoResponse(
+      mcp2221A,
       // [MCP2221A] 3.1.12 GET GPIO VALUES
       // [0] 0x51: Get GPIO Values command code
       // [1] 0x00: Command completed successfully
@@ -58,7 +61,7 @@ public class Mcp2221ATransceiverTests {
     );
 
     Assert.That(
-      async () => _ = await getGp0PinValueAsyncFunc(mcp2221A),
+      async () => _ = await getGp0ReadAsyncFunc(mcp2221A),
       Throws
         .TypeOf<Mcp2221ACommandException>()
         .With
@@ -73,7 +76,7 @@ public class Mcp2221ATransceiverTests {
   public void CommandAsync_ResponseReportTooShort(int actualResponseLength)
     => CommandSyncOrAsync_ResponseReportTooShort(
       actualResponseLength: actualResponseLength,
-      static async mcp2221A => await mcp2221A.GP0.GetValueAsync().ConfigureAwait(false)
+      static async mcp2221A => await mcp2221A.GpPin0.ReadAsync().ConfigureAwait(false)
     );
 
   [TestCase(0)]
@@ -82,12 +85,12 @@ public class Mcp2221ATransceiverTests {
   public void Command_ResponseReportTooShort(int actualResponseLength)
     => CommandSyncOrAsync_ResponseReportTooShort(
       actualResponseLength: actualResponseLength,
-      static mcp2221A => new(mcp2221A.GP0.GetValue())
+      static mcp2221A => new(mcp2221A.GpPin0.Read())
     );
 
   private void CommandSyncOrAsync_ResponseReportTooShort(
     int actualResponseLength,
-    Func<Mcp2221A, ValueTask<PinValue>> getGp0PinValueAsyncFunc
+    Func<Mcp2221A, ValueTask<PinValue>> getGp0ReadAsyncFunc
   )
   {
     var loggerProvider = new FakeLoggerProvider();
@@ -97,12 +100,15 @@ public class Mcp2221ATransceiverTests {
 
     using var serviceProvider = services.BuildServiceProvider();
 
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation (GPIO0)
+
     using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(),
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings
+      ),
       shouldDisposeUsbHidDevice: true,
       serviceProvider: serviceProvider
     );
-    var endPoint = (mcp2221A.HidDevice as PseudoUsbHidDevice)!.EndPoint;
 
     // [MCP2221A] 3.1.12 GET GPIO VALUES
     // [0] 0x51: Get GPIO Values command code
@@ -117,8 +123,9 @@ public class Mcp2221ATransceiverTests {
 
     // Assume a scenario where a response of 64 bytes is expected,
     // but less than 64 bytes is returned.
-    Mcp2221ATests.AppendResponse(
-      endPoint,
+    Mcp2221ATests.AppendPseudoResponse(
+      mcp2221A,
+      verifyCommandLength: false,
       BitConverter.ToString(getGpioValuesResponseBytes.Take(actualResponseLength).ToArray())
     );
 
@@ -127,7 +134,7 @@ public class Mcp2221ATransceiverTests {
     var actualReportLength = actualResponseLength + LengthOfReportId;
 
     Assert.That(
-      async () => _ = await getGp0PinValueAsyncFunc(mcp2221A),
+      async () => _ = await getGp0ReadAsyncFunc(mcp2221A),
       Throws
         .TypeOf<Mcp2221ACommandException>()
         .With
@@ -145,19 +152,21 @@ public class Mcp2221ATransceiverTests {
   [Test]
   public void CommandAsync_ResponseReportTooShort_NoResponse()
     => CommandSyncOrAsync_ResponseReportTooShort_NoResponse(
-      static async mcp2221A => await mcp2221A.GP0.GetValueAsync().ConfigureAwait(false)
+      static async mcp2221A => await mcp2221A.GpPin0.ReadAsync().ConfigureAwait(false)
     );
 
   [Test]
   public void Command_ResponseReportTooShort_NoResponse()
     => CommandSyncOrAsync_ResponseReportTooShort_NoResponse(
-      static mcp2221A => new(mcp2221A.GP0.GetValue())
+      static mcp2221A => new(mcp2221A.GpPin0.Read())
     );
 
   private void CommandSyncOrAsync_ResponseReportTooShort_NoResponse(
-    Func<Mcp2221A, ValueTask<PinValue>> getGp0PinValueAsyncFunc
+    Func<Mcp2221A, ValueTask<PinValue>> getGp0ReadAsyncFunc
   )
   {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation (GPIO0)
+
     var loggerProvider = new FakeLoggerProvider();
     var services = new ServiceCollection();
 
@@ -166,7 +175,9 @@ public class Mcp2221ATransceiverTests {
     using var serviceProvider = services.BuildServiceProvider();
 
     using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(),
+      Mcp2221ATests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings
+      ),
       shouldDisposeUsbHidDevice: true,
       serviceProvider: serviceProvider
     );
@@ -179,7 +190,7 @@ public class Mcp2221ATransceiverTests {
     loggerProvider.Collector.Clear();
 
     Assert.That(
-      async () => _ = await getGp0PinValueAsyncFunc(mcp2221A),
+      async () => _ = await getGp0ReadAsyncFunc(mcp2221A),
       Throws
         .TypeOf<Mcp2221ACommandException>()
         .With

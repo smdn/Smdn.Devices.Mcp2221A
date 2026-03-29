@@ -20,7 +20,7 @@ using var serviceProvider = services.BuildServiceProvider();
 
 await using var device = await Mcp2221A.CreateAsync(serviceProvider);
 
-await device.GP3.ConfigureAsLedI2cAsync();
+await device.GpPin3.ConfigureAsI2cLedOutputAsync();
 
 using var display = SO1602A.Create(
   device.I2c.CreateDevice(SO1602A.DefaultI2CAddress).WithFastMode()

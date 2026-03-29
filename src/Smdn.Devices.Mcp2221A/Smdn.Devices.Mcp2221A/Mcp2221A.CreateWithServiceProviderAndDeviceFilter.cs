@@ -426,12 +426,12 @@ partial class Mcp2221A {
           if (mcp2221AFilter(info)) {
             selectedUsbHidDevice = mcp2221AUsbHidDevice;
 
-            return CreateFromInfoAndTransceiver(
+            return await CreateFromInfoAndTransceiverAsync(
               transceiver: transceiver,
               info: info,
               logger: logger,
               cancellationToken: cancellationToken
-            );
+            ).ConfigureAwait(false);
           }
 
           if (transceiver is not null)
