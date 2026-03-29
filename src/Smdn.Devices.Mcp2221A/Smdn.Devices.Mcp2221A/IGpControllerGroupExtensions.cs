@@ -115,7 +115,8 @@ public static class IGpControllerGroupExtensions {
     }
 
     /// <summary>
-    /// Configures all GP pins (GP0-GP3) to function as GPIO and sets their modes and initial values in a single communication.
+    /// Configures all GP pins (GP0-GP3) to function as GPIO and sets their
+    /// modes and initial values in a single communication.
     /// </summary>
     /// <param name="gp0Mode">
     /// The <see cref="PinMode"/> for GP0.

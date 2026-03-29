@@ -39,7 +39,7 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
   /// Gets the controller for the <c>GP1</c> pin.
   /// </summary>
   /// <value>
-  /// A <see cref="Gp0Controller"/> instance representing the <c>GP1</c> pin.
+  /// A <see cref="Gp1Controller"/> instance representing the <c>GP1</c> pin.
   /// </value>
   /// <seealso cref="Gp1Controller"/>
   Gp1Controller Gp1 { get; }
