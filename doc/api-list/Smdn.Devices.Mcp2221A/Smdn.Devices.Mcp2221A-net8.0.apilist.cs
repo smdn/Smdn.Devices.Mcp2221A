@@ -1,20 +1,20 @@
-// Smdn.Devices.Mcp2221A.dll (Smdn.Devices.Mcp2221A-1.0.0-preview1)
+// Smdn.Devices.Mcp2221A.dll (Smdn.Devices.Mcp2221A-1.0.0-preview2)
 //   Name: Smdn.Devices.Mcp2221A
 //   AssemblyVersion: 1.0.0.0
-//   InformationalVersion: 1.0.0-preview1+077854654720e368ee674194833ee52d976ac129
+//   InformationalVersion: 1.0.0-preview2+9335bdfc1b937075a51ac35af5bd1768fa3a1654
 //   TargetFramework: .NETCoreApp,Version=v8.0
 //   Configuration: Release
 //   Metadata: IsTrimmable=True
 //   Metadata: RepositoryUrl=https://github.com/smdn/Smdn.Devices.Mcp2221A
 //   Metadata: RepositoryBranch=main
-//   Metadata: RepositoryCommit=077854654720e368ee674194833ee52d976ac129
+//   Metadata: RepositoryCommit=9335bdfc1b937075a51ac35af5bd1768fa3a1654
 //   Referenced assemblies:
 //     Microsoft.Extensions.DependencyInjection.Abstractions, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
 //     Microsoft.Extensions.Logging.Abstractions, Version=5.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
 //     Smdn.IO.UsbHid.Abstractions, Version=1.0.0.0, Culture=neutral
 //     System.Collections, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
 //     System.ComponentModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
-//     System.Device.Gpio, Version=1.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35
+//     System.Device.Gpio, Version=4.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35
 //     System.Linq, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
 //     System.Memory, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51
 //     System.Runtime, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
@@ -27,6 +27,7 @@ using System.Device.I2c;
 using System.Threading;
 using System.Threading.Tasks;
 using Smdn.Devices.Mcp2221A;
+using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 using Smdn.Devices.Mcp2221A.Peripherals.I2c;
 using Smdn.IO.UsbHid;
 
@@ -40,6 +41,34 @@ namespace Smdn.Devices.Mcp2221A {
     string SerialNumber { get; }
   }
 
+  public static class IGpControllerGroupExtensions {
+    extension(IGpControllerGroup gpPins) {
+      public void ConfigureAllAsGpio(PinMode? gp0Mode = null, PinValue? gp0InitialValue = null, PinMode? gp1Mode = null, PinValue? gp1InitialValue = null, PinMode? gp2Mode = null, PinValue? gp2InitialValue = null, PinMode? gp3Mode = null, PinValue? gp3InitialValue = null, CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAllAsGpioAsync(PinMode? gp0Mode = null, PinValue? gp0InitialValue = null, PinMode? gp1Mode = null, PinValue? gp1InitialValue = null, PinMode? gp2Mode = null, PinValue? gp2InitialValue = null, PinMode? gp3Mode = null, PinValue? gp3InitialValue = null, CancellationToken cancellationToken = default) {}
+      public void ConfigureAllAsGpioInput(CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAllAsGpioInputAsync(CancellationToken cancellationToken = default) {}
+      public void ConfigureAllAsGpioOutput(PinValue? gp0InitialValue = null, PinValue? gp1InitialValue = null, PinValue? gp2InitialValue = null, PinValue? gp3InitialValue = null, CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAllAsGpioOutputAsync(PinValue? gp0InitialValue = null, PinValue? gp1InitialValue = null, PinValue? gp2InitialValue = null, PinValue? gp3InitialValue = null, CancellationToken cancellationToken = default) {}
+      public void ConfigureAllGpFunctions(GpFunction? gp0Function = null, GpFunction? gp1Function = null, GpFunction? gp2Function = null, GpFunction? gp3Function = null, CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAllGpFunctionsAsync(GpFunction? gp0Function = null, GpFunction? gp1Function = null, GpFunction? gp2Function = null, GpFunction? gp3Function = null, CancellationToken cancellationToken = default) {}
+      public (PinValue Gp0Value, PinValue Gp1Value, PinValue Gp2Value, PinValue Gp3Value) Read(CancellationToken cancellationToken = default) {}
+      public void Read(Span<PinValuePair> pinValuePairs, CancellationToken cancellationToken = default) {}
+      public ValueTask ReadAsync(Memory<PinValuePair> pinValuePairs, CancellationToken cancellationToken = default) {}
+      public ValueTask<(PinValue Gp0Value, PinValue Gp1Value, PinValue Gp2Value, PinValue Gp3Value)> ReadAsync(CancellationToken cancellationToken = default) {}
+      public void Write(PinValue? gp0Value = null, PinValue? gp1Value = null, PinValue? gp2Value = null, PinValue? gp3Value = null, CancellationToken cancellationToken = default) {}
+      public void Write(ReadOnlySpan<PinValuePair> pinValuePairs, CancellationToken cancellationToken = default) {}
+      public ValueTask WriteAsync(PinValue? gp0Value = null, PinValue? gp1Value = null, PinValue? gp2Value = null, PinValue? gp3Value = null, CancellationToken cancellationToken = default) {}
+      public ValueTask WriteAsync(ReadOnlyMemory<PinValuePair> pinValuePairs, CancellationToken cancellationToken = default) {}
+    }
+  }
+
+  public static class IGpioControllerExtensions {
+    public static void ConfigureAsGpioInput(this IGpioController controller, CancellationToken cancellationToken = default) {}
+    public static ValueTask ConfigureAsGpioInputAsync(this IGpioController controller, CancellationToken cancellationToken = default) {}
+    public static void ConfigureAsGpioOutput(this IGpioController controller, PinValue initialValue = default, CancellationToken cancellationToken = default) {}
+    public static ValueTask ConfigureAsGpioOutputAsync(this IGpioController controller, PinValue initialValue = default, CancellationToken cancellationToken = default) {}
+  }
+
   public static class IMcp2221AInfoExtensions {
     extension(IMcp2221AInfo info) {
       public bool IsMcp2221A { get; }
@@ -51,58 +80,6 @@ namespace Smdn.Devices.Mcp2221A {
     IDisposable,
     IMcp2221AInfo
   {
-    public sealed class GP0Functionality : GPFunctionality {
-      public void ConfigureAsLedUrx(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsLedUrxAsync(CancellationToken cancellationToken = default) {}
-      public void ConfigureAsSspnd(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsSspndAsync(CancellationToken cancellationToken = default) {}
-    }
-
-    public sealed class GP1Functionality : GPFunctionality {
-      public void ConfigureAsAdc(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsAdcAsync(CancellationToken cancellationToken = default) {}
-      public void ConfigureAsClockOutput(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsClockOutputAsync(CancellationToken cancellationToken = default) {}
-      public void ConfigureAsInterruptDetection(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsInterruptDetectionAsync(CancellationToken cancellationToken = default) {}
-      public void ConfigureAsLedUtx(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsLedUtxAsync(CancellationToken cancellationToken = default) {}
-    }
-
-    public sealed class GP2Functionality : GPFunctionality {
-      public void ConfigureAsAdc(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsAdcAsync(CancellationToken cancellationToken = default) {}
-      public void ConfigureAsDac(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsDacAsync(CancellationToken cancellationToken = default) {}
-      public void ConfigureAsUsbCfg(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsUsbCfgAsync(CancellationToken cancellationToken = default) {}
-    }
-
-    public sealed class GP3Functionality : GPFunctionality {
-      public void ConfigureAsAdc(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsAdcAsync(CancellationToken cancellationToken = default) {}
-      public void ConfigureAsDac(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsDacAsync(CancellationToken cancellationToken = default) {}
-      public void ConfigureAsLedI2c(CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsLedI2cAsync(CancellationToken cancellationToken = default) {}
-    }
-
-    public abstract class GPFunctionality {
-      public string? PinDesignation { get; }
-      public string PinName { get; }
-
-      public void ConfigureAsGpio(PinMode initialDirection = PinMode.Output, PinValue initialValue = default, CancellationToken cancellationToken = default) {}
-      public ValueTask ConfigureAsGpioAsync(PinMode initialDirection = PinMode.Output, PinValue initialValue = default, CancellationToken cancellationToken = default) {}
-      public PinMode GetDirection(CancellationToken cancellationToken = default) {}
-      public ValueTask<PinMode> GetDirectionAsync(CancellationToken cancellationToken = default) {}
-      public PinValue GetValue(CancellationToken cancellationToken = default) {}
-      public ValueTask<PinValue> GetValueAsync(CancellationToken cancellationToken = default) {}
-      public void SetDirection(PinMode newDirection, CancellationToken cancellationToken = default) {}
-      public ValueTask SetDirectionAsync(PinMode newDirection, CancellationToken cancellationToken = default) {}
-      public void SetValue(PinValue newValue, CancellationToken cancellationToken = default) {}
-      public ValueTask SetValueAsync(PinValue newValue, CancellationToken cancellationToken = default) {}
-    }
-
     public const int DefaultProductId = 221;
     public const int DefaultVendorId = 1240;
     public const string FirmwareRevisionMcp2221 = "1.1";
@@ -122,20 +99,15 @@ namespace Smdn.Devices.Mcp2221A {
     public static ValueTask<Mcp2221A> CreateAsync<TServiceKey>(IServiceProvider serviceProvider, TServiceKey serviceKey, CancellationToken cancellationToken = default) {}
     public static ValueTask<Mcp2221A> CreateAsync<TServiceKey>(IServiceProvider serviceProvider, TServiceKey serviceKey, Predicate<IUsbHidDevice>? usbHidDeviceFilter, Predicate<IMcp2221AInfo>? mcp2221AFilter, CancellationToken cancellationToken = default) {}
     public static ValueTask<Mcp2221A> CreateAsync<TServiceKey>(IUsbHidDevice usbHidDevice, IServiceProvider? serviceProvider, TServiceKey serviceKey, bool shouldDisposeUsbHidDevice = false, CancellationToken cancellationToken = default) {}
-    [Obsolete("Use Create with IUsbHidDevice instead.", true)]
-    public static Mcp2221A Open(Func<IUsbHidDevice?> createHidDevice, IServiceProvider? serviceProvider = null) {}
-    [Obsolete("Use CreateAsync with IUsbHidDevice instead.", true)]
-    public static async ValueTask<Mcp2221A> OpenAsync(Func<IUsbHidDevice?> createHidDevice, IServiceProvider? serviceProvider = null) {}
-    public static bool TryCalculateMcp2221AI2cSpeedDivider(int i2cBusSpeedInKbps, out byte i2cSpeedDivider) {}
-    public static bool TryCalculateMcp2221I2cSpeedDivider(int i2cBusSpeedInKbps, out byte i2cSpeedDivider) {}
 
     public string ChipFactorySerialNumber { get; }
     public string FirmwareRevision { get; }
-    public Mcp2221A.GP0Functionality GP0 { get; }
-    public Mcp2221A.GP1Functionality GP1 { get; }
-    public Mcp2221A.GP2Functionality GP2 { get; }
-    public Mcp2221A.GP3Functionality GP3 { get; }
-    public IReadOnlyList<Mcp2221A.GPFunctionality> GPs { get; }
+    public Gp0Controller GpPin0 { get; }
+    public Gp1Controller GpPin1 { get; }
+    public Gp2Controller GpPin2 { get; }
+    public Gp3Controller GpPin3 { get; }
+    public IGpControllerGroup GpPins { get; }
+    public GpioController GpioController { get; }
     public string HardwareRevision { get; }
     public IUsbHidDevice HidDevice { get; }
     public Mcp2221AI2cBus I2c { get; }
@@ -218,6 +190,137 @@ namespace Smdn.Devices.Mcp2221A {
     public byte ToByte() {}
     public int ToInt32() {}
     public override string ToString() {}
+  }
+
+  public readonly record struct PinModePair {
+    public PinModePair(int PinNumber, PinMode PinMode) {}
+
+    public PinMode PinMode { get; init; }
+    public int PinNumber { get; init; }
+
+    [CompilerGenerated]
+    public void Deconstruct(out int PinNumber, out PinMode PinMode) {}
+    [CompilerGenerated]
+    public override string ToString() {}
+  }
+}
+
+namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio {
+  public interface IGpControllerGroup : IReadOnlyList<GpController> {
+    Gp0Controller Gp0 { get; }
+    Gp1Controller Gp1 { get; }
+    Gp2Controller Gp2 { get; }
+    Gp3Controller Gp3 { get; }
+
+    void ApplyGpioStates(ReadOnlySpan<PinValuePair> pinValuePairs, ReadOnlySpan<PinModePair> pinModePairs, CancellationToken cancellationToken = default);
+    ValueTask ApplyGpioStatesAsync(ReadOnlyMemory<PinValuePair> pinValuePairs, ReadOnlyMemory<PinModePair> pinModePairs, CancellationToken cancellationToken = default);
+    void ConfigureAllGpSettings(GpFunction? gp0Function = null, PinMode? gp0Mode = null, PinValue? gp0InitialValue = null, GpFunction? gp1Function = null, PinMode? gp1Mode = null, PinValue? gp1InitialValue = null, GpFunction? gp2Function = null, PinMode? gp2Mode = null, PinValue? gp2InitialValue = null, GpFunction? gp3Function = null, PinMode? gp3Mode = null, PinValue? gp3InitialValue = null, CancellationToken cancellationToken = default);
+    ValueTask ConfigureAllGpSettingsAsync(GpFunction? gp0Function = null, PinMode? gp0Mode = null, PinValue? gp0InitialValue = null, GpFunction? gp1Function = null, PinMode? gp1Mode = null, PinValue? gp1InitialValue = null, GpFunction? gp2Function = null, PinMode? gp2Mode = null, PinValue? gp2InitialValue = null, GpFunction? gp3Function = null, PinMode? gp3Mode = null, PinValue? gp3InitialValue = null, CancellationToken cancellationToken = default);
+    void FetchGpioStates(Span<PinValuePair> pinValuePairs, Span<PinModePair> pinModePairs, CancellationToken cancellationToken = default);
+    ValueTask FetchGpioStatesAsync(Memory<PinValuePair> pinValuePairs, Memory<PinModePair> pinModePairs, CancellationToken cancellationToken = default);
+  }
+
+  public interface IGpioController {
+    void ConfigureAsGpio(PinMode mode, PinValue initialValue, CancellationToken cancellationToken = default);
+    ValueTask ConfigureAsGpioAsync(PinMode mode, PinValue initialValue, CancellationToken cancellationToken = default);
+    PinMode GetMode(CancellationToken cancellationToken = default);
+    ValueTask<PinMode> GetModeAsync(CancellationToken cancellationToken = default);
+    PinValue Read(CancellationToken cancellationToken = default);
+    ValueTask<PinValue> ReadAsync(CancellationToken cancellationToken = default);
+    void SetMode(PinMode mode, CancellationToken cancellationToken = default);
+    ValueTask SetModeAsync(PinMode mode, CancellationToken cancellationToken = default);
+    void Write(PinValue @value, CancellationToken cancellationToken = default);
+    ValueTask WriteAsync(PinValue @value, CancellationToken cancellationToken = default);
+  }
+
+  public enum GpFunction : int {
+    Adc = 1,
+    ClockOutput = 5,
+    Dac = 2,
+    ExternalInterrupt = 3,
+    Gpio = 0,
+    LedOutput = 4,
+    UsbConfigureStatus = 7,
+    UsbSuspendStatus = 6,
+  }
+
+  public sealed class Gp0Controller : GpController {
+    public override string CurrentDesignation { get; }
+    public override GpFunction CurrentFunction { get; }
+    public override int Index { get; }
+    public override string PinName { get; }
+
+    public void ConfigureAsUrxLedOutput(CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsUrxLedOutputAsync(CancellationToken cancellationToken = default) {}
+    public void ConfigureAsUsbSuspendStatus(CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsUsbSuspendStatusAsync(CancellationToken cancellationToken = default) {}
+  }
+
+  public sealed class Gp1Controller : GpController {
+    public override string CurrentDesignation { get; }
+    public override GpFunction CurrentFunction { get; }
+    public override int Index { get; }
+    public override string PinName { get; }
+
+    public void ConfigureAsAdc(CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsAdcAsync(CancellationToken cancellationToken = default) {}
+    public void ConfigureAsClockOutput(CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsClockOutputAsync(CancellationToken cancellationToken = default) {}
+    public void ConfigureAsExternalInterrupt(CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsExternalInterruptAsync(CancellationToken cancellationToken = default) {}
+    public void ConfigureAsUtxLedOutput(CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsUtxLedOutputAsync(CancellationToken cancellationToken = default) {}
+  }
+
+  public sealed class Gp2Controller : GpController {
+    public override string CurrentDesignation { get; }
+    public override GpFunction CurrentFunction { get; }
+    public override int Index { get; }
+    public override string PinName { get; }
+
+    public void ConfigureAsAdc(CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsAdcAsync(CancellationToken cancellationToken = default) {}
+    public void ConfigureAsDac(CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsDacAsync(CancellationToken cancellationToken = default) {}
+    public void ConfigureAsUsbConfigureStatus(CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsUsbConfigureStatusAsync(CancellationToken cancellationToken = default) {}
+  }
+
+  public sealed class Gp3Controller : GpController {
+    public override string CurrentDesignation { get; }
+    public override GpFunction CurrentFunction { get; }
+    public override int Index { get; }
+    public override string PinName { get; }
+
+    public void ConfigureAsAdc(CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsAdcAsync(CancellationToken cancellationToken = default) {}
+    public void ConfigureAsDac(CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsDacAsync(CancellationToken cancellationToken = default) {}
+    public void ConfigureAsI2cLedOutput(CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsI2cLedOutputAsync(CancellationToken cancellationToken = default) {}
+  }
+
+  public abstract class GpController : IGpioController {
+    public abstract string CurrentDesignation { get; }
+    public abstract GpFunction CurrentFunction { get; }
+    public PinMode CurrentMode { get; }
+    public abstract int Index { get; }
+    public bool IsUsedByGpioController { get; }
+    public PinValue LastUpdatedValue { get; }
+    public abstract string PinName { get; }
+
+    public void ConfigureAsGpio(PinMode mode = PinMode.Output, PinValue initialValue = default, CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsGpioAsync(PinMode mode = PinMode.Output, PinValue initialValue = default, CancellationToken cancellationToken = default) {}
+    public PinMode GetMode(CancellationToken cancellationToken = default) {}
+    public async ValueTask<PinMode> GetModeAsync(CancellationToken cancellationToken = default) {}
+    public bool IsFunctionSupported(GpFunction function) {}
+    public PinValue Read(CancellationToken cancellationToken = default) {}
+    public async ValueTask<PinValue> ReadAsync(CancellationToken cancellationToken = default) {}
+    public void SetMode(PinMode mode, CancellationToken cancellationToken = default) {}
+    public async ValueTask SetModeAsync(PinMode mode, CancellationToken cancellationToken = default) {}
+    protected void ThrowIfInvalidConfiguration(GpFunction requiredFunction) {}
+    public void Write(PinValue @value, CancellationToken cancellationToken = default) {}
+    public async ValueTask WriteAsync(PinValue @value, CancellationToken cancellationToken = default) {}
   }
 }
 
