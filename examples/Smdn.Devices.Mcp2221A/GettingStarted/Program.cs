@@ -75,6 +75,6 @@ for (var n = 0; n < 10; n++) {
   Thread.Sleep(100);
 
   // Set the GP0–GP3 outputs to L-H-L-H
-   device.GpPins.Write(false, true, false, true);
+  device.GpPins.Write(false, true, false, true);
   Thread.Sleep(100);
 }
