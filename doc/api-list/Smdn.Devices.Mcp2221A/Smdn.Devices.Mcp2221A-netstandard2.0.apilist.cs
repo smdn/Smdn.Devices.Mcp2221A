@@ -2,22 +2,21 @@
 //   Name: Smdn.Devices.Mcp2221A
 //   AssemblyVersion: 1.0.0.0
 //   InformationalVersion: 1.0.0-preview2+9335bdfc1b937075a51ac35af5bd1768fa3a1654
-//   TargetFramework: .NETCoreApp,Version=v10.0
+//   TargetFramework: .NETStandard,Version=v2.0
 //   Configuration: Release
-//   Metadata: IsTrimmable=True
 //   Metadata: RepositoryUrl=https://github.com/smdn/Smdn.Devices.Mcp2221A
 //   Metadata: RepositoryBranch=main
 //   Metadata: RepositoryCommit=9335bdfc1b937075a51ac35af5bd1768fa3a1654
 //   Referenced assemblies:
+//     Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51
 //     Microsoft.Extensions.DependencyInjection.Abstractions, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
 //     Microsoft.Extensions.Logging.Abstractions, Version=5.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
 //     Smdn.IO.UsbHid.Abstractions, Version=1.0.0.0, Culture=neutral
-//     System.Collections, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
-//     System.ComponentModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
-//     System.Device.Gpio, Version=4.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35
-//     System.Linq, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
-//     System.Memory, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51
-//     System.Runtime, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
+//     System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51
+//     System.Device.Gpio, Version=1.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35
+//     System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51
+//     System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51
+//     netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51
 #nullable enable annotations
 
 using System;
@@ -371,8 +370,8 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.I2c {
     public static ValueTask<int> ReadAsync(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
     public static int ReadByte(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, CancellationToken cancellationToken = default) {}
     public static async ValueTask<int> ReadByteAsync(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, CancellationToken cancellationToken = default) {}
-    public static (IReadOnlySet<I2cAddress> WriteAddressSet, IReadOnlySet<I2cAddress> ReadAddressSet) ScanBus(this II2cController controller, I2cAddress addressRangeMin = default, I2cAddress addressRangeMax = default, int i2cBusTransmissionSpeedInKbps = 100, IProgress<I2cScanBusProgress>? progress = null, CancellationToken cancellationToken = default) {}
-    public static async ValueTask<(IReadOnlySet<I2cAddress> WriteAddressSet, IReadOnlySet<I2cAddress> ReadAddressSet)> ScanBusAsync(this II2cController controller, I2cAddress addressRangeMin = default, I2cAddress addressRangeMax = default, int i2cBusTransmissionSpeedInKbps = 100, IProgress<I2cScanBusProgress>? progress = null, CancellationToken cancellationToken = default) {}
+    public static (IReadOnlyCollection<I2cAddress> WriteAddressSet, IReadOnlyCollection<I2cAddress> ReadAddressSet) ScanBus(this II2cController controller, I2cAddress addressRangeMin = default, I2cAddress addressRangeMax = default, int i2cBusTransmissionSpeedInKbps = 100, IProgress<I2cScanBusProgress>? progress = null, CancellationToken cancellationToken = default) {}
+    public static async ValueTask<(IReadOnlyCollection<I2cAddress> WriteAddressSet, IReadOnlyCollection<I2cAddress> ReadAddressSet)> ScanBusAsync(this II2cController controller, I2cAddress addressRangeMin = default, I2cAddress addressRangeMax = default, int i2cBusTransmissionSpeedInKbps = 100, IProgress<I2cScanBusProgress>? progress = null, CancellationToken cancellationToken = default) {}
     public static void Write(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
     public static ValueTask WriteAsync(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
     public static void WriteByte(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte @value, CancellationToken cancellationToken = default) {}
@@ -398,8 +397,7 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.I2c {
 
     public Mcp2221AI2cDevice CreateDevice(I2cAddress deviceAddress, bool shouldDisposeMcp2221A = false) {}
     public Mcp2221AI2cDevice CreateDevice(I2cAddress deviceAddress, int transmissionSpeedInKbps, bool shouldDisposeMcp2221A = false) {}
-    [PreserveBaseOverrides]
-    public virtual Mcp2221AI2cDevice CreateDevice(int deviceAddress) {}
+    public override I2cDevice CreateDevice(int deviceAddress) {}
     public int Read(I2cAddress address, int transmissionSpeedInKbps, Span<byte> buffer, CancellationToken cancellationToken = default) {}
     public async ValueTask<int> ReadAsync(I2cAddress address, int transmissionSpeedInKbps, Memory<byte> buffer, CancellationToken cancellationToken = default) {}
     public override void RemoveDevice(int deviceAddress) {}
