@@ -95,6 +95,8 @@ public partial class Mcp2221A :
     GpioController = new Mcp2221AGpioController(driver: gpioDriver);
   }
 
+  /// <inheritdoc/>
+  /// <seealso cref="Reset(System.Threading.CancellationToken)"/>
   public void Dispose()
   {
     Dispose(disposing: true);
@@ -102,6 +104,8 @@ public partial class Mcp2221A :
     GC.SuppressFinalize(this);
   }
 
+  /// <inheritdoc/>
+  /// <seealso cref="ResetAsync(System.Threading.CancellationToken)"/>
   public async ValueTask DisposeAsync()
   {
     await DisposeAsyncCore().ConfigureAwait(false);

@@ -62,7 +62,7 @@ See [Smdn.Devices.Mcp2221A examples](examples/Smdn.Devices.Mcp2221A/).
     - [x] Chip Factory Serial Number (read only, [always returns `01234567` (issue #8)](../../issues/8))
     - [x] Hardware/Firmware revision (read only)
     - [ ] Passwords and chip setting protection
-- [ ] Reset
+- [x] Reset
 
 Haven't tested with the actual MCP2221, but it is expected that works as same as MCP2221A.
 

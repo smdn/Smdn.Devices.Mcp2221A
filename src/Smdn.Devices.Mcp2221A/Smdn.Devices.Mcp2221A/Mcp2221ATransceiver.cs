@@ -52,6 +52,8 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
 
   private readonly ILogger? logger;
 
+  internal bool HasResetChipCommandIssued { get; private set; }
+
   public Mcp2221ATransceiver(
     IUsbHidEndPoint endPoint,
     ILogger? logger
@@ -164,6 +166,14 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
         throw new Mcp2221ACommandException("writing command report failed", ex);
       }
 
+      if (HasResetChipCommandIssued) {
+        // Performing a reset will invalidate the current USB HID endpoint,
+        // and subsequent communication will no longer be possible;
+        // therefore, this instance should also be disposed.
+        await DisposeAsync().ConfigureAwait(false);
+        return default!;
+      }
+
       int readReportLength = default;
 
       try {
@@ -251,6 +261,14 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
       throw new Mcp2221ACommandException("writing command report failed", ex);
     }
 
+    if (HasResetChipCommandIssued) {
+      // Performing a reset will invalidate the current USB HID endpoint,
+      // and subsequent communication will no longer be possible;
+      // therefore, this instance should also be disposed.
+      Dispose();
+      return default!;
+    }
+
     int readReportLength = default;
 
     try {
@@ -275,4 +293,52 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
 
     return parseResponse(responseSpan, arg);
   }
+
+  private static class ResetChipCommand {
+#pragma warning disable IDE0060 // [IDE0060] Remove unused parameter
+    public static void ConstructCommand(
+      Span<byte> comm,
+      ReadOnlySpan<byte> userData,
+      Mcp2221ATransceiver self
+    )
+#pragma warning restore IDE0060
+    {
+      // [MCP2221A] 3.1.15 RESET CHIP
+      comm[0] = 0x70; // Reset Chip
+      comm[1] = 0xAB;
+      comm[2] = 0xCD;
+      comm[3] = 0xEF;
+      // [4-64] Don't care
+
+      self.HasResetChipCommandIssued = true;
+    }
+
+    public static None ParseResponse(
+      ReadOnlySpan<byte> resp,
+      Mcp2221ATransceiver self
+    )
+      => throw new Mcp2221ACommandException("No response to the reset command is defined.");
+  }
+
+  public ValueTask ResetChipAsync(
+    CancellationToken cancellationToken = default
+  )
+    => CommandAsync(
+      userData: default,
+      arg: this,
+      cancellationToken: cancellationToken,
+      constructCommand: ResetChipCommand.ConstructCommand,
+      parseResponse: ResetChipCommand.ParseResponse
+    ).AsValueTask();
+
+  public void ResetChip(
+    CancellationToken cancellationToken = default
+  )
+    => Command(
+      userData: default,
+      arg: this,
+      cancellationToken: cancellationToken,
+      constructCommand: ResetChipCommand.ConstructCommand,
+      parseResponse: ResetChipCommand.ParseResponse
+    );
 }

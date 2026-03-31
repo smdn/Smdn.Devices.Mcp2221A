@@ -398,6 +398,9 @@ public partial class Mcp2221ATests {
     Assert.That(() => _ = device.SerialNumber, Throws.Nothing);
     Assert.That(() => _ = device.ChipFactorySerialNumber, Throws.Nothing);
 
+    Assert.That(() => device.Reset(), Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(async () => await device.ResetAsync(), Throws.TypeOf<ObjectDisposedException>());
+
     foreach (var gp in new GpController[] { gp0, gp1, gp2, gp3 }) {
       Assert.That(async () => await gp.WriteAsync(default), Throws.TypeOf<ObjectDisposedException>());
       Assert.That(() => gp.WriteAsync(default), Throws.TypeOf<ObjectDisposedException>());
