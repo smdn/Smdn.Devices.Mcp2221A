@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
+using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
-namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
+namespace Smdn.Devices.Mcp2221A;
 
 /// <summary>
 /// Defines the functions that can be assigned to the General Purpose (GP) pins.
