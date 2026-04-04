@@ -55,10 +55,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v6.0.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v4
+      uses: github/codeql-action/init@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
       with:
         languages: ${{ matrix.language }}
         # If you wish to specify custom queries, you can do so here or in a config file.
@@ -69,10 +69,10 @@ jobs:
 
     - name: Autobuild
       if: ${{ (matrix.build-mode == 'autobuild') || (matrix.build-mode == '') }}
-      uses: github/codeql-action/autobuild@v4
+      uses: github/codeql-action/autobuild@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
 
     - name: Prepare .NET SDK ${{ env.MINIMAL_DOTNET_SDK_VERSION }}
-      uses: smdn/workflows-dotnet/actions/prepare-dotnet-sdk@actions/prepare-dotnet-sdk/v1.1.0
+      uses: smdn/workflows-dotnet/actions/prepare-dotnet-sdk@e294de483afffc1d3a366fbba853efe23c7b7d4c # actions/prepare-dotnet-sdk/v1.2.0
       if: ${{ (matrix.build-mode == 'manual') && (matrix.language == 'csharp') }}
       with:
         minimal_dotnet_sdk_version: '${{ env.MINIMAL_DOTNET_SDK_VERSION }}'
@@ -83,4 +83,4 @@ jobs:
         ./eng/BuildAllProjects.ps1
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v4
+      uses: github/codeql-action/analyze@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1

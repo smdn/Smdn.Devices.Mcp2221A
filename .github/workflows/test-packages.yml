@@ -56,13 +56,13 @@ jobs:
   await-package-publishing:
     name: Wait for publishing of released package
     if: ${{ github.event_name == 'release' }}
-    uses: smdn/workflows-dotnet/.github/workflows/nuget-await-package-publishing.yml@nuget/v1.1.1
+    uses: smdn/workflows-dotnet/.github/workflows/nuget-await-package-publishing.yml@e7c5d3c21afa020ce40b0dae3bb2cb050c7c0ec1 # nuget/v1.2.0
     with:
       release_tag: ${{ github.event.release.tag_name }}
 
   run-test:
     name: Run tests with released packages
-    uses: smdn/workflows-dotnet/.github/workflows/test.yml@test/v1.9.0
+    uses: smdn/workflows-dotnet/.github/workflows/test.yml@ea0a480137fc3227427d82f4c40614f298822025 # test/v1.9.1
     needs: await-package-publishing
     if: ${{ always() && !failure() && !cancelled() }} # run tests even if await-package-publishing is skipped
     with:
