@@ -42,7 +42,7 @@ public interface II2cController {
     I2cAddress address,
     int transmissionSpeedInKbps,
     Span<byte> buffer,
-    CancellationToken cancellationToken
+    CancellationToken cancellationToken = default
   );
 
   /// <remarks>
@@ -59,7 +59,7 @@ public interface II2cController {
     I2cAddress address,
     int transmissionSpeedInKbps,
     Memory<byte> buffer,
-    CancellationToken cancellationToken
+    CancellationToken cancellationToken = default
   );
 
   /// <remarks>
@@ -76,7 +76,7 @@ public interface II2cController {
     I2cAddress address,
     int transmissionSpeedInKbps,
     ReadOnlySpan<byte> buffer,
-    CancellationToken cancellationToken
+    CancellationToken cancellationToken = default
   );
 
   /// <remarks>
@@ -93,6 +93,6 @@ public interface II2cController {
     I2cAddress address,
     int transmissionSpeedInKbps,
     ReadOnlyMemory<byte> buffer,
-    CancellationToken cancellationToken
+    CancellationToken cancellationToken = default
   );
 }
