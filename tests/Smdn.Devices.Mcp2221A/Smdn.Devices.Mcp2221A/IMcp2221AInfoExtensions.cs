@@ -12,11 +12,11 @@ public class IMcp2221AInfoExtensionsTests {
   [TestCase('1', '2', true)] // 1.2 (MCP2221A)
   public async Task IsMcp2221A(char firmwareRevisionMajor, char firmwareRevisionMinor, bool expected)
   {
-    var baseDevice = Mcp2221ATests.CreatePseudoDevice(
+    var baseDevice = Mcp2221AControllerTests.CreatePseudoDevice(
       firmwareRevisionMajor: (byte)firmwareRevisionMajor,
       firmwareRevisionMinor: (byte)firmwareRevisionMinor
     );
-    using var device = await Mcp2221A.CreateAsync(baseDevice, shouldDisposeUsbHidDevice: true);
+    using var device = await Mcp2221AController.CreateAsync(baseDevice, shouldDisposeUsbHidDevice: true);
 
     Assert.That(device.IsMcp2221A, Is.EqualTo(expected));
   }

@@ -10,14 +10,14 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 [TestFixture]
 public partial class GpControllerTests {
-  public delegate GpController SelectGpControllerFunc(Mcp2221A mcp2221A);
+  public delegate GpController SelectGpControllerFunc(Mcp2221AController mcp2221A);
 
-  private static GpController SelectGp0Controller(Mcp2221A mcp2221A) => mcp2221A.GpPin0;
-  private static GpController SelectGp1Controller(Mcp2221A mcp2221A) => mcp2221A.GpPin1;
-  private static GpController SelectGp2Controller(Mcp2221A mcp2221A) => mcp2221A.GpPin2;
-  private static GpController SelectGp3Controller(Mcp2221A mcp2221A) => mcp2221A.GpPin3;
+  private static GpController SelectGp0Controller(Mcp2221AController mcp2221A) => mcp2221A.GpPin0;
+  private static GpController SelectGp1Controller(Mcp2221AController mcp2221A) => mcp2221A.GpPin1;
+  private static GpController SelectGp2Controller(Mcp2221AController mcp2221A) => mcp2221A.GpPin2;
+  private static GpController SelectGp3Controller(Mcp2221AController mcp2221A) => mcp2221A.GpPin3;
 
-  private static Mcp2221A CreateMcp2221AConfiguredAsGpio(
+  private static Mcp2221AController CreateMcp2221AConfiguredAsGpio(
     ReadOnlySpan<PinValuePair> initialValues = default,
     ReadOnlySpan<PinModePair> initialModes = default
   )
@@ -41,8 +41,8 @@ public partial class GpControllerTests {
       };
     }
 
-    return Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    return Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: gpSettings[0],
         gp1Settings: gpSettings[1],
         gp2Settings: gpSettings[2],

@@ -48,7 +48,7 @@ public sealed class Mcp2221AI2cDevice : I2cDevice, II2cDevice {
   } = Mcp2221AI2cBus.DefaultTransmissionSpeedInKbps;
 #pragma warning restore SA1513
 
-  private readonly bool shouldDisposeMcp2221A;
+  private readonly bool shouldDisposeMcp2221AController;
 
   private I2cConnectionSettings? connectionSettings;
 
@@ -70,19 +70,19 @@ public sealed class Mcp2221AI2cDevice : I2cDevice, II2cDevice {
   internal Mcp2221AI2cDevice(
     Mcp2221AI2cBus i2cBus,
     I2cAddress deviceAddress,
-    bool shouldDisposeMcp2221A
+    bool shouldDisposeMcp2221AController
   )
   {
     this.i2cBus = i2cBus ?? throw new ArgumentNullException(nameof(i2cBus));
     this.deviceAddress = deviceAddress;
-    this.shouldDisposeMcp2221A = shouldDisposeMcp2221A;
+    this.shouldDisposeMcp2221AController = shouldDisposeMcp2221AController;
   }
 
   /// <inheritdoc/>
   protected override void Dispose(bool disposing)
   {
     if (disposing) {
-      if (shouldDisposeMcp2221A)
+      if (shouldDisposeMcp2221AController)
         i2cBus?.Device?.Dispose();
 
       i2cBus = null!;

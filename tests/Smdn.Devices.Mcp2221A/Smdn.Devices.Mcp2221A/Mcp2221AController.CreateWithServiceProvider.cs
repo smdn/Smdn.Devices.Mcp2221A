@@ -14,57 +14,57 @@ using Smdn.IO.UsbHid;
 namespace Smdn.Devices.Mcp2221A;
 
 [TestFixture]
-public partial class Mcp2221ATests {
-  private delegate ValueTask<Mcp2221A> CreateWithKeyedServiceProviderFunc(
+public partial class Mcp2221AControllerTests {
+  private delegate ValueTask<Mcp2221AController> CreateWithKeyedServiceProviderFunc(
     IServiceProvider serviceProvider,
     object? serviceKey,
     CancellationToken cancellationToken
   );
 
-  private delegate ValueTask<Mcp2221A> CreateWithServiceProviderFunc(
+  private delegate ValueTask<Mcp2221AController> CreateWithServiceProviderFunc(
     IServiceProvider serviceProvider,
     CancellationToken cancellationToken
   );
 
-  private ValueTask<Mcp2221A> CreateWithServiceProviderAsync(
+  private ValueTask<Mcp2221AController> CreateWithServiceProviderAsync(
     IServiceProvider serviceProvider,
     object? serviceKey,
     CancellationToken cancellationToken
   )
-    => Mcp2221A.CreateAsync(
+    => Mcp2221AController.CreateAsync(
       serviceProvider: serviceProvider,
       serviceKey: serviceKey,
       cancellationToken: cancellationToken
     );
 
-  private ValueTask<Mcp2221A> CreateWithServiceProviderAsync(
+  private ValueTask<Mcp2221AController> CreateWithServiceProviderAsync(
     IServiceProvider serviceProvider,
     CancellationToken cancellationToken
   )
-    => Mcp2221A.CreateAsync(
+    => Mcp2221AController.CreateAsync(
       serviceProvider: serviceProvider,
       cancellationToken: cancellationToken
     );
 
-  private ValueTask<Mcp2221A> CreateWithServiceProvider(
+  private ValueTask<Mcp2221AController> CreateWithServiceProvider(
     IServiceProvider serviceProvider,
     object? serviceKey,
     CancellationToken cancellationToken
   )
     => new(
-      Mcp2221A.Create(
+      Mcp2221AController.Create(
         serviceProvider: serviceProvider,
         serviceKey: serviceKey,
         cancellationToken: cancellationToken
       )
     );
 
-  private ValueTask<Mcp2221A> CreateWithServiceProvider(
+  private ValueTask<Mcp2221AController> CreateWithServiceProvider(
     IServiceProvider serviceProvider,
     CancellationToken cancellationToken
   )
     => new(
-      Mcp2221A.Create(
+      Mcp2221AController.Create(
         serviceProvider: serviceProvider,
         cancellationToken: cancellationToken
       )
@@ -166,7 +166,7 @@ public partial class Mcp2221ATests {
     services.AddPseudoUsbHid(new PseudoUsbHidService(devices));
 
     using var serviceProvider = services.BuildServiceProvider();
-    Mcp2221A? mcp2221A = null;
+    Mcp2221AController? mcp2221A = null;
 
     Assert.That(
       async () => {
@@ -371,8 +371,8 @@ public partial class Mcp2221ATests {
   )
   {
     PseudoUsbHidDevice[] devices = [
-      CreatePseudoDevice(vendorId: Mcp2221A.DefaultVendorId, productId: 0xFFFF), // not match
-      CreatePseudoDevice(vendorId: 0xFFFF, productId: Mcp2221A.DefaultProductId), // not match
+      CreatePseudoDevice(vendorId: Mcp2221AController.DefaultVendorId, productId: 0xFFFF), // not match
+      CreatePseudoDevice(vendorId: 0xFFFF, productId: Mcp2221AController.DefaultProductId), // not match
       CreatePseudoDevice(vendorId: 0xFFFF, productId: 0xFFFF), // not match
     ];
 
@@ -401,21 +401,21 @@ public partial class Mcp2221ATests {
 
   [TestCase(null)]
   [TestCase(StringServiceKeyForTestCase)]
-  public void CreateAsync_WithServiceProvider_ExceptionWhileConstructingMcp2221A(object? serviceKey)
-    => CreateSyncOrAsync_WithServiceProvider_ExceptionWhileConstructingMcp2221A(
+  public void CreateAsync_WithServiceProvider_ExceptionWhileConstructingMcp2221AController(object? serviceKey)
+    => CreateSyncOrAsync_WithServiceProvider_ExceptionWhileConstructingMcp2221AController(
       serviceKey,
       CreateWithServiceProviderAsync
     );
 
   [TestCase(null)]
   [TestCase(StringServiceKeyForTestCase)]
-  public void Create_WithServiceProvider_ExceptionWhileConstructingMcp2221A(object? serviceKey)
-    => CreateSyncOrAsync_WithServiceProvider_ExceptionWhileConstructingMcp2221A(
+  public void Create_WithServiceProvider_ExceptionWhileConstructingMcp2221AController(object? serviceKey)
+    => CreateSyncOrAsync_WithServiceProvider_ExceptionWhileConstructingMcp2221AController(
       serviceKey,
       CreateWithServiceProvider
     );
 
-  private void CreateSyncOrAsync_WithServiceProvider_ExceptionWhileConstructingMcp2221A(
+  private void CreateSyncOrAsync_WithServiceProvider_ExceptionWhileConstructingMcp2221AController(
     object? serviceKey,
     CreateWithKeyedServiceProviderFunc createFunc
   )
@@ -450,21 +450,21 @@ public partial class Mcp2221ATests {
 
   [TestCase(null)]
   [TestCase(StringServiceKeyForTestCase)]
-  public void CreateAsync_WithServiceProvider_CancellationRequestedWhileConstructingMcp2221A(object? serviceKey)
-    => CreateSyncOrAsync_WithServiceProvider_CancellationRequestedWhileConstructingMcp2221A(
+  public void CreateAsync_WithServiceProvider_CancellationRequestedWhileConstructingMcp2221AController(object? serviceKey)
+    => CreateSyncOrAsync_WithServiceProvider_CancellationRequestedWhileConstructingMcp2221AController(
       serviceKey,
       CreateWithServiceProviderAsync
     );
 
   [TestCase(null)]
   [TestCase(StringServiceKeyForTestCase)]
-  public void Create_WithServiceProvider_CancellationRequestedWhileConstructingMcp2221A(object? serviceKey)
-    => CreateSyncOrAsync_WithServiceProvider_CancellationRequestedWhileConstructingMcp2221A(
+  public void Create_WithServiceProvider_CancellationRequestedWhileConstructingMcp2221AController(object? serviceKey)
+    => CreateSyncOrAsync_WithServiceProvider_CancellationRequestedWhileConstructingMcp2221AController(
       serviceKey,
       CreateWithServiceProvider
     );
 
-  private void CreateSyncOrAsync_WithServiceProvider_CancellationRequestedWhileConstructingMcp2221A(
+  private void CreateSyncOrAsync_WithServiceProvider_CancellationRequestedWhileConstructingMcp2221AController(
     object? serviceKey,
     CreateWithKeyedServiceProviderFunc createFunc
   )

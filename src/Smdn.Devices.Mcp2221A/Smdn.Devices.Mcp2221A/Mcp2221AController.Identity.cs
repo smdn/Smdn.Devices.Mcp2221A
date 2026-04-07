@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 namespace Smdn.Devices.Mcp2221A;
 
-public partial class Mcp2221A {
+public partial class Mcp2221AController {
   /// <summary>
   /// Represents the default Vendor ID (VID) for the MCP2221/MCP2221A.
   /// </summary>

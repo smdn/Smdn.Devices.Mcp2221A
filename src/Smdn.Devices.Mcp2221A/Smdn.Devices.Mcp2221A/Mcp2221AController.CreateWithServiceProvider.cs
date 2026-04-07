@@ -8,11 +8,11 @@ using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
 
-#pragma warning disable IDE0040, CA1724
-partial class Mcp2221A {
-#pragma warning restore IDE0040, CA1724
+#pragma warning disable IDE0040
+partial class Mcp2221AController {
+#pragma warning restore IDE0040
   /// <summary>
-  /// Finds and opens a <see cref="Mcp2221A"/> device that is the first found among the
+  /// Finds and opens a <see cref="Mcp2221AController"/> device that is the first found among the
   /// USB HID devices on the system, and creates an instance for it asynchronously.
   /// </summary>
   /// <param name="serviceProvider">
@@ -24,7 +24,7 @@ partial class Mcp2221A {
   /// </param>
   /// <returns>
   /// A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.
-  /// The result of the task is a <see cref="Mcp2221A"/> instance for the found device.
+  /// The result of the task is a <see cref="Mcp2221AController"/> instance for the found device.
   /// </returns>
   /// <exception cref="ArgumentNullException">
   /// <paramref name="serviceProvider"/> is <see langword="null"/>.
@@ -45,7 +45,7 @@ partial class Mcp2221A {
   /// </para>
   /// </remarks>
   /// <seealso cref="CreateAsync(IUsbHidDevice, bool, IServiceProvider?, CancellationToken)"/>
-  public static ValueTask<Mcp2221A> CreateAsync(
+  public static ValueTask<Mcp2221AController> CreateAsync(
     IServiceProvider serviceProvider,
     CancellationToken cancellationToken = default
   )
@@ -57,7 +57,7 @@ partial class Mcp2221A {
     );
 
   /// <summary>
-  /// Finds and opens a <see cref="Mcp2221A"/> device that is the first found among the
+  /// Finds and opens a <see cref="Mcp2221AController"/> device that is the first found among the
   /// USB HID devices on the system, and creates an instance for it.
   /// </summary>
   /// <param name="serviceProvider">
@@ -68,7 +68,7 @@ partial class Mcp2221A {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// </param>
   /// <returns>
-  /// A <see cref="Mcp2221A"/> instance for the found device.
+  /// A <see cref="Mcp2221AController"/> instance for the found device.
   /// </returns>
   /// <exception cref="ArgumentNullException">
   /// <paramref name="serviceProvider"/> is <see langword="null"/>.
@@ -89,7 +89,7 @@ partial class Mcp2221A {
   /// </para>
   /// </remarks>
   /// <seealso cref="Create(IUsbHidDevice, bool, IServiceProvider?, CancellationToken)"/>
-  public static Mcp2221A Create(
+  public static Mcp2221AController Create(
     IServiceProvider serviceProvider,
     CancellationToken cancellationToken = default
   )
@@ -101,7 +101,7 @@ partial class Mcp2221A {
     );
 
   /// <summary>
-  /// Finds and opens a <see cref="Mcp2221A"/> device that is the first found among the
+  /// Finds and opens a <see cref="Mcp2221AController"/> device that is the first found among the
   /// USB HID devices on the system, and creates an instance for it asynchronously.
   /// </summary>
   /// <typeparam name="TServiceKey">
@@ -121,7 +121,7 @@ partial class Mcp2221A {
   /// </param>
   /// <returns>
   /// A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.
-  /// The result of the task is a <see cref="Mcp2221A"/> instance for the found device.
+  /// The result of the task is a <see cref="Mcp2221AController"/> instance for the found device.
   /// </returns>
   /// <exception cref="ArgumentNullException">
   /// <paramref name="serviceProvider"/> is <see langword="null"/>.
@@ -142,7 +142,7 @@ partial class Mcp2221A {
   /// </para>
   /// </remarks>
   /// <seealso cref="CreateAsync{TServiceKey}(IUsbHidDevice, IServiceProvider?, TServiceKey, bool, CancellationToken)"/>
-  public static ValueTask<Mcp2221A> CreateAsync<TServiceKey>(
+  public static ValueTask<Mcp2221AController> CreateAsync<TServiceKey>(
     IServiceProvider serviceProvider,
     TServiceKey serviceKey,
     CancellationToken cancellationToken = default
@@ -155,7 +155,7 @@ partial class Mcp2221A {
     );
 
   /// <summary>
-  /// Finds and opens a <see cref="Mcp2221A"/> device that is the first found among the
+  /// Finds and opens a <see cref="Mcp2221AController"/> device that is the first found among the
   /// USB HID devices on the system, and creates an instance for it.
   /// </summary>
   /// <typeparam name="TServiceKey">
@@ -174,7 +174,7 @@ partial class Mcp2221A {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// </param>
   /// <returns>
-  /// A <see cref="Mcp2221A"/> instance for the found device.
+  /// A <see cref="Mcp2221AController"/> instance for the found device.
   /// </returns>
   /// <exception cref="ArgumentNullException">
   /// <paramref name="serviceProvider"/> is <see langword="null"/>.
@@ -195,7 +195,7 @@ partial class Mcp2221A {
   /// </para>
   /// </remarks>
   /// <seealso cref="Create{TServiceKey}(IUsbHidDevice, IServiceProvider?, TServiceKey, bool, CancellationToken)"/>
-  public static Mcp2221A Create<TServiceKey>(
+  public static Mcp2221AController Create<TServiceKey>(
     IServiceProvider serviceProvider,
     TServiceKey serviceKey,
     CancellationToken cancellationToken = default

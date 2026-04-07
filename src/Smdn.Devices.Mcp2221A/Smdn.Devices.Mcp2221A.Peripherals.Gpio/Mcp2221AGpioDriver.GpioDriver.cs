@@ -21,7 +21,7 @@ partial class Mcp2221AGpioDriver : GpioDriver {
   {
     if (IsUsedByGpioController(gp)) {
       throw new InvalidOperationException(
-        message: $"The GP{gp} is currently being used by a {nameof(Mcp2221A.GpioController)}. Close the pin with the {nameof(Mcp2221A.GpioController)} before performing this operation."
+        message: $"The GP{gp} is currently being used by a {nameof(Mcp2221AController.GpioController)}. Close the pin with the {nameof(Mcp2221AController.GpioController)} before performing this operation."
       );
     }
   }
@@ -30,7 +30,7 @@ partial class Mcp2221AGpioDriver : GpioDriver {
   /// <remarks>
   /// Although <see cref="GpioDriver"/> requires an implementation of <see cref="IDisposable"/>,
   /// this class does not hold any objects whose lifecycle needs to be maintained,
-  /// and since the lifecycle of this class itself is maintained by the <see cref="Mcp2221A"/>,
+  /// and since the lifecycle of this class itself is maintained by the <see cref="Mcp2221AController"/>,
   /// this method does nothing when called.
   /// </remarks>
   protected override void Dispose(bool disposing)

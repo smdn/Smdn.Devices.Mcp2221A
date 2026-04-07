@@ -14,29 +14,29 @@ using Smdn.IO.UsbHid;
 namespace Smdn.Devices.Mcp2221A;
 
 #pragma warning disable IDE0040
-partial class Mcp2221ATests {
+partial class Mcp2221AControllerTests {
 #pragma warning restore IDE0040
   private static System.Collections.IEnumerable YieldTestCases_CreateI2cDeviceAdapter()
   {
-    const bool ShouldDisposeMcp2221A = true;
-    const bool ShouldNotDisposeMcp2221A = false;
+    const bool ShouldDisposeMcp2221AController = true;
+    const bool ShouldNotDisposeMcp2221AController = false;
 
-    yield return new object[] { I2cAddress.DeviceMinValue, ShouldDisposeMcp2221A };
-    yield return new object[] { I2cAddress.DeviceMaxValue, ShouldDisposeMcp2221A };
-    yield return new object[] { I2cAddress.DeviceMinValue, ShouldNotDisposeMcp2221A };
+    yield return new object[] { I2cAddress.DeviceMinValue, ShouldDisposeMcp2221AController };
+    yield return new object[] { I2cAddress.DeviceMaxValue, ShouldDisposeMcp2221AController };
+    yield return new object[] { I2cAddress.DeviceMinValue, ShouldNotDisposeMcp2221AController };
   }
 
   [TestCaseSource(nameof(YieldTestCases_CreateI2cDeviceAdapter))]
   public async Task CreateI2cDeviceAdapter(
     I2cAddress deviceAddress,
-    bool shouldDisposeMcp2221A
+    bool shouldDisposeMcp2221AController
   )
   {
-    await using var mcp2221A = await Mcp2221A.CreateAsync(
+    await using var mcp2221A = await Mcp2221AController.CreateAsync(
       CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true
     );
-    using var i2cDevice = mcp2221A.I2cBus.CreateDevice(deviceAddress, shouldDisposeMcp2221A);
+    using var i2cDevice = mcp2221A.I2cBus.CreateDevice(deviceAddress, shouldDisposeMcp2221AController);
 
     Assert.That(i2cDevice, Is.Not.Null);
     Assert.That(i2cDevice.ConnectionSettings, Is.Not.Null);
@@ -55,7 +55,7 @@ partial class Mcp2221ATests {
 
     Assert.That(
       () => _ = mcp2221A.HidDevice,
-      shouldDisposeMcp2221A
+      shouldDisposeMcp2221AController
         ? Throws.TypeOf<ObjectDisposedException>()
         : Throws.Nothing
     );
@@ -82,9 +82,9 @@ partial class Mcp2221ATests {
       static (d, address, ct) => d.I2cBus.WriteAsync(address, 100, new byte[] { 0x00, 0x00, 0x00 }, ct)
     );
 
-  private async ValueTask WriteSyncAndAsync(Func<Mcp2221A, I2cAddress, CancellationToken, ValueTask> writeAsyncAction)
+  private async ValueTask WriteSyncAndAsync(Func<Mcp2221AController, I2cAddress, CancellationToken, ValueTask> writeAsyncAction)
   {
-    await using var mcp2221A = await Mcp2221A.CreateAsync(
+    await using var mcp2221A = await Mcp2221AController.CreateAsync(
       CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true
     );

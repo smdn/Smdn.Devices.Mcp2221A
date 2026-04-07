@@ -3,7 +3,7 @@
 namespace Smdn.Devices.Mcp2221A;
 
 #pragma warning disable IDE0040
-partial class Mcp2221A : IMcp2221AInfo {
+partial class Mcp2221AController : IMcp2221AInfo {
 #pragma warning restore IDE0040
   private readonly IMcp2221AInfo info;
 

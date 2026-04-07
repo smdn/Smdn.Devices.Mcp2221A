@@ -29,7 +29,7 @@ const int DeviceProductId = 0xFFFF;
 const string DeviceChipFactorySerialNumber = "XXXXXXXX";
 
 try {
-  using var device = Mcp2221A.Create(
+  using var device = Mcp2221AController.Create(
     serviceProvider: serviceProvider,
     usbHidDeviceFilter: (IUsbHidDevice usbHidDevice) => {
       return usbHidDevice.VendorId == DeviceVendorId && usbHidDevice.ProductId == DeviceProductId;

@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace Smdn.Devices.Mcp2221A;
 
-#pragma warning disable IDE0040, CA1724
-partial class Mcp2221A {
-#pragma warning restore IDE0040, CA1724
+#pragma warning disable IDE0040
+partial class Mcp2221AController {
+#pragma warning restore IDE0040
 
   /// <inheritdoc cref="Reset(CancellationToken)"/>
   /// <summary>
@@ -46,7 +46,7 @@ partial class Mcp2221A {
   /// To reflect this hardware state, this method automatically calls <see cref="Dispose()"/>
   /// after transmitting the reset command. If you need to communicate with the
   /// device again after the reset is complete, you must discover the device and
-  /// create a new <see cref="Mcp2221A"/> instance.
+  /// create a new <see cref="Mcp2221AController"/> instance.
   /// </para>
   /// </remarks>
   /// <seealso cref="Dispose()"/>

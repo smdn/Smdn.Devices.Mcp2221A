@@ -55,8 +55,8 @@ partial class GpControllerTests {
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -68,14 +68,14 @@ partial class GpControllerTests {
     var currentGpSettings = new byte[4] { InitialGp0Settings, InitialGp1Settings, InitialGp2Settings, InitialGp3Settings };
 
     foreach (var gp in mcp2221A.GpPins) {
-      Mcp2221ATests.AppendPseudoResponse(
+      Mcp2221AControllerTests.AppendPseudoResponse(
         mcp2221A,
         // [MCP2221A] 3.1.13 SET SRAM SETTINGS
         // [1] 0x00: Command completed successfully
         // [2-63] Don't care
         "60-00-" + string.Join("-", Enumerable.Repeat("00", 62))
       );
-      Mcp2221ATests.ClearSentCommands(mcp2221A);
+      Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
       expectedAssignments[gp.Index] = GpFunction.Gpio;
 
@@ -92,7 +92,7 @@ partial class GpControllerTests {
 
       currentGpSettings[gp.Index] = (byte)(expectedOutputValueBits | expectedDirectionBits | ExpectedDesignationBits);
 
-      Mcp2221ATests.AppendPseudoResponse(
+      Mcp2221AControllerTests.AppendPseudoResponse(
         mcp2221A,
         // [MCP2221A] 3.1.13 SET SRAM SETTINGS
         // [1] 0x00: Command completed successfully
@@ -120,7 +120,7 @@ partial class GpControllerTests {
         Throws.Nothing
       );
       Assert.That(
-        Mcp2221ATests.GetSentCommand(mcp2221A),
+        Mcp2221AControllerTests.GetSentCommand(mcp2221A),
         SequenceIs.EqualTo(expectedSentCommand)
       );
 
@@ -172,8 +172,8 @@ partial class GpControllerTests {
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -187,7 +187,7 @@ partial class GpControllerTests {
     for (var gp = 0; gp < 4; gp++) {
       currentGpSettings[gp] = (byte)(currentGpSettings[gp] & 0b_111_1_1_000);
 
-      Mcp2221ATests.AppendPseudoResponse(
+      Mcp2221AControllerTests.AppendPseudoResponse(
         mcp2221A,
         // [MCP2221A] 3.1.13 SET SRAM SETTINGS
         // [1] 0x00: Command completed successfully
@@ -213,8 +213,8 @@ partial class GpControllerTests {
 
     foreach (var gp in mcp2221A.GpPins) {
       // command should not be sent
-      // Mcp2221ATests.AppendPseudoResponse(...);
-      Mcp2221ATests.ClearSentCommands(mcp2221A);
+      // Mcp2221AControllerTests.AppendPseudoResponse(...);
+      Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
       Assert.That(
         async () => await configureAsGpioAsyncFunc(gp, mode, initialValue),
@@ -229,7 +229,7 @@ partial class GpControllerTests {
       );
 
       Assert.That(
-        Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+        Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
         Is.Zero,
         "command should not be sent"
       );
@@ -265,8 +265,8 @@ partial class GpControllerTests {
     Func<GpController, PinMode, ValueTask> configureAsGpioAsyncFunc
   )
   {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: 0b_000_1_0_010, // Alternate Function 0 (LED UART RX)
         gp1Settings: 0b_000_1_0_011, // Alternate Function 1 (LED UART TX)
         gp2Settings: 0b_000_1_0_001, // Dedicated function operation (USBCFG)
@@ -310,8 +310,8 @@ partial class GpControllerTests {
     Func<GpController, CancellationToken, ValueTask> configureAsGpioAsyncFunc
   )
   {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: 0b_000_1_0_010, // Alternate Function 0 (LED UART RX)
         gp1Settings: 0b_000_1_0_011, // Alternate Function 1 (LED UART TX)
         gp2Settings: 0b_000_1_0_001, // Dedicated function operation (USBCFG)
@@ -364,8 +364,8 @@ partial class GpControllerTests {
     Func<GpController, ValueTask> configureAsGpioAsyncFunc
   )
   {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(),
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true
     );
     var gpPins = mcp2221A.GpPins;

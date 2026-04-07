@@ -19,8 +19,8 @@ public class Mcp2221AGpioControllerTests {
   [TestCase(int.MaxValue)]
   public void OpenPin_PinNumberOutOfRange(int pinNumber)
   {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(),
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true
     );
 
@@ -57,8 +57,8 @@ public class Mcp2221AGpioControllerTests {
       PinMode.Output,
     };
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -67,14 +67,14 @@ public class Mcp2221AGpioControllerTests {
       shouldDisposeUsbHidDevice: true
     );
 
-    Mcp2221ATests.AppendPseudoResponse(
+    Mcp2221AControllerTests.AppendPseudoResponse(
       mcp2221A,
       // [MCP2221A] 3.1.13 SET SRAM SETTINGS
       // [1] 0x00: Command completed successfully
       // [2-63] Don't care
       "60-00-" + string.Join("-", Enumerable.Repeat("00", 62))
     );
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     var expectedSentCommand = new byte[64];
 
@@ -101,7 +101,7 @@ public class Mcp2221AGpioControllerTests {
 #endif
 
     Assert.That(
-      Mcp2221ATests.GetSentCommand(mcp2221A),
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand)
     );
 
@@ -129,8 +129,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_001; // LOW - INPUT - Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_0_0_001; // LOW - OUTPUT - Dedicated function operation (LED I2C)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -174,8 +174,8 @@ public class Mcp2221AGpioControllerTests {
       PinMode.Output,
     };
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -185,8 +185,8 @@ public class Mcp2221AGpioControllerTests {
     );
 
     // command should not be sent
-    // Mcp2221ATests.AppendPseudoResponse(...);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
 #if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
     GpioPin? pin = null;
@@ -203,7 +203,7 @@ public class Mcp2221AGpioControllerTests {
 #endif
 
     Assert.That(
-      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
       Is.Zero,
       "command should not be sent"
     );
@@ -245,8 +245,8 @@ public class Mcp2221AGpioControllerTests {
       PinMode.Output,
     };
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -256,8 +256,8 @@ public class Mcp2221AGpioControllerTests {
     );
 
     // command should not be sent
-    // Mcp2221ATests.AppendPseudoResponse(...);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     Assert.That(
       () =>
@@ -292,7 +292,7 @@ public class Mcp2221AGpioControllerTests {
     Assert.That(mcp2221A.GpioController.IsPinOpen(pinNumber), Is.True);
 
     Assert.That(
-      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
       Is.Zero,
       "command should not be sent"
     );
@@ -319,8 +319,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -330,8 +330,8 @@ public class Mcp2221AGpioControllerTests {
     );
 
     // command should not be sent
-    // Mcp2221ATests.AppendPseudoResponse(...);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     Assert.That(
       () =>
@@ -348,7 +348,7 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
       Is.Zero,
       "command should not be sent"
     );
@@ -370,8 +370,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -381,8 +381,8 @@ public class Mcp2221AGpioControllerTests {
     );
 
     // command should not be sent
-    // Mcp2221ATests.AppendPseudoResponse(...);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     Assert.That(
       () => mcp2221A.GpioController.SetPinMode(pinNumber, mode),
@@ -390,7 +390,7 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
       Is.Zero,
       "command should not be sent"
     );
@@ -407,8 +407,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -440,8 +440,8 @@ public class Mcp2221AGpioControllerTests {
       string.Join("-", Enumerable.Repeat("00", 64 - 18))
     );
 
-    Mcp2221ATests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    Mcp2221AControllerTests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     var expectedSentCommand = new byte[64];
 
@@ -463,7 +463,7 @@ public class Mcp2221AGpioControllerTests {
       Throws.Nothing
     );
     Assert.That(
-      Mcp2221ATests.GetSentCommand(mcp2221A),
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand)
     );
   }
@@ -479,8 +479,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -499,8 +499,8 @@ public class Mcp2221AGpioControllerTests {
     );
 
     // command should not be sent
-    // Mcp2221ATests.AppendPseudoResponse(...);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     Assert.That(
       () => mcp2221A.GpioController.SetPinMode(pinNumber, unsupportedPinMode),
@@ -508,7 +508,7 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
       Is.Zero,
       "command should not be sent"
     );
@@ -524,8 +524,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -535,8 +535,8 @@ public class Mcp2221AGpioControllerTests {
     );
 
     // command should not be sent
-    // Mcp2221ATests.AppendPseudoResponse(...);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     Assert.That(
       () => mcp2221A.GpioController.GetPinMode(pinNumber),
@@ -544,7 +544,7 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
       Is.Zero,
       "command should not be sent"
     );
@@ -572,8 +572,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -601,8 +601,8 @@ public class Mcp2221AGpioControllerTests {
       string.Join("-", Enumerable.Repeat("00", 64 - 10))
     );
 
-    Mcp2221ATests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    Mcp2221AControllerTests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     var expectedSentCommand = new byte[64]; // [1-64]: don't care
 
@@ -615,7 +615,7 @@ public class Mcp2221AGpioControllerTests {
       Throws.Nothing
     );
     Assert.That(
-      Mcp2221ATests.GetSentCommand(mcp2221A),
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand)
     );
 
@@ -648,8 +648,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -659,8 +659,8 @@ public class Mcp2221AGpioControllerTests {
     );
 
     // command should not be sent
-    // Mcp2221ATests.AppendPseudoResponse(...);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     Assert.That(
       () => mcp2221A.GpioController.Write(pinNumber, value),
@@ -668,7 +668,7 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
       Is.Zero,
       "command should not be sent"
     );
@@ -693,8 +693,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -726,8 +726,8 @@ public class Mcp2221AGpioControllerTests {
       string.Join("-", Enumerable.Repeat("00", 64 - 18))
     );
 
-    Mcp2221ATests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    Mcp2221AControllerTests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     var expectedSentCommand = new byte[64];
 
@@ -749,7 +749,7 @@ public class Mcp2221AGpioControllerTests {
       Throws.Nothing
     );
     Assert.That(
-      Mcp2221ATests.GetSentCommand(mcp2221A),
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand)
     );
     Assert.That(
@@ -774,8 +774,8 @@ public class Mcp2221AGpioControllerTests {
     var initialGp2Value = PinValue.Low;
     var initialGp3Value = PinValue.Low;
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -785,8 +785,8 @@ public class Mcp2221AGpioControllerTests {
     );
 
     // command should not be sent
-    // Mcp2221ATests.AppendPseudoResponse(...);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     Assert.That(
       () =>
@@ -798,7 +798,7 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
       Is.Zero,
       "command should not be sent"
     );
@@ -884,8 +884,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -917,17 +917,17 @@ public class Mcp2221AGpioControllerTests {
     );
 
 #if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
-    Mcp2221ATests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
+    Mcp2221AControllerTests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
 #else
     // In this version, `GpioController.Write(ReadOnlySpan<PinValuePair>)` is implemented to
     // call `Write(int, PinValue)` for each individual `PinValuePair`, so the response must
     // also be prepared for each one.
-    Mcp2221ATests.AppendPseudoResponse(
+    Mcp2221AControllerTests.AppendPseudoResponse(
       mcp2221A,
       Enumerable.Repeat(setGpioOutputValuesResponse, pinValuePairs.Length).ToArray()
     );
 #endif
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     var expectedSentCommand = new byte[64];
 
@@ -941,7 +941,7 @@ public class Mcp2221AGpioControllerTests {
     );
 #if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
     Assert.That(
-      Mcp2221ATests.GetSentCommand(mcp2221A),
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand)
     );
 #else
@@ -967,8 +967,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -978,8 +978,8 @@ public class Mcp2221AGpioControllerTests {
     );
 
     // command should not be sent
-    // Mcp2221ATests.AppendPseudoResponse(...);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     Assert.That(
       () => mcp2221A.GpioController.Read(pinNumber),
@@ -987,7 +987,7 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
       Is.Zero,
       "command should not be sent"
     );
@@ -1015,8 +1015,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -1044,8 +1044,8 @@ public class Mcp2221AGpioControllerTests {
       string.Join("-", Enumerable.Repeat("00", 64 - 10))
     );
 
-    Mcp2221ATests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    Mcp2221AControllerTests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     var expectedSentCommand = new byte[64]; // [1-64]: don't care
 
@@ -1058,7 +1058,7 @@ public class Mcp2221AGpioControllerTests {
       Throws.Nothing
     );
     Assert.That(
-      Mcp2221ATests.GetSentCommand(mcp2221A),
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand)
     );
 
@@ -1125,8 +1125,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -1154,17 +1154,17 @@ public class Mcp2221AGpioControllerTests {
     );
 
 #if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
-    Mcp2221ATests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
+    Mcp2221AControllerTests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
 #else
     // In this version, `GpioController.Read(Span<PinValuePair>)` is implemented to
     // call `Read(int)` for each individual `PinValuePair`, so the response must
     // also be prepared for each one.
-    Mcp2221ATests.AppendPseudoResponse(
+    Mcp2221AControllerTests.AppendPseudoResponse(
       mcp2221A,
       Enumerable.Repeat(getGpioValuesResponse, pinValuePairs.Length).ToArray()
     );
 #endif
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     var expectedSentCommand = new byte[64]; // [1-64]: don't care
 
@@ -1176,7 +1176,7 @@ public class Mcp2221AGpioControllerTests {
     );
 #if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
     Assert.That(
-      Mcp2221ATests.GetSentCommand(mcp2221A),
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand)
     );
 #else
@@ -1207,8 +1207,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -1218,8 +1218,8 @@ public class Mcp2221AGpioControllerTests {
     );
 
     // command should not be sent
-    // Mcp2221ATests.AppendPseudoResponse(...);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     Assert.That(
       () => mcp2221A.GpioController.Toggle(pinNumber),
@@ -1227,7 +1227,7 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
       Is.Zero,
       "command should not be sent"
     );
@@ -1253,8 +1253,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_0_000; // LOW/HIGH - OUTPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_0_000; // LOW/HIGH - OUTPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: (byte)(InitialGp0Settings | (pinNumber == 0 ? (initialValue == PinValue.Low ? 0b_000_0_0_000 : 0b_000_1_0_000) : 0b_000_0_0_000)),
         gp1Settings: (byte)(InitialGp1Settings | (pinNumber == 1 ? (initialValue == PinValue.Low ? 0b_000_0_0_000 : 0b_000_1_0_000) : 0b_000_0_0_000)),
         gp2Settings: (byte)(InitialGp2Settings | (pinNumber == 2 ? (initialValue == PinValue.Low ? 0b_000_0_0_000 : 0b_000_1_0_000) : 0b_000_0_0_000)),
@@ -1287,8 +1287,8 @@ public class Mcp2221AGpioControllerTests {
       string.Join("-", Enumerable.Repeat("00", 64 - 18))
     );
 
-    Mcp2221ATests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    Mcp2221AControllerTests.AppendPseudoResponse(mcp2221A, setGpioOutputValuesResponse);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     var expectedSentCommand = new byte[64];
 
@@ -1306,15 +1306,15 @@ public class Mcp2221AGpioControllerTests {
     }
 
     // command should not be sent
-    // Mcp2221ATests.AppendPseudoResponse(...);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     Assert.That(
       () => mcp2221A.GpioController.Toggle(pinNumber),
       Throws.Nothing
     );
     Assert.That(
-      Mcp2221ATests.GetSentCommand(mcp2221A),
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand)
     );
 
@@ -1342,8 +1342,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -1353,8 +1353,8 @@ public class Mcp2221AGpioControllerTests {
     );
 
     // command should not be sent
-    // Mcp2221ATests.AppendPseudoResponse(...);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
 
@@ -1364,7 +1364,7 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
       Is.Zero,
       "command should not be sent"
     );
@@ -1387,8 +1387,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -1407,8 +1407,8 @@ public class Mcp2221AGpioControllerTests {
     );
 
     // command should not be sent
-    // Mcp2221ATests.AppendPseudoResponse(...);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
 
@@ -1418,7 +1418,7 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
       Is.Zero,
       "command should not be sent"
     );
@@ -1441,8 +1441,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -1452,8 +1452,8 @@ public class Mcp2221AGpioControllerTests {
     );
 
     // command should not be sent
-    // Mcp2221ATests.AppendPseudoResponse(...);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
 
@@ -1463,7 +1463,7 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
       Is.Zero,
       "command should not be sent"
     );
@@ -1486,8 +1486,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -1506,8 +1506,8 @@ public class Mcp2221AGpioControllerTests {
     );
 
     // command should not be sent
-    // Mcp2221ATests.AppendPseudoResponse(...);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
 
@@ -1517,7 +1517,7 @@ public class Mcp2221AGpioControllerTests {
     );
 
     Assert.That(
-      Mcp2221ATests.GetEndPointWriteStream(mcp2221A).Length,
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
       Is.Zero,
       "command should not be sent"
     );
@@ -1540,8 +1540,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -1577,8 +1577,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -1616,8 +1616,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
@@ -1645,8 +1645,8 @@ public class Mcp2221AGpioControllerTests {
     const byte InitialGp2Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO2)
     const byte InitialGp3Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO3)
 
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,

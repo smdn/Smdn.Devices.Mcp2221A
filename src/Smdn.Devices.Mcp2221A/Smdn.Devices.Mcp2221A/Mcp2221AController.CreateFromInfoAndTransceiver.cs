@@ -9,10 +9,10 @@ using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 namespace Smdn.Devices.Mcp2221A;
 
-#pragma warning disable IDE0040, CA1724
-partial class Mcp2221A {
-#pragma warning restore IDE0040, CA1724
-  private static async ValueTask<Mcp2221A> CreateFromInfoAndTransceiverAsync(
+#pragma warning disable IDE0040
+partial class Mcp2221AController {
+#pragma warning restore IDE0040
+  private static async ValueTask<Mcp2221AController> CreateFromInfoAndTransceiverAsync(
     Mcp2221ATransceiver transceiver,
     Mcp2221AInfo info,
     ILogger? logger,
@@ -33,7 +33,7 @@ partial class Mcp2221A {
     return mcp2221A;
   }
 
-  private static Mcp2221A CreateFromInfoAndTransceiver(
+  private static Mcp2221AController CreateFromInfoAndTransceiver(
     Mcp2221ATransceiver transceiver,
     Mcp2221AInfo info,
     ILogger? logger,
@@ -54,7 +54,7 @@ partial class Mcp2221A {
     return mcp2221A;
   }
 
-  private static Mcp2221A CreateFromInfoAndTransceiverCore(
+  private static Mcp2221AController CreateFromInfoAndTransceiverCore(
     Mcp2221ATransceiver transceiver,
     Mcp2221AInfo info,
     ILogger? logger,

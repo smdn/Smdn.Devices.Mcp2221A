@@ -15,12 +15,12 @@ using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
 
-#pragma warning disable IDE0055, CA1724
-public partial class Mcp2221A :
+#pragma warning disable IDE0055
+public partial class Mcp2221AController :
   IDisposable,
   IAsyncDisposable
 {
-#pragma warning restore IDE0055, CA1724
+#pragma warning restore IDE0055
   private Mcp2221ATransceiver? transceiver;
   internal Mcp2221ATransceiver Transceiver => transceiver ?? throw new ObjectDisposedException(GetType().Name);
   public IUsbHidDevice HidDevice => transceiver?.EndPoint?.Device ?? throw new ObjectDisposedException(GetType().Name);
@@ -58,19 +58,19 @@ public partial class Mcp2221A :
 
   /// <summary>
   /// Gets a <see cref="GpioController"/> that operates the GPIO peripherals using
-  /// the current <see cref="Mcp2221A"/> instance as the underlying <see cref="GpioDriver"/>.
+  /// the current <see cref="Mcp2221AController"/> instance as the underlying <see cref="GpioDriver"/>.
   /// </summary>
   /// <remarks>
   /// <para>
   /// If the <see cref="GpioController.Dispose()"/> is called on the <see cref="GpioController"/>
   /// returned by this property, the <see cref="GpioController"/> will be disposed of, but
-  /// the underlying <see cref="Mcp2221A"/> will remain available for use.
+  /// the underlying <see cref="Mcp2221AController"/> will remain available for use.
   /// </para>
   /// <para>
   /// It is recommended that when passing an instance of this property as a <see cref="GpioController"/>
   /// to device binding classes such as <see href="https://www.nuget.org/packages/Iot.Device.Bindings">Iot.Device.Bindings</see>,
   /// set the <c>shouldDispose</c> parameter to <see langword="false"/> and manage the lifecycle of
-  /// the <see cref="Mcp2221A"/> instance separately.
+  /// the <see cref="Mcp2221AController"/> instance separately.
   /// </para>
   /// </remarks>
   [CLSCompliant(false)]
@@ -81,7 +81,7 @@ public partial class Mcp2221A :
     }
   }
 
-  private Mcp2221A(
+  private Mcp2221AController(
     Mcp2221ATransceiver transceiver,
     IMcp2221AInfo info,
     ILogger? logger

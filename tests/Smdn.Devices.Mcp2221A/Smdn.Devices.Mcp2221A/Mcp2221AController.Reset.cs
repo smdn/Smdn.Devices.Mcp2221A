@@ -13,7 +13,7 @@ using NUnit.Framework;
 namespace Smdn.Devices.Mcp2221A;
 
 #pragma warning disable IDE0040
-partial class Mcp2221ATests {
+partial class Mcp2221AControllerTests {
 #pragma warning restore IDE0040
   [Test]
   public void ResetAsync()
@@ -31,7 +31,7 @@ partial class Mcp2221ATests {
     );
 
   private void ResetSyncOrAsync(
-    Func<Mcp2221A, ValueTask> resetAsyncFunc
+    Func<Mcp2221AController, ValueTask> resetAsyncFunc
   )
   {
     var loggerProvider = new FakeLoggerProvider();
@@ -40,8 +40,8 @@ partial class Mcp2221ATests {
     services.AddSingleton<ILoggerFactory>(new LoggerFactory([loggerProvider]));
 
     using var serviceProvider = services.BuildServiceProvider();
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(),
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true,
       serviceProvider: serviceProvider
     );
@@ -91,7 +91,7 @@ partial class Mcp2221ATests {
     );
 
   private void ResetSyncOrAsync_CancellationRequestedBeforeSendCommand(
-    Func<Mcp2221A, CancellationToken, ValueTask> resetAsyncFunc
+    Func<Mcp2221AController, CancellationToken, ValueTask> resetAsyncFunc
   )
   {
     var loggerProvider = new FakeLoggerProvider();
@@ -100,8 +100,8 @@ partial class Mcp2221ATests {
     services.AddSingleton<ILoggerFactory>(new LoggerFactory([loggerProvider]));
 
     using var serviceProvider = services.BuildServiceProvider();
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(),
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true,
       serviceProvider: serviceProvider
     );

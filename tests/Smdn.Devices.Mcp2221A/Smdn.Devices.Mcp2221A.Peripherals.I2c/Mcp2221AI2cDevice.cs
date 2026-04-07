@@ -8,20 +8,20 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
 [TestFixture]
 public class Mcp2221AI2cDeviceTests {
-  private static Mcp2221A CreateFromPseudoDevice()
+  private static Mcp2221AController CreateFromPseudoDevice()
   {
-    var baseDevice = Mcp2221ATests.CreatePseudoDevice();
+    var baseDevice = Mcp2221AControllerTests.CreatePseudoDevice();
 
-    return Mcp2221A.Create(baseDevice, shouldDisposeUsbHidDevice: true);
+    return Mcp2221AController.Create(baseDevice, shouldDisposeUsbHidDevice: true);
   }
 
   [Test]
   public void Dispose(
-    [Values] bool shouldDisposeMcp2221A
+    [Values] bool shouldDisposeMcp2221AController
   )
   {
     using var device = CreateFromPseudoDevice();
-    using var i2cDevice = device.I2cBus.CreateDevice(0x40, shouldDisposeMcp2221A: shouldDisposeMcp2221A);
+    using var i2cDevice = device.I2cBus.CreateDevice(0x40, shouldDisposeMcp2221AController: shouldDisposeMcp2221AController);
 
     Assert.That(i2cDevice.Dispose, Throws.Nothing);
 
@@ -35,7 +35,7 @@ public class Mcp2221AI2cDeviceTests {
 
     Assert.That(
       () => _ = device.I2cBus,
-      shouldDisposeMcp2221A
+      shouldDisposeMcp2221AController
         ? Throws.TypeOf<ObjectDisposedException>()
         : Throws.Nothing
     );
