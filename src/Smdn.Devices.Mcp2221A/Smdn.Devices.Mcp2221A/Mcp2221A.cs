@@ -15,12 +15,12 @@ using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
 
-#pragma warning disable IDE0055, CA1724
+#pragma warning disable IDE0055
 public partial class Mcp2221AController :
   IDisposable,
   IAsyncDisposable
 {
-#pragma warning restore IDE0055, CA1724
+#pragma warning restore IDE0055
   private Mcp2221ATransceiver? transceiver;
   internal Mcp2221ATransceiver Transceiver => transceiver ?? throw new ObjectDisposedException(GetType().Name);
   public IUsbHidDevice HidDevice => transceiver?.EndPoint?.Device ?? throw new ObjectDisposedException(GetType().Name);

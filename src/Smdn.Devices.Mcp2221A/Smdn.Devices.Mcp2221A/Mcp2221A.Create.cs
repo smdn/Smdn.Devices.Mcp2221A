@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 namespace Smdn.Devices.Mcp2221A;
 
-#pragma warning disable IDE0040, CA1724
+#pragma warning disable IDE0040
 partial class Mcp2221AController {
-#pragma warning restore IDE0040, CA1724
+#pragma warning restore IDE0040
 #if __FUTURE_VERSION
   public static ValueTask<Mcp2221AController> CreateAsync(
     CancellationToken cancellationToken = default

@@ -11,9 +11,9 @@ using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
 
-#pragma warning disable IDE0040, CA1724
+#pragma warning disable IDE0040
 partial class Mcp2221AController {
-#pragma warning restore IDE0040, CA1724
+#pragma warning restore IDE0040
   /// <summary>
   /// Creates an instance of <see cref="Mcp2221AController"/> from the specified
   /// <see cref="IUsbHidDevice"/> asynchronously.

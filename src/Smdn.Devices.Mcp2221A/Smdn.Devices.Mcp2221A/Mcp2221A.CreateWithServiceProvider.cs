@@ -8,9 +8,9 @@ using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
 
-#pragma warning disable IDE0040, CA1724
+#pragma warning disable IDE0040
 partial class Mcp2221AController {
-#pragma warning restore IDE0040, CA1724
+#pragma warning restore IDE0040
   /// <summary>
   /// Finds and opens a <see cref="Mcp2221AController"/> device that is the first found among the
   /// USB HID devices on the system, and creates an instance for it asynchronously.
