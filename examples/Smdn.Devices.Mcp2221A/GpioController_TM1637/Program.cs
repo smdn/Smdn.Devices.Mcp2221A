@@ -19,7 +19,7 @@ services.AddHidSharpUsbHid();
 
 using var serviceProvider = services.BuildServiceProvider();
 
-using var device = Mcp2221A.Create(serviceProvider);
+using var device = Mcp2221AController.Create(serviceProvider);
 
 // construct TM1637
 using var tm1637 = new Tm1637(

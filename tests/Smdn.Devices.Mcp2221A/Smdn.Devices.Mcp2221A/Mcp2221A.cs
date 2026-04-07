@@ -16,7 +16,7 @@ using Smdn.IO.UsbHid;
 namespace Smdn.Devices.Mcp2221A;
 
 [TestFixture]
-public partial class Mcp2221ATests {
+public partial class Mcp2221AControllerTests {
   private const byte ReportInput = 0x00;
   private const byte ReportOutput = 0x00;
   private const int CommandLength = 64;
@@ -28,8 +28,8 @@ public partial class Mcp2221ATests {
   internal const string DefaultChipFactorySerialNumber = "01234567";
 
   internal static PseudoUsbHidDevice CreatePseudoDevice(
-    int vendorId = Mcp2221A.DefaultVendorId,
-    int productId = Mcp2221A.DefaultProductId,
+    int vendorId = Mcp2221AController.DefaultVendorId,
+    int productId = Mcp2221AController.DefaultProductId,
     byte hardwareRevisionMajor = (byte)'A', // = MCP2221/MCP2221A,
     byte hardwareRevisionMinor = (byte)'6', // = MCP2221/MCP2221A,
     byte firmwareRevisionMajor = (byte)'1', // = MCP2221/MCP2221A,
@@ -192,7 +192,7 @@ public partial class Mcp2221ATests {
     );
 
   internal static void AppendPseudoResponse(
-    Mcp2221A mcp2221A,
+    Mcp2221AController mcp2221A,
     params string[] responseSequences
   )
     => AppendPseudoResponse(
@@ -202,7 +202,7 @@ public partial class Mcp2221ATests {
     );
 
   internal static void AppendPseudoResponse(
-    Mcp2221A mcp2221A,
+    Mcp2221AController mcp2221A,
     bool verifyCommandLength,
     params string[] responseSequences
   )
@@ -239,7 +239,7 @@ public partial class Mcp2221ATests {
     endPoint.ReadStream.Position = currentPosition;
   }
 
-  internal static void ClearSentCommands(Mcp2221A mcp2221A)
+  internal static void ClearSentCommands(Mcp2221AController mcp2221A)
   {
     var endPoint = (mcp2221A.HidDevice as PseudoUsbHidDevice)!.EndPoint!;
 
@@ -247,10 +247,10 @@ public partial class Mcp2221ATests {
     endPoint.WriteStream!.SetLength(0L);
   }
 
-  internal static Stream GetEndPointWriteStream(Mcp2221A mcp2221A)
+  internal static Stream GetEndPointWriteStream(Mcp2221AController mcp2221A)
     => (mcp2221A.HidDevice as PseudoUsbHidDevice)!.EndPoint!.WriteStream!;
 
-  internal static ReadOnlyMemory<byte> GetSentCommand(Mcp2221A mcp2221A)
+  internal static ReadOnlyMemory<byte> GetSentCommand(Mcp2221AController mcp2221A)
   {
     var stream = GetEndPointWriteStream(mcp2221A);
 
@@ -271,10 +271,10 @@ public partial class Mcp2221ATests {
   [Test]
   public void CreateAsync()
   {
-    Mcp2221A? device = null;
+    Mcp2221AController? device = null;
 
     try {
-      Assert.That(async () => device = await Mcp2221A.CreateAsync(CreatePseudoDevice(), shouldDisposeUsbHidDevice: true), Throws.Nothing);
+      Assert.That(async () => device = await Mcp2221AController.CreateAsync(CreatePseudoDevice(), shouldDisposeUsbHidDevice: true), Throws.Nothing);
 
       Assert.That(device, Is.Not.Null);
       Assert.That(device.HidDevice, Is.Not.Null);
@@ -289,10 +289,10 @@ public partial class Mcp2221ATests {
   [Test]
   public void Create()
   {
-    Mcp2221A? device = null;
+    Mcp2221AController? device = null;
 
     try {
-      Assert.That(() => device = Mcp2221A.Create(CreatePseudoDevice(), shouldDisposeUsbHidDevice: true), Throws.Nothing);
+      Assert.That(() => device = Mcp2221AController.Create(CreatePseudoDevice(), shouldDisposeUsbHidDevice: true), Throws.Nothing);
 
       Assert.That(device, Is.Not.Null);
       Assert.That(device.HidDevice, Is.Not.Null);
@@ -304,7 +304,7 @@ public partial class Mcp2221ATests {
     }
   }
 
-  private static void AssertPseudoDeviceWithDefaultConfiguration(Mcp2221A device)
+  private static void AssertPseudoDeviceWithDefaultConfiguration(Mcp2221AController device)
   {
     Assert.That(device.FirmwareRevision, Is.EqualTo("1.2"), nameof(device.FirmwareRevision));
     Assert.That(device.HardwareRevision, Is.EqualTo("A.6"), nameof(device.HardwareRevision));
@@ -335,7 +335,7 @@ public partial class Mcp2221ATests {
   )
     => await TestDispose(shouldDisposeUsbHidDevice, async d => await d.DisposeAsync());
 
-  private async Task TestDispose(bool shouldDisposeUsbHidDevice, Func<Mcp2221A, Task> disposeAction)
+  private async Task TestDispose(bool shouldDisposeUsbHidDevice, Func<Mcp2221AController, Task> disposeAction)
   {
     const byte InitialGp0Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO0)
     const byte InitialGp1Settings = 0b_000_0_1_000; // LOW - INPUT - GPIO operation (GPIO1)
@@ -348,7 +348,7 @@ public partial class Mcp2221ATests {
       gp2Settings: InitialGp2Settings,
       gp3Settings: InitialGp3Settings
     );
-    await using var device = await Mcp2221A.CreateAsync(baseDevice, shouldDisposeUsbHidDevice: shouldDisposeUsbHidDevice);
+    await using var device = await Mcp2221AController.CreateAsync(baseDevice, shouldDisposeUsbHidDevice: shouldDisposeUsbHidDevice);
 
     Assert.That(() => _ = device.HidDevice, Throws.Nothing);
 
@@ -471,10 +471,10 @@ public partial class Mcp2221ATests {
       firmwareRevisionMinor: (byte)firmwareRevisionMinor
     );
 
-    Mcp2221A? device = null;
+    Mcp2221AController? device = null;
 
     Assert.That(
-      async () => device = await Mcp2221A.CreateAsync(baseDevice, shouldDisposeUsbHidDevice: true),
+      async () => device = await Mcp2221AController.CreateAsync(baseDevice, shouldDisposeUsbHidDevice: true),
       expectExceptionThrown ? Throws.TypeOf<Mcp2221ANotSupportedException>() : Throws.Nothing
     );
     Assert.That(baseDevice.IsDisposed, Is.EqualTo(expectExceptionThrown));
@@ -498,10 +498,10 @@ public partial class Mcp2221ATests {
       firmwareRevisionMinor: (byte)firmwareRevisionMinor
     );
 
-    Mcp2221A? device = null;
+    Mcp2221AController? device = null;
 
     Assert.That(
-      () => device = Mcp2221A.Create(baseDevice, shouldDisposeUsbHidDevice: true),
+      () => device = Mcp2221AController.Create(baseDevice, shouldDisposeUsbHidDevice: true),
       expectExceptionThrown ? Throws.TypeOf<Mcp2221ANotSupportedException>() : Throws.Nothing
     );
     Assert.That(baseDevice.IsDisposed, Is.EqualTo(expectExceptionThrown));
@@ -512,7 +512,7 @@ public partial class Mcp2221ATests {
   [Test]
   public async ValueTask GpPins()
   {
-    await using var mcp2221A = await Mcp2221A.CreateAsync(
+    await using var mcp2221A = await Mcp2221AController.CreateAsync(
       CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true
     );
@@ -524,7 +524,7 @@ public partial class Mcp2221ATests {
   [Test]
   public async ValueTask GpPins_IReadOnlyList_Items()
   {
-    await using var mcp2221A = await Mcp2221A.CreateAsync(
+    await using var mcp2221A = await Mcp2221AController.CreateAsync(
       CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true
     );
@@ -541,7 +541,7 @@ public partial class Mcp2221ATests {
   [TestCase(int.MaxValue)]
   public async ValueTask GpPins_IReadOnlyList_Items_IndexOutOfRange(int index)
   {
-    await using var mcp2221A = await Mcp2221A.CreateAsync(
+    await using var mcp2221A = await Mcp2221AController.CreateAsync(
       CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true
     );
@@ -562,7 +562,7 @@ public partial class Mcp2221ATests {
   [Test]
   public async ValueTask GpPins_IEnumerable()
   {
-    await using var mcp2221A = await Mcp2221A.CreateAsync(
+    await using var mcp2221A = await Mcp2221AController.CreateAsync(
       CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true
     );
@@ -586,7 +586,7 @@ public partial class Mcp2221ATests {
   [Test]
   public async ValueTask GpPin0()
   {
-    await using var mcp2221A = await Mcp2221A.CreateAsync(
+    await using var mcp2221A = await Mcp2221AController.CreateAsync(
       CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true
     );
@@ -599,7 +599,7 @@ public partial class Mcp2221ATests {
   [Test]
   public async ValueTask GpPin1()
   {
-    await using var mcp2221A = await Mcp2221A.CreateAsync(
+    await using var mcp2221A = await Mcp2221AController.CreateAsync(
       CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true
     );
@@ -612,7 +612,7 @@ public partial class Mcp2221ATests {
   [Test]
   public async ValueTask GpPin2()
   {
-    await using var mcp2221A = await Mcp2221A.CreateAsync(
+    await using var mcp2221A = await Mcp2221AController.CreateAsync(
       CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true
     );
@@ -625,7 +625,7 @@ public partial class Mcp2221ATests {
   [Test]
   public async ValueTask GpPin3()
   {
-    await using var mcp2221A = await Mcp2221A.CreateAsync(
+    await using var mcp2221A = await Mcp2221AController.CreateAsync(
       CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true
     );

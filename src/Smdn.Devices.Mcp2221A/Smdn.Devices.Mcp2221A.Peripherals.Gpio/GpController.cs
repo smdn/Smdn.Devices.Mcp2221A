@@ -20,7 +20,7 @@ public abstract partial class GpController {
   /// </summary>
   /// <remarks>
   /// This is a logical index used to identify the pin within the
-  /// <see cref="Mcp2221A.GpPins"/> collection. It does not refer to the physical
+  /// <see cref="Mcp2221AController.GpPins"/> collection. It does not refer to the physical
   /// pin number (1-14) on the MCP2221/MCP2221A chip package.
   /// </remarks>
   public abstract int Index { get; }
@@ -168,7 +168,7 @@ public abstract partial class GpController {
 
   /// <summary>
   /// Gets a value indicating whether the GP pin is currently being
-  /// used by <see cref="Mcp2221A.GpioController"/>.
+  /// used by <see cref="Mcp2221AController.GpioController"/>.
   /// </summary>
   /// <value>
   /// <see langword="true"/> if the pin has been opened by <see cref="GpioController.OpenPin(int)"/>

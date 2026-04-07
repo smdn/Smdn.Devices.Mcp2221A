@@ -22,7 +22,7 @@ services.AddHidSharpUsbHid();
 
 using var serviceProvider = services.BuildServiceProvider();
 
-await using var device = await Mcp2221A.CreateAsync(serviceProvider);
+await using var device = await Mcp2221AController.CreateAsync(serviceProvider);
 
 await device.GpPin3.ConfigureAsI2cLedOutputAsync();
 

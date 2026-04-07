@@ -19,7 +19,7 @@ Class Blink
     services.AddHidSharpUsbHid()
 
     Using serviceProvider = services.BuildServiceProvider()
-      Using device = Mcp2221A.Create(serviceProvider)
+      Using device = Mcp2221AController.Create(serviceProvider)
         Console.WriteLine("[MCP2221 Device information]")
 
         Dim serialNumber As String = Nothing

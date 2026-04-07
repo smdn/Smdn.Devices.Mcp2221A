@@ -23,7 +23,7 @@ public interface II2cDevice {
   /// Gets the <see cref="II2cController"/> that created this instance.
   /// </summary>
   /// <exception cref="System.ObjectDisposedException">
-  /// Thrown if the <see cref="Mcp2221A"/> associated with this instance has
+  /// Thrown if the <see cref="Mcp2221AController"/> associated with this instance has
   /// already been disposed.
   /// </exception>
   II2cController Controller { get; }

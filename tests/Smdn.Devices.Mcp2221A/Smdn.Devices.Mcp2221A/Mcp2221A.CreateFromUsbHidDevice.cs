@@ -16,8 +16,8 @@ using Smdn.IO.UsbHid;
 namespace Smdn.Devices.Mcp2221A;
 
 [TestFixture]
-public partial class Mcp2221ATests {
-  private delegate ValueTask<Mcp2221A> CreateFromUsbHidDeviceWithKeyedServiceProviderFunc(
+public partial class Mcp2221AControllerTests {
+  private delegate ValueTask<Mcp2221AController> CreateFromUsbHidDeviceWithKeyedServiceProviderFunc(
     IUsbHidDevice usbHidDevice,
     bool shouldDisposeUsbHidDevice,
     IServiceProvider? serviceProvider,
@@ -25,21 +25,21 @@ public partial class Mcp2221ATests {
     CancellationToken cancellationToken
   );
 
-  private delegate ValueTask<Mcp2221A> CreateFromUsbHidDeviceWithServiceProviderFunc(
+  private delegate ValueTask<Mcp2221AController> CreateFromUsbHidDeviceWithServiceProviderFunc(
     IUsbHidDevice usbHidDevice,
     bool shouldDisposeUsbHidDevice,
     IServiceProvider? serviceProvider,
     CancellationToken cancellationToken
   );
 
-  private ValueTask<Mcp2221A> CreateFromUsbHidDeviceAsync(
+  private ValueTask<Mcp2221AController> CreateFromUsbHidDeviceAsync(
     IUsbHidDevice usbHidDevice,
     bool shouldDisposeUsbHidDevice,
     IServiceProvider? serviceProvider,
     object? serviceKey,
     CancellationToken cancellationToken
   )
-    => Mcp2221A.CreateAsync(
+    => Mcp2221AController.CreateAsync(
       usbHidDevice: usbHidDevice,
       shouldDisposeUsbHidDevice: shouldDisposeUsbHidDevice,
       serviceProvider: serviceProvider,
@@ -47,20 +47,20 @@ public partial class Mcp2221ATests {
       cancellationToken: cancellationToken
     );
 
-  private ValueTask<Mcp2221A> CreateFromUsbHidDeviceAsync(
+  private ValueTask<Mcp2221AController> CreateFromUsbHidDeviceAsync(
     IUsbHidDevice usbHidDevice,
     bool shouldDisposeUsbHidDevice,
     IServiceProvider? serviceProvider,
     CancellationToken cancellationToken
   )
-    => Mcp2221A.CreateAsync(
+    => Mcp2221AController.CreateAsync(
       usbHidDevice: usbHidDevice,
       shouldDisposeUsbHidDevice: shouldDisposeUsbHidDevice,
       serviceProvider: serviceProvider,
       cancellationToken: cancellationToken
     );
 
-  private ValueTask<Mcp2221A> CreateFromUsbHidDevice(
+  private ValueTask<Mcp2221AController> CreateFromUsbHidDevice(
     IUsbHidDevice usbHidDevice,
     bool shouldDisposeUsbHidDevice,
     IServiceProvider? serviceProvider,
@@ -68,7 +68,7 @@ public partial class Mcp2221ATests {
     CancellationToken cancellationToken
   )
     => new(
-      Mcp2221A.Create(
+      Mcp2221AController.Create(
         usbHidDevice: usbHidDevice,
         shouldDisposeUsbHidDevice: shouldDisposeUsbHidDevice,
         serviceProvider: serviceProvider,
@@ -77,14 +77,14 @@ public partial class Mcp2221ATests {
       )
     );
 
-  private ValueTask<Mcp2221A> CreateFromUsbHidDevice(
+  private ValueTask<Mcp2221AController> CreateFromUsbHidDevice(
     IUsbHidDevice usbHidDevice,
     bool shouldDisposeUsbHidDevice,
     IServiceProvider? serviceProvider,
     CancellationToken cancellationToken
   )
     => new(
-      Mcp2221A.Create(
+      Mcp2221AController.Create(
         usbHidDevice: usbHidDevice,
         shouldDisposeUsbHidDevice: shouldDisposeUsbHidDevice,
         serviceProvider: serviceProvider,
@@ -201,7 +201,7 @@ public partial class Mcp2221ATests {
   )
   {
     using var usbHidDevice = CreatePseudoDevice();
-    Mcp2221A? mcp2221A = null;
+    Mcp2221AController? mcp2221A = null;
 
     Assert.That(
       async () => {
@@ -436,8 +436,8 @@ public partial class Mcp2221ATests {
   [TestCase(null, true)]
   [TestCase(null, false)]
   [TestCase(StringServiceKeyForTestCase, true)]
-  public void CreateAsync_FromUsbHidDevice_ExceptionWhileConstructingMcp2221A(object? serviceKey, bool shouldDisposeUsbHidDevice)
-    => CreateSyncOrAsync_FromUsbHidDevice_ExceptionWhileConstructingMcp2221A(
+  public void CreateAsync_FromUsbHidDevice_ExceptionWhileConstructingMcp2221AController(object? serviceKey, bool shouldDisposeUsbHidDevice)
+    => CreateSyncOrAsync_FromUsbHidDevice_ExceptionWhileConstructingMcp2221AController(
       serviceKey,
       shouldDisposeUsbHidDevice,
       CreateFromUsbHidDeviceAsync
@@ -446,14 +446,14 @@ public partial class Mcp2221ATests {
   [TestCase(null, true)]
   [TestCase(null, false)]
   [TestCase(StringServiceKeyForTestCase, true)]
-  public void Create_FromUsbHidDevice_ExceptionWhileConstructingMcp2221A(object? serviceKey, bool shouldDisposeUsbHidDevice)
-    => CreateSyncOrAsync_FromUsbHidDevice_ExceptionWhileConstructingMcp2221A(
+  public void Create_FromUsbHidDevice_ExceptionWhileConstructingMcp2221AController(object? serviceKey, bool shouldDisposeUsbHidDevice)
+    => CreateSyncOrAsync_FromUsbHidDevice_ExceptionWhileConstructingMcp2221AController(
       serviceKey,
       shouldDisposeUsbHidDevice,
       CreateFromUsbHidDevice
     );
 
-  private void CreateSyncOrAsync_FromUsbHidDevice_ExceptionWhileConstructingMcp2221A(
+  private void CreateSyncOrAsync_FromUsbHidDevice_ExceptionWhileConstructingMcp2221AController(
     object? serviceKey,
     bool shouldDisposeUsbHidDevice,
     CreateFromUsbHidDeviceWithKeyedServiceProviderFunc createFunc
@@ -483,8 +483,8 @@ public partial class Mcp2221ATests {
   [TestCase(null, true)]
   [TestCase(null, false)]
   [TestCase(StringServiceKeyForTestCase, true)]
-  public void CreateAsync_FromUsbHidDevice_CancellationRequestedWhileConstructingMcp2221A(object? serviceKey, bool shouldDisposeUsbHidDevice)
-    => CreateSyncOrAsync_FromUsbHidDevice_CancellationRequestedWhileConstructingMcp2221A(
+  public void CreateAsync_FromUsbHidDevice_CancellationRequestedWhileConstructingMcp2221AController(object? serviceKey, bool shouldDisposeUsbHidDevice)
+    => CreateSyncOrAsync_FromUsbHidDevice_CancellationRequestedWhileConstructingMcp2221AController(
       serviceKey,
       shouldDisposeUsbHidDevice,
       CreateFromUsbHidDeviceAsync
@@ -493,14 +493,14 @@ public partial class Mcp2221ATests {
   [TestCase(null, true)]
   [TestCase(null, false)]
   [TestCase(StringServiceKeyForTestCase, true)]
-  public void Create_FromUsbHidDevice_CancellationRequestedWhileConstructingMcp2221A(object? serviceKey, bool shouldDisposeUsbHidDevice)
-    => CreateSyncOrAsync_FromUsbHidDevice_CancellationRequestedWhileConstructingMcp2221A(
+  public void Create_FromUsbHidDevice_CancellationRequestedWhileConstructingMcp2221AController(object? serviceKey, bool shouldDisposeUsbHidDevice)
+    => CreateSyncOrAsync_FromUsbHidDevice_CancellationRequestedWhileConstructingMcp2221AController(
       serviceKey,
       shouldDisposeUsbHidDevice,
       CreateFromUsbHidDevice
     );
 
-  private void CreateSyncOrAsync_FromUsbHidDevice_CancellationRequestedWhileConstructingMcp2221A(
+  private void CreateSyncOrAsync_FromUsbHidDevice_CancellationRequestedWhileConstructingMcp2221AController(
     object? serviceKey,
     bool shouldDisposeUsbHidDevice,
     CreateFromUsbHidDeviceWithKeyedServiceProviderFunc createFunc

@@ -16,7 +16,7 @@ services.AddHidSharpUsbHid();
 
 using var serviceProvider = services.BuildServiceProvider();
 
-await using var device = await Mcp2221A.CreateAsync(serviceProvider);
+await using var device = await Mcp2221AController.CreateAsync(serviceProvider);
 
 var initialCursorPosition = (left: Console.CursorLeft, top: Console.CursorTop);
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Smdn.Devices.Mcp2221A;
 
 #pragma warning disable IDE0040
-public partial class Mcp2221A : IMcp2221ATransceiver {
+public partial class Mcp2221AController : IMcp2221ATransceiver {
 #pragma warning restore IDE0040, CA1724
   TResponse IMcp2221ATransceiver.Command<TArg, TResponse>(
     ReadOnlySpan<byte> userData,

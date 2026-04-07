@@ -16,12 +16,12 @@ public sealed partial class Mcp2221AI2cBus : I2cBus, II2cController {
 
   internal const int DefaultTransmissionSpeedInKbps = 100;
 
-  internal Mcp2221A Device { get; }
+  internal Mcp2221AController Device { get; }
 
   private readonly ILogger? logger;
 
   internal Mcp2221AI2cBus(
-    Mcp2221A device,
+    Mcp2221AController device,
     ILogger? logger
   )
   {
@@ -40,7 +40,7 @@ public sealed partial class Mcp2221AI2cBus : I2cBus, II2cController {
     => CreateDevice(
       deviceAddress: new(deviceAddress),
       transmissionSpeedInKbps: DefaultTransmissionSpeedInKbps,
-      shouldDisposeMcp2221A: false
+      shouldDisposeMcp2221AController: false
     );
 
   /// <summary>
@@ -50,9 +50,9 @@ public sealed partial class Mcp2221AI2cBus : I2cBus, II2cController {
   /// library.
   /// </summary>
   /// <param name="deviceAddress">The I2C address of the target device.</param>
-  /// <param name="shouldDisposeMcp2221A">
-  /// <see langword="true"/> to automatically dispose the underlying <see cref="Mcp2221A"/>
-  /// when this adapter is disposed; <see langword="false"/> to keep the <see cref="Mcp2221A"/> open.
+  /// <param name="shouldDisposeMcp2221AController">
+  /// <see langword="true"/> to automatically dispose the underlying <see cref="Mcp2221AController"/>
+  /// when this adapter is disposed; <see langword="false"/> to keep the <see cref="Mcp2221AController"/> open.
   /// The default is <see langword="false"/>.
   /// </param>
   /// <returns>
@@ -60,17 +60,17 @@ public sealed partial class Mcp2221AI2cBus : I2cBus, II2cController {
   /// for the specified address.
   /// </returns>
   /// <exception cref="ObjectDisposedException">
-  /// Thrown if the parent <see cref="Mcp2221A"/> has already been disposed.
+  /// Thrown if the parent <see cref="Mcp2221AController"/> has already been disposed.
   /// </exception>
   [CLSCompliant(false)]
   public Mcp2221AI2cDevice CreateDevice(
     I2cAddress deviceAddress,
-    bool shouldDisposeMcp2221A = false
+    bool shouldDisposeMcp2221AController = false
   )
     => CreateDevice(
       deviceAddress: deviceAddress,
       transmissionSpeedInKbps: DefaultTransmissionSpeedInKbps,
-      shouldDisposeMcp2221A: shouldDisposeMcp2221A
+      shouldDisposeMcp2221AController: shouldDisposeMcp2221AController
     );
 
   /// <summary>
@@ -83,9 +83,9 @@ public sealed partial class Mcp2221AI2cBus : I2cBus, II2cController {
   /// <param name="transmissionSpeedInKbps">
   /// The transmission speed used for reading and writing to the I2C bus in [kbps] units.
   /// </param>
-  /// <param name="shouldDisposeMcp2221A">
-  /// <see langword="true"/> to automatically dispose the underlying <see cref="Mcp2221A"/>
-  /// when this adapter is disposed; <see langword="false"/> to keep the <see cref="Mcp2221A"/> open.
+  /// <param name="shouldDisposeMcp2221AController">
+  /// <see langword="true"/> to automatically dispose the underlying <see cref="Mcp2221AController"/>
+  /// when this adapter is disposed; <see langword="false"/> to keep the <see cref="Mcp2221AController"/> open.
   /// The default is <see langword="false"/>.
   /// </param>
   /// <returns>
@@ -93,7 +93,7 @@ public sealed partial class Mcp2221AI2cBus : I2cBus, II2cController {
   /// for the specified address.
   /// </returns>
   /// <exception cref="ObjectDisposedException">
-  /// Thrown if the parent <see cref="Mcp2221A"/> has already been disposed.
+  /// Thrown if the parent <see cref="Mcp2221AController"/> has already been disposed.
   /// </exception>
   /// <remarks>
   ///   <include
@@ -105,7 +105,7 @@ public sealed partial class Mcp2221AI2cBus : I2cBus, II2cController {
   public Mcp2221AI2cDevice CreateDevice(
     I2cAddress deviceAddress,
     int transmissionSpeedInKbps,
-    bool shouldDisposeMcp2221A = false
+    bool shouldDisposeMcp2221AController = false
   )
   {
     Device.ThrowIfDisposed();
@@ -113,7 +113,7 @@ public sealed partial class Mcp2221AI2cBus : I2cBus, II2cController {
     return new(
       i2cBus: this,
       deviceAddress: deviceAddress,
-      shouldDisposeMcp2221A: shouldDisposeMcp2221A
+      shouldDisposeMcp2221AController: shouldDisposeMcp2221AController
     ) {
       TransmissionSpeedInKbps = transmissionSpeedInKbps,
     };

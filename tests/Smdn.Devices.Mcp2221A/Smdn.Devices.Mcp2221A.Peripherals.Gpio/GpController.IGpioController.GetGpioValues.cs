@@ -92,37 +92,37 @@ partial class GpControllerTests {
   [TestCaseSource(nameof(YieldTestCases_GP0_InvalidConfigurationSettings))]
   public void GetMode_GPO_InvalidConfiguration(byte gp0Settings)
     => GetModeSyncAndAsync_InvalidConfiguration(
-      createUsbHidDevice: () => Mcp2221ATests.CreatePseudoDevice(gp0Settings: gp0Settings),
+      createUsbHidDevice: () => Mcp2221AControllerTests.CreatePseudoDevice(gp0Settings: gp0Settings),
       selectGpPin: static mcp2221A => mcp2221A.GpPin0
     );
 
   [TestCaseSource(nameof(YieldTestCases_GP1_InvalidConfigurationSettings))]
   public void GetMode_GP1_InvalidConfiguration(byte gp1Settings)
     => GetModeSyncAndAsync_InvalidConfiguration(
-      createUsbHidDevice: () => Mcp2221ATests.CreatePseudoDevice(gp1Settings: gp1Settings),
+      createUsbHidDevice: () => Mcp2221AControllerTests.CreatePseudoDevice(gp1Settings: gp1Settings),
       selectGpPin: static mcp2221A => mcp2221A.GpPin1
     );
 
   [TestCaseSource(nameof(YieldTestCases_GP2_InvalidConfigurationSettings))]
   public void GetMode_GP2_InvalidConfiguration(byte gp2Settings)
     => GetModeSyncAndAsync_InvalidConfiguration(
-      createUsbHidDevice: () => Mcp2221ATests.CreatePseudoDevice(gp2Settings: gp2Settings),
+      createUsbHidDevice: () => Mcp2221AControllerTests.CreatePseudoDevice(gp2Settings: gp2Settings),
       selectGpPin: static mcp2221A => mcp2221A.GpPin2
     );
 
   [TestCaseSource(nameof(YieldTestCases_GP3_InvalidConfigurationSettings))]
   public void GetMode_GP3_InvalidConfiguration(byte gp3Settings)
     => GetModeSyncAndAsync_InvalidConfiguration(
-      createUsbHidDevice: () => Mcp2221ATests.CreatePseudoDevice(gp3Settings: gp3Settings),
+      createUsbHidDevice: () => Mcp2221AControllerTests.CreatePseudoDevice(gp3Settings: gp3Settings),
       selectGpPin: static mcp2221A => mcp2221A.GpPin3
     );
 
   private void GetModeSyncAndAsync_InvalidConfiguration(
     Func<IUsbHidDevice> createUsbHidDevice,
-    Func<Mcp2221A, GpController> selectGpPin
+    Func<Mcp2221AController, GpController> selectGpPin
   )
   {
-    using var mcp2221A = Mcp2221A.Create(
+    using var mcp2221A = Mcp2221AController.Create(
       createUsbHidDevice(),
       shouldDisposeUsbHidDevice: true
     );
@@ -220,8 +220,8 @@ partial class GpControllerTests {
       string.Join("-", Enumerable.Repeat("00", 64 - 10))
     );
 
-    Mcp2221ATests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    Mcp2221AControllerTests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     var expectedSentCommand = new byte[64]; // [1-64]: don't care
 
@@ -246,7 +246,7 @@ partial class GpControllerTests {
       Is.EqualTo(expectedValue)
     );
     Assert.That(
-      Mcp2221ATests.GetSentCommand(mcp2221A),
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand),
       $"sent command from {nameof(gp.GetMode)}"
     );
@@ -255,37 +255,37 @@ partial class GpControllerTests {
   [TestCaseSource(nameof(YieldTestCases_GP0_InvalidConfigurationSettings))]
   public void Read_GPO_InvalidConfiguration(byte gp0Settings)
     => ReadSyncAndAsync_InvalidConfiguration(
-      createUsbHidDevice: () => Mcp2221ATests.CreatePseudoDevice(gp0Settings: gp0Settings),
+      createUsbHidDevice: () => Mcp2221AControllerTests.CreatePseudoDevice(gp0Settings: gp0Settings),
       selectGpPin: static mcp2221A => mcp2221A.GpPin0
     );
 
   [TestCaseSource(nameof(YieldTestCases_GP1_InvalidConfigurationSettings))]
   public void Read_GP1_InvalidConfiguration(byte gp1Settings)
     => ReadSyncAndAsync_InvalidConfiguration(
-      createUsbHidDevice: () => Mcp2221ATests.CreatePseudoDevice(gp1Settings: gp1Settings),
+      createUsbHidDevice: () => Mcp2221AControllerTests.CreatePseudoDevice(gp1Settings: gp1Settings),
       selectGpPin: static mcp2221A => mcp2221A.GpPin1
     );
 
   [TestCaseSource(nameof(YieldTestCases_GP2_InvalidConfigurationSettings))]
   public void Read_GP2_InvalidConfiguration(byte gp2Settings)
     => ReadSyncAndAsync_InvalidConfiguration(
-      createUsbHidDevice: () => Mcp2221ATests.CreatePseudoDevice(gp2Settings: gp2Settings),
+      createUsbHidDevice: () => Mcp2221AControllerTests.CreatePseudoDevice(gp2Settings: gp2Settings),
       selectGpPin: static mcp2221A => mcp2221A.GpPin2
     );
 
   [TestCaseSource(nameof(YieldTestCases_GP3_InvalidConfigurationSettings))]
   public void Read_GP3_InvalidConfiguration(byte gp3Settings)
     => ReadSyncAndAsync_InvalidConfiguration(
-      createUsbHidDevice: () => Mcp2221ATests.CreatePseudoDevice(gp3Settings: gp3Settings),
+      createUsbHidDevice: () => Mcp2221AControllerTests.CreatePseudoDevice(gp3Settings: gp3Settings),
       selectGpPin: static mcp2221A => mcp2221A.GpPin3
     );
 
   private void ReadSyncAndAsync_InvalidConfiguration(
     Func<IUsbHidDevice> createUsbHidDevice,
-    Func<Mcp2221A, GpController> selectGpPin
+    Func<Mcp2221AController, GpController> selectGpPin
   )
   {
-    using var mcp2221A = Mcp2221A.Create(
+    using var mcp2221A = Mcp2221AController.Create(
       createUsbHidDevice(),
       shouldDisposeUsbHidDevice: true
     );
@@ -448,8 +448,8 @@ partial class GpControllerTests {
 
     expectedSentCommand[0] = 0x51; // GET GPIO VALUES
 
-    Mcp2221ATests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
-    Mcp2221ATests.ClearSentCommands(mcp2221A);
+    Mcp2221AControllerTests.AppendPseudoResponse(mcp2221A, getGpioValuesResponse);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     Assert.That(
       gp.LastUpdatedValue,
@@ -470,7 +470,7 @@ partial class GpControllerTests {
       Is.EqualTo(expectedMode)
     );
     Assert.That(
-      Mcp2221ATests.GetSentCommand(mcp2221A),
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand),
       $"sent command from {nameof(gp.Read)}"
     );

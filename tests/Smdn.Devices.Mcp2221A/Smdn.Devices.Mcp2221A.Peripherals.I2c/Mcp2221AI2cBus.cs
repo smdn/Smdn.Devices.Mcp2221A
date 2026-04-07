@@ -8,11 +8,11 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
 [TestFixture]
 public class Mcp2221AI2cBusTests {
-  private static Mcp2221A CreateFromPseudoDevice()
+  private static Mcp2221AController CreateFromPseudoDevice()
   {
-    var baseDevice = Mcp2221ATests.CreatePseudoDevice();
+    var baseDevice = Mcp2221AControllerTests.CreatePseudoDevice();
 
-    return Mcp2221A.Create(baseDevice, shouldDisposeUsbHidDevice: true);
+    return Mcp2221AController.Create(baseDevice, shouldDisposeUsbHidDevice: true);
   }
 
   [Test]

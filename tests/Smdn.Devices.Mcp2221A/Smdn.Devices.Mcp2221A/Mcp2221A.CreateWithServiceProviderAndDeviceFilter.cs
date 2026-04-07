@@ -16,11 +16,11 @@ using Smdn.IO.UsbHid;
 namespace Smdn.Devices.Mcp2221A;
 
 [TestFixture]
-public partial class Mcp2221ATests {
+public partial class Mcp2221AControllerTests {
   private const int IntegerServiceKeyForTestCase = int.MaxValue;
   private const string StringServiceKeyForTestCase = nameof(StringServiceKeyForTestCase);
 
-  private delegate ValueTask<Mcp2221A> CreateWithKeyedServiceProviderAndDeviceFilterFunc(
+  private delegate ValueTask<Mcp2221AController> CreateWithKeyedServiceProviderAndDeviceFilterFunc(
     IServiceProvider serviceProvider,
     object? serviceKey,
     Predicate<IUsbHidDevice>? usbHidDeviceFilter,
@@ -28,21 +28,21 @@ public partial class Mcp2221ATests {
     CancellationToken cancellationToken
   );
 
-  private delegate ValueTask<Mcp2221A> CreateWithServiceProviderAndDeviceFilterFunc(
+  private delegate ValueTask<Mcp2221AController> CreateWithServiceProviderAndDeviceFilterFunc(
     IServiceProvider serviceProvider,
     Predicate<IUsbHidDevice>? usbHidDeviceFilter,
     Predicate<IMcp2221AInfo>? mcp2221AFilter,
     CancellationToken cancellationToken
   );
 
-  private ValueTask<Mcp2221A> CreateWithServiceProviderAndDeviceFilterAsync(
+  private ValueTask<Mcp2221AController> CreateWithServiceProviderAndDeviceFilterAsync(
     IServiceProvider serviceProvider,
     object? serviceKey,
     Predicate<IUsbHidDevice>? usbHidDeviceFilter,
     Predicate<IMcp2221AInfo>? mcp2221AFilter,
     CancellationToken cancellationToken
   )
-    => Mcp2221A.CreateAsync(
+    => Mcp2221AController.CreateAsync(
       serviceProvider: serviceProvider,
       serviceKey: serviceKey,
       usbHidDeviceFilter: usbHidDeviceFilter,
@@ -50,20 +50,20 @@ public partial class Mcp2221ATests {
       cancellationToken: cancellationToken
     );
 
-  private ValueTask<Mcp2221A> CreateWithServiceProviderAndDeviceFilterAsync(
+  private ValueTask<Mcp2221AController> CreateWithServiceProviderAndDeviceFilterAsync(
     IServiceProvider serviceProvider,
     Predicate<IUsbHidDevice>? usbHidDeviceFilter,
     Predicate<IMcp2221AInfo>? mcp2221AFilter,
     CancellationToken cancellationToken
   )
-    => Mcp2221A.CreateAsync(
+    => Mcp2221AController.CreateAsync(
       serviceProvider: serviceProvider,
       usbHidDeviceFilter: usbHidDeviceFilter,
       mcp2221AFilter: mcp2221AFilter,
       cancellationToken: cancellationToken
     );
 
-  private ValueTask<Mcp2221A> CreateWithServiceProviderAndDeviceFilter(
+  private ValueTask<Mcp2221AController> CreateWithServiceProviderAndDeviceFilter(
     IServiceProvider serviceProvider,
     object? serviceKey,
     Predicate<IUsbHidDevice>? usbHidDeviceFilter,
@@ -71,7 +71,7 @@ public partial class Mcp2221ATests {
     CancellationToken cancellationToken
   )
     => new(
-      Mcp2221A.Create(
+      Mcp2221AController.Create(
         serviceProvider: serviceProvider,
         serviceKey: serviceKey,
         usbHidDeviceFilter: usbHidDeviceFilter,
@@ -80,14 +80,14 @@ public partial class Mcp2221ATests {
       )
     );
 
-  private ValueTask<Mcp2221A> CreateWithServiceProviderAndDeviceFilter(
+  private ValueTask<Mcp2221AController> CreateWithServiceProviderAndDeviceFilter(
     IServiceProvider serviceProvider,
     Predicate<IUsbHidDevice>? usbHidDeviceFilter,
     Predicate<IMcp2221AInfo>? mcp2221AFilter,
     CancellationToken cancellationToken
   )
     => new(
-      Mcp2221A.Create(
+      Mcp2221AController.Create(
         serviceProvider: serviceProvider,
         usbHidDeviceFilter: usbHidDeviceFilter,
         mcp2221AFilter: mcp2221AFilter,
@@ -468,9 +468,9 @@ public partial class Mcp2221ATests {
 
     PseudoUsbHidDevice[] devices = [
       CreatePseudoDevice(vendorId: UnrelatedDeviceVendorId), // not selected
-      CreatePseudoDevice(vendorId: Mcp2221A.DefaultVendorId, productId: 0xFFFF), // not selected
-      CreatePseudoDevice(vendorId: Mcp2221A.DefaultVendorId, productId: Mcp2221A.DefaultProductId), // selected
-      CreatePseudoDevice(vendorId: Mcp2221A.DefaultVendorId, productId: Mcp2221A.DefaultProductId), // not tested
+      CreatePseudoDevice(vendorId: Mcp2221AController.DefaultVendorId, productId: 0xFFFF), // not selected
+      CreatePseudoDevice(vendorId: Mcp2221AController.DefaultVendorId, productId: Mcp2221AController.DefaultProductId), // selected
+      CreatePseudoDevice(vendorId: Mcp2221AController.DefaultVendorId, productId: Mcp2221AController.DefaultProductId), // not tested
     ];
 
     var services = new ServiceCollection();
@@ -489,8 +489,8 @@ public partial class Mcp2221ATests {
       default
     ).ConfigureAwait(false);
 
-    Assert.That(mcp2221A.HidDevice.VendorId, Is.EqualTo(Mcp2221A.DefaultVendorId));
-    Assert.That(mcp2221A.HidDevice.ProductId, Is.EqualTo(Mcp2221A.DefaultProductId));
+    Assert.That(mcp2221A.HidDevice.VendorId, Is.EqualTo(Mcp2221AController.DefaultVendorId));
+    Assert.That(mcp2221A.HidDevice.ProductId, Is.EqualTo(Mcp2221AController.DefaultProductId));
 
     Assert.That(devices[0].IsDisposed, Is.True, "USB HID devices that were listed but not selected must be disposed.");
     Assert.That(devices[1].IsDisposed, Is.True, "USB HID devices that were listed but not selected must be disposed.");
@@ -940,7 +940,7 @@ public partial class Mcp2221ATests {
 
     using var serviceProvider = services.BuildServiceProvider();
 
-    Mcp2221A? mcp2221A = null;
+    Mcp2221AController? mcp2221A = null;
 
     Assert.That(
       async () => mcp2221A = await createFunc(

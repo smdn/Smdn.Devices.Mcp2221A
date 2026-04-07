@@ -12,10 +12,10 @@ using Smdn.IO.UsbHid;
 namespace Smdn.Devices.Mcp2221A;
 
 #pragma warning disable IDE0040, CA1724
-partial class Mcp2221A {
+partial class Mcp2221AController {
 #pragma warning restore IDE0040, CA1724
   /// <summary>
-  /// Creates an instance of <see cref="Mcp2221A"/> from the specified
+  /// Creates an instance of <see cref="Mcp2221AController"/> from the specified
   /// <see cref="IUsbHidDevice"/> asynchronously.
   /// </summary>
   /// <param name="usbHidDevice">
@@ -23,7 +23,7 @@ partial class Mcp2221A {
   /// </param>
   /// <param name="shouldDisposeUsbHidDevice">
   /// <see langword="true"/> to dispose the <paramref name="usbHidDevice"/> when the
-  /// created <see cref="Mcp2221A"/> instance is disposed; otherwise, <see langword="false"/>.
+  /// created <see cref="Mcp2221AController"/> instance is disposed; otherwise, <see langword="false"/>.
   /// </param>
   /// <param name="serviceProvider">
   /// An optional <see cref="IServiceProvider"/> for providing services like logging.
@@ -33,7 +33,7 @@ partial class Mcp2221A {
   /// </param>
   /// <returns>
   /// A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.
-  /// The result of the task is a new <see cref="Mcp2221A"/> instance.
+  /// The result of the task is a new <see cref="Mcp2221AController"/> instance.
   /// </returns>
   /// <exception cref="ArgumentNullException">
   /// <paramref name="usbHidDevice"/> is <see langword="null"/>.
@@ -58,11 +58,11 @@ partial class Mcp2221A {
   /// <para>
   /// If <paramref name="shouldDisposeUsbHidDevice"/> is set to <see langword="true"/>,
   /// the lifecycle of the provided <paramref name="usbHidDevice"/> is tied to the
-  /// created <see cref="Mcp2221A"/> instance. Disposing the <see cref="Mcp2221A"/>
+  /// created <see cref="Mcp2221AController"/> instance. Disposing the <see cref="Mcp2221AController"/>
   /// instance will also dispose the <paramref name="usbHidDevice"/>.
   /// </para>
   /// </remarks>
-  public static ValueTask<Mcp2221A> CreateAsync(
+  public static ValueTask<Mcp2221AController> CreateAsync(
     IUsbHidDevice usbHidDevice,
     bool shouldDisposeUsbHidDevice = false,
     IServiceProvider? serviceProvider = null,
@@ -77,7 +77,7 @@ partial class Mcp2221A {
     );
 
   /// <summary>
-  /// Creates an instance of <see cref="Mcp2221A"/> from the specified
+  /// Creates an instance of <see cref="Mcp2221AController"/> from the specified
   /// <see cref="IUsbHidDevice"/>.
   /// </summary>
   /// <param name="usbHidDevice">
@@ -85,7 +85,7 @@ partial class Mcp2221A {
   /// </param>
   /// <param name="shouldDisposeUsbHidDevice">
   /// <see langword="true"/> to dispose the <paramref name="usbHidDevice"/> when the
-  /// created <see cref="Mcp2221A"/> instance is disposed; otherwise, <see langword="false"/>.
+  /// created <see cref="Mcp2221AController"/> instance is disposed; otherwise, <see langword="false"/>.
   /// </param>
   /// <param name="serviceProvider">
   /// An optional <see cref="IServiceProvider"/> for providing services like logging.
@@ -94,7 +94,7 @@ partial class Mcp2221A {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// </param>
   /// <returns>
-  /// A <see cref="Mcp2221A"/> instance.
+  /// A <see cref="Mcp2221AController"/> instance.
   /// </returns>
   /// <exception cref="ArgumentNullException">
   /// <paramref name="usbHidDevice"/> is <see langword="null"/>.
@@ -119,11 +119,11 @@ partial class Mcp2221A {
   /// <para>
   /// If <paramref name="shouldDisposeUsbHidDevice"/> is set to <see langword="true"/>,
   /// the lifecycle of the provided <paramref name="usbHidDevice"/> is tied to the
-  /// created <see cref="Mcp2221A"/> instance. Disposing the <see cref="Mcp2221A"/>
+  /// created <see cref="Mcp2221AController"/> instance. Disposing the <see cref="Mcp2221AController"/>
   /// instance will also dispose the <paramref name="usbHidDevice"/>.
   /// </para>
   /// </remarks>
-  public static Mcp2221A Create(
+  public static Mcp2221AController Create(
     IUsbHidDevice usbHidDevice,
     bool shouldDisposeUsbHidDevice = false,
     IServiceProvider? serviceProvider = null,
@@ -138,7 +138,7 @@ partial class Mcp2221A {
     );
 
   /// <summary>
-  /// Creates an instance of <see cref="Mcp2221A"/> from the specified
+  /// Creates an instance of <see cref="Mcp2221AController"/> from the specified
   /// <see cref="IUsbHidDevice"/> asynchronously.
   /// </summary>
   /// <typeparam name="TServiceKey">
@@ -155,14 +155,14 @@ partial class Mcp2221A {
   /// </param>
   /// <param name="shouldDisposeUsbHidDevice">
   /// <see langword="true"/> to dispose the <paramref name="usbHidDevice"/> when the
-  /// created <see cref="Mcp2221A"/> instance is disposed; otherwise, <see langword="false"/>.
+  /// created <see cref="Mcp2221AController"/> instance is disposed; otherwise, <see langword="false"/>.
   /// </param>
   /// <param name="cancellationToken">
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// </param>
   /// <returns>
   /// A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.
-  /// The result of the task is a new <see cref="Mcp2221A"/> instance.
+  /// The result of the task is a new <see cref="Mcp2221AController"/> instance.
   /// </returns>
   /// <exception cref="ArgumentNullException">
   /// <paramref name="usbHidDevice"/> is <see langword="null"/>.
@@ -187,11 +187,11 @@ partial class Mcp2221A {
   /// <para>
   /// If <paramref name="shouldDisposeUsbHidDevice"/> is set to <see langword="true"/>,
   /// the lifecycle of the provided <paramref name="usbHidDevice"/> is tied to the
-  /// created <see cref="Mcp2221A"/> instance. Disposing the <see cref="Mcp2221A"/>
+  /// created <see cref="Mcp2221AController"/> instance. Disposing the <see cref="Mcp2221AController"/>
   /// instance will also dispose the <paramref name="usbHidDevice"/>.
   /// </para>
   /// </remarks>
-  public static ValueTask<Mcp2221A> CreateAsync<TServiceKey>(
+  public static ValueTask<Mcp2221AController> CreateAsync<TServiceKey>(
     IUsbHidDevice usbHidDevice,
     IServiceProvider? serviceProvider,
     TServiceKey serviceKey,
@@ -207,7 +207,7 @@ partial class Mcp2221A {
     );
 
   /// <summary>
-  /// Creates an instance of <see cref="Mcp2221A"/> from the specified
+  /// Creates an instance of <see cref="Mcp2221AController"/> from the specified
   /// <see cref="IUsbHidDevice"/>.
   /// </summary>
   /// <typeparam name="TServiceKey">
@@ -224,13 +224,13 @@ partial class Mcp2221A {
   /// </param>
   /// <param name="shouldDisposeUsbHidDevice">
   /// <see langword="true"/> to dispose the <paramref name="usbHidDevice"/> when the
-  /// created <see cref="Mcp2221A"/> instance is disposed; otherwise, <see langword="false"/>.
+  /// created <see cref="Mcp2221AController"/> instance is disposed; otherwise, <see langword="false"/>.
   /// </param>
   /// <param name="cancellationToken">
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// </param>
   /// <returns>
-  /// A <see cref="Mcp2221A"/> instance.
+  /// A <see cref="Mcp2221AController"/> instance.
   /// </returns>
   /// <exception cref="ArgumentNullException">
   /// <paramref name="usbHidDevice"/> is <see langword="null"/>.
@@ -255,11 +255,11 @@ partial class Mcp2221A {
   /// <para>
   /// If <paramref name="shouldDisposeUsbHidDevice"/> is set to <see langword="true"/>,
   /// the lifecycle of the provided <paramref name="usbHidDevice"/> is tied to the
-  /// created <see cref="Mcp2221A"/> instance. Disposing the <see cref="Mcp2221A"/>
+  /// created <see cref="Mcp2221AController"/> instance. Disposing the <see cref="Mcp2221AController"/>
   /// instance will also dispose the <paramref name="usbHidDevice"/>.
   /// </para>
   /// </remarks>
-  public static Mcp2221A Create<TServiceKey>(
+  public static Mcp2221AController Create<TServiceKey>(
     IUsbHidDevice usbHidDevice,
     IServiceProvider? serviceProvider,
     TServiceKey serviceKey,
@@ -305,8 +305,8 @@ partial class Mcp2221A {
     // filtering by VID/PID is not performed here when Predicate<IUsbHidDevice>
     // is provided; instead, it is delegated to Predicate<IUsbHidDevice>.
     var usbHidDevice = usbHidService.FindDevice(
-      vendorId: usbHidDeviceFilter is null ? Mcp2221A.DefaultVendorId : null,
-      productId: usbHidDeviceFilter is null ? Mcp2221A.DefaultProductId : null,
+      vendorId: usbHidDeviceFilter is null ? Mcp2221AController.DefaultVendorId : null,
+      productId: usbHidDeviceFilter is null ? Mcp2221AController.DefaultProductId : null,
       predicate: usbHidDeviceFilter,
       cancellationToken: cancellationToken
     );
@@ -314,7 +314,7 @@ partial class Mcp2221A {
     return usbHidDevice ?? throw new Mcp2221ANotFoundException(usbHidService, usbHidDeviceFilter);
   }
 
-  private static ValueTask<Mcp2221A> CreateFromFirstUsbHidDeviceAsyncCore<TServiceKey>(
+  private static ValueTask<Mcp2221AController> CreateFromFirstUsbHidDeviceAsyncCore<TServiceKey>(
     IServiceProvider serviceProvider,
     TServiceKey? serviceKey,
     Predicate<IUsbHidDevice>? usbHidDeviceFilter,
@@ -333,7 +333,7 @@ partial class Mcp2221A {
       cancellationToken: cancellationToken
     );
 
-  private static Mcp2221A CreateFromFirstUsbHidDeviceCore<TServiceKey>(
+  private static Mcp2221AController CreateFromFirstUsbHidDeviceCore<TServiceKey>(
     IServiceProvider serviceProvider,
     TServiceKey? serviceKey,
     Predicate<IUsbHidDevice>? usbHidDeviceFilter,
@@ -352,7 +352,7 @@ partial class Mcp2221A {
       cancellationToken: cancellationToken
     );
 
-  private static async ValueTask<Mcp2221A> CreateFromUsbHidDeviceAsyncCore<TServiceKey>(
+  private static async ValueTask<Mcp2221AController> CreateFromUsbHidDeviceAsyncCore<TServiceKey>(
     IUsbHidDevice usbHidDevice,
     IServiceProvider? serviceProvider,
 #pragma warning disable IDE0060
@@ -376,7 +376,7 @@ partial class Mcp2221A {
         throw new Mcp2221AUnavailableException(ex, usbHidDevice);
       }
 
-      var logger = serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221A>();
+      var logger = serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221AController>();
 #pragma warning disable CA2000
       var transceiver = new Mcp2221ATransceiver(
         endPoint: usbHidEndPoint,
@@ -405,7 +405,7 @@ partial class Mcp2221A {
     }
   }
 
-  private static Mcp2221A CreateFromUsbHidDeviceCore<TServiceKey>(
+  private static Mcp2221AController CreateFromUsbHidDeviceCore<TServiceKey>(
     IUsbHidDevice usbHidDevice,
     bool shouldDisposeUsbHidDevice,
     IServiceProvider? serviceProvider,
@@ -429,7 +429,7 @@ partial class Mcp2221A {
         throw new Mcp2221AUnavailableException(ex, usbHidDevice);
       }
 
-      var logger = serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221A>();
+      var logger = serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221AController>();
 #pragma warning disable CA2000
       var transceiver = new Mcp2221ATransceiver(
         endPoint: usbHidEndPoint,

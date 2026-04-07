@@ -156,7 +156,7 @@ services.AddHidSharpUsbHid();
 using var serviceProvider = services.BuildServiceProvider();
 
 // Find and open the first MCP2221/MCP2221A device connected to the USB port.
-using var device = Mcp2221A.Create(serviceProvider);
+using var device = Mcp2221AController.Create(serviceProvider);
 
 // Configure the all GP pins (GP0-GP3) as GPIO output.
 device.GpPins.ConfigureAllAsGpioOutput();

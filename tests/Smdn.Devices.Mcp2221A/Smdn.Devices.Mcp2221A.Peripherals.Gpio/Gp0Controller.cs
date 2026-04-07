@@ -35,8 +35,8 @@ public class Gp0ControllerTests {
     bool expected
   )
   {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(),
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true
     );
 
@@ -66,8 +66,8 @@ public class Gp0ControllerTests {
   [TestCaseSource(nameof(YieldTestCases_LastUpdatedValue_AtStartup))]
   public void LastUpdatedValue_AtStartup(byte gp0Settings, PinValue? expected)
   {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: gp0Settings
       ),
       shouldDisposeUsbHidDevice: true
@@ -89,8 +89,8 @@ public class Gp0ControllerTests {
   [TestCaseSource(nameof(YieldTestCases_CurrentMode_AtStartup))]
   public void CurrentMode_AtStartup(byte gp0Settings, PinMode? expected)
   {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: gp0Settings
       ),
       shouldDisposeUsbHidDevice: true
@@ -112,8 +112,8 @@ public class Gp0ControllerTests {
   [TestCaseSource(nameof(YieldTestCases_CurrentFunction_AtStartup))]
   public void CurrentFunction_AtStartup(byte gp0Settings, GpFunction expected)
   {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: gp0Settings
       ),
       shouldDisposeUsbHidDevice: true
@@ -132,8 +132,8 @@ public class Gp0ControllerTests {
   [TestCaseSource(nameof(YieldTestCases_CurrentDesignation_AtStartup))]
   public void CurrentDesignation_AtStartup(byte gp0Settings, string expected)
   {
-    using var mcp2221A = Mcp2221A.Create(
-      Mcp2221ATests.CreatePseudoDevice(
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: gp0Settings
       ),
       shouldDisposeUsbHidDevice: true

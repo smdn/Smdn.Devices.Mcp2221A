@@ -13,6 +13,6 @@ public static class IMcp2221AInfoExtensions {
     /// revision, assume it is an MCP2221A.
     /// </remarks>
     public bool IsMcp2221A
-      => !string.Equals(info.FirmwareRevision, Mcp2221A.FirmwareRevisionMcp2221, StringComparison.Ordinal);
+      => !string.Equals(info.FirmwareRevision, Mcp2221AController.FirmwareRevisionMcp2221, StringComparison.Ordinal);
   }
 }
