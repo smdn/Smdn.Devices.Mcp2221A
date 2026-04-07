@@ -36,7 +36,7 @@ partial class Mcp2221ATests {
       CreatePseudoDevice(),
       shouldDisposeUsbHidDevice: true
     );
-    using var i2cDevice = mcp2221A.I2c.CreateDevice(deviceAddress, shouldDisposeMcp2221A);
+    using var i2cDevice = mcp2221A.I2cBus.CreateDevice(deviceAddress, shouldDisposeMcp2221A);
 
     Assert.That(i2cDevice, Is.Not.Null);
     Assert.That(i2cDevice.ConnectionSettings, Is.Not.Null);
@@ -71,7 +71,7 @@ partial class Mcp2221ATests {
   public ValueTask Write()
     => WriteSyncAndAsync(
       static (d, address, ct) => {
-        d.I2c.Write(address, 100, [0x00, 0x00, 0x00], ct);
+        d.I2cBus.Write(address, 100, [0x00, 0x00, 0x00], ct);
         return default;
       }
     );
@@ -79,7 +79,7 @@ partial class Mcp2221ATests {
   [Test]
   public ValueTask WriteAsync()
     => WriteSyncAndAsync(
-      static (d, address, ct) => d.I2c.WriteAsync(address, 100, new byte[] { 0x00, 0x00, 0x00 }, ct)
+      static (d, address, ct) => d.I2cBus.WriteAsync(address, 100, new byte[] { 0x00, 0x00, 0x00 }, ct)
     );
 
   private async ValueTask WriteSyncAndAsync(Func<Mcp2221A, I2cAddress, CancellationToken, ValueTask> writeAsyncAction)

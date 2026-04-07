@@ -26,8 +26,8 @@ await device.GpPin3.ConfigureAsI2cLedOutputAsync();
 // If an I2cCommandException is thrown when using the
 // HidSharp backend, try WithFastMode() instead of WithStandardMode().
 var i2cDevices = new[] {
-  device.I2c.CreateDevice(Ht16k33.DefaultI2cAddress | 0b_000).WithStandardMode(),
-  device.I2c.CreateDevice(Ht16k33.DefaultI2cAddress | 0b_001).WithStandardMode(),
+  device.I2cBus.CreateDevice(Ht16k33.DefaultI2cAddress | 0b_000).WithStandardMode(),
+  device.I2cBus.CreateDevice(Ht16k33.DefaultI2cAddress | 0b_001).WithStandardMode(),
 };
 
 FourDigitFourteenSegmentDisplay[] displays = [

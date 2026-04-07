@@ -66,7 +66,7 @@ partial class Mcp2221ATests {
 
     Assert.That(() => _ = mcp2221A.HidDevice, Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => _ = mcp2221A.GpPins, Throws.TypeOf<ObjectDisposedException>());
-    Assert.That(() => _ = mcp2221A.I2c, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = mcp2221A.I2cBus, Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => _ = mcp2221A.GpioController, Throws.TypeOf<ObjectDisposedException>());
 
     Assert.That(() => mcp2221A.Reset(), Throws.TypeOf<ObjectDisposedException>());
@@ -129,7 +129,7 @@ partial class Mcp2221ATests {
 
     Assert.That(() => _ = mcp2221A.HidDevice, Throws.Nothing);
     Assert.That(() => _ = mcp2221A.GpPins, Throws.Nothing);
-    Assert.That(() => _ = mcp2221A.I2c, Throws.Nothing);
+    Assert.That(() => _ = mcp2221A.I2cBus, Throws.Nothing);
     Assert.That(() => _ = mcp2221A.GpioController, Throws.Nothing);
 
     Assert.That(() => mcp2221A.Dispose(), Throws.Nothing);

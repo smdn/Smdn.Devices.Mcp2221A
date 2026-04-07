@@ -41,7 +41,7 @@ I2cAddress addressRangeMax = I2cAddress.DeviceMaxValue;
 // I2cAddress addressRangeMax = 0x27;
 const int TransmissionSpeedInKbps = 100;
 
-var (writeAddressSet, readAddressSet) = await device.I2c.ScanBusAsync(
+var (writeAddressSet, readAddressSet) = await device.I2cBus.ScanBusAsync(
   addressRangeMin,
   addressRangeMax,
   TransmissionSpeedInKbps,

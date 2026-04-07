@@ -25,7 +25,7 @@ await device.GpPin3.ConfigureAsI2cLedOutputAsync();
 const int DeviceAddressMcp23017 = 0x20; // The address of MCP23017 which is connected to MCP2221/MCP2221A
 
 var mcp23017 = new Mcp23017(
-  i2cDevice: device.I2c.CreateDevice(DeviceAddressMcp23017).WithStandardMode(),
+  i2cDevice: device.I2cBus.CreateDevice(DeviceAddressMcp23017).WithStandardMode(),
   shouldDispose: false, // Mcp23017 itself does not dispose supplied i2cDevice above in this case
   controller: null,
   reset: -1,        // disable RESET pin

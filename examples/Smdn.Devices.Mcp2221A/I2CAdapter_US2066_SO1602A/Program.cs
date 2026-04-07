@@ -23,7 +23,7 @@ await using var device = await Mcp2221A.CreateAsync(serviceProvider);
 await device.GpPin3.ConfigureAsI2cLedOutputAsync();
 
 using var display = SO1602A.Create(
-  device.I2c.CreateDevice(SO1602A.DefaultI2CAddress).WithFastMode()
+  device.I2cBus.CreateDevice(SO1602A.DefaultI2CAddress).WithFastMode()
 );
 
 // write string and display it

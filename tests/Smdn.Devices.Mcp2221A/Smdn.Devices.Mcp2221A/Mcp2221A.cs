@@ -363,10 +363,10 @@ public partial class Mcp2221ATests {
     Assert.That(() => _ = device.GpPin1, Throws.Nothing);
     Assert.That(() => _ = device.GpPin2, Throws.Nothing);
     Assert.That(() => _ = device.GpPin3, Throws.Nothing);
-    Assert.That(() => _ = device.I2c, Throws.Nothing);
+    Assert.That(() => _ = device.I2cBus, Throws.Nothing);
     Assert.That(() => _ = device.GpioController, Throws.Nothing);
 
-    var i2c = device.I2c;
+    var i2cBus = device.I2cBus;
     var gp0 = device.GpPin0;
     var gp1 = device.GpPin1;
     var gp2 = device.GpPin2;
@@ -388,7 +388,7 @@ public partial class Mcp2221ATests {
     Assert.That(() => _ = device.GpPin1, Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => _ = device.GpPin2, Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => _ = device.GpPin3, Throws.TypeOf<ObjectDisposedException>());
-    Assert.That(() => _ = device.I2c, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = device.I2cBus, Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => _ = device.GpioController, Throws.TypeOf<ObjectDisposedException>());
 
     Assert.That(() => _ = device.HardwareRevision, Throws.Nothing);
@@ -410,12 +410,12 @@ public partial class Mcp2221ATests {
       Assert.That(() => gp.Read(), Throws.TypeOf<ObjectDisposedException>());
     }
 
-    Assert.That(async () => await i2c.WriteAsync(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
-    Assert.That(() => i2c.WriteAsync(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
-    Assert.That(() => i2c.Write(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
-    Assert.That(async () => await i2c.ReadAsync(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
-    Assert.That(() => i2c.ReadAsync(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
-    Assert.That(() => i2c.Read(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(async () => await i2cBus.WriteAsync(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => i2cBus.WriteAsync(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => i2cBus.Write(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(async () => await i2cBus.ReadAsync(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => i2cBus.ReadAsync(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => i2cBus.Read(default, 100, default), Throws.TypeOf<ObjectDisposedException>());
 
     Assert.That(() => gpioController.OpenPin(1, PinMode.Output), Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => gpioController.ClosePin(0), Throws.TypeOf<ObjectDisposedException>());

@@ -36,7 +36,7 @@ public partial class Mcp2221A :
 #pragma warning restore CA2213
 
   [CLSCompliant(false)]
-  public Mcp2221AI2cBus I2c {
+  public Mcp2221AI2cBus I2cBus {
     get {
       ThrowIfDisposed();
       return field;
@@ -91,7 +91,7 @@ public partial class Mcp2221A :
     this.info = info ?? throw new ArgumentNullException(nameof(info));
 
     gpioDriver = new(transceiver: transceiver);
-    I2c = new(this, logger);
+    I2cBus = new(this, logger);
     GpioController = new Mcp2221AGpioController(driver: gpioDriver);
   }
 

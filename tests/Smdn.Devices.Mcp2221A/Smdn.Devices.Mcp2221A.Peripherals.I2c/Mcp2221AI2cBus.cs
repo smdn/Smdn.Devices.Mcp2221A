@@ -20,12 +20,12 @@ public class Mcp2221AI2cBusTests {
   {
     using var device = CreateFromPseudoDevice();
 
-    Assert.That(device.I2c.Dispose, Throws.Nothing);
+    Assert.That(device.I2cBus.Dispose, Throws.Nothing);
 
-    Assert.That(() => _ = device.I2c, Throws.Nothing);
-    Assert.That(() => _ = device.I2c.CreateDevice(0x40), Throws.Nothing);
+    Assert.That(() => _ = device.I2cBus, Throws.Nothing);
+    Assert.That(() => _ = device.I2cBus.CreateDevice(0x40), Throws.Nothing);
 
-    Assert.That(device.I2c.Dispose, Throws.Nothing, "dispose again");
+    Assert.That(device.I2cBus.Dispose, Throws.Nothing, "dispose again");
   }
 
   [Test]
@@ -33,13 +33,13 @@ public class Mcp2221AI2cBusTests {
   {
     using var device = CreateFromPseudoDevice();
 
-    Assert.That(() => _ = device.I2c, Throws.Nothing);
+    Assert.That(() => _ = device.I2cBus, Throws.Nothing);
 
-    var i2cBus = device.I2c;
+    var i2cBus = device.I2cBus;
 
     device.Dispose();
 
-    Assert.That(() => _ = device.I2c, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = device.I2cBus, Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => _ = i2cBus.CreateDevice(0x40), Throws.TypeOf<ObjectDisposedException>());
   }
 
@@ -49,14 +49,14 @@ public class Mcp2221AI2cBusTests {
     const int DeviceAddress = 0x40;
 
     using var device = CreateFromPseudoDevice();
-    using var i2cDevice = device.I2c.CreateDevice(DeviceAddress);
+    using var i2cDevice = device.I2cBus.CreateDevice(DeviceAddress);
 
     Assert.That(i2cDevice, Is.Not.Null);
     Assert.That(i2cDevice.ConnectionSettings, Is.Not.Null);
     Assert.That(i2cDevice.ConnectionSettings.DeviceAddress, Is.EqualTo(DeviceAddress));
     Assert.That(i2cDevice.TransmissionSpeedInKbps, Is.EqualTo(100));
 
-    using var i2cSameAddressDevice = device.I2c.CreateDevice(DeviceAddress);
+    using var i2cSameAddressDevice = device.I2cBus.CreateDevice(DeviceAddress);
 
     Assert.That(
       i2cSameAddressDevice,
@@ -72,14 +72,14 @@ public class Mcp2221AI2cBusTests {
     var deviceAddress = new I2cAddress(DeviceAddressNumber);
 
     using var device = CreateFromPseudoDevice();
-    using var i2cDevice = device.I2c.CreateDevice(deviceAddress);
+    using var i2cDevice = device.I2cBus.CreateDevice(deviceAddress);
 
     Assert.That(i2cDevice, Is.Not.Null);
     Assert.That(i2cDevice.ConnectionSettings, Is.Not.Null);
     Assert.That(i2cDevice.ConnectionSettings.DeviceAddress, Is.EqualTo(deviceAddress));
     Assert.That(i2cDevice.TransmissionSpeedInKbps, Is.EqualTo(100));
 
-    using var i2cSameAddressDevice = device.I2c.CreateDevice(deviceAddress);
+    using var i2cSameAddressDevice = device.I2cBus.CreateDevice(deviceAddress);
 
     Assert.That(
       i2cSameAddressDevice,
@@ -94,7 +94,7 @@ public class Mcp2221AI2cBusTests {
   public void CreateDevice_FromI2cAddress_WithTransmissionSpeed(int transmissionSpeedInKbps)
   {
     using var device = CreateFromPseudoDevice();
-    using var i2cDevice = device.I2c.CreateDevice(0x40, transmissionSpeedInKbps: transmissionSpeedInKbps);
+    using var i2cDevice = device.I2cBus.CreateDevice(0x40, transmissionSpeedInKbps: transmissionSpeedInKbps);
 
     Assert.That(i2cDevice, Is.Not.Null);
     Assert.That(i2cDevice.TransmissionSpeedInKbps, Is.EqualTo(transmissionSpeedInKbps));
@@ -106,14 +106,14 @@ public class Mcp2221AI2cBusTests {
     const int DeviceAddress = 0x40;
 
     using var device = CreateFromPseudoDevice();
-    using var i2cDevice = device.I2c.CreateDevice(DeviceAddress);
+    using var i2cDevice = device.I2cBus.CreateDevice(DeviceAddress);
 
     Assert.That(
-      () => device.I2c.RemoveDevice(DeviceAddress),
+      () => device.I2cBus.RemoveDevice(DeviceAddress),
       Throws.Nothing
     );
     Assert.That(
-      () => device.I2c.RemoveDevice(DeviceAddress),
+      () => device.I2cBus.RemoveDevice(DeviceAddress),
       Throws.Nothing,
       "remove again"
     );
@@ -134,14 +134,14 @@ public class Mcp2221AI2cBusTests {
     var deviceAddress = new I2cAddress(DeviceAddressNumber);
 
     using var device = CreateFromPseudoDevice();
-    using var i2cDevice = device.I2c.CreateDevice(deviceAddress);
+    using var i2cDevice = device.I2cBus.CreateDevice(deviceAddress);
 
     Assert.That(
-      () => device.I2c.RemoveDevice(deviceAddress),
+      () => device.I2cBus.RemoveDevice(deviceAddress),
       Throws.Nothing
     );
     Assert.That(
-      () => device.I2c.RemoveDevice(deviceAddress),
+      () => device.I2cBus.RemoveDevice(deviceAddress),
       Throws.Nothing,
       "remove again"
     );

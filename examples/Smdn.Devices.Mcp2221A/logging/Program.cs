@@ -42,4 +42,4 @@ using var serviceProvider = services.BuildServiceProvider();
 
 await using var device = await Mcp2221A.CreateAsync(serviceProvider);
 
-await device.I2c.ScanBusAsync();
+await device.I2cBus.ScanBusAsync();
