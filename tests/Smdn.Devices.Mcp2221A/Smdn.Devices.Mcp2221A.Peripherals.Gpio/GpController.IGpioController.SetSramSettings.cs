@@ -92,19 +92,6 @@ partial class GpControllerTests {
 
       currentGpSettings[gp.Index] = (byte)(expectedOutputValueBits | expectedDirectionBits | ExpectedDesignationBits);
 
-      Mcp2221AControllerTests.AppendPseudoResponse(
-        mcp2221A,
-        // [MCP2221A] 3.1.13 SET SRAM SETTINGS
-        // [1] 0x00: Command completed successfully
-        // [22] GP0 Settings
-        // [23] GP1 Settings
-        // [24] GP2 Settings
-        // [25] GP3 Settings
-        "60-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-" +
-        $"{currentGpSettings[0]:X2}-{currentGpSettings[1]:X2}-{currentGpSettings[2]:X2}-{currentGpSettings[3]:X2}-" +
-        "00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00"
-      );
-
       var expectedSentCommand = new byte[64];
 
       expectedSentCommand[0] = 0x60; // [0] SET SRAM SETTINGS
@@ -131,7 +118,7 @@ partial class GpControllerTests {
       Assert.That(
         mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList(),
         Is.EqualTo(expectedAssignments).AsCollection,
-        $"must not be configured ({gp.PinName})"
+        $"other GP pins must not be configured (except {gp.PinName})"
       );
     }
   }
@@ -191,13 +178,8 @@ partial class GpControllerTests {
         mcp2221A,
         // [MCP2221A] 3.1.13 SET SRAM SETTINGS
         // [1] 0x00: Command completed successfully
-        // [22] GP0 Settings
-        // [23] GP1 Settings
-        // [24] GP2 Settings
-        // [25] GP3 Settings
-        "60-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-" +
-        $"{currentGpSettings[0]:X2}-{currentGpSettings[1]:X2}-{currentGpSettings[2]:X2}-{currentGpSettings[3]:X2}-" +
-        "00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00"
+        // [2-63] Don't care
+        "60-00-" + string.Join("-", Enumerable.Repeat("00", 62))
       );
 
       Assert.That(
@@ -325,8 +307,6 @@ partial class GpControllerTests {
     cts.Cancel();
 
     foreach (var gp in mcp2221A.GpPins) {
-      var initialFunction = gp.CurrentFunction;
-
       Assert.That(
         async () => await configureAsGpioAsyncFunc(gp, cts.Token),
         Throws
