@@ -40,6 +40,8 @@ internal sealed partial class Mcp2221AGpioDriver : IGpControllerGroup {
 
   public int Count => NumberOfGpPins;
 
+  private readonly SramSettings sramSettings;
+
   internal Mcp2221AGpioDriver(
     Mcp2221ATransceiver transceiver
   )
@@ -50,6 +52,8 @@ internal sealed partial class Mcp2221AGpioDriver : IGpControllerGroup {
     Gp1 = new(this);
     Gp2 = new(this);
     Gp3 = new(this);
+
+    sramSettings = new();
   }
 
   internal void ThrowIfDisposed()

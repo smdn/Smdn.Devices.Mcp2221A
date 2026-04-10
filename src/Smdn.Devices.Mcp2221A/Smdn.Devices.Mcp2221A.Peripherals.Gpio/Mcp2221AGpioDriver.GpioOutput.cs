@@ -417,7 +417,7 @@ partial class Mcp2221AGpioDriver {
 
   /// <summary>
   /// Synchronize the GPIO states cache (<see cref="gpioStateBytes"/>) based on
-  /// the updated SRAM settings (<see cref="gpSettingsBytes"/>).
+  /// the updated SRAM settings (<see cref="sramSettings"/>).
   /// </summary>
   /// <remarks>
   /// When using the 'GET SRAM SETTINGS' or 'SET SRAM SETTINGS' commands, setting
@@ -426,22 +426,23 @@ partial class Mcp2221AGpioDriver {
   /// Therefore, this method updates the <see cref="gpioStateBytes"/> based on
   /// the SRAM settings.
   /// </remarks>
-  private void SyncGpioStates(ReadOnlySpan<byte> gpSettings)
+  private void SyncGpioStates(SramSettings sramSettings)
   {
     const byte GpSettingsGpioOutputValueMask = 0b_000_1_0_000;
     const byte GpSettingsGpioDirectionMask = 0b_000_0_1_000;
 
     for (int gp = 0, i = 0; gp < NumberOfGpPins; gp++) {
-      var isGpio = (GpDesignation)(gpSettings[gp] & (byte)GpDesignation.BitMask) == GpDesignation.GpioOperation;
+      var gpSettings = sramSettings.ReadGpSettingsByte(gp);
+      var isGpio = (GpDesignation)(gpSettings & (byte)GpDesignation.BitMask) == GpDesignation.GpioOperation;
 
       // 0 + 2n: GP<n> pin value
       gpioStateBytes.Span[i++] = isGpio
-        ? ((gpSettings[gp] & GpSettingsGpioOutputValueMask) == 0) ? GpioValueLow : GpioValueHigh
+        ? ((gpSettings & GpSettingsGpioOutputValueMask) == 0) ? GpioValueLow : GpioValueHigh
         : GpioValueInvalid;
 
       // 1 + 2n: GP<n> direction value
       gpioStateBytes.Span[i++] = isGpio
-        ? ((gpSettings[gp] & GpSettingsGpioDirectionMask) == 0) ? GpioDirectionOutput : GpioDirectionInput
+        ? ((gpSettings & GpSettingsGpioDirectionMask) == 0) ? GpioDirectionOutput : GpioDirectionInput
         : GpioDirectionInvalid;
     }
   }

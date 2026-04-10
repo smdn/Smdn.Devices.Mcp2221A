@@ -12,6 +12,14 @@ SPDX-License-Identifier: MIT
     <NoWarn>CS1591;$(NoWarn)</NoWarn> <!-- CS1591: Missing XML comment for publicly visible type or member 'Type_or_Member' -->
   </PropertyGroup>
 
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard2.'))">
+    <!--
+      Since InlineArrayAttribute cannot be used in netstandard 2.x,
+      implementation must use fixed-size buffers instead.
+    -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <!--
     Since System.Device.Gpio version 4.0.1 and later does not support
     .NET Standard 2.x, use a version earlier than this.

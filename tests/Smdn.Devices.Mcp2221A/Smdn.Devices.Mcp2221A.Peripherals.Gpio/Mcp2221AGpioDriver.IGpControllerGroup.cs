@@ -324,23 +324,23 @@ partial class Mcp2221AGpioDriverTests {
     > configureAllGpSettingsAsyncFunc
   )
   {
-    const byte InitialGp0Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO0)
-    const byte InitialGp1Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO1)
-    const byte InitialGp2Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO2)
-    const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
-
-    using var mcp2221A = Mcp2221AController.Create(
-      Mcp2221AControllerTests.CreatePseudoDevice(
-        gp0Settings: InitialGp0Settings,
-        gp1Settings: InitialGp1Settings,
-        gp2Settings: InitialGp2Settings,
-        gp3Settings: InitialGp3Settings
-      ),
-      shouldDisposeUsbHidDevice: true
-    );
-
     foreach (var mode in new[] { PinMode.Input, PinMode.Output }) {
       foreach (var initialValue in new[] { PinValue.High, PinValue.Low }) {
+        const byte InitialGp0Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO0)
+        const byte InitialGp1Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO1)
+        const byte InitialGp2Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO2)
+        const byte InitialGp3Settings = 0b_000_0_0_000; // LOW - OUTPUT - GPIO operation (GPIO3)
+
+        using var mcp2221A = Mcp2221AController.Create(
+          Mcp2221AControllerTests.CreatePseudoDevice(
+            gp0Settings: InitialGp0Settings,
+            gp1Settings: InitialGp1Settings,
+            gp2Settings: InitialGp2Settings,
+            gp3Settings: InitialGp3Settings
+          ),
+          shouldDisposeUsbHidDevice: true
+        );
+
         Mcp2221AControllerTests.AppendPseudoResponse(
           mcp2221A,
           // [MCP2221A] 3.1.13 SET SRAM SETTINGS

@@ -49,13 +49,11 @@ partial class Mcp2221AGpioDriver : GpioDriver {
       !isUsedByGpioController[pinNumber] &&
       GetCurrentGpDesignation(pinNumber) != GpDesignation.GpioOperation
     ) {
-      SetGpSettings(
-        allGpSettings: (
-          pinNumber == 0 ? new(Designation: GpDesignation.GpioOperation) : default,
-          pinNumber == 1 ? new(Designation: GpDesignation.GpioOperation) : default,
-          pinNumber == 2 ? new(Designation: GpDesignation.GpioOperation) : default,
-          pinNumber == 3 ? new(Designation: GpDesignation.GpioOperation) : default
-        ),
+      ConfigureGpDesignation(
+        gp: pinNumber,
+        gpDesignation: GpDesignation.GpioOperation,
+        gpioDirection: null,
+        gpioValue: null,
         shouldThrowIfUsedByGpioController: false,
         cancellationToken: default
       );
