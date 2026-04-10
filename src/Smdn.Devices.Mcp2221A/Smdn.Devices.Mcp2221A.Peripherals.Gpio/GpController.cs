@@ -10,9 +10,11 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 #pragma warning disable IDE0040
 public abstract partial class GpController {
 #pragma warning restore IDE0040
-  private readonly Mcp2221AGpioDriver gpio;
+  private protected Mcp2221AGpioDriver GpioDriver { get; }
 
-  private protected GpDesignation CurrentGpDesignation => gpio.GetCurrentGpDesignation(Index);
+  private protected Mcp2221ATransceiver Transceiver => GpioDriver.Transceiver;
+
+  private protected GpDesignation CurrentGpDesignation => GpioDriver.GetCurrentGpDesignation(Index);
 
   /// <summary>
   /// Gets the logical index of General Purpose (GP) pin represented by the current instance,
@@ -113,7 +115,7 @@ public abstract partial class GpController {
   /// <seealso cref="Write(PinValue, CancellationToken)"/>
   /// <seealso cref="WriteAsync(PinValue, CancellationToken)"/>
   [CLSCompliant(false)]
-  public PinValue LastUpdatedValue => gpio.GetLastUpdatedValueOrThrow(gp: Index);
+  public PinValue LastUpdatedValue => GpioDriver.GetLastUpdatedValueOrThrow(gp: Index);
 
   /// <summary>
   /// Gets the current I/O direction (mode) of the GP pin.
@@ -164,7 +166,7 @@ public abstract partial class GpController {
   /// <seealso cref="SetMode(PinMode, CancellationToken)"/>
   /// <seealso cref="SetModeAsync(PinMode, CancellationToken)"/>
   [CLSCompliant(false)]
-  public PinMode CurrentMode => gpio.GetLastUpdatedDirectionOrThrow(gp: Index);
+  public PinMode CurrentMode => GpioDriver.GetLastUpdatedDirectionOrThrow(gp: Index);
 
   /// <summary>
   /// Gets a value indicating whether the GP pin is currently being
@@ -196,11 +198,11 @@ public abstract partial class GpController {
   /// <seealso cref="Write"/>
   /// <seealso cref="SetMode"/>
   public bool IsUsedByGpioController
-    => gpio.IsUsedByGpioController(gp: Index);
+    => GpioDriver.IsUsedByGpioController(gp: Index);
 
-  private protected GpController(Mcp2221AGpioDriver gpio)
+  private protected GpController(Mcp2221AGpioDriver gpioDriver)
   {
-    this.gpio = gpio;
+    GpioDriver = gpioDriver;
   }
 
   /// <summary>
@@ -242,7 +244,7 @@ public abstract partial class GpController {
     PinValue? gpioInitialValue = null,
     CancellationToken cancellationToken = default
   )
-    => gpio.ConfigureGpDesignationAsync(
+    => GpioDriver.ConfigureGpDesignationAsync(
       gp: Index,
       gpDesignation: gpDesignation,
       gpioDirection: gpioDirection,
@@ -256,7 +258,7 @@ public abstract partial class GpController {
     PinValue? gpioInitialValue = null,
     CancellationToken cancellationToken = default
   )
-    => gpio.ConfigureGpDesignation(
+    => GpioDriver.ConfigureGpDesignation(
       gp: Index,
       gpDesignation: gpDesignation,
       gpioDirection: gpioDirection,

@@ -35,8 +35,8 @@ public sealed class Gp0Controller : GpController {
     _ => throw new NotSupportedException(),
   };
 
-  internal Gp0Controller(Mcp2221AGpioDriver gpio)
-    : base(gpio)
+  internal Gp0Controller(Mcp2221AGpioDriver gpioDriver)
+    : base(gpioDriver)
   {
   }
 

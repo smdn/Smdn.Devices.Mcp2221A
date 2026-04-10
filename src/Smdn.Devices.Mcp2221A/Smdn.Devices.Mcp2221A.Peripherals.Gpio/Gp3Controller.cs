@@ -42,8 +42,8 @@ public sealed class Gp3Controller :
     _ => throw new NotSupportedException(),
   };
 
-  internal Gp3Controller(Mcp2221AGpioDriver gpio)
-    : base(gpio)
+  internal Gp3Controller(Mcp2221AGpioDriver gpioDriver)
+    : base(gpioDriver)
   {
   }
 

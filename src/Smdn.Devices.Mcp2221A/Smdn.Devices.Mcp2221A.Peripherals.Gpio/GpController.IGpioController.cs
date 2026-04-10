@@ -64,13 +64,13 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    gpio.Transceiver.ThrowIfDisposed();
+    GpioDriver.Transceiver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
-    await gpio.FetchGpioStatesAsync(default, default, cancellationToken).ConfigureAwait(false);
+    await GpioDriver.FetchGpioStatesAsync(default, default, cancellationToken).ConfigureAwait(false);
 
-    return gpio.GetLastUpdatedDirectionOrThrow(gp: Index);
+    return GpioDriver.GetLastUpdatedDirectionOrThrow(gp: Index);
   }
 
   /// <inheritdoc/>
@@ -81,13 +81,13 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    gpio.Transceiver.ThrowIfDisposed();
+    GpioDriver.Transceiver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
-    gpio.FetchGpioStates(default, default, cancellationToken);
+    GpioDriver.FetchGpioStates(default, default, cancellationToken);
 
-    return gpio.GetLastUpdatedDirectionOrThrow(gp: Index);
+    return GpioDriver.GetLastUpdatedDirectionOrThrow(gp: Index);
   }
 
   /// <inheritdoc/>
@@ -97,7 +97,7 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    gpio.Transceiver.ThrowIfDisposed();
+    GpioDriver.Transceiver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
@@ -106,7 +106,7 @@ partial class GpController : IGpioController {
     try {
       modes[0] = new(Index, mode);
 
-      await gpio.ApplyGpioStatesAsync(
+      await GpioDriver.ApplyGpioStatesAsync(
         pinValuePairs: default,
         pinModePairs: modes.AsMemory(0, 1),
         cancellationToken: cancellationToken
@@ -124,11 +124,11 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    gpio.Transceiver.ThrowIfDisposed();
+    GpioDriver.Transceiver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
-    gpio.ApplyGpioStates(
+    GpioDriver.ApplyGpioStates(
       pinValuePairs: default,
       pinModePairs: [new(Index, mode)],
       cancellationToken: cancellationToken
@@ -143,13 +143,13 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    gpio.Transceiver.ThrowIfDisposed();
+    GpioDriver.Transceiver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
-    await gpio.FetchGpioStatesAsync(default, default, cancellationToken).ConfigureAwait(false);
+    await GpioDriver.FetchGpioStatesAsync(default, default, cancellationToken).ConfigureAwait(false);
 
-    return gpio.GetLastUpdatedValueOrThrow(gp: Index);
+    return GpioDriver.GetLastUpdatedValueOrThrow(gp: Index);
   }
 
   /// <inheritdoc/>
@@ -160,13 +160,13 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    gpio.Transceiver.ThrowIfDisposed();
+    GpioDriver.Transceiver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
-    gpio.FetchGpioStates(default, default, cancellationToken);
+    GpioDriver.FetchGpioStates(default, default, cancellationToken);
 
-    return gpio.GetLastUpdatedValueOrThrow(gp: Index);
+    return GpioDriver.GetLastUpdatedValueOrThrow(gp: Index);
   }
 
   /// <inheritdoc/>
@@ -176,7 +176,7 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    gpio.Transceiver.ThrowIfDisposed();
+    GpioDriver.Transceiver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
@@ -185,7 +185,7 @@ partial class GpController : IGpioController {
     try {
       values[0] = new(Index, value);
 
-      await gpio.ApplyGpioStatesAsync(
+      await GpioDriver.ApplyGpioStatesAsync(
         pinValuePairs: values.AsMemory(0, 1),
         pinModePairs: default,
         cancellationToken: cancellationToken
@@ -203,11 +203,11 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    gpio.Transceiver.ThrowIfDisposed();
+    GpioDriver.Transceiver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
-    gpio.ApplyGpioStates(
+    GpioDriver.ApplyGpioStates(
       pinValuePairs: [new(Index, value)],
       pinModePairs: default,
       cancellationToken: cancellationToken
