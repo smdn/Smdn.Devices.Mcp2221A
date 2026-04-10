@@ -52,6 +52,27 @@ public partial class GpControllerTests {
     );
   }
 
+  private static Mcp2221AController CreateMcp2221AConfiguredAsAdc(
+    byte chipSettings3 = 0b_0_1_1_01_1_00 // VRM 1.024V (factory default)
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation
+    const byte InitialGp1Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC1)
+    const byte InitialGp2Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC2)
+    const byte InitialGp3Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC3)
+
+    return Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings,
+        chipSettings3: chipSettings3
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+  }
+
   private static IEnumerable<byte> YieldTestCases_GP0_InvalidConfigurationSettings()
   {
     yield return 0b_000_1_0_010; // LED_URX

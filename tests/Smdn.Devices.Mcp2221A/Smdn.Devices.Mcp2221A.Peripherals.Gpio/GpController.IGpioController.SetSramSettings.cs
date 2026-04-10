@@ -54,13 +54,15 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
+    const byte InitialChipSettings3 = 0b_0_1_1_00_0_00; // ADC: VDD
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
-        gp3Settings: InitialGp3Settings
+        gp3Settings: InitialGp3Settings,
+        chipSettings3: InitialChipSettings3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -109,6 +111,134 @@ partial class GpControllerTests {
       Assert.That(
         Mcp2221AControllerTests.GetSentCommand(mcp2221A),
         SequenceIs.EqualTo(expectedSentCommand)
+      );
+
+      Assert.That(gp.CurrentFunction, Is.EqualTo(GpFunction.Gpio));
+      Assert.That(gp.CurrentMode, Is.EqualTo(mode));
+      Assert.That(gp.LastUpdatedValue, Is.EqualTo(initialValue));
+
+      Assert.That(
+        mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList(),
+        Is.EqualTo(expectedAssignments).AsCollection,
+        $"other GP pins must not be configured (except {gp.PinName})"
+      );
+    }
+  }
+
+  [TestCase(PinMode.Input, true)]
+  [TestCase(PinMode.Input, false)]
+  [TestCase(PinMode.Output, true)]
+  [TestCase(PinMode.Output, false)]
+  public void ConfigureAsGpioAsync_AdcVmrMustBeReenabled(PinMode mode, bool initialValue)
+    => ConfigureAsGpioSyncOrAsync_AdcVmrMustBeReenabled(
+      mode,
+      (PinValue)initialValue,
+      static async (gp, m, val) => await gp.ConfigureAsGpioAsync(mode: m, initialValue: val).ConfigureAwait(false)
+    );
+
+  [TestCase(PinMode.Input, true)]
+  [TestCase(PinMode.Input, false)]
+  [TestCase(PinMode.Output, true)]
+  [TestCase(PinMode.Output, false)]
+  public void ConfigureAsGpio_AdcVmrMustBeReenabled(PinMode mode, bool initialValue)
+    => ConfigureAsGpioSyncOrAsync_AdcVmrMustBeReenabled(
+      mode,
+      (PinValue)initialValue,
+      static (gp, m, val) => {
+        gp.ConfigureAsGpio(mode: m, initialValue: val);
+        return default;
+      }
+    );
+
+  private void ConfigureAsGpioSyncOrAsync_AdcVmrMustBeReenabled(
+    PinMode mode,
+    PinValue initialValue,
+    Func<GpController, PinMode, PinValue, ValueTask> configureAsGpioAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_1_0_010; // Alternate Function 0 (LED UART RX)
+    const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
+    const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
+    const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
+    const byte InitialChipSettings3 = 0b_0_1_1_01_1_00; // ADC: VRM 1.024V (factory default)
+
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings,
+        chipSettings3: InitialChipSettings3
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+    var expectedAssignments = mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList();
+    var currentGpSettings = new byte[4] { InitialGp0Settings, InitialGp1Settings, InitialGp2Settings, InitialGp3Settings };
+
+    foreach (var gp in mcp2221A.GpPins) {
+      Mcp2221AControllerTests.AppendPseudoResponse(
+        mcp2221A,
+        // [MCP2221A] 3.1.13 SET SRAM SETTINGS
+        // [1] 0x00: Command completed successfully
+        // [2-63] Don't care
+        "60-00-" + string.Join("-", Enumerable.Repeat("00", 62)),
+        // [MCP2221A] 3.1.13 SET SRAM SETTINGS (response to the command to re-enable VRM)
+        // [1] 0x00: Command completed successfully
+        // [2-63] Don't care
+        "60-00-" + string.Join("-", Enumerable.Repeat("00", 62))
+      );
+      Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+      expectedAssignments[gp.Index] = GpFunction.Gpio;
+
+      var expectedOutputValueBits = (bool)initialValue switch {
+        true => 0b_000_1_0_000,
+        false => 0b_000_0_0_000,
+      };
+      var expectedDirectionBits = mode switch {
+        PinMode.Input => 0b_000_0_1_000,
+        PinMode.Output => 0b_000_0_0_000,
+        _ => throw new InvalidOperationException(),
+      };
+      const byte ExpectedDesignationBits = 0b_000_0_0_000; // GPIO operation
+
+      currentGpSettings[gp.Index] = (byte)(expectedOutputValueBits | expectedDirectionBits | ExpectedDesignationBits);
+
+      var expectedSentSramSettingsCommand = new byte[64];
+
+      expectedSentSramSettingsCommand[0] = 0x60; // [0] SET SRAM SETTINGS
+      // [1-4] don't care
+      expectedSentSramSettingsCommand[5] = 0b_0_0000_01_1; // [5] ADC Voltage Reference: VRM 1.024V
+      // [1-6] don't care
+      expectedSentSramSettingsCommand[7] = 0b10000000; // [7] Alter GPIO configuration = Alter the GP designation (1)
+      expectedSentSramSettingsCommand[8] = currentGpSettings[0]; // [8] GP0 settings
+      expectedSentSramSettingsCommand[9] = currentGpSettings[1]; // [9] GP1 settings
+      expectedSentSramSettingsCommand[10] = currentGpSettings[2]; // [10] GP2 settings
+      expectedSentSramSettingsCommand[11] = currentGpSettings[3]; // [11] GP3 settings
+
+      var expectedSentReenableVrmCommand = new byte[64];
+
+      expectedSentReenableVrmCommand[0] = 0x60; // [0] SET SRAM SETTINGS
+      // [1-4] don't care
+      expectedSentReenableVrmCommand[5] = 0b_1_0000_01_1; // [5] ADC Voltage Reference: VRM 1.024V
+      // [6] don't care
+      expectedSentReenableVrmCommand[7] = 0b00000000; // [7] Alter GPIO configuration = Do not alter the current GP designation (0)
+      expectedSentReenableVrmCommand[8] = currentGpSettings[0]; // [8] GP0 settings
+      expectedSentReenableVrmCommand[9] = currentGpSettings[1]; // [9] GP1 settings
+      expectedSentReenableVrmCommand[10] = currentGpSettings[2]; // [10] GP2 settings
+      expectedSentReenableVrmCommand[11] = currentGpSettings[3]; // [11] GP3 settings
+
+      Assert.That(
+        async () => await configureAsGpioAsyncFunc(gp, mode, initialValue),
+        Throws.Nothing
+      );
+      Assert.That(
+        Mcp2221AControllerTests.GetSentCommand(mcp2221A, 0),
+        SequenceIs.EqualTo(expectedSentSramSettingsCommand)
+      );
+      Assert.That(
+        Mcp2221AControllerTests.GetSentCommand(mcp2221A, 1),
+        SequenceIs.EqualTo(expectedSentReenableVrmCommand)
       );
 
       Assert.That(gp.CurrentFunction, Is.EqualTo(GpFunction.Gpio));

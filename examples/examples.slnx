@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 SPDX-License-Identifier: MIT
 -->
@@ -6,6 +6,12 @@ SPDX-License-Identifier: MIT
   <Folder Name="/Smdn.Devices.Mcp2221A/">
     <Project Path="Smdn.Devices.Mcp2221A/i2cscanbus/i2cscanbus.csproj" />
     <Project Path="Smdn.Devices.Mcp2221A/logging/logging.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/ADC_Read/">
+    <Project Path="Smdn.Devices.Mcp2221A/ADC_Read/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/ADC_ReadVoltage/">
+    <Project Path="Smdn.Devices.Mcp2221A/ADC_ReadVoltage/Program.csproj" />
   </Folder>
   <Folder Name="/Smdn.Devices.Mcp2221A/blink-csharp/">
     <Project Path="Smdn.Devices.Mcp2221A/blink-csharp/blink.csproj" />

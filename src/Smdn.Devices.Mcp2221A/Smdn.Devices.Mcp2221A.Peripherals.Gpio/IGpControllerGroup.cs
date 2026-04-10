@@ -63,6 +63,16 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
   Gp3Controller Gp3 { get; }
 
   /// <summary>
+  /// Gets the current voltage reference source configured for the ADC module.
+  /// </summary>
+  /// <remarks>
+  /// This property represents the global configuration for the ADC module
+  /// of the MCP2221A. Changing the reference source on one GP pin will
+  /// affect all other GP pins configured as ADC inputs.
+  /// </remarks>
+  VoltageReferenceSource CurrentAdcReferenceSource { get; }
+
+  /// <summary>
   /// Configures all settings for GP pins (GP0-GP3), including functions, modes,
   /// and initial values, in a single communication.
   /// </summary>
@@ -330,6 +340,39 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
   ValueTask ApplyGpioStatesAsync(
     ReadOnlyMemory<PinValuePair> pinValuePairs,
     ReadOnlyMemory<PinModePair> pinModePairs,
+    CancellationToken cancellationToken = default
+  );
+
+  /// <summary>
+  /// Fetches the current 10-bit raw input values from all ADC channels
+  /// (ADC1, ADC2, and ADC3) by sending a command to the device and updates
+  /// the internal cache.
+  /// </summary>
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// The default value is <see cref="CancellationToken.None"/>.
+  /// </param>
+  /// <returns>
+  /// An <see cref="AdcAllChannelSample"/> containing the fetched 10-bit raw values.
+  /// </returns>
+  /// <exception cref="OperationCanceledException">
+  /// The operation was canceled.
+  /// </exception>
+  AdcAllChannelSample FetchAdcRawValues(
+    CancellationToken cancellationToken = default
+  );
+
+  /// <summary>
+  /// Asynchronously fetches the current 10-bit raw input values from all ADC channels
+  /// (ADC1, ADC2, and ADC3) by sending a command to the device and updates
+  /// the internal cache.
+  /// </summary>
+  /// <inheritdoc cref="FetchAdcRawValues(CancellationToken)"/>
+  /// <returns>
+  /// A <see cref="ValueTask{AdcAllChannelSample}"/> representing the asynchronous
+  /// operation, containing the fetched 10-bit raw values.
+  /// </returns>
+  ValueTask<AdcAllChannelSample> FetchAdcRawValuesAsync(
     CancellationToken cancellationToken = default
   );
 }

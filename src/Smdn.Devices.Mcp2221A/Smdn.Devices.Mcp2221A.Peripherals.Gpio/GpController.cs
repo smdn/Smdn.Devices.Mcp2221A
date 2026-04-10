@@ -265,4 +265,36 @@ public abstract partial class GpController {
       gpioValue: gpioInitialValue,
       cancellationToken: cancellationToken
     );
+
+  private protected ValueTask ConfigureGpDesignationAsync(
+    GpDesignation gpDesignation,
+    VoltageReferenceSource? dacVoltageReferenceSource,
+    int? dacOutputValue,
+    VoltageReferenceSource? adcVoltageReferenceSource,
+    CancellationToken cancellationToken
+  )
+    => GpioDriver.ConfigureGpDesignationAsync(
+      gp: Index,
+      gpDesignation: gpDesignation,
+      dacVoltageReferenceSource: dacVoltageReferenceSource,
+      dacOutputValue: dacOutputValue,
+      adcVoltageReferenceSource: adcVoltageReferenceSource,
+      cancellationToken: cancellationToken
+    );
+
+  private protected void ConfigureGpDesignation(
+    GpDesignation gpDesignation,
+    VoltageReferenceSource? dacVoltageReferenceSource,
+    int? dacOutputValue,
+    VoltageReferenceSource? adcVoltageReferenceSource,
+    CancellationToken cancellationToken
+  )
+    => GpioDriver.ConfigureGpDesignation(
+      gp: Index,
+      gpDesignation: gpDesignation,
+      dacVoltageReferenceSource: dacVoltageReferenceSource,
+      dacOutputValue: dacOutputValue,
+      adcVoltageReferenceSource: adcVoltageReferenceSource,
+      cancellationToken: cancellationToken
+    );
 }

@@ -711,5 +711,200 @@ public static class IGpControllerGroupExtensions {
         ArrayPool<PinValuePair>.Shared.Return(pinValuePairArray);
       }
     }
+
+    /// <summary>
+    /// Reads the current 10-bit raw analog values from all ADC-capable
+    /// pins (GP1, GP2, and GP3) at once.
+    /// </summary>
+    /// <param name="cancellationToken">
+    /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+    /// </param>
+    /// <returns>
+    /// A tuple containing the 10-bit raw analog values (0-1023) for
+    /// GP1, GP2, and GP3.
+    /// </returns>
+    /// <remarks>
+    /// This method calls <see cref="IGpControllerGroup.FetchAdcRawValues"/>
+    /// internally to update the analog module's state. If a pin is not
+    /// currently configured as an ADC input (see <see cref="GpFunction.Adc"/>),
+    /// the returned value for that pin is undefined.
+    /// </remarks>
+    /// <seealso cref="IGpControllerGroup.FetchAdcRawValues"/>
+    public
+    (int Gp1Value, int Gp2Value, int Gp3Value)
+    ReadAnalogRaw(
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      return gpPins
+        .FetchAdcRawValues(
+          cancellationToken: cancellationToken
+        )
+        .AsInt32();
+    }
+
+    /// <summary>
+    /// Asynchronously reads the current 10-bit raw analog values from all
+    /// ADC-capable pins (GP1, GP2, and GP3) at once.
+    /// </summary>
+    /// <inheritdoc cref="ReadAnalogRaw(IGpControllerGroup, CancellationToken)"/>
+    /// <returns>
+    /// A <see cref="ValueTask"/> representing the asynchronous operation,
+    /// containing a tuple of the 10-bit raw analog values (0-1023) for
+    /// GP1, GP2, and GP3.
+    /// </returns>
+    /// <seealso cref="IGpControllerGroup.FetchAdcRawValuesAsync"/>
+    public
+    async ValueTask<(int Gp1Value, int Gp2Value, int Gp3Value)>
+    ReadAnalogRawAsync(
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      return (
+        await gpPins.FetchAdcRawValuesAsync(
+          cancellationToken: cancellationToken
+        ).ConfigureAwait(false)
+      ).AsInt32();
+    }
+
+    /// <summary>
+    /// Reads the raw ADC values from all channels (GP1, GP2, and GP3) and converts
+    /// them to voltage values [V] based on the currently configured voltage
+    /// reference source (VRM).
+    /// </summary>
+    /// <param name="cancellationToken">
+    /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+    /// </param>
+    /// <returns>
+    /// A tuple containing the voltage values [V] for GP1, GP2, and GP3.
+    /// </returns>
+    /// <remarks>
+    /// This method calls <see cref="IGpControllerGroup.FetchAdcRawValues"/>
+    /// internally to update the analog module's state. If a pin is not
+    /// currently configured as an ADC input (see <see cref="GpFunction.Adc"/>),
+    /// the returned value for that pin is undefined.
+    /// </remarks>
+    /// <inheritdoc
+    ///   cref="AdcAllChannelSample.AsVoltage(VoltageReferenceSource)"
+    ///   path="/remarks|/exception"
+    /// />
+    /// <seealso cref="IGpControllerGroup.FetchAdcRawValues"/>
+    public
+    (double Gp1Voltage, double Gp2Voltage, double Gp3Voltage)
+    ReadAnalogVoltage(
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      return gpPins
+        .FetchAdcRawValues(
+          cancellationToken: cancellationToken
+        )
+        .AsVoltage(gpPins.CurrentAdcReferenceSource);
+    }
+
+    /// <summary>
+    /// Asynchronously reads the raw ADC values from all channels and
+    /// converts them to voltage values [V] based on the currently configured
+    /// voltage reference source(VRM).
+    /// </summary>
+    /// <inheritdoc
+    ///   cref="ReadAnalogVoltage(IGpControllerGroup, CancellationToken)"
+    ///   path="/param|/returns"
+    /// />
+    /// <inheritdoc
+    ///   cref="AdcAllChannelSample.AsVoltage(VoltageReferenceSource)"
+    /// path="/remarks|/exception"
+    /// />
+    /// <seealso cref="IGpControllerGroup.FetchAdcRawValuesAsync"/>
+    public
+    async ValueTask<(double Gp1Voltage, double Gp2Voltage, double Gp3Voltage)>
+    ReadAnalogVoltageAsync(
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      return (
+        await gpPins.FetchAdcRawValuesAsync(
+          cancellationToken: cancellationToken
+        ).ConfigureAwait(false)
+      ).AsVoltage(gpPins.CurrentAdcReferenceSource);
+    }
+
+    /// <summary>
+    /// Reads the raw ADC values from all channels (GP1, GP2, and GP3) and converts
+    /// them to voltage values [V] based on the specified reference voltage value.
+    /// </summary>
+    /// <param name="referenceVoltage">
+    /// The reference voltage [V] used for conversion (e.g., VDD voltage).
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+    /// </param>
+    /// <returns>
+    /// A tuple containing the voltage values [V] for GP1, GP2, and GP3.
+    /// </returns>
+    /// <remarks>
+    /// This method calls <see cref="IGpControllerGroup.FetchAdcRawValues"/>
+    /// internally to update the analog module's state. If a pin is not
+    /// currently configured as an ADC input (see <see cref="GpFunction.Adc"/>),
+    /// the returned value for that pin is undefined.
+    /// </remarks>
+    /// <inheritdoc
+    ///   cref="AdcAllChannelSample.AsVoltage(double)"
+    ///   path="/remarks|/exception"
+    /// />
+    /// <seealso cref="IGpControllerGroup.FetchAdcRawValues"/>
+    public
+    (double Gp1Voltage, double Gp2Voltage, double Gp3Voltage)
+    ReadAnalogVoltage(
+      double referenceVoltage,
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      return gpPins
+        .FetchAdcRawValues(
+          cancellationToken: cancellationToken
+        )
+        .AsVoltage(referenceVoltage);
+    }
+
+    /// <summary>
+    /// Asynchronously reads the raw ADC values from all channels and
+    /// converts them to voltage values [V] based on the specified reference
+    /// voltage value.
+    /// </summary>
+    /// <inheritdoc
+    ///   cref="ReadAnalogVoltage(IGpControllerGroup, double, CancellationToken)"
+    ///   path="/param|/returns"
+    /// />
+    /// <inheritdoc
+    ///   cref="AdcAllChannelSample.AsVoltage(double)"
+    ///   path="/remarks|/exception"
+    /// />
+    /// <seealso cref="IGpControllerGroup.FetchAdcRawValuesAsync"/>
+    public async
+    ValueTask<(double Gp1Voltage, double Gp2Voltage, double Gp3Voltage)>
+    ReadAnalogVoltageAsync(
+      double referenceVoltage,
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      return (
+        await gpPins.FetchAdcRawValuesAsync(
+          cancellationToken: cancellationToken
+        ).ConfigureAwait(false)
+      ).AsVoltage(referenceVoltage);
+    }
   }
 }

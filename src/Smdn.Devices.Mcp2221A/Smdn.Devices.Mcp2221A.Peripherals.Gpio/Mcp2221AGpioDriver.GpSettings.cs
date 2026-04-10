@@ -38,6 +38,20 @@ partial class Mcp2221AGpioDriver {
 
       // TODO: update other SRAM settings
 
+      // [6] Bit 7-6: DAC Reference voltage option
+      // [6] Bit 5: DAC reference option
+      // [6] Bit 4-0: Power-up DAC value
+      sramSettings.ModifyDacSettings(
+        dacVoltageReferenceSource: ParseVoltageSelectionAndReferenceVoltageBits((resp[6] & 0b_11_1_00000) >> 5),
+        dacOutputValue: resp[6] & 0b_00_0_11111
+      );
+
+      // [7] Bit 4-3: ADC Reference Voltage
+      // [7] Bit 2: ADC Reference Option
+      sramSettings.ModifyAdcSettings(
+        adcVoltageReferenceSource: ParseVoltageSelectionAndReferenceVoltageBits((resp[7] & 0b_0_0_0_11_1_0_0) >> 2)
+      );
+
       sramSettings.StoreGpSettingsBytes(
         gpSettingBytes: resp.Slice(22, SramSettings.SizeOfGpSettings) // [22-25] GP0-3 Settings
       );
@@ -47,6 +61,21 @@ partial class Mcp2221AGpioDriver {
 
       return default;
     }
+
+    private static VoltageReferenceSource ParseVoltageSelectionAndReferenceVoltageBits(
+      int voltageSelectionAndReferenceVoltageBits
+    )
+      => voltageSelectionAndReferenceVoltageBits switch {
+        0b_00_0 => VoltageReferenceSource.Vdd,
+
+        var vrm when (vrm & 0b_11_0) is
+          0b_11_0 or
+          0b_10_0 or
+          0b_01_0 or
+          0b_00_0 => (VoltageReferenceSource)(vrm | 0b_00_1),
+
+        _ => default, // unknown
+      };
   }
 
   private static class SetSramSettingsCommand {
@@ -170,6 +199,78 @@ partial class Mcp2221AGpioDriver {
           direction: gpioDirection,
           outputValue: gpioValue
         ),
+        cancellationToken: cancellationToken
+      );
+    }
+    catch {
+      sramSettings.Restore();
+      throw;
+    }
+  }
+
+  internal async ValueTask ConfigureGpDesignationAsync(
+    int gp,
+    GpDesignation gpDesignation,
+    VoltageReferenceSource? dacVoltageReferenceSource,
+    int? dacOutputValue,
+    VoltageReferenceSource? adcVoltageReferenceSource,
+    CancellationToken cancellationToken
+  )
+  {
+    ThrowIfUsedByGpioController(gp);
+
+    try {
+      await SetGpSettingsAsync(
+        sramSettings: sramSettings
+          .ModifyGpSettings(
+            gp: gp,
+            designation: gpDesignation,
+            direction: null,
+            outputValue: null
+          )
+          .ModifyDacSettings(
+            dacVoltageReferenceSource: dacVoltageReferenceSource,
+            dacOutputValue: dacOutputValue
+          )
+          .ModifyAdcSettings(
+            adcVoltageReferenceSource: adcVoltageReferenceSource
+          ),
+        cancellationToken: cancellationToken
+      ).ConfigureAwait(false);
+    }
+    catch {
+      sramSettings.Restore();
+      throw;
+    }
+  }
+
+  internal void ConfigureGpDesignation(
+    int gp,
+    GpDesignation gpDesignation,
+    VoltageReferenceSource? dacVoltageReferenceSource,
+    int? dacOutputValue,
+    VoltageReferenceSource? adcVoltageReferenceSource,
+    CancellationToken cancellationToken
+  )
+  {
+    ThrowIfUsedByGpioController(gp);
+
+    try {
+      SetGpSettings(
+        sramSettings: sramSettings
+          .ModifyGpSettings(
+            gp: gp,
+            designation: gpDesignation,
+            direction: null,
+            outputValue: null
+          )
+          .ModifyDacSettings(
+            dacVoltageReferenceSource: dacVoltageReferenceSource,
+            dacOutputValue: dacOutputValue
+          )
+          .ModifyAdcSettings(
+            adcVoltageReferenceSource: adcVoltageReferenceSource
+          ),
         cancellationToken: cancellationToken
       );
     }
@@ -323,6 +424,15 @@ partial class Mcp2221AGpioDriver {
       parseResponse: SetSramSettingsCommand.ParseResponse
     ).ConfigureAwait(false);
 
+    if (sramSettings.ShouldReenableVrm()) {
+      _ = await Transceiver.CommandAsync<SramSettings, None>(
+        arg: sramSettings,
+        cancellationToken: cancellationToken,
+        constructCommand: SetSramSettingsCommand.ConstructCommand,
+        parseResponse: SetSramSettingsCommand.ParseResponse
+      ).ConfigureAwait(false);
+    }
+
     // save the successfully configured settings as the current state
     sramSettings.Store();
 
@@ -346,6 +456,15 @@ partial class Mcp2221AGpioDriver {
       constructCommand: SetSramSettingsCommand.ConstructCommand,
       parseResponse: SetSramSettingsCommand.ParseResponse
     );
+
+    if (sramSettings.ShouldReenableVrm()) {
+      _ = Transceiver.Command<SramSettings, None>(
+        arg: sramSettings,
+        cancellationToken: cancellationToken,
+        constructCommand: SetSramSettingsCommand.ConstructCommand,
+        parseResponse: SetSramSettingsCommand.ParseResponse
+      );
+    }
 
     // save the successfully configured settings as the current state
     sramSettings.Store();

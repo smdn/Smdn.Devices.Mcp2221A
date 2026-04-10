@@ -81,6 +81,25 @@ public partial class Mcp2221AController :
     }
   }
 
+  /// <summary>
+  /// Gets the current voltage reference source configured for the ADC module.
+  /// </summary>
+  /// <remarks>
+  /// This property represents the global configuration for the ADC module
+  /// of the MCP2221A. Changing the reference source on one GP pin will
+  /// affect all other GP pins configured as ADC inputs.
+  /// </remarks>
+  /// <seealso cref="Gp1Controller.ConfigureAsAdc"/>
+  /// <seealso cref="Gp2Controller.ConfigureAsAdc"/>
+  /// <seealso cref="Gp3Controller.ConfigureAsAdc"/>
+  /// <seealso cref="IAdcController.CurrentAdcReferenceSource"/>
+  public VoltageReferenceSource CurrentAdcReferenceSource {
+    get {
+      ThrowIfDisposed();
+      return gpioDriver.CurrentAdcReferenceSource;
+    }
+  }
+
   private Mcp2221AController(
     Mcp2221ATransceiver transceiver,
     IMcp2221AInfo info,

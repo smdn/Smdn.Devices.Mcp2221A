@@ -1836,4 +1836,181 @@ partial class Mcp2221AGpioDriverTests {
     Assert.That(mcp2221A.GpPin3.LastUpdatedValue, Is.EqualTo(initialGp3Value));
     Assert.That(mcp2221A.GpPin3.CurrentMode, Is.EqualTo(initialGp3Mode));
   }
+
+  [Test]
+  public void FetchAdcRawValuesAsync_Disposed()
+    => FetchAdcRawValuesSyncOrAsync_Disposed(
+      static async gpPins => await gpPins.FetchAdcRawValuesAsync().ConfigureAwait(false)
+    );
+
+  [Test]
+  public void FetchAdcRawValues_Disposed()
+    => FetchAdcRawValuesSyncOrAsync_Disposed(
+      static gpPins => {
+        gpPins.FetchAdcRawValues();
+        return default;
+      }
+    );
+
+  private void FetchAdcRawValuesSyncOrAsync_Disposed(
+    Func<IGpControllerGroup, ValueTask> fetchAdcRawValuesAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    mcp2221A.Dispose();
+
+    Assert.That(
+      async () => await fetchAdcRawValuesAsyncFunc(mcp2221A.GpPins),
+      Throws.TypeOf<ObjectDisposedException>()
+    );
+  }
+
+  [Test]
+  public void FetchAdcRawValuesAsync_CancellationRequested()
+    => FetchAdcRawValuesSyncOrAsync_CancellationRequested(
+      static async (gpPins, ct) => await gpPins.FetchAdcRawValuesAsync(ct).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void FetchAdcRawValues_CancellationRequested()
+    => FetchAdcRawValuesSyncOrAsync_CancellationRequested(
+      static (gpPins, ct) => {
+        gpPins.FetchAdcRawValues(ct);
+        return default;
+      }
+    );
+
+  private void FetchAdcRawValuesSyncOrAsync_CancellationRequested(
+    Func<IGpControllerGroup, CancellationToken, ValueTask> fetchAdcRawValuesAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+    using var cts = new CancellationTokenSource();
+
+    cts.Cancel();
+
+    // command should not be sent
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await fetchAdcRawValuesAsyncFunc(mcp2221A.GpPins, cts.Token),
+      Throws
+        .TypeOf<OperationCanceledException>()
+        .With
+        .Property(nameof(OperationCanceledException.CancellationToken))
+        .EqualTo(cts.Token)
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_FetchAdcRawValuesSyncOrAsync()
+  {
+    yield return new object[] { "00-00-", "00-00-", "00-00-", new AdcAllChannelSample((ushort)0x_00_00u, (ushort)0x_00_00u, (ushort)0x_00_00u) };
+    yield return new object[] { "FF-00-", "00-00-", "00-00-", new AdcAllChannelSample((ushort)0x_00_FFu, (ushort)0x_00_00u, (ushort)0x_00_00u) };
+    yield return new object[] { "00-03-", "00-00-", "00-00-", new AdcAllChannelSample((ushort)0x_03_00u, (ushort)0x_00_00u, (ushort)0x_00_00u) };
+    yield return new object[] { "00-00-", "FF-00-", "00-00-", new AdcAllChannelSample((ushort)0x_00_00u, (ushort)0x_00_FFu, (ushort)0x_00_00u) };
+    yield return new object[] { "00-00-", "00-03-", "00-00-", new AdcAllChannelSample((ushort)0x_00_00u, (ushort)0x_03_00u, (ushort)0x_00_00u) };
+    yield return new object[] { "00-00-", "00-00-", "FF-00-", new AdcAllChannelSample((ushort)0x_00_00u, (ushort)0x_00_00u, (ushort)0x_00_FFu) };
+    yield return new object[] { "00-00-", "00-00-", "00-03-", new AdcAllChannelSample((ushort)0x_00_00u, (ushort)0x_00_00u, (ushort)0x_03_00u) };
+    yield return new object[] { "FF-03-", "FF-03-", "FF-03-", new AdcAllChannelSample((ushort)0x_03_FFu, (ushort)0x_03_FFu, (ushort)0x_03_FFu) };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_FetchAdcRawValuesSyncOrAsync))]
+  public void FetchAdcRawValuesAsync(
+    string adcChannel0Response,
+    string adcChannel1Response,
+    string adcChannel2Response,
+    AdcAllChannelSample expectedAdcRawValues
+  )
+    => FetchAdcRawValuesSyncOrAsync(
+      adcChannel0Response: adcChannel0Response,
+      adcChannel1Response: adcChannel1Response,
+      adcChannel2Response: adcChannel2Response,
+      expectedAdcRawValues: expectedAdcRawValues,
+      static async gpPins => await gpPins.FetchAdcRawValuesAsync().ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_FetchAdcRawValuesSyncOrAsync))]
+  public void FetchAdcRawValues(
+    string adcChannel0Response,
+    string adcChannel1Response,
+    string adcChannel2Response,
+    AdcAllChannelSample expectedAdcRawValues
+  )
+    => FetchAdcRawValuesSyncOrAsync(
+      adcChannel0Response: adcChannel0Response,
+      adcChannel1Response: adcChannel1Response,
+      adcChannel2Response: adcChannel2Response,
+      expectedAdcRawValues: expectedAdcRawValues,
+      static gpPins => new(gpPins.FetchAdcRawValues())
+    );
+
+  private void FetchAdcRawValuesSyncOrAsync(
+    string adcChannel0Response,
+    string adcChannel1Response,
+    string adcChannel2Response,
+    AdcAllChannelSample expectedAdcRawValues,
+    Func<IGpControllerGroup, ValueTask<AdcAllChannelSample>> fetchAdcRawValuesAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation
+    const byte InitialGp1Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC1)
+    const byte InitialGp2Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC2)
+    const byte InitialGp3Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC3)
+
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
+    var statusSetParametersResponse = string.Concat(
+      "10-00-",
+      string.Join("-", Enumerable.Repeat("00", 50 - 2)), "-",
+      // [50-55] ADC Data (16-bit) values
+      adcChannel0Response, // [50] LSB [51] MSB of ADC CH0
+      adcChannel1Response, // [52] LSB [53] MSB of ADC CH1
+      adcChannel2Response, // [54] LSB [55] MSB of ADC CH2
+      string.Join("-", Enumerable.Repeat("00", 64 - 56))
+    );
+
+    Mcp2221AControllerTests.AppendPseudoResponse(mcp2221A, statusSetParametersResponse);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64]; // [1-64]: don't care
+
+    expectedSentCommand[0] = 0x10; // STATUS/SET PARAMETERS
+
+    AdcAllChannelSample adcRawValues = default;
+
+    Assert.That(
+      async () => adcRawValues = await fetchAdcRawValuesAsyncFunc(mcp2221A.GpPins),
+      Throws.Nothing
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+
+    Assert.That(adcRawValues, Is.EqualTo(expectedAdcRawValues));
+  }
 }

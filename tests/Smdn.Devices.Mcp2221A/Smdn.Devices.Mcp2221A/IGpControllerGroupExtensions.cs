@@ -2926,4 +2926,587 @@ public class IGpControllerGroupExtensionsTests {
     Assert.That(mcp2221A.GpPin2.CurrentMode, Is.EqualTo(PinMode.Input));
     Assert.That(mcp2221A.GpPin3.CurrentMode, Is.EqualTo(PinMode.Output));
   }
+
+  [Test]
+  public void ReadAnalogRawAsync_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => gpPins!.ReadAnalogRawAsync(),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void ReadAnalogRaw_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => _ = gpPins!.ReadAnalogRaw(),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void ReadAnalogRawAsync_CancellationRequested()
+    => ReadAnalogRawSyncOrAsync_CancellationRequested(
+      static async (gpPins, ct) => _ = await gpPins.ReadAnalogRawAsync(ct).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void ReadAnalogRaw_CancellationRequested()
+    => ReadAnalogRawSyncOrAsync_CancellationRequested(
+      static (gpPins, ct) => {
+        _ = gpPins.ReadAnalogRaw(ct);
+        return default;
+      }
+    );
+
+  private void ReadAnalogRawSyncOrAsync_CancellationRequested(
+    Func<IGpControllerGroup, CancellationToken, ValueTask> readAnalogRawAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+    using var cts = new CancellationTokenSource();
+
+    cts.Cancel();
+
+    // command should not be sent
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await readAnalogRawAsyncFunc(mcp2221A.GpPins, cts.Token),
+      Throws
+        .TypeOf<OperationCanceledException>()
+        .With
+        .Property(nameof(OperationCanceledException.CancellationToken))
+        .EqualTo(cts.Token)
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_ReadAnalogRawSyncOrAsync()
+  {
+    yield return new object[] { "00-00-", "00-00-", "00-00-", 0x_00_00, 0x_00_00, 0x_00_00 };
+    yield return new object[] { "FF-00-", "00-00-", "00-00-", 0x_00_FF, 0x_00_00, 0x_00_00 };
+    yield return new object[] { "00-03-", "00-00-", "00-00-", 0x_03_00, 0x_00_00, 0x_00_00 };
+    yield return new object[] { "00-00-", "FF-00-", "00-00-", 0x_00_00, 0x_00_FF, 0x_00_00 };
+    yield return new object[] { "00-00-", "00-03-", "00-00-", 0x_00_00, 0x_03_00, 0x_00_00 };
+    yield return new object[] { "00-00-", "00-00-", "FF-00-", 0x_00_00, 0x_00_00, 0x_00_FF };
+    yield return new object[] { "00-00-", "00-00-", "00-03-", 0x_00_00, 0x_00_00, 0x_03_00 };
+    yield return new object[] { "FF-03-", "FF-03-", "FF-03-", 0x_03_FF, 0x_03_FF, 0x_03_FF };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_ReadAnalogRawSyncOrAsync))]
+  public void ReadAnalogRawAsync(
+    string adcChannel0Response,
+    string adcChannel1Response,
+    string adcChannel2Response,
+    int expectedAdc1RawValue,
+    int expectedAdc2RawValue,
+    int expectedAdc3RawValue
+  )
+    => ReadAnalogRawSyncOrAsync(
+      adcChannel0Response: adcChannel0Response,
+      adcChannel1Response: adcChannel1Response,
+      adcChannel2Response: adcChannel2Response,
+      expectedAdc1RawValue: expectedAdc1RawValue,
+      expectedAdc2RawValue: expectedAdc2RawValue,
+      expectedAdc3RawValue: expectedAdc3RawValue,
+      static async gpPins => await gpPins.ReadAnalogRawAsync().ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_ReadAnalogRawSyncOrAsync))]
+  public void ReadAnalogRaw(
+    string adcChannel0Response,
+    string adcChannel1Response,
+    string adcChannel2Response,
+    int expectedAdc1RawValue,
+    int expectedAdc2RawValue,
+    int expectedAdc3RawValue
+  )
+    => ReadAnalogRawSyncOrAsync(
+      adcChannel0Response: adcChannel0Response,
+      adcChannel1Response: adcChannel1Response,
+      adcChannel2Response: adcChannel2Response,
+      expectedAdc1RawValue: expectedAdc1RawValue,
+      expectedAdc2RawValue: expectedAdc2RawValue,
+      expectedAdc3RawValue: expectedAdc3RawValue,
+      static gpPins => new(gpPins.ReadAnalogRaw())
+    );
+
+  private void ReadAnalogRawSyncOrAsync(
+    string adcChannel0Response,
+    string adcChannel1Response,
+    string adcChannel2Response,
+    int expectedAdc1RawValue,
+    int expectedAdc2RawValue,
+    int expectedAdc3RawValue,
+    Func<IGpControllerGroup, ValueTask<(int, int, int)>> readAnalogRawAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation
+    const byte InitialGp1Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC1)
+    const byte InitialGp2Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC2)
+    const byte InitialGp3Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC3)
+
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
+    var statusSetParametersResponse = string.Concat(
+      "10-00-",
+      string.Join("-", Enumerable.Repeat("00", 50 - 2)), "-",
+      // [50-55] ADC Data (16-bit) values
+      adcChannel0Response, // [50] LSB [51] MSB of ADC CH0
+      adcChannel1Response, // [52] LSB [53] MSB of ADC CH1
+      adcChannel2Response, // [54] LSB [55] MSB of ADC CH2
+      string.Join("-", Enumerable.Repeat("00", 64 - 56))
+    );
+
+    Mcp2221AControllerTests.AppendPseudoResponse(mcp2221A, statusSetParametersResponse);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64]; // [1-64]: don't care
+
+    expectedSentCommand[0] = 0x10; // STATUS/SET PARAMETERS
+
+    (int, int, int) adcRawValues = default;
+
+    Assert.That(
+      async () => adcRawValues = await readAnalogRawAsyncFunc(mcp2221A.GpPins),
+      Throws.Nothing
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+
+    var (adc1RawValue, adc2RawValue, adc3RawValue) = adcRawValues;
+
+    Assert.That(adc1RawValue, Is.EqualTo(expectedAdc1RawValue));
+    Assert.That(adc2RawValue, Is.EqualTo(expectedAdc2RawValue));
+    Assert.That(adc3RawValue, Is.EqualTo(expectedAdc3RawValue));
+  }
+
+  [Test]
+  public void ReadAnalogVoltageAsync_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => gpPins!.ReadAnalogVoltageAsync(),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void ReadAnalogVoltage_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => _ = gpPins!.ReadAnalogVoltage(),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void ReadAnalogVoltageAsync_CancellationRequested()
+    => ReadAnalogVoltageSyncOrAsync_CancellationRequested(
+      static async (gpPins, ct) => _ = await gpPins.ReadAnalogVoltageAsync(ct).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void ReadAnalogVoltage_CancellationRequested()
+    => ReadAnalogVoltageSyncOrAsync_CancellationRequested(
+      static (gpPins, ct) => {
+        _ = gpPins.ReadAnalogVoltage(ct);
+        return default;
+      }
+    );
+
+  private void ReadAnalogVoltageSyncOrAsync_CancellationRequested(
+    Func<IGpControllerGroup, CancellationToken, ValueTask> readAnalogVoltageAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+    using var cts = new CancellationTokenSource();
+
+    cts.Cancel();
+
+    // command should not be sent
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await readAnalogVoltageAsyncFunc(mcp2221A.GpPins, cts.Token),
+      Throws
+        .TypeOf<OperationCanceledException>()
+        .With
+        .Property(nameof(OperationCanceledException.CancellationToken))
+        .EqualTo(cts.Token)
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_ReadAnalogVoltageSyncOrAsync()
+  {
+    const byte InitialChipSettings3_AdcVrm1024 = 0b_0_1_1_01_1_00; // ADC: VRM 1.024V (factory default)
+    const byte InitialChipSettings3_AdcVrm2048 = 0b_0_1_1_10_1_00; // ADC: VRM 2.048V
+    const byte InitialChipSettings3_AdcVrm4096 = 0b_0_1_1_11_1_00; // ADC: VRM 4.096V
+    const byte InitialChipSettings3_AdcVrmOff = 0b_0_1_1_00_1_00; // ADC: VRM Off
+
+    yield return new object[] { "00-00-", "01-00-", "FF-03-", InitialChipSettings3_AdcVrm1024, 0.0d, 0.001d, 1.023d };
+    yield return new object[] { "01-00-", "FF-03-", "00-00-", InitialChipSettings3_AdcVrm2048, 0.002d, 2.046d, 0.0d };
+    yield return new object[] { "FF-03-", "00-00-", "01-00-", InitialChipSettings3_AdcVrm4096, 4.092d, 0.0d, 0.004d };
+
+    yield return new object[] { "00-00-", "00-00-", "00-00-", InitialChipSettings3_AdcVrmOff, 0.0d, 0.0d, 0.0d };
+    yield return new object[] { "01-00-", "01-00-", "01-00-", InitialChipSettings3_AdcVrmOff, 0.0d, 0.0d, 0.0d };
+    yield return new object[] { "FF-03-", "FF-03-", "FF-03-", InitialChipSettings3_AdcVrmOff, 0.0d, 0.0d, 0.0d };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_ReadAnalogVoltageSyncOrAsync))]
+  public void ReadAnalogVoltageAsync(
+    string adcChannel0Response,
+    string adcChannel1Response,
+    string adcChannel2Response,
+    byte initialChipSettings3,
+    double expectedAdc1Voltage,
+    double expectedAdc2Voltage,
+    double expectedAdc3Voltage
+  )
+    => ReadAnalogVoltageSyncOrAsync(
+      adcChannel0Response: adcChannel0Response,
+      adcChannel1Response: adcChannel1Response,
+      adcChannel2Response: adcChannel2Response,
+      initialChipSettings3: initialChipSettings3,
+      expectedAdc1Voltage: expectedAdc1Voltage,
+      expectedAdc2Voltage: expectedAdc2Voltage,
+      expectedAdc3Voltage: expectedAdc3Voltage,
+      static async gpPins => await gpPins.ReadAnalogVoltageAsync().ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_ReadAnalogVoltageSyncOrAsync))]
+  public void ReadAnalogVoltage(
+    string adcChannel0Response,
+    string adcChannel1Response,
+    string adcChannel2Response,
+    byte initialChipSettings3,
+    double expectedAdc1Voltage,
+    double expectedAdc2Voltage,
+    double expectedAdc3Voltage
+  )
+    => ReadAnalogVoltageSyncOrAsync(
+      adcChannel0Response: adcChannel0Response,
+      adcChannel1Response: adcChannel1Response,
+      adcChannel2Response: adcChannel2Response,
+      initialChipSettings3: initialChipSettings3,
+      expectedAdc1Voltage: expectedAdc1Voltage,
+      expectedAdc2Voltage: expectedAdc2Voltage,
+      expectedAdc3Voltage: expectedAdc3Voltage,
+      static gpPins => new(gpPins.ReadAnalogVoltage())
+    );
+
+  private void ReadAnalogVoltageSyncOrAsync(
+    string adcChannel0Response,
+    string adcChannel1Response,
+    string adcChannel2Response,
+    byte initialChipSettings3,
+    double expectedAdc1Voltage,
+    double expectedAdc2Voltage,
+    double expectedAdc3Voltage,
+    Func<IGpControllerGroup, ValueTask<(double, double, double)>> readAnalogVoltageAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation
+    const byte InitialGp1Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC1)
+    const byte InitialGp2Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC2)
+    const byte InitialGp3Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC3)
+
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings,
+        chipSettings3: initialChipSettings3
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
+    var statusSetParametersResponse = string.Concat(
+      "10-00-",
+      string.Join("-", Enumerable.Repeat("00", 50 - 2)), "-",
+      // [50-55] ADC Data (16-bit) values
+      adcChannel0Response, // [50] LSB [51] MSB of ADC CH0
+      adcChannel1Response, // [52] LSB [53] MSB of ADC CH1
+      adcChannel2Response, // [54] LSB [55] MSB of ADC CH2
+      string.Join("-", Enumerable.Repeat("00", 64 - 56))
+    );
+
+    Mcp2221AControllerTests.AppendPseudoResponse(mcp2221A, statusSetParametersResponse);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64]; // [1-64]: don't care
+
+    expectedSentCommand[0] = 0x10; // STATUS/SET PARAMETERS
+
+    (double, double, double) adcVoltages = default;
+
+    Assert.That(
+      async () => adcVoltages = await readAnalogVoltageAsyncFunc(mcp2221A.GpPins),
+      Throws.Nothing
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+
+    var (adc1Voltage, adc2Voltage, adc3Voltage) = adcVoltages;
+
+    Assert.That(adc1Voltage, Is.EqualTo(expectedAdc1Voltage).Within(1e-9));
+    Assert.That(adc2Voltage, Is.EqualTo(expectedAdc2Voltage).Within(1e-9));
+    Assert.That(adc3Voltage, Is.EqualTo(expectedAdc3Voltage).Within(1e-9));
+  }
+
+  [Test]
+  public void ReadAnalogVoltageAsync_WithReferenceVoltage_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => gpPins!.ReadAnalogVoltageAsync(referenceVoltage: 5.0),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void ReadAnalogVoltage_WithReferenceVoltage_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => _ = gpPins!.ReadAnalogVoltage(referenceVoltage: 5.0),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void ReadAnalogVoltageAsync_WithReferenceVoltage_CancellationRequested()
+    => ReadAnalogVoltageSyncOrAsync_WithReferenceVoltage_CancellationRequested(
+      static async (gpPins, ct) => _ = await gpPins.ReadAnalogVoltageAsync(referenceVoltage: 5.0, ct).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void ReadAnalogVoltage_WithReferenceVoltage_CancellationRequested()
+    => ReadAnalogVoltageSyncOrAsync_WithReferenceVoltage_CancellationRequested(
+      static (gpPins, ct) => {
+        _ = gpPins.ReadAnalogVoltage(referenceVoltage: 5.0, ct);
+        return default;
+      }
+    );
+
+  private void ReadAnalogVoltageSyncOrAsync_WithReferenceVoltage_CancellationRequested(
+    Func<IGpControllerGroup, CancellationToken, ValueTask> readAnalogVoltageAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+    using var cts = new CancellationTokenSource();
+
+    cts.Cancel();
+
+    // command should not be sent
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await readAnalogVoltageAsyncFunc(mcp2221A.GpPins, cts.Token),
+      Throws
+        .TypeOf<OperationCanceledException>()
+        .With
+        .Property(nameof(OperationCanceledException.CancellationToken))
+        .EqualTo(cts.Token)
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_ReadAnalogVoltageSyncOrAsync_WithReferenceVoltage()
+  {
+    const double Vdd_5V0 = 5.0;
+    const double Vdd_3V3 = 3.3;
+    const double Vdd_Zero = 0.0;
+
+    yield return new object[] { "00-00-", "00-02-", "FF-03-", Vdd_5V0, 0.0d, 2.5d, (1023.0d * 5.0d) / 1024.0 };
+    yield return new object[] { "00-00-", "00-01-", "FF-03-", Vdd_3V3, 0.0d, 0.825d, (1023.0d * 3.3d) / 1024.0d };
+    yield return new object[] { "00-00-", "00-01-", "FF-03-", Vdd_Zero, 0.0d, 0.0d, 0.0d };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_ReadAnalogVoltageSyncOrAsync_WithReferenceVoltage))]
+  public void ReadAnalogVoltageAsync_WithReferenceVoltage(
+    string adcChannel0Response,
+    string adcChannel1Response,
+    string adcChannel2Response,
+    double referenceVoltage,
+    double expectedAdc1Voltage,
+    double expectedAdc2Voltage,
+    double expectedAdc3Voltage
+  )
+    => ReadAnalogVoltageSyncOrAsync_WithReferenceVoltage(
+      adcChannel0Response: adcChannel0Response,
+      adcChannel1Response: adcChannel1Response,
+      adcChannel2Response: adcChannel2Response,
+      referenceVoltage: referenceVoltage,
+      expectedAdc1Voltage: expectedAdc1Voltage,
+      expectedAdc2Voltage: expectedAdc2Voltage,
+      expectedAdc3Voltage: expectedAdc3Voltage,
+      static async (gpPins, referenceVoltage) => await gpPins.ReadAnalogVoltageAsync(referenceVoltage).ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_ReadAnalogVoltageSyncOrAsync_WithReferenceVoltage))]
+  public void ReadAnalogVoltage_WithReferenceVoltage(
+    string adcChannel0Response,
+    string adcChannel1Response,
+    string adcChannel2Response,
+    double referenceVoltage,
+    double expectedAdc1Voltage,
+    double expectedAdc2Voltage,
+    double expectedAdc3Voltage
+  )
+    => ReadAnalogVoltageSyncOrAsync_WithReferenceVoltage(
+      adcChannel0Response: adcChannel0Response,
+      adcChannel1Response: adcChannel1Response,
+      adcChannel2Response: adcChannel2Response,
+      referenceVoltage: referenceVoltage,
+      expectedAdc1Voltage: expectedAdc1Voltage,
+      expectedAdc2Voltage: expectedAdc2Voltage,
+      expectedAdc3Voltage: expectedAdc3Voltage,
+      static (gpPins, referenceVoltage) => new(gpPins.ReadAnalogVoltage(referenceVoltage))
+    );
+
+  private void ReadAnalogVoltageSyncOrAsync_WithReferenceVoltage(
+    string adcChannel0Response,
+    string adcChannel1Response,
+    string adcChannel2Response,
+    double referenceVoltage,
+    double expectedAdc1Voltage,
+    double expectedAdc2Voltage,
+    double expectedAdc3Voltage,
+    Func<IGpControllerGroup, double, ValueTask<(double, double, double)>> readAnalogVoltageAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation
+    const byte InitialGp1Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC1)
+    const byte InitialGp2Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC2)
+    const byte InitialGp3Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC3)
+    const byte InitialChipSettings3 = 0b_0_1_1_00_0_00; // ADC: VDD
+
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings,
+        chipSettings3: InitialChipSettings3
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
+    var statusSetParametersResponse = string.Concat(
+      "10-00-",
+      string.Join("-", Enumerable.Repeat("00", 50 - 2)), "-",
+      // [50-55] ADC Data (16-bit) values
+      adcChannel0Response, // [50] LSB [51] MSB of ADC CH0
+      adcChannel1Response, // [52] LSB [53] MSB of ADC CH1
+      adcChannel2Response, // [54] LSB [55] MSB of ADC CH2
+      string.Join("-", Enumerable.Repeat("00", 64 - 56))
+    );
+
+    Mcp2221AControllerTests.AppendPseudoResponse(mcp2221A, statusSetParametersResponse);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64]; // [1-64]: don't care
+
+    expectedSentCommand[0] = 0x10; // STATUS/SET PARAMETERS
+
+    (double, double, double) adcVoltages = default;
+
+    Assert.That(
+      async () => adcVoltages = await readAnalogVoltageAsyncFunc(mcp2221A.GpPins, referenceVoltage),
+      Throws.Nothing
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+
+    var (adc1Voltage, adc2Voltage, adc3Voltage) = adcVoltages;
+
+    Assert.That(adc1Voltage, Is.EqualTo(expectedAdc1Voltage).Within(1e-9));
+    Assert.That(adc2Voltage, Is.EqualTo(expectedAdc2Voltage).Within(1e-9));
+    Assert.That(adc3Voltage, Is.EqualTo(expectedAdc3Voltage).Within(1e-9));
+  }
 }
