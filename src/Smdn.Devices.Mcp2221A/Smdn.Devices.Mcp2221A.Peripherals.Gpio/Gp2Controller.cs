@@ -42,6 +42,14 @@ public sealed class Gp2Controller :
     _ => throw new NotSupportedException(),
   };
 
+  /// <inheritdoc/>
+  VoltageReferenceSource IAdcController.CurrentAdcReferenceSource
+    => GpioDriver.CurrentAdcReferenceSource;
+
+  /// <inheritdoc/>
+  public int LastReadAnalogRawValue
+    => GpioDriver.GetLastFetchedAdcRawValue(Index);
+
   internal Gp2Controller(Mcp2221AGpioDriver gpioDriver)
     : base(gpioDriver)
   {
@@ -71,18 +79,58 @@ public sealed class Gp2Controller :
     );
 
   /// <inheritdoc/>
-  public ValueTask ConfigureAsAdcAsync(CancellationToken cancellationToken = default)
+  public ValueTask ConfigureAsAdcAsync(
+    VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd,
+    CancellationToken cancellationToken = default
+  )
     => ConfigureGpDesignationAsync(
       gpDesignation: GpDesignation.AlternateFunction0,
+      dacVoltageReferenceSource: null,
+      dacOutputValue: null,
+      adcVoltageReferenceSource: voltageReferenceSource,
       cancellationToken: cancellationToken
     );
 
   /// <inheritdoc/>
-  public void ConfigureAsAdc(CancellationToken cancellationToken = default)
+  public void ConfigureAsAdc(
+    VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd,
+    CancellationToken cancellationToken = default
+  )
     => ConfigureGpDesignation(
       gpDesignation: GpDesignation.AlternateFunction0,
+      dacVoltageReferenceSource: null,
+      dacOutputValue: null,
+      adcVoltageReferenceSource: voltageReferenceSource,
       cancellationToken: cancellationToken
     );
+
+  /// <inheritdoc/>
+  public int ReadAnalogRaw(
+    CancellationToken cancellationToken = default
+  )
+  {
+    GpioDriver.Transceiver.ThrowIfDisposed();
+
+    ThrowIfInvalidConfiguration(GpFunction.Adc);
+
+    GpioDriver.FetchAdcRawValues(cancellationToken);
+
+    return GpioDriver.GetLastFetchedAdcRawValue(Index);
+  }
+
+  /// <inheritdoc/>
+  public async ValueTask<int> ReadAnalogRawAsync(
+    CancellationToken cancellationToken = default
+  )
+  {
+    GpioDriver.Transceiver.ThrowIfDisposed();
+
+    ThrowIfInvalidConfiguration(GpFunction.Adc);
+
+    await GpioDriver.FetchAdcRawValuesAsync(cancellationToken).ConfigureAwait(false);
+
+    return GpioDriver.GetLastFetchedAdcRawValue(Index);
+  }
 
   /// <exception cref="InvalidOperationException">
   /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.

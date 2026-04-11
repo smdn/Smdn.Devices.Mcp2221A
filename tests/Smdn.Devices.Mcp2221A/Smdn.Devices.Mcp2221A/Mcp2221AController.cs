@@ -41,7 +41,8 @@ public partial class Mcp2221AControllerTests {
     byte gp0Settings = 0b_000_1_0_010, // Output: HIGH, Alternate Function 0 (LED UART RX)
     byte gp1Settings = 0b_000_1_0_011, // Output: HIGH, Alternate Function 1 (LED UART TX)
     byte gp2Settings = 0b_000_1_0_001, // Output: HIGH, Dedicated function operation (USBCFG)
-    byte gp3Settings = 0b_000_1_0_001 // Output: HIGH, Dedicated function operation (LED I2C)
+    byte gp3Settings = 0b_000_1_0_001, // Output: HIGH, Dedicated function operation (LED I2C)
+    byte chipSettings3 = 0b_0_0_0_00_0_00 // INTDETFEEN(6): Disable, INTDETREEN(5): Disable, ADCVRM(4-3): VRM is off, ADCREF(2): VDD
   )
     => new(
       vendorId: vendorId,
@@ -171,7 +172,8 @@ public partial class Mcp2221AControllerTests {
           [
             ReportInput,
             0x61, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00,
+            0x00, 0x00, 0x00, chipSettings3,
             vendorIdHigh, vendorIdLow, productIdHigh, productIdLow,
             0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -223,7 +225,7 @@ public partial class Mcp2221AControllerTests {
       var sequenceBytes = ToByteArray(sequence);
 
       if (verifyCommandLength && sequenceBytes.Length != CommandLength)
-        throw new InvalidCastException($"response sequence must be {CommandLength}-byte length (length: {sequenceBytes.Length}, sequence: '{sequence}')");
+        throw new InvalidOperationException($"response sequence must be {CommandLength}-byte length (length: {sequenceBytes.Length}, sequence: '{sequence}')");
 
       endPoint.ReadStream.Write(
 #if SYSTEM_IO_STREAM_WRITE_READONLYSPAN_OF_BYTE
@@ -250,7 +252,7 @@ public partial class Mcp2221AControllerTests {
   internal static Stream GetEndPointWriteStream(Mcp2221AController mcp2221A)
     => (mcp2221A.HidDevice as PseudoUsbHidDevice)!.EndPoint!.WriteStream!;
 
-  internal static ReadOnlyMemory<byte> GetSentCommand(Mcp2221AController mcp2221A)
+  internal static ReadOnlyMemory<byte> GetSentCommand(Mcp2221AController mcp2221A, int commandNumber = 0)
   {
     var stream = GetEndPointWriteStream(mcp2221A);
 
@@ -259,7 +261,7 @@ public partial class Mcp2221AControllerTests {
 
     var buffer = new byte[ReportLength];
 
-    stream.Position = 0L;
+    stream.Position = commandNumber * ReportLength;
 
     stream.ReadExactly(buffer.AsSpan(0, ReportLength));
 
@@ -365,6 +367,7 @@ public partial class Mcp2221AControllerTests {
     Assert.That(() => _ = device.GpPin3, Throws.Nothing);
     Assert.That(() => _ = device.I2cBus, Throws.Nothing);
     Assert.That(() => _ = device.GpioController, Throws.Nothing);
+    Assert.That(() => _ = device.CurrentAdcReferenceSource, Throws.Nothing);
 
     var i2cBus = device.I2cBus;
     var gp0 = device.GpPin0;
@@ -390,6 +393,7 @@ public partial class Mcp2221AControllerTests {
     Assert.That(() => _ = device.GpPin3, Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => _ = device.I2cBus, Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => _ = device.GpioController, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = device.CurrentAdcReferenceSource, Throws.TypeOf<ObjectDisposedException>());
 
     Assert.That(() => _ = device.HardwareRevision, Throws.Nothing);
     Assert.That(() => _ = device.FirmwareRevision, Throws.Nothing);
@@ -633,5 +637,31 @@ public partial class Mcp2221AControllerTests {
     Assert.That(mcp2221A.GpPin3, Is.TypeOf<Gp3Controller>());
     Assert.That(mcp2221A.GpPin3.Index, Is.EqualTo(3));
     Assert.That(mcp2221A.GpPin3.PinName, Is.EqualTo("GP3"));
+  }
+
+  [TestCase(0b_0_0_0_00_0_00, VoltageReferenceSource.Vdd)]
+  [TestCase(0b_0_0_0_00_1_00, VoltageReferenceSource.VrmOff)]
+  [TestCase(0b_0_0_0_01_1_00, VoltageReferenceSource.Vrm1024)]
+  [TestCase(0b_0_0_0_10_1_00, VoltageReferenceSource.Vrm2048)]
+  [TestCase(0b_0_0_0_11_1_00, VoltageReferenceSource.Vrm4096)] // INTDETFEEN: 0, INTDETREEN: 0
+  [TestCase(0b_0_0_1_01_1_00, VoltageReferenceSource.Vrm1024)] // INTDETFEEN: 0, INTDETREEN: 1
+  [TestCase(0b_0_1_0_01_1_00, VoltageReferenceSource.Vrm1024)] // INTDETFEEN: 1, INTDETREEN: 0
+  [TestCase(0b_0_1_1_01_1_00, VoltageReferenceSource.Vrm1024)] // INTDETFEEN: 1, INTDETREEN: 1 (factory default)
+  public void CurrentAdcReferenceSource(
+    byte chipSettings3AdcBits,
+    VoltageReferenceSource expected
+  )
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      CreatePseudoDevice(
+        chipSettings3: chipSettings3AdcBits
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(
+      mcp2221A.CurrentAdcReferenceSource,
+      Is.EqualTo(expected)
+    );
   }
 }

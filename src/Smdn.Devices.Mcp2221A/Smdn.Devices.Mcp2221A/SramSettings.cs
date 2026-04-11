@@ -27,6 +27,9 @@ internal sealed class SramSettings {
   // [7] GP1 Settings
   // [8] GP2 Settings
   // [9] GP3 Settings
+  private const int OffsetOfDacVoltageReference = 1;
+  private const int OffsetOfDacOutputValue = 2;
+  private const int OffsetOfAdcVoltageReference = 3;
   private const int OffsetOfAlterGpioConfigurations = 5;
   private const int OffsetOfGpSettings = 6;
 
@@ -146,8 +149,84 @@ internal sealed class SramSettings {
     }
   }
 
+  public byte ReadAdcSettingsByte()
+    => settings[OffsetOfAdcVoltageReference];
+
   public byte ReadGpSettingsByte(int gp)
     => settings[OffsetOfGpSettings + gp];
+
+  public SramSettings ModifyDacSettings(
+    VoltageReferenceSource? dacVoltageReferenceSource,
+    int? dacOutputValue
+  )
+  {
+    if (!dacVoltageReferenceSource.HasValue && dacOutputValue.HasValue)
+      return this;
+
+    // [1] DAC Voltage Reference
+    if (dacVoltageReferenceSource.HasValue) {
+      // Bit 7: Enable loading of a new DAC reference
+      unsentSettings[OffsetOfDacVoltageReference] = 0b_1_0000_00_0;
+
+      // Bit 6-3: Don't care
+
+      // Bit 2-1: DAC V_RM voltage selection
+      // Bit 0: DAC reference voltage (1: DAC V_RM, 0: VDD)
+      unsentSettings[OffsetOfDacVoltageReference] |= GetVoltageSelectionAndReferenceVoltageBits(dacVoltageReferenceSource.Value);
+    }
+
+    // [2] Set DAC Output Value
+    if (dacOutputValue.HasValue) {
+      // Bit 7: Enable loading of a new DAC value
+      unsentSettings[OffsetOfDacOutputValue] = 0b_1_00_00000;
+
+      // Bit 6-5: Don't care
+
+      // Bit 4-0: The new DAC value
+      unsentSettings[OffsetOfDacOutputValue] |= (byte)((byte)dacOutputValue.Value & 0b_0_00_11111);
+    }
+
+    return this;
+  }
+
+  public SramSettings ModifyAdcSettings(
+    VoltageReferenceSource? adcVoltageReferenceSource
+  )
+  {
+    if (!adcVoltageReferenceSource.HasValue)
+      return this;
+
+    // [3] ADC Voltage Reference
+    // Bit 7: Enable loading of a new ADC reference
+    unsentSettings[OffsetOfAdcVoltageReference] = 0b_1_0000_00_0;
+
+    // Bit 6-3: Don't care
+
+    // Bit 2-1: ADC V_RM voltage selection
+    // Bit 0: ADC reference voltage (1: ADC V_RM, 0: VDD)
+    unsentSettings[OffsetOfAdcVoltageReference] |= GetVoltageSelectionAndReferenceVoltageBits(adcVoltageReferenceSource.Value);
+
+    return this;
+  }
+
+  private static byte GetVoltageSelectionAndReferenceVoltageBits(
+    VoltageReferenceSource voltageReferenceSource
+  )
+    // Bit 2-1: DAC/ADC V_RM voltage selection
+    // Bit 0: DAC/ADC reference voltage (1: V_RM, 0: VDD)
+    => voltageReferenceSource switch {
+      VoltageReferenceSource.Vdd => 0b_0_0000_00_0,
+
+      var vrm when vrm is
+        VoltageReferenceSource.VrmOff or
+        VoltageReferenceSource.Vrm1024 or
+        VoltageReferenceSource.Vrm2048 or
+        VoltageReferenceSource.Vrm4096 => (byte)((byte)vrm & 0b_0_0000_11_1),
+
+      var invalid => throw new NotSupportedException(
+        message: $"The voltage reference source value cannot set to {invalid}. The value must be one of the values defined in {nameof(VoltageReferenceSource)}."
+      ),
+    };
 
   public SramSettings ModifyGpSettings(
     int gp,
@@ -199,5 +278,80 @@ internal sealed class SramSettings {
 #endif
 
     return this;
+  }
+
+  /// <summary>
+  /// Determines whether the DAC/ADC Voltage Reference (VRM) needs to be re-enabled
+  /// or maintained after sending a SET SRAM SETTINGS command.
+  /// </summary>
+  /// <returns>
+  /// <see langword="true"/> if the additional command must be sent to re-enable or
+  /// maintained the VRM configuration; otherwise, <see langword="false"/>.
+  /// </returns>
+  /// <remarks>
+  /// <para>
+  /// According to the MCP2221A Datasheet (DS20005565E, Section 1.8.1.1, page 20):
+  /// "When the Set SRAM settings command is used for GPIO control, the reference
+  /// voltage for VRM is always reinitialized to the default value (VDD) if it is
+  /// not explicitly set".
+  /// </para>
+  /// <para>
+  /// This method implements a workaround for this hardware behavior. If the outgoing
+  /// command intends to alter GPIO configurations (Byte Index 7 != 0), the VRM
+  /// selection for ADC and DAC would be reset to VDD by the chip's internal logic.
+  /// </para>
+  /// <para>
+  /// To counteract this, this method checks if either the current state or the
+  /// pending settings are configured to use VRM. If VRM is in use, it ensures the
+  /// "Bit 7: Enable loading of a DAC/ADC reference" flags are set in the outgoing
+  /// command to re-assert the VRM selection, ensuring the reference does not
+  /// unexpectedly revert to VDD.
+  /// </para>
+  /// </remarks>
+  public bool ShouldReenableVrm()
+  {
+    if (unsentSettings[OffsetOfAlterGpioConfigurations] == 0)
+      // GPIO configurations will remain unaltered; no need to re-enable VRM
+      return false;
+
+    var isConfiguredToReferVrm = false;
+
+    // [1] DAC Voltage Reference
+    // Bit 7: Enable loading of a new DAC reference
+    // Bit 0: DAC reference voltage (1: DAC V_RM, 0: VDD)
+    var shouldDacVrmBeEnabled =
+      (
+        (unsentSettings[OffsetOfDacVoltageReference] & 0b_1_0000_00_0) == 0 && // DAC reference will remain unaltered, and
+        (settings[OffsetOfDacVoltageReference] & 0b_0_0000_00_1) != 0 // DAC VRM is currently enabled
+      ) || // or
+      ((unsentSettings[OffsetOfDacVoltageReference] & 0b_1_0000_00_1) == 0b_1_0000_00_1); // Altering DAC to VRM
+
+    if (shouldDacVrmBeEnabled) {
+      unsentSettings[OffsetOfDacVoltageReference] |= 0b_1_0000_00_0;
+      isConfiguredToReferVrm = true;
+    }
+
+    // [3] ADC Voltage Reference
+    // Bit 7: Enable loading of a new ADC reference
+    // Bit 0: ADC reference voltage (1: ADC V_RM, 0: VDD)
+    var shouldAdcVrmBeEnabled =
+      (
+        (unsentSettings[OffsetOfAdcVoltageReference] & 0b_1_0000_00_0) == 0 && // ADC reference will remain unaltered, and
+        (settings[OffsetOfAdcVoltageReference] & 0b_0_0000_00_1) != 0 // ADC VRM is currently enabled
+      ) || // or
+      ((unsentSettings[OffsetOfAdcVoltageReference] & 0b_1_0000_00_1) == 0b_1_0000_00_1); // Altering ADC to VRM
+
+    if (shouldAdcVrmBeEnabled) {
+      unsentSettings[OffsetOfAdcVoltageReference] |= 0b_1_0000_00_0;
+      isConfiguredToReferVrm = true;
+    }
+
+    if (isConfiguredToReferVrm) {
+      // [5] Alter GPIO configuration
+      // 0: Do not alter the current GP designation
+      unsentSettings[OffsetOfAlterGpioConfigurations] = 0;
+    }
+
+    return isConfiguredToReferVrm;
   }
 }
