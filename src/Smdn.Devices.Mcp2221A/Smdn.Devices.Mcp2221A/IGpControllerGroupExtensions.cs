@@ -14,11 +14,13 @@ namespace Smdn.Devices.Mcp2221A;
 /// Provides extension methods for <see cref="IGpControllerGroup"/>.
 /// </summary>
 public static class IGpControllerGroupExtensions {
+#pragma warning disable IDE0051
   private static void ThrowIfThisArgumentIsNull(IGpControllerGroup gpPins, string paramName)
   {
     if (gpPins is null)
       throw new ArgumentNullException(paramName: paramName);
   }
+#pragma warning restore IDE0051
 
 #pragma warning disable CA1034
   extension(IGpControllerGroup gpPins) {
