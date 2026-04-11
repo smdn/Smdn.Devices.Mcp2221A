@@ -17,17 +17,18 @@ internal static class StreamExtensions {
     var buffer = ArrayPool<byte>.Shared.Rent(BufferSize);
 
     try {
-      int readTotal = 0;
+      for (;;) {
+        if (destination.IsEmpty)
+          return;
 
-      while (readTotal < destination.Length) {
-        int n = stream.Read(buffer, 0, BufferSize);
+        int read = stream.Read(buffer, 0, Math.Min(destination.Length, BufferSize));
 
-        if (n == 0)
+        if (read == 0)
           throw new EndOfStreamException();
 
-        buffer.AsMemory(0, n).Span.CopyTo(destination.Slice(readTotal));
+        buffer.AsMemory(0, read).Span.CopyTo(destination);
 
-        readTotal += n;
+        destination = destination.Slice(read);
       }
     }
     finally {
