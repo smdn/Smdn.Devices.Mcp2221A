@@ -56,7 +56,7 @@ jobs:
   await-package-publishing:
     name: Wait for publishing of released package
     if: ${{ github.event_name == 'release' }}
-    uses: smdn/workflows-dotnet/.github/workflows/nuget-await-package-publishing.yml@e7c5d3c21afa020ce40b0dae3bb2cb050c7c0ec1 # nuget/v1.2.0
+    uses: smdn/workflows-dotnet/.github/workflows/nuget-await-package-publishing.yml@35043858ed6e4363e999b82c4182cf5c4b2a2ca4 # nuget/v1.2.1
     with:
       release_tag: ${{ github.event.release.tag_name }}
 
