@@ -47,7 +47,7 @@ partial class Mcp2221AGpioDriver {
 
   /// <inheritdoc/>
   public VoltageReferenceSource CurrentAdcReferenceSource
-    => (VoltageReferenceSource)(sramSettings.ReadAdcSettingsByte() & 0b_0_0000_11_1);
+    => (VoltageReferenceSource)(sramSettings.ReadAdcVoltageReferenceByte() & 0b_0_0000_11_1);
 
   /// <summary>
   /// Returns the cached 10-bit raw ADC input value (0-1023) for the specified GP pin

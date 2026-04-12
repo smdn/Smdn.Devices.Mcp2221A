@@ -149,7 +149,7 @@ internal sealed class SramSettings {
     }
   }
 
-  public byte ReadAdcSettingsByte()
+  public byte ReadAdcVoltageReferenceByte()
     => settings[OffsetOfAdcVoltageReference];
 
   public byte ReadGpSettingsByte(int gp)
@@ -160,7 +160,7 @@ internal sealed class SramSettings {
     int? dacOutputValue
   )
   {
-    if (!dacVoltageReferenceSource.HasValue && dacOutputValue.HasValue)
+    if (!dacVoltageReferenceSource.HasValue && !dacOutputValue.HasValue)
       return this;
 
     // [1] DAC Voltage Reference
