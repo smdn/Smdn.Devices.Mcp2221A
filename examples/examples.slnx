@@ -1,26 +1,26 @@
-<!--
+﻿<!--
 SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 SPDX-License-Identifier: MIT
 -->
 <Solution>
-  <Folder Name="/Smdn.Devices.Mcp2221A/">
-    <Project Path="Smdn.Devices.Mcp2221A/i2cscanbus/i2cscanbus.csproj" />
-    <Project Path="Smdn.Devices.Mcp2221A/logging/logging.csproj" />
-  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/" />
   <Folder Name="/Smdn.Devices.Mcp2221A/ADC_Read/">
     <Project Path="Smdn.Devices.Mcp2221A/ADC_Read/Program.csproj" />
   </Folder>
   <Folder Name="/Smdn.Devices.Mcp2221A/ADC_ReadVoltage/">
     <Project Path="Smdn.Devices.Mcp2221A/ADC_ReadVoltage/Program.csproj" />
   </Folder>
-  <Folder Name="/Smdn.Devices.Mcp2221A/blink-csharp/">
-    <Project Path="Smdn.Devices.Mcp2221A/blink-csharp/blink.csproj" />
-  </Folder>
-  <Folder Name="/Smdn.Devices.Mcp2221A/blink-visualbasic/">
-    <Project Path="Smdn.Devices.Mcp2221A/blink-visualbasic/blink.vbproj" />
+  <Folder Name="/Smdn.Devices.Mcp2221A/DependencyInjection_Logging/">
+    <Project Path="Smdn.Devices.Mcp2221A/DependencyInjection_Logging/Program.csproj" />
   </Folder>
   <Folder Name="/Smdn.Devices.Mcp2221A/GettingStarted/">
     <Project Path="Smdn.Devices.Mcp2221A/GettingStarted/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/GettingStarted_CSharp/">
+    <Project Path="Smdn.Devices.Mcp2221A/GettingStarted_CSharp/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/GettingStarted_VisualBasic/">
+    <Project Path="Smdn.Devices.Mcp2221A/GettingStarted_VisualBasic/Program.vbproj" />
   </Folder>
   <Folder Name="/Smdn.Devices.Mcp2221A/GpioController_ShiftRegister/">
     <Project Path="Smdn.Devices.Mcp2221A/GpioController_ShiftRegister/Program.csproj" />
@@ -34,19 +34,23 @@ SPDX-License-Identifier: MIT
   <Folder Name="/Smdn.Devices.Mcp2221A/GPIO_ShiftRegister/">
     <Project Path="Smdn.Devices.Mcp2221A/GPIO_ShiftRegister/Program.csproj" />
   </Folder>
-  <Folder Name="/Smdn.Devices.Mcp2221A/I2CAdapter_BME280/">
-    <Project Path="Smdn.Devices.Mcp2221A/I2CAdapter_BME280/Program.csproj" />
+  <Folder Name="/Smdn.Devices.Mcp2221A/I2cDevice_BME280/">
+    <Project Path="Smdn.Devices.Mcp2221A/I2cDevice_BME280/Program.csproj" />
   </Folder>
-  <Folder Name="/Smdn.Devices.Mcp2221A/I2CAdapter_HT16K33_4Digit14SegmentDisplay/">
-    <Project Path="Smdn.Devices.Mcp2221A/I2CAdapter_HT16K33_4Digit14SegmentDisplay/Program.csproj" />
+  <Folder Name="/Smdn.Devices.Mcp2221A/I2cDevice_HT16K33_4Digit14SegmentDisplay/">
+    <Project Path="Smdn.Devices.Mcp2221A/I2cDevice_HT16K33_4Digit14SegmentDisplay/Program.csproj" />
   </Folder>
-  <Folder Name="/Smdn.Devices.Mcp2221A/I2CAdapter_MCP23017/">
-    <Project Path="Smdn.Devices.Mcp2221A/I2CAdapter_MCP23017/Program.csproj" />
+  <Folder Name="/Smdn.Devices.Mcp2221A/I2cDevice_MCP23017/">
+    <Project Path="Smdn.Devices.Mcp2221A/I2cDevice_MCP23017/Program.csproj" />
   </Folder>
-  <Folder Name="/Smdn.Devices.Mcp2221A/I2CAdapter_US2066_SO1602A/">
-    <Project Path="Smdn.Devices.Mcp2221A/I2CAdapter_US2066_SO1602A/Program.csproj" />
+  <Folder Name="/Smdn.Devices.Mcp2221A/I2cDevice_US2066_SO1602A/">
+    <Project Path="Smdn.Devices.Mcp2221A/I2cDevice_US2066_SO1602A/Program.csproj" />
   </Folder>
-  <Folder Name="/Smdn.Devices.Mcp2221A/SelectDevice/">
-    <Project Path="Smdn.Devices.Mcp2221A/SelectDevice/Program.csproj" />
+  <Folder Name="/Smdn.Devices.Mcp2221A/I2C_ScanBus/">
+    <Project Path="Smdn.Devices.Mcp2221A/I2C_ScanBus/Program.csproj" />
   </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/">
+    <Project Path="Smdn.Devices.Mcp2221A/USBHID_SelectDevice/Program.csproj" />
+  </Folder>
+
 </Solution>

@@ -1,5 +1,5 @@
-# `US2066_SO1602A`
-MCP2221A + SO1602A OLED character display
+# `I2cDevice_US2066_SO1602A`
+This example demonstrates how to use the `I2cDevice` implementation created from the MCP2221A to operate the SO1602A OLED character display binding provided by `Smdn.Devices.US2066`.
 
 This example controls a [SO1602A OLED character display](https://akizukidenshi.com/catalog/g/gP-08277/) which has US2066 controller chip.
 

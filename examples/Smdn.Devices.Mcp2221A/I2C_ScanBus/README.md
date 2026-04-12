@@ -1,4 +1,4 @@
-# `i2cscanbus`
+# `I2C_ScanBus`
 This example performs I<sup>2</sup>C bus scanning.
 
 ## Example of output

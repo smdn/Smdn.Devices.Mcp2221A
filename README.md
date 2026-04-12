@@ -79,10 +79,10 @@ Haven't tested with the actual MCP2221, but it is expected that works as same as
   - `Read`/`Write` and other command methods
     - Supports `Span<byte>`/`Memory<byte>`
     - Supports `async`, `CancellationToken`
-    - Supports logging with `ILogger`, [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging/) ([example](examples/Smdn.Devices.Mcp2221A/logging/))
-  - Can handle multiple MCP2221/MCP2221A by finding target with `Predicate<IUsbHidDevice>` and/or `Predicate<IMcp2221AInfo>`. ([example](examples/Smdn.Devices.Mcp2221A/SelectDevice/))
-  - Can handle MCP2221/MCP2221A with custom VID/PID values written in the chip settings. ([example](examples/Smdn.Devices.Mcp2221A/SelectDevice/))
-  - I2C bus scanning ([example](examples/Smdn.Devices.Mcp2221A/i2cscanbus/))
+    - Supports logging with `ILogger`, [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging/) ([example](examples/Smdn.Devices.Mcp2221A/DependencyInjection_Logging/))
+  - Can handle multiple MCP2221/MCP2221A by finding target with `Predicate<IUsbHidDevice>` and/or `Predicate<IMcp2221AInfo>`. ([example](examples/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/))
+  - Can handle MCP2221/MCP2221A with custom VID/PID values written in the chip settings. ([example](examples/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/))
+  - I2C bus scanning ([example](examples/Smdn.Devices.Mcp2221A/I2C_ScanBus/))
   - Using [HIDSharp](https://www.zer7.com/software/hidsharp) as default USB HID driver, [LibUsbDotNet](https://www.nuget.org/packages/LibUsbDotNet/) also supported.
   - Provides an adapter for [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio/)
   - Can handle I2C devices using with [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings/)
@@ -186,7 +186,7 @@ foreach (var gp in device.GpPins) {
 
 [![See the actual action in the video](https://img.youtube.com/vi/MnIunESm71E/mqdefault.jpg)](https://www.youtube.com/watch?v=MnIunESm71E)
 
-For detailed instructions, including wiring of the devices and parts, see [blink example](examples/Smdn.Devices.MCP2221/blink-csharp) page.
+For detailed instructions, including wiring of the devices and parts, see [GettingStarted_CSharp](examples/Smdn.Devices.Mcp2221A/GettingStarted_CSharp) page.
 
 More examples can be found in following examples directory.
 

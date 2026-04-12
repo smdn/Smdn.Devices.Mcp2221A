@@ -1,4 +1,4 @@
-# `blink` (C#)
+# `GettingStarted_CSharp`
 This example shows the simplest usage of `Smdn.Devices.Mcp2221A`, how to control GP pins and blink LEDs connected to them.
 
 You can run this example with following instruction.
@@ -27,7 +27,7 @@ If the project run properly, this project and circuit blinks LEDs like below:
 [![Expected behavior video](https://img.youtube.com/vi/MnIunESm71E/0.jpg)](https://www.youtube.com/watch?v=MnIunESm71E)
 
 ### Visual Basic version
-This example is written in C#. For Visual Basic version, see [blink-visualbasic](../blink-visualbasic).
+This example is written in C#. For Visual Basic version, see [GettingStarted_VisualBasic](../GettingStarted_VisualBasic).
 
 
 ## Next step
