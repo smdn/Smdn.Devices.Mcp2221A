@@ -17,7 +17,8 @@ public interface IAdcController {
   /// <remarks>
   /// This property represents the global configuration for the ADC module
   /// of the MCP2221A. Changing the reference source on one GP pin will
-  /// affect all other GP pins configured as ADC inputs.
+  /// affect all other GP pins configured as ADC inputs, but does not affect
+  /// the DAC module configuration.
   /// </remarks>
   VoltageReferenceSource CurrentAdcReferenceSource { get; }
 
@@ -36,8 +37,8 @@ public interface IAdcController {
   int LastReadAnalogRawValue { get; }
 
   /// <summary>
-  /// Configures the GP pin to function as an Analog-to-Digital Converter (ADC) input
-  /// and sets the voltage reference source for the analog module.
+  /// Configures the GP pin to function as an Analog-to-Digital Converter (ADC)
+  /// input and sets the voltage reference source for the ADC module.
   /// </summary>
   /// <param name="voltageReferenceSource">
   /// The <see cref="VoltageReferenceSource"/> to be used for the ADC.
@@ -51,7 +52,7 @@ public interface IAdcController {
   /// </exception>
   /// <remarks>
   /// Note that the <paramref name="voltageReferenceSource"/> is a global setting
-  /// for the entire analog module. Updating this value through one GP pin will
+  /// for the entire ADC module. Updating this value through one GP pin will
   /// simultaneously change the reference source for all other ADC-enabled pins.
   /// </remarks>
   /// <seealso cref="CurrentAdcReferenceSource"/>
@@ -63,7 +64,8 @@ public interface IAdcController {
 
   /// <summary>
   /// Asynchronously configures the GP pin to function as an Analog-to-Digital
-  /// Converter (ADC) input and sets the voltage reference source for the analog module.
+  /// Converter (ADC) input and sets the voltage reference source for the
+  /// ADC module.
   /// </summary>
   /// <inheritdoc cref="ConfigureAsAdc(VoltageReferenceSource, CancellationToken)"/>
   /// <returns>

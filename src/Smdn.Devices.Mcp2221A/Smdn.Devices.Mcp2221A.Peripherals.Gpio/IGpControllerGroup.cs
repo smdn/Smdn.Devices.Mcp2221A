@@ -68,7 +68,8 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
   /// <remarks>
   /// This property represents the global configuration for the ADC module
   /// of the MCP2221A. Changing the reference source on one GP pin will
-  /// affect all other GP pins configured as ADC inputs.
+  /// affect all other GP pins configured as ADC inputs, but does not affect
+  /// the DAC module configuration.
   /// </remarks>
   VoltageReferenceSource CurrentAdcReferenceSource { get; }
 
@@ -364,8 +365,8 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
 
   /// <summary>
   /// Asynchronously fetches the current 10-bit raw input values from all ADC channels
-  /// (ADC1, ADC2, and ADC3) by sending a command to the device and updates
-  /// the internal cache.
+  /// (ADC1, ADC2, and ADC3) from the ADC module by sending a command to the
+  /// device and updates the internal cache.
   /// </summary>
   /// <inheritdoc cref="FetchAdcRawValues(CancellationToken)"/>
   /// <returns>
