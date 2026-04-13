@@ -183,16 +183,6 @@ partial class GpControllerTests {
     );
   }
 
-  private static IEnumerable<VoltageReferenceSource> YieldTestCases_UnsupportedVoltageReferenceSource()
-  {
-    yield return (VoltageReferenceSource)(-1);
-    yield return (VoltageReferenceSource)0b_0_0000_01_0; // VRM 4.096 + ADC voltage reference is VDD
-    yield return (VoltageReferenceSource)0b_0_0000_10_0; // VRM 2.048 + ADC voltage reference is VDD
-    yield return (VoltageReferenceSource)0b_0_0000_11_0; // VRM 1.024 + ADC voltage reference is VDD
-    yield return (VoltageReferenceSource)0b_1_1111_00_0;
-    yield return (VoltageReferenceSource)0b_1_1111_11_1;
-  }
-
   [TestCaseSource(nameof(YieldTestCases_UnsupportedVoltageReferenceSource))]
   public void ConfigureAsAdcAsync_UnsupportedVoltageReferenceSource(VoltageReferenceSource voltageReferenceSource)
     => ConfigureAsAdcSyncOrAsync_UnsupportedVoltageReferenceSource(

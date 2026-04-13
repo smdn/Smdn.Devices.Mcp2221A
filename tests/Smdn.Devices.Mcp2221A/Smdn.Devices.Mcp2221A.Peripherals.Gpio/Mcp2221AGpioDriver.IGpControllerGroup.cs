@@ -1838,6 +1838,261 @@ partial class Mcp2221AGpioDriverTests {
   }
 
   [Test]
+  public void ApplyDacRawValueAsync_Disposed()
+    => ApplyDacRawValueSyncOrAsync_Disposed(
+      static async gpPins => await gpPins.ApplyDacRawValueAsync(0).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void ApplyDacRawValue_Disposed()
+    => ApplyDacRawValueSyncOrAsync_Disposed(
+      static gpPins => {
+        gpPins.ApplyDacRawValue(0);
+        return default;
+      }
+    );
+
+  private void ApplyDacRawValueSyncOrAsync_Disposed(
+    Func<IGpControllerGroup, ValueTask> applyDacRawValueAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    mcp2221A.Dispose();
+
+    Assert.That(
+      async () => await applyDacRawValueAsyncFunc(mcp2221A.GpPins),
+      Throws.TypeOf<ObjectDisposedException>()
+    );
+  }
+
+  [Test]
+  public void ApplyDacRawValueAsync_CancellationRequested()
+    => ApplyDacRawValueSyncOrAsync_CancellationRequested(
+      static async (gpPins, ct) => await gpPins.ApplyDacRawValueAsync(0, ct).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void ApplyDacRawValue_CancellationRequested()
+    => ApplyDacRawValueSyncOrAsync_CancellationRequested(
+      static (gpPins, ct) => {
+        gpPins.ApplyDacRawValue(0, ct);
+        return default;
+      }
+    );
+
+  private void ApplyDacRawValueSyncOrAsync_CancellationRequested(
+    Func<IGpControllerGroup, CancellationToken, ValueTask> applyDacRawValueAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+    using var cts = new CancellationTokenSource();
+
+    cts.Cancel();
+
+    // command should not be sent
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await applyDacRawValueAsyncFunc(mcp2221A.GpPins, cts.Token),
+      Throws
+        .TypeOf<OperationCanceledException>()
+        .With
+        .Property(nameof(OperationCanceledException.CancellationToken))
+        .EqualTo(cts.Token)
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_ApplyDacRawValueSyncOrAsync_ValueOutOfRange()
+  {
+    yield return new object[] { int.MinValue };
+    yield return new object[] { -1 };
+    yield return new object[] { 32 };
+    yield return new object[] { int.MaxValue };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_ApplyDacRawValueSyncOrAsync_ValueOutOfRange))]
+  public void ApplyDacRawValueAsync_ValueOutOfRange(int value)
+    => ApplyDacRawValueSyncOrAsync_ValueOutOfRange(
+      value,
+      static async (gpPins, value) => await gpPins.ApplyDacRawValueAsync(value).ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_ApplyDacRawValueSyncOrAsync_ValueOutOfRange))]
+  public void ApplyDacRawValue_ValueOutOfRange(int value)
+    => ApplyDacRawValueSyncOrAsync_ValueOutOfRange(
+      value,
+      static (gpPins, value) => {
+        gpPins.ApplyDacRawValue(value);
+        return default;
+      }
+    );
+
+  private void ApplyDacRawValueSyncOrAsync_ValueOutOfRange(
+    int value,
+    Func<IGpControllerGroup, int, ValueTask> applyDacRawValueAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation
+    const byte InitialGp1Settings = 0b_000_0_0_000; // GPIO operation
+    const byte InitialGp2Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC1)
+    const byte InitialGp3Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC2)
+    const byte InitialChipSettings2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
+
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings,
+        chipSettings2: InitialChipSettings2
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+    var initialDacRawValue = mcp2221A.LastWriteAnalogRawValue;
+
+    // command should not be sent
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await applyDacRawValueAsyncFunc(mcp2221A.GpPins, value),
+      Throws
+        .TypeOf<ArgumentOutOfRangeException>()
+        .With
+        .Property(nameof(ArgumentOutOfRangeException.ParamName))
+        .EqualTo("value")
+        .And
+        .Property(nameof(ArgumentOutOfRangeException.ActualValue))
+        .EqualTo(value),
+      $"DAC output value out of range ({value})"
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+
+    Assert.That(
+      mcp2221A.LastWriteAnalogRawValue,
+      Is.EqualTo(initialDacRawValue),
+      $"must not be changed ({nameof(mcp2221A.LastWriteAnalogRawValue)})"
+    );
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_ApplyDacRawValueSyncOrAsync()
+  {
+    const byte InitialChipSettings2_DacVrm = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
+    const byte InitialChipSettings2_DacVdd = 0b_00_0_00111; // DAC: VDD; Output = 7
+
+    yield return new object[] { InitialChipSettings2_DacVrm, 0 };
+    yield return new object[] { InitialChipSettings2_DacVdd, 0 };
+
+    yield return new object[] { InitialChipSettings2_DacVrm, 1 };
+    yield return new object[] { InitialChipSettings2_DacVdd, 30 };
+
+    yield return new object[] { InitialChipSettings2_DacVrm, 31 };
+    yield return new object[] { InitialChipSettings2_DacVdd, 31 };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_ApplyDacRawValueSyncOrAsync))]
+  public ValueTask ApplyDacRawValueAsync(
+    byte chipSettings2,
+    int value
+  )
+    => ApplyDacRawValueSyncOrAsync(
+      chipSettings2: chipSettings2,
+      value: value,
+      static async (gpPins, value) => await gpPins.ApplyDacRawValueAsync(value).ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_ApplyDacRawValueSyncOrAsync))]
+  public ValueTask ApplyDacRawValue(
+    byte chipSettings2,
+    int value
+  )
+    => ApplyDacRawValueSyncOrAsync(
+      chipSettings2: chipSettings2,
+      value: value,
+      static (gpPins, value) => {
+        gpPins.ApplyDacRawValue(value);
+        return default;
+      }
+    );
+
+  private async ValueTask ApplyDacRawValueSyncOrAsync(
+    byte chipSettings2,
+    int value,
+    Func<IGpControllerGroup, int, ValueTask> applyDacRawValueAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation
+    const byte InitialGp1Settings = 0b_000_0_0_000; // GPIO operation
+    const byte InitialGp2Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC1)
+    const byte InitialGp3Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC2)
+
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings,
+        chipSettings2: chipSettings2
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Mcp2221AControllerTests.AppendPseudoResponse(
+      mcp2221A,
+      // [MCP2221A] 3.1.13 SET SRAM SETTINGS
+      // [1] 0x00: Command completed successfully
+      // [2-63] Don't care
+      "60-00-" + string.Join("-", Enumerable.Repeat("00", 62))
+    );
+
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64];
+
+    expectedSentCommand[0] = 0x60; // [0] SET SRAM SETTINGS
+    // [1-2] don't care
+    expectedSentCommand[3] = (byte)(chipSettings2 >> 5); // [3] DAC Voltage Reference
+    expectedSentCommand[4] = (byte)(0b_1_00_00000 | value); // [4] Set DAC Output Value
+    // [5-6] don't care
+    expectedSentCommand[7] = 0; // [7] Alter GPIO configuration = Do not alter the current GP designation (0)
+    expectedSentCommand[8] = InitialGp0Settings; // [8] GP0 settings
+    expectedSentCommand[9] = InitialGp1Settings; // [9] GP1 settings
+    expectedSentCommand[10] = InitialGp2Settings; // [10] GP2 settings
+    expectedSentCommand[11] = InitialGp3Settings; // [11] GP3 settings
+
+    Assert.That(
+      async () => await applyDacRawValueAsyncFunc(mcp2221A.GpPins, value),
+      Throws.Nothing
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, 0),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+
+    Assert.That(mcp2221A.LastWriteAnalogRawValue, Is.EqualTo(value));
+  }
+
+  [Test]
   public void FetchAdcRawValuesAsync_Disposed()
     => FetchAdcRawValuesSyncOrAsync_Disposed(
       static async gpPins => await gpPins.FetchAdcRawValuesAsync().ConfigureAwait(false)

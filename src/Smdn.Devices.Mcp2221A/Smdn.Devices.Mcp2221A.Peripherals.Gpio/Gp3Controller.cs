@@ -43,6 +43,14 @@ public sealed class Gp3Controller :
   };
 
   /// <inheritdoc/>
+  VoltageReferenceSource IDacController.CurrentDacReferenceSource
+    => GpioDriver.CurrentDacReferenceSource;
+
+  /// <inheritdoc/>
+  int IDacController.LastWriteAnalogRawValue
+    => GpioDriver.GetLastAppliedDacRawValue();
+
+  /// <inheritdoc/>
   VoltageReferenceSource IAdcController.CurrentAdcReferenceSource
     => GpioDriver.CurrentAdcReferenceSource;
 
@@ -65,18 +73,68 @@ public sealed class Gp3Controller :
     };
 
   /// <inheritdoc/>
-  public ValueTask ConfigureAsDacAsync(CancellationToken cancellationToken = default)
+  public ValueTask ConfigureAsDacAsync(
+    VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd,
+    int? initialOutputValue = null,
+    CancellationToken cancellationToken = default
+  )
     => ConfigureGpDesignationAsync(
       gpDesignation: GpDesignation.AlternateFunction1,
+      dacVoltageReferenceSource: voltageReferenceSource,
+      dacOutputValue: initialOutputValue.HasValue
+        ? Mcp2221AGpioDriver.ThrowIfDacOutputValueOutOfRange(initialOutputValue.Value, nameof(initialOutputValue))
+        : null,
+      adcVoltageReferenceSource: null,
       cancellationToken: cancellationToken
     );
 
   /// <inheritdoc/>
-  public void ConfigureAsDac(CancellationToken cancellationToken = default)
+  public void ConfigureAsDac(
+    VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd,
+    int? initialOutputValue = null,
+    CancellationToken cancellationToken = default
+  )
     => ConfigureGpDesignation(
       gpDesignation: GpDesignation.AlternateFunction1,
+      dacVoltageReferenceSource: voltageReferenceSource,
+      dacOutputValue: initialOutputValue.HasValue
+        ? Mcp2221AGpioDriver.ThrowIfDacOutputValueOutOfRange(initialOutputValue.Value, nameof(initialOutputValue))
+        : null,
+      adcVoltageReferenceSource: null,
       cancellationToken: cancellationToken
     );
+
+  /// <inheritdoc/>
+  public void WriteAnalogRaw(
+    int value,
+    CancellationToken cancellationToken = default
+  )
+  {
+    GpioDriver.Transceiver.ThrowIfDisposed();
+
+    ThrowIfInvalidConfiguration(GpFunction.Dac);
+
+    GpioDriver.ApplyDacRawValue(
+      Mcp2221AGpioDriver.ThrowIfDacOutputValueOutOfRange(value, nameof(value)),
+      cancellationToken
+    );
+  }
+
+  /// <inheritdoc/>
+  public ValueTask WriteAnalogRawAsync(
+    int value,
+    CancellationToken cancellationToken = default
+  )
+  {
+    GpioDriver.Transceiver.ThrowIfDisposed();
+
+    ThrowIfInvalidConfiguration(GpFunction.Dac);
+
+    return GpioDriver.ApplyDacRawValueAsync(
+      value: Mcp2221AGpioDriver.ThrowIfDacOutputValueOutOfRange(value, nameof(value)),
+      cancellationToken
+    );
+  }
 
   /// <inheritdoc/>
   public ValueTask ConfigureAsAdcAsync(
