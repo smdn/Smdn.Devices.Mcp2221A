@@ -148,7 +148,8 @@ public readonly record struct AdcAllChannelSample {
   /// Thrown when <paramref name="referenceVoltage"/> is negative.
   /// </exception>
   /// <exception cref="ArgumentException">
-  /// Thrown when <paramref name="referenceVoltage"/> is NaN or Infinity.
+  /// Thrown when <paramref name="referenceVoltage"/> is <see cref="double.NaN"/>,
+  /// <see cref="double.PositiveInfinity"/> or <see cref="double.NegativeInfinity"/>.
   /// </exception>
   public
   (double Adc1, double Adc2, double Adc3)

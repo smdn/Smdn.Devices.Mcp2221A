@@ -813,7 +813,7 @@ public static class IGpControllerGroupExtensions {
     /// <summary>
     /// Asynchronously reads the raw ADC values from all channels and
     /// converts them to voltage values [V] based on the currently configured
-    /// voltage reference source(VRM).
+    /// voltage reference source (VRM).
     /// </summary>
     /// <inheritdoc
     ///   cref="ReadAnalogVoltage(IGpControllerGroup, CancellationToken)"
