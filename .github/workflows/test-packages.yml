@@ -62,7 +62,7 @@ jobs:
 
   run-test:
     name: Run tests with released packages
-    uses: smdn/workflows-dotnet/.github/workflows/test.yml@ea0a480137fc3227427d82f4c40614f298822025 # test/v1.9.1
+    uses: smdn/workflows-dotnet/.github/workflows/test.yml@17112594cdc2a6dd9bf2417fe103174ded21863f # test/v1.16.1
     needs: await-package-publishing
     if: ${{ always() && !failure() && !cancelled() }} # run tests even if await-package-publishing is skipped
     with:
