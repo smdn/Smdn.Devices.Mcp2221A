@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 using System;
 using System.Device.Gpio;
-#if SYSTEM_RUNTIME_COMPILERSERVICES_INLINEARRAYATTRIBUTE
-using System.Runtime.CompilerServices;
-#endif
 
 using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
@@ -27,32 +24,15 @@ internal sealed class SramSettings {
   // [7] GP1 Settings
   // [8] GP2 Settings
   // [9] GP3 Settings
+  private const int OffsetOfClockOutputDriverValue = 0;
   private const int OffsetOfDacVoltageReference = 1;
   private const int OffsetOfDacOutputValue = 2;
   private const int OffsetOfAdcVoltageReference = 3;
-  private const int OffsetOfAlterGpioConfigurations = 5;
+  private const int OffsetOfInterruptDetectionModuleSetup = 4;
+  private const int OffsetOfAlterGpioConfiguration = 5;
   private const int OffsetOfGpSettings = 6;
 
-#if SYSTEM_RUNTIME_COMPILERSERVICES_INLINEARRAYATTRIBUTE
-  [InlineArray(SizeOfSelf)]
-  private struct SramSettingsByteArray {
-    private byte element;
-  }
-#else
-  private unsafe struct SramSettingsByteArray {
-    private static int ValidateIndex(int index)
-      => index is < 0 or >= SizeOfSelf
-        ? throw new ArgumentOutOfRangeException(paramName: nameof(index), actualValue: index, message: "index out of range")
-        : index;
-
-    private fixed byte elements[SizeOfSelf];
-
-    public byte this[int index] {
-      get => elements[ValidateIndex(index)];
-      set => elements[ValidateIndex(index)] = value;
-    }
-  }
-#endif
+  private const byte MaintainGpioConfiguration = 0;
 
   /// <remarks>
   /// <para>
@@ -68,7 +48,7 @@ internal sealed class SramSettings {
   /// offset by -2.
   /// </para>
   /// </remarks>
-  private SramSettingsByteArray settings;
+  private readonly byte[] currentSettings = new byte[SizeOfSelf];
 
   /// <remarks>
   /// <para>
@@ -76,37 +56,14 @@ internal sealed class SramSettings {
   /// which will be applied by the next command.
   /// </para>
   /// </remarks>
-  private SramSettingsByteArray unsentSettings;
+  private readonly byte[] unsentSettings = new byte[SizeOfSelf];
 
-  public bool IsDirty {
-    get {
-      for (var i = 0; i < SizeOfSelf; i++) {
-        if (settings[i] != unsentSettings[i])
-          return true;
-      }
-
-      return false;
-    }
-  }
-
-#if DEBUG
-  public byte[] ToArray()
-  {
-    var arr = new byte[SizeOfSelf];
-
-    for (var i = 0; i < SizeOfSelf; i++) {
-      arr[i] = settings[i];
-    }
-
-    return arr;
-  }
-#endif
+  public bool IsDirty
+    => !currentSettings.SequenceEqual(unsentSettings);
 
   public void Store()
   {
-    for (var i = 0; i < SizeOfSelf; i++) {
-      settings[i] = unsentSettings[i];
-    }
+    unsentSettings.CopyTo(currentSettings);
 
     // For each of the following byte entries, set the bit that
     // commands the alteration of settings to 0:
@@ -115,51 +72,41 @@ internal sealed class SramSettings {
     //   [2] Set DAC Output Value
     //   [3] ADC Voltage Reference
     //   [4] Setup the interrupt detection mechanism and clear the detection flag
-    for (var i = 0; i <= 4; i++) {
-      settings[i] &= 0b_0_1111111;
+    for (var i = OffsetOfClockOutputDriverValue; i <= OffsetOfInterruptDetectionModuleSetup; i++) {
+      currentSettings[i] &= 0b_0_1111111;
       unsentSettings[i] &= 0b_0_1111111;
     }
 
     // For the following byte entry, set the byte that
     // commands the alteration of settings to 0:
     //   [5] Alter GPIO configuration
-    settings[OffsetOfAlterGpioConfigurations] = 0;
-    unsentSettings[OffsetOfAlterGpioConfigurations] = 0;
+    currentSettings[OffsetOfAlterGpioConfiguration] = MaintainGpioConfiguration;
+    unsentSettings[OffsetOfAlterGpioConfiguration] = MaintainGpioConfiguration;
   }
 
   public void Restore()
-  {
-    for (var i = 0; i < SizeOfSelf; i++) {
-      unsentSettings[i] = settings[i];
-    }
-  }
+    => currentSettings.CopyTo(unsentSettings);
 
-  public void WriteSetSramSettingsBytes(Span<byte> destination)
-  {
-    for (var i = 0; i < SizeOfSelf; i++) {
-      destination[i] = unsentSettings[i];
-    }
-  }
+  public void WriteAsSetSramSettingsCommand(Span<byte> destination)
+    => unsentSettings.CopyTo(destination);
 
   public void StoreGpSettingsBytes(ReadOnlySpan<byte> gpSettingBytes)
   {
-    for (var i = 0; i < SizeOfGpSettings; i++) {
-      settings[OffsetOfGpSettings + i] = gpSettingBytes[i];
-      unsentSettings[OffsetOfGpSettings + i] = gpSettingBytes[i];
-    }
+    gpSettingBytes.CopyTo(currentSettings.AsSpan(OffsetOfGpSettings, SizeOfGpSettings));
+    gpSettingBytes.CopyTo(unsentSettings.AsSpan(OffsetOfGpSettings, SizeOfGpSettings));
   }
 
   public byte ReadDacVoltageReferenceByte()
-    => settings[OffsetOfDacVoltageReference];
+    => currentSettings[OffsetOfDacVoltageReference];
 
   public byte ReadDacOutputValueByte()
-    => settings[OffsetOfDacOutputValue];
+    => currentSettings[OffsetOfDacOutputValue];
 
   public byte ReadAdcVoltageReferenceByte()
-    => settings[OffsetOfAdcVoltageReference];
+    => currentSettings[OffsetOfAdcVoltageReference];
 
   public byte ReadGpSettingsByte(int gp)
-    => settings[OffsetOfGpSettings + gp];
+    => currentSettings[OffsetOfGpSettings + gp];
 
   public SramSettings ModifyDacSettings(
     VoltageReferenceSource? dacVoltageReferenceSource,
@@ -248,7 +195,7 @@ internal sealed class SramSettings {
     }
 
     // Alter GPIO configuration = Alter the GP designation (1)
-    unsentSettings[OffsetOfAlterGpioConfigurations] |= 0b_1_0000000;
+    unsentSettings[OffsetOfAlterGpioConfiguration] |= 0b_1_0000000;
 
 #if SYSTEM_RUNTIME_COMPILERSERVICES_INLINEARRAYATTRIBUTE
     ref var gpSettings = ref unsentSettings[OffsetOfGpSettings + gp];
@@ -316,7 +263,7 @@ internal sealed class SramSettings {
   /// </remarks>
   public bool ShouldReenableVrm()
   {
-    if (unsentSettings[OffsetOfAlterGpioConfigurations] == 0)
+    if (unsentSettings[OffsetOfAlterGpioConfiguration] == MaintainGpioConfiguration)
       // GPIO configurations will remain unaltered; no need to re-enable VRM
       return false;
 
@@ -328,7 +275,7 @@ internal sealed class SramSettings {
     var shouldDacVrmBeEnabled =
       (
         (unsentSettings[OffsetOfDacVoltageReference] & 0b_1_0000_00_0) == 0 && // DAC reference will remain unaltered, and
-        (settings[OffsetOfDacVoltageReference] & 0b_0_0000_00_1) != 0 // DAC VRM is currently enabled
+        (currentSettings[OffsetOfDacVoltageReference] & 0b_0_0000_00_1) != 0 // DAC VRM is currently enabled
       ) || // or
       ((unsentSettings[OffsetOfDacVoltageReference] & 0b_1_0000_00_1) == 0b_1_0000_00_1); // Altering DAC to VRM
 
@@ -343,7 +290,7 @@ internal sealed class SramSettings {
     var shouldAdcVrmBeEnabled =
       (
         (unsentSettings[OffsetOfAdcVoltageReference] & 0b_1_0000_00_0) == 0 && // ADC reference will remain unaltered, and
-        (settings[OffsetOfAdcVoltageReference] & 0b_0_0000_00_1) != 0 // ADC VRM is currently enabled
+        (currentSettings[OffsetOfAdcVoltageReference] & 0b_0_0000_00_1) != 0 // ADC VRM is currently enabled
       ) || // or
       ((unsentSettings[OffsetOfAdcVoltageReference] & 0b_1_0000_00_1) == 0b_1_0000_00_1); // Altering ADC to VRM
 
@@ -355,7 +302,7 @@ internal sealed class SramSettings {
     if (isConfiguredToReferVrm) {
       // [5] Alter GPIO configuration
       // 0: Do not alter the current GP designation
-      unsentSettings[OffsetOfAlterGpioConfigurations] = 0;
+      unsentSettings[OffsetOfAlterGpioConfiguration] = MaintainGpioConfiguration;
     }
 
     return isConfiguredToReferVrm;

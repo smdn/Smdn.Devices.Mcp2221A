@@ -91,7 +91,7 @@ partial class Mcp2221AGpioDriver {
       comm[0] = 0x60; // Set SRAM settings
       comm[1] = 0x00; // Don't care
 
-      sramSettings.WriteSetSramSettingsBytes(
+      sramSettings.WriteAsSetSramSettingsCommand(
         comm.Slice(2, SramSettings.SizeOfSelf) // [2-11] SRAM settings
       );
     }
