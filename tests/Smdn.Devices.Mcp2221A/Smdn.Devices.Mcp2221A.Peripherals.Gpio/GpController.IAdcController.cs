@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 using System;
 using System.Collections.Generic;
+using System.Device.Gpio;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -241,6 +242,86 @@ partial class GpControllerTests {
         mcp2221A.CurrentAdcReferenceSource,
         Is.EqualTo(initialAdcReferenceSource),
         $"must not be configured ({nameof(mcp2221A.CurrentAdcReferenceSource)})"
+      );
+    }
+  }
+
+
+  [Test]
+  public void ConfigureAsAdcAsync_ThrowsWhenUsedByGpioController()
+    => ConfigureAsAdcSyncOrAsync_ThrowsWhenUsedByGpioController(
+      static async gp => await ((IAdcController)gp).ConfigureAsAdcAsync(VoltageReferenceSource.Vdd).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void ConfigureAsAdc_ThrowsWhenUsedByGpioController()
+    => ConfigureAsAdcSyncOrAsync_ThrowsWhenUsedByGpioController(
+      static gp => {
+        ((IAdcController)gp).ConfigureAsAdc(VoltageReferenceSource.Vdd);
+        return default;
+      }
+    );
+
+  private void ConfigureAsAdcSyncOrAsync_ThrowsWhenUsedByGpioController(
+    Func<GpController, ValueTask> configureAsAdcAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_1_0_010; // Alternate Function 0 (LED UART RX)
+    const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
+    const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
+    const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
+
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    for (var gp = 0; gp < 4; gp++) {
+      Mcp2221AControllerTests.AppendPseudoResponse(
+        mcp2221A,
+        // [MCP2221A] 3.1.13 SET SRAM SETTINGS
+        // [1] 0x00: Command completed successfully
+        // [2-63] Don't care
+        "60-00-" + string.Join("-", Enumerable.Repeat("00", 62))
+      );
+
+      Assert.That(
+        () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+          _ =
+#endif
+          mcp2221A.GpioController.OpenPin(gp),
+        Throws.Nothing
+      );
+      Assert.That(mcp2221A.GpPins[gp].IsUsedByGpioController, Is.True);
+    }
+
+    foreach (var gp in new GpController[] { mcp2221A.GpPin1, mcp2221A.GpPin2, mcp2221A.GpPin3 }) {
+       // command should not be sent
+      // Mcp2221AControllerTests.AppendPseudoResponse(...);
+      Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+      Assert.That(
+        async () => await configureAsAdcAsyncFunc(gp),
+        Throws
+          .InvalidOperationException
+          .With
+          .Property(nameof(InvalidOperationException.Message))
+          .Contains($"GP{gp.Index}")
+          .And
+          .Property(nameof(InvalidOperationException.Message))
+          .Contains(nameof(GpioController))
+      );
+
+      Assert.That(
+        Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+        Is.Zero,
+        "command should not be sent"
       );
     }
   }
