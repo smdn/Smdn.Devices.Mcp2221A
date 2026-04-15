@@ -147,7 +147,7 @@ partial class Mcp2221AGpioDriver {
     ThrowIfUsedByGpioController(gp);
 
     try {
-      await SetGpSettingsAsync(
+      await SetSramSettingsAsync(
         sramSettings: sramSettings.ModifyGpSettings(
           gp: gp,
           designation: gpDesignation,
@@ -192,7 +192,7 @@ partial class Mcp2221AGpioDriver {
       ThrowIfUsedByGpioController(gp);
 
     try {
-      SetGpSettings(
+      SetSramSettings(
         sramSettings: sramSettings.ModifyGpSettings(
           gp: gp,
           designation: gpDesignation,
@@ -220,7 +220,7 @@ partial class Mcp2221AGpioDriver {
     ThrowIfUsedByGpioController(gp);
 
     try {
-      await SetGpSettingsAsync(
+      await SetSramSettingsAsync(
         sramSettings: sramSettings
           .ModifyGpSettings(
             gp: gp,
@@ -256,7 +256,7 @@ partial class Mcp2221AGpioDriver {
     ThrowIfUsedByGpioController(gp);
 
     try {
-      SetGpSettings(
+      SetSramSettings(
         sramSettings: sramSettings
           .ModifyGpSettings(
             gp: gp,
@@ -298,7 +298,7 @@ partial class Mcp2221AGpioDriver {
   )
   {
     try {
-      await SetGpSettingsAsync(
+      await SetSramSettingsAsync(
         sramSettings: ModifyAllGpSettings(
           gp0Function,
           gp0Mode,
@@ -340,7 +340,7 @@ partial class Mcp2221AGpioDriver {
   )
   {
     try {
-      SetGpSettings(
+      SetSramSettings(
         sramSettings: ModifyAllGpSettings(
           gp0Function,
           gp0Mode,
@@ -406,7 +406,7 @@ partial class Mcp2221AGpioDriver {
     return sramSettings;
   }
 
-  private async ValueTask SetGpSettingsAsync(
+  private async ValueTask SetSramSettingsAsync(
     SramSettings sramSettings,
     CancellationToken cancellationToken
   )
@@ -439,7 +439,7 @@ partial class Mcp2221AGpioDriver {
     SyncGpioStates(sramSettings);
   }
 
-  private void SetGpSettings(
+  private void SetSramSettings(
     SramSettings sramSettings,
     CancellationToken cancellationToken
   )
