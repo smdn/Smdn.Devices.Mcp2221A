@@ -82,6 +82,44 @@ public partial class Mcp2221AController :
   }
 
   /// <summary>
+  /// Gets the current voltage reference source configured for the DAC module.
+  /// </summary>
+  /// <remarks>
+  /// This property represents the global configuration for the DAC module
+  /// of the MCP2221A. Changing the reference source on one GP pin will
+  /// affect all other GP pins configured as DAC outputs.
+  /// </remarks>
+  /// <seealso cref="Gp2Controller.ConfigureAsDac"/>
+  /// <seealso cref="Gp3Controller.ConfigureAsDac"/>
+  /// <seealso cref="IDacController.CurrentDacReferenceSource"/>
+  public VoltageReferenceSource CurrentDacReferenceSource {
+    get {
+      ThrowIfDisposed();
+      return gpioDriver.CurrentDacReferenceSource;
+    }
+  }
+
+  /// <summary>
+  /// Gets the 5-bit raw output value (0-31) that was last written to the
+  /// DAC module.
+  /// </summary>
+  /// <remarks>
+  /// This property represents the global configuration for the DAC module
+  /// of the MCP2221A. If no write operation has been performed yet, this
+  /// property returns the value currently held by the controller (e.g.,
+  /// the default value from Flash settings).
+  /// </remarks>
+  /// <seealso cref="Gp2Controller.ConfigureAsDac"/>
+  /// <seealso cref="Gp3Controller.ConfigureAsDac"/>
+  /// <seealso cref="IDacController.LastWriteAnalogRawValue"/>
+  public int LastWriteAnalogRawValue {
+    get {
+      ThrowIfDisposed();
+      return gpioDriver.GetLastAppliedDacRawValue();
+    }
+  }
+
+  /// <summary>
   /// Gets the current voltage reference source configured for the ADC module.
   /// </summary>
   /// <remarks>

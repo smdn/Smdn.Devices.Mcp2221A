@@ -30,7 +30,7 @@ See [Smdn.Devices.Mcp2221A examples](examples/Smdn.Devices.Mcp2221A/).
     - [x] GPIO read/write value
     - [x] GPIO get/set direction
   - [x] ADC inputs
-  - [ ] DAC outputs
+  - [x] DAC outputs
   - [ ] Clock output
   - [ ] Interrupt detection
   - [x] Other functionalities
@@ -55,7 +55,7 @@ See [Smdn.Devices.Mcp2221A examples](examples/Smdn.Devices.Mcp2221A/).
     - [ ] Chip settings
       - [ ] Pin options
       - [ ] Clock output
-      - [ ] DAC outputs
+      - [x] DAC outputs
       - [x] ADC inputs
       - [ ] Interrupt detection
   - [ ] Flash read/write

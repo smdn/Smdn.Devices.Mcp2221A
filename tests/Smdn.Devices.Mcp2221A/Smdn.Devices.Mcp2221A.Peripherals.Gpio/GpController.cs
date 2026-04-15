@@ -73,6 +73,27 @@ public partial class GpControllerTests {
     );
   }
 
+  private static Mcp2221AController CreateMcp2221AConfiguredAsDac(
+    byte chipSettings2 = 0b_01_1_01000 // DAC: VRM 1.024V; Output = 8 (factory default)
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation
+    const byte InitialGp1Settings = 0b_000_0_0_000; // GPIO operation
+    const byte InitialGp2Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC1)
+    const byte InitialGp3Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC2)
+
+    return Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings,
+        chipSettings2: chipSettings2
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+  }
+
   private static IEnumerable<byte> YieldTestCases_GP0_InvalidConfigurationSettings()
   {
     yield return 0b_000_1_0_010; // LED_URX
@@ -99,5 +120,15 @@ public partial class GpControllerTests {
     yield return 0b_000_1_0_011; // DAC2
     yield return 0b_000_1_0_010; // ADC3
     yield return 0b_000_1_0_001; // LED_I2C
+  }
+
+  private static IEnumerable<VoltageReferenceSource> YieldTestCases_UnsupportedVoltageReferenceSource()
+  {
+    yield return (VoltageReferenceSource)(-1);
+    yield return (VoltageReferenceSource)0b_0_0000_01_0; // VRM 4.096 + ADC voltage reference is VDD
+    yield return (VoltageReferenceSource)0b_0_0000_10_0; // VRM 2.048 + ADC voltage reference is VDD
+    yield return (VoltageReferenceSource)0b_0_0000_11_0; // VRM 1.024 + ADC voltage reference is VDD
+    yield return (VoltageReferenceSource)0b_1_1111_00_0;
+    yield return (VoltageReferenceSource)0b_1_1111_11_1;
   }
 }

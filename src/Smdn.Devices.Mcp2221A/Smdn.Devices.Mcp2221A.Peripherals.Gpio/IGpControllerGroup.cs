@@ -63,6 +63,17 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
   Gp3Controller Gp3 { get; }
 
   /// <summary>
+  /// Gets the current voltage reference source configured for the DAC module.
+  /// </summary>
+  /// <remarks>
+  /// This property represents the global configuration for the DAC module
+  /// of the MCP2221A. Changing the reference source on one GP pin will
+  /// affect all other GP pins configured as DAC outputs, but does not affect
+  /// the ADC module configuration.
+  /// </remarks>
+  VoltageReferenceSource CurrentDacReferenceSource { get; }
+
+  /// <summary>
   /// Gets the current voltage reference source configured for the ADC module.
   /// </summary>
   /// <remarks>
@@ -345,9 +356,49 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
   );
 
   /// <summary>
-  /// Fetches the current 10-bit raw input values from all ADC channels
-  /// (ADC1, ADC2, and ADC3) by sending a command to the device and updates
+  /// Applies the 5-bit raw analog value (0-31) to the DAC module and updates
   /// the internal cache.
+  /// </summary>
+  /// <param name="value">
+  /// The 5-bit raw analog value (0-31) to be set for the DAC output.
+  /// </param>
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// The default value is <see cref="CancellationToken.None"/>.
+  /// </param>
+  /// <exception cref="ArgumentOutOfRangeException">
+  /// <paramref name="value"/> is negative, or greater than 31 (the maximum
+  /// value for a 5-bit DAC).
+  /// </exception>
+  /// <exception cref="OperationCanceledException">
+  /// The operation was canceled.
+  /// </exception>
+  /// <remarks>
+  /// This method updates the output value of the DAC module globally.
+  /// All GP pins configured as DAC outputs will be affected simultaneously.
+  /// </remarks>
+  void ApplyDacRawValue(
+    int value,
+    CancellationToken cancellationToken = default
+  );
+
+  /// <summary>
+  /// Asynchronously applies the 5-bit raw analog value (0-31) to the DAC module
+  /// and updates the internal cache.
+  /// </summary>
+  /// <inheritdoc cref="ApplyDacRawValue(int, CancellationToken)"/>
+  /// <returns>
+  /// A <see cref="ValueTask"/> representing the asynchronous operation.
+  /// </returns>
+  ValueTask ApplyDacRawValueAsync(
+    int value,
+    CancellationToken cancellationToken = default
+  );
+
+  /// <summary>
+  /// Fetches the current 10-bit raw input values from all ADC channels
+  /// (ADC1, ADC2, and ADC3) from the ADC module by sending a command to the
+  /// device and updates the internal cache.
   /// </summary>
   /// <param name="cancellationToken">
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.

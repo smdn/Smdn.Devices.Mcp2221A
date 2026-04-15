@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using NUnit.Framework;
+using NUnit.Framework.Constraints;
 
 using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
@@ -3508,5 +3509,571 @@ public class IGpControllerGroupExtensionsTests {
     Assert.That(adc1Voltage, Is.EqualTo(expectedAdc1Voltage).Within(1e-9));
     Assert.That(adc2Voltage, Is.EqualTo(expectedAdc2Voltage).Within(1e-9));
     Assert.That(adc3Voltage, Is.EqualTo(expectedAdc3Voltage).Within(1e-9));
+  }
+
+  [Test]
+  public void WriteAnalogVoltageAsync_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => gpPins!.WriteAnalogVoltageAsync(0.0),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void WriteAnalogVoltage_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => gpPins!.WriteAnalogVoltage(0.0),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void WriteAnalogVoltageAsync_CancellationRequested()
+    => WriteAnalogVoltageSyncOrAsync_CancellationRequested(
+      static async (gpPins, ct) => await gpPins.WriteAnalogVoltageAsync(0.0, ct).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void WriteAnalogVoltage_CancellationRequested()
+    => WriteAnalogVoltageSyncOrAsync_CancellationRequested(
+      static (gpPins, ct) => {
+        gpPins.WriteAnalogVoltage(0.0, ct);
+        return default;
+      }
+    );
+
+  private void WriteAnalogVoltageSyncOrAsync_CancellationRequested(
+    Func<IGpControllerGroup, CancellationToken, ValueTask> writeAnalogVoltageAsyncFunc
+  )
+  {
+    const byte InitialChipSettings2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
+
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        chipSettings2: InitialChipSettings2
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+    using var cts = new CancellationTokenSource();
+
+    cts.Cancel();
+
+    // command should not be sent
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await writeAnalogVoltageAsyncFunc(mcp2221A.GpPins, cts.Token),
+      Throws
+        .TypeOf<OperationCanceledException>()
+        .With
+        .Property(nameof(OperationCanceledException.CancellationToken))
+        .EqualTo(cts.Token)
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+  }
+
+  [Test]
+  public void WriteAnalogVoltageAsync_Vdd()
+    => WriteAnalogVoltageSyncOrAsync_Vdd(
+      static async gpPins => await gpPins.WriteAnalogVoltageAsync(0.0).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void WriteAnalogVoltage_Vdd()
+    => WriteAnalogVoltageSyncOrAsync_Vdd(
+      static gpPins => {
+        gpPins.WriteAnalogVoltage(0.0);
+        return default;
+      }
+    );
+
+  private void WriteAnalogVoltageSyncOrAsync_Vdd(
+    Func<IGpControllerGroup, ValueTask> writeAnalogVoltageAsyncFunc
+  )
+  {
+    const byte InitialChipSettings2 = 0b_00_0_11111; // DAC: VDD; Output = 31
+
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        chipSettings2: InitialChipSettings2
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    // command should not be sent
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await writeAnalogVoltageAsyncFunc(mcp2221A.GpPins),
+      Throws
+        .TypeOf<InvalidOperationException>()
+        .With
+        .Property(nameof(InvalidOperationException.Message))
+        .Contains("Vdd")
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_WriteAnalogVoltageSyncOrAsync()
+  {
+    const byte InitialChipSettings2_DacVrm1024 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
+    const byte InitialChipSettings2_DacVrm2048 = 0b_10_1_00001; // DAC: VRM 2.048V; Output = 1
+    const byte InitialChipSettings2_DacVrm4096 = 0b_11_1_00010; // DAC: VRM 4.096V; Output = 2
+    const byte InitialChipSettings2_DacVrmOff = 0b_00_1_00100; // DAC: VRM Off; Output = 4
+
+    yield return new object[] { InitialChipSettings2_DacVrm1024, 0.0, 0 };
+    yield return new object[] { InitialChipSettings2_DacVrm1024, 0.033, 1 };
+    yield return new object[] { InitialChipSettings2_DacVrm1024, 0.512, 16 };
+    yield return new object[] { InitialChipSettings2_DacVrm1024, 1.020, 31 };
+    yield return new object[] { InitialChipSettings2_DacVrm1024, 1.024, 31 };
+
+    yield return new object[] { InitialChipSettings2_DacVrm2048, 0.0, 0 };
+    yield return new object[] { InitialChipSettings2_DacVrm2048, 0.066, 1 };
+    yield return new object[] { InitialChipSettings2_DacVrm2048, 1.024, 16 };
+    yield return new object[] { InitialChipSettings2_DacVrm2048, 2.040, 31 };
+    yield return new object[] { InitialChipSettings2_DacVrm2048, 2.048, 31 };
+
+    yield return new object[] { InitialChipSettings2_DacVrm4096, 0.0, 0 };
+    yield return new object[] { InitialChipSettings2_DacVrm4096, 0.132, 1 };
+    yield return new object[] { InitialChipSettings2_DacVrm4096, 2.048, 16 };
+    yield return new object[] { InitialChipSettings2_DacVrm4096, 4.090, 31 };
+    yield return new object[] { InitialChipSettings2_DacVrm4096, 4.096, 31 };
+
+    yield return new object[] { InitialChipSettings2_DacVrmOff, 0.0, 0 };
+    yield return new object[] { InitialChipSettings2_DacVrmOff, 1.0, 0 };
+    yield return new object[] { InitialChipSettings2_DacVrmOff, 5.0, 0 };
+    yield return new object[] { InitialChipSettings2_DacVrmOff, 12.0, 0 };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_WriteAnalogVoltageSyncOrAsync))]
+  public void WriteAnalogVoltageAsync(
+    byte chipSettings2,
+    double voltage,
+    int expectedAnalogRawValue
+  )
+    => WriteAnalogVoltageSyncOrAsync(
+      chipSettings2: chipSettings2,
+      voltage: voltage,
+      expectedAnalogRawValue: expectedAnalogRawValue,
+      static async (gpPins, voltage) => await gpPins.WriteAnalogVoltageAsync(voltage).ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_WriteAnalogVoltageSyncOrAsync))]
+  public void WriteAnalogVoltage(
+    byte chipSettings2,
+    double voltage,
+    int expectedAnalogRawValue
+  )
+    => WriteAnalogVoltageSyncOrAsync(
+      chipSettings2: chipSettings2,
+      voltage: voltage,
+      expectedAnalogRawValue: expectedAnalogRawValue,
+      static (gpPins, voltage) => {
+        gpPins.WriteAnalogVoltage(voltage);
+        return default;
+      }
+    );
+
+  private void WriteAnalogVoltageSyncOrAsync(
+    byte chipSettings2,
+    double voltage,
+    int expectedAnalogRawValue,
+    Func<IGpControllerGroup, double, ValueTask> writeAnalogVoltageAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation
+    const byte InitialGp1Settings = 0b_000_0_0_000; // GPIO operation
+    const byte InitialGp2Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC1)
+    const byte InitialGp3Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC2)
+
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings,
+        chipSettings2: chipSettings2
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Mcp2221AControllerTests.AppendPseudoResponse(
+      mcp2221A,
+      // [MCP2221A] 3.1.13 SET SRAM SETTINGS
+      // [1] 0x00: Command completed successfully
+      // [2-63] Don't care
+      "60-00-" + string.Join("-", Enumerable.Repeat("00", 62))
+    );
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64];
+
+    expectedSentCommand[0] = 0x60; // [0] SET SRAM SETTINGS
+    // [1-2] don't care
+    expectedSentCommand[3] = (byte)(chipSettings2 >> 5); // [3] DAC Voltage Reference
+    expectedSentCommand[4] = (byte)(0b_1_00_00000 | expectedAnalogRawValue); // [4] Set DAC Output Value
+    // [5-6] don't care
+    expectedSentCommand[7] = 0; // [7] Alter GPIO configuration = Do not alter the current GP designation (0)
+    expectedSentCommand[8] = InitialGp0Settings; // [8] GP0 settings
+    expectedSentCommand[9] = InitialGp1Settings; // [9] GP1 settings
+    expectedSentCommand[10] = InitialGp2Settings; // [10] GP2 settings
+    expectedSentCommand[11] = InitialGp3Settings; // [11] GP3 settings
+
+    Assert.That(
+      async () => await writeAnalogVoltageAsyncFunc(mcp2221A.GpPins, voltage),
+      Throws.Nothing
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, 0),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+
+    Assert.That(mcp2221A.LastWriteAnalogRawValue, Is.EqualTo(expectedAnalogRawValue));
+
+    Assert.That(((IDacController)mcp2221A.GpPin2).LastWriteAnalogRawValue, Is.EqualTo(expectedAnalogRawValue));
+    Assert.That(((IDacController)mcp2221A.GpPin3).LastWriteAnalogRawValue, Is.EqualTo(expectedAnalogRawValue));
+  }
+
+  [Test]
+  public void WriteAnalogVoltageAsync_WithReferenceVoltage_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => gpPins!.WriteAnalogVoltageAsync(0.0, referenceVoltage: 5.0),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void WriteAnalogVoltage_WithReferenceVoltage_ArgumentNull()
+  {
+    IGpControllerGroup? gpPins = null;
+
+    Assert.That(
+      () => gpPins!.WriteAnalogVoltage(0.0, referenceVoltage: 5.0),
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("gpPins")
+    );
+  }
+
+  [Test]
+  public void WriteAnalogVoltageAsync_WithReferenceVoltage_CancellationRequested()
+    => WriteAnalogVoltageSyncOrAsync_WithReferenceVoltage_CancellationRequested(
+      static async (gpPins, ct) => await gpPins.WriteAnalogVoltageAsync(0.0, referenceVoltage: 5.0, ct).ConfigureAwait(false)
+    );
+
+  [Test]
+  public void WriteAnalogVoltage_WithReferenceVoltage_CancellationRequested()
+    => WriteAnalogVoltageSyncOrAsync_WithReferenceVoltage_CancellationRequested(
+      static (gpPins, ct) => {
+        gpPins.WriteAnalogVoltage(0.0, referenceVoltage: 5.0, ct);
+        return default;
+      }
+    );
+
+  private void WriteAnalogVoltageSyncOrAsync_WithReferenceVoltage_CancellationRequested(
+    Func<IGpControllerGroup, CancellationToken, ValueTask> writeAnalogVoltageAsyncFunc
+  )
+  {
+    const byte InitialChipSettings2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
+
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        chipSettings2: InitialChipSettings2
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+    using var cts = new CancellationTokenSource();
+
+    cts.Cancel();
+
+    // command should not be sent
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await writeAnalogVoltageAsyncFunc(mcp2221A.GpPins, cts.Token),
+      Throws
+        .TypeOf<OperationCanceledException>()
+        .With
+        .Property(nameof(OperationCanceledException.CancellationToken))
+        .EqualTo(cts.Token)
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_WriteAnalogVoltageSyncOrAsync_WithReferenceVoltage()
+  {
+    const double Vdd_5V0 = 5.0;
+    const double Vdd_3V3 = 3.3;
+    const double Vdd_Zero = 0.0;
+
+    yield return new object[] { 0.000, Vdd_5V0, 0 };
+    yield return new object[] { 0.161, Vdd_5V0, 1 };
+    yield return new object[] { 4.999, Vdd_5V0, 31 };
+    yield return new object[] { 5.000, Vdd_5V0, 31 };
+
+    yield return new object[] { 0.0, Vdd_3V3, 0 };
+    yield return new object[] { 0.106, Vdd_3V3, 1 };
+    yield return new object[] { 3.299, Vdd_3V3, 31 };
+    yield return new object[] { 3.300, Vdd_3V3, 31 };
+
+    yield return new object[] { 0.0, Vdd_Zero, 0 };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_WriteAnalogVoltageSyncOrAsync_WithReferenceVoltage))]
+  public void WriteAnalogVoltageAsync_WithReferenceVoltage(
+    double voltage,
+    double referenceVoltage,
+    int expectedAnalogRawValue
+  )
+    => WriteAnalogVoltageSyncOrAsync_WithReferenceVoltage(
+      voltage: voltage,
+      referenceVoltage: referenceVoltage,
+      expectedAnalogRawValue: expectedAnalogRawValue,
+      static async (gpPins, voltage, referenceVoltage) => await gpPins.WriteAnalogVoltageAsync(voltage, referenceVoltage).ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_WriteAnalogVoltageSyncOrAsync_WithReferenceVoltage))]
+  public void WriteAnalogVoltage_WithReferenceVoltage(
+    double voltage,
+    double referenceVoltage,
+    int expectedAnalogRawValue
+  )
+    => WriteAnalogVoltageSyncOrAsync_WithReferenceVoltage(
+      voltage: voltage,
+      referenceVoltage: referenceVoltage,
+      expectedAnalogRawValue: expectedAnalogRawValue,
+      static (gpPins, voltage, referenceVoltage) => {
+        gpPins.WriteAnalogVoltage(voltage, referenceVoltage);
+        return default;
+      }
+    );
+
+  private void WriteAnalogVoltageSyncOrAsync_WithReferenceVoltage(
+    double voltage,
+    double referenceVoltage,
+    int expectedAnalogRawValue,
+    Func<IGpControllerGroup, double, double, ValueTask> writeAnalogVoltageAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation
+    const byte InitialGp1Settings = 0b_000_0_0_000; // GPIO operation
+    const byte InitialGp2Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC1)
+    const byte InitialGp3Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC2)
+    const byte InitialChipSettings2 = 0b_00_0_00000; // DAC: VDD; Output = 0
+
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings,
+        chipSettings2: InitialChipSettings2
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Mcp2221AControllerTests.AppendPseudoResponse(
+      mcp2221A,
+      // [MCP2221A] 3.1.13 SET SRAM SETTINGS
+      // [1] 0x00: Command completed successfully
+      // [2-63] Don't care
+      "60-00-" + string.Join("-", Enumerable.Repeat("00", 62))
+    );
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    var expectedSentCommand = new byte[64];
+
+    expectedSentCommand[0] = 0x60; // [0] SET SRAM SETTINGS
+    // [1-2] don't care
+    expectedSentCommand[3] = InitialChipSettings2 >> 5; // [3] DAC Voltage Reference
+    expectedSentCommand[4] = (byte)(0b_1_00_00000 | expectedAnalogRawValue); // [4] Set DAC Output Value
+    // [5-6] don't care
+    expectedSentCommand[7] = 0; // [7] Alter GPIO configuration = Do not alter the current GP designation (0)
+    expectedSentCommand[8] = InitialGp0Settings; // [8] GP0 settings
+    expectedSentCommand[9] = InitialGp1Settings; // [9] GP1 settings
+    expectedSentCommand[10] = InitialGp2Settings; // [10] GP2 settings
+    expectedSentCommand[11] = InitialGp3Settings; // [11] GP3 settings
+
+    Assert.That(
+      async () => await writeAnalogVoltageAsyncFunc(mcp2221A.GpPins, voltage, referenceVoltage),
+      Throws.Nothing
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, 0),
+      SequenceIs.EqualTo(expectedSentCommand)
+    );
+
+    Assert.That(mcp2221A.LastWriteAnalogRawValue, Is.EqualTo(expectedAnalogRawValue));
+
+    Assert.That(((IDacController)mcp2221A.GpPin2).LastWriteAnalogRawValue, Is.EqualTo(expectedAnalogRawValue));
+    Assert.That(((IDacController)mcp2221A.GpPin3).LastWriteAnalogRawValue, Is.EqualTo(expectedAnalogRawValue));
+  }
+
+  private static System.Collections.IEnumerable YieldTestCases_WriteAnalogVoltageSyncOrAsync_WithReferenceVoltage_ArgumentException()
+  {
+    const double Vdd_5V0 = 5.0;
+    const double Vdd_3V3 = 3.3;
+    const double VrmOff = 0.0;
+    const double Vrm1024 = 1.024;
+    const double Vrm2048 = 2.048;
+    const double Vrm4096 = 4.096;
+
+    const string ParamNameVoltage = "voltage";
+    const string ParamNameReferenceVoltage = "referenceVoltage";
+
+    static IResolveConstraint ThrowsArgumentOutOfRangeException(string expectedParamName, object expectedActualValue)
+      => Throws
+        .TypeOf<ArgumentOutOfRangeException>()
+        .With
+        .Property(nameof(ArgumentOutOfRangeException.ParamName))
+        .EqualTo(expectedParamName)
+        .And
+        .Property(nameof(ArgumentOutOfRangeException.ActualValue))
+        .EqualTo(expectedActualValue);
+
+    static IResolveConstraint ThrowsArgumentException(string expectedParamName)
+      => Throws
+        .TypeOf<ArgumentException>()
+        .With
+        .Property(nameof(ArgumentException.ParamName))
+        .EqualTo(expectedParamName);
+
+    // voltage exceeds referenceVoltage
+    yield return new object[] { 5.05, Vdd_5V0, ThrowsArgumentOutOfRangeException(ParamNameVoltage, 5.05) };
+    yield return new object[] { 3.33, Vdd_3V3, ThrowsArgumentOutOfRangeException(ParamNameVoltage, 3.33) };
+
+    yield return new object[] { 1.025, Vrm1024, ThrowsArgumentOutOfRangeException(ParamNameVoltage, 1.025) };
+    yield return new object[] { 1.1, Vrm1024, ThrowsArgumentOutOfRangeException(ParamNameVoltage, 1.1) };
+
+    yield return new object[] { 2.049, Vrm2048, ThrowsArgumentOutOfRangeException(ParamNameVoltage, 2.049) };
+    yield return new object[] { 2.1, Vrm2048, ThrowsArgumentOutOfRangeException(ParamNameVoltage, 2.1) };
+
+    yield return new object[] { 4.097, Vrm4096, ThrowsArgumentOutOfRangeException(ParamNameVoltage, 4.097) };
+    yield return new object[] { 4.2, Vrm4096, ThrowsArgumentOutOfRangeException(ParamNameVoltage, 4.2) };
+
+    yield return new object[] { 0.1, VrmOff, ThrowsArgumentOutOfRangeException(ParamNameVoltage, 0.1) };
+
+    // voltage exceeds max output value (31)
+    yield return new object[] { 5.1, Vdd_5V0, ThrowsArgumentOutOfRangeException(ParamNameVoltage, 5.1) };
+
+    // negative values
+    yield return new object[] { -0.1, Vdd_5V0, ThrowsArgumentOutOfRangeException(ParamNameVoltage, -0.1) };
+    yield return new object[] { 0.0, -1.0, ThrowsArgumentOutOfRangeException(ParamNameReferenceVoltage, -1.0) };
+    yield return new object[] { -1.0, -1.0, ThrowsArgumentOutOfRangeException(ParamNameVoltage, -1.0) };
+
+    // NaN
+    yield return new object[] { double.NaN, Vdd_5V0, ThrowsArgumentException(ParamNameVoltage) };
+    yield return new object[] { 0.0, double.NaN, ThrowsArgumentException(ParamNameReferenceVoltage) };
+    yield return new object[] { double.NaN, double.NaN, ThrowsArgumentException(ParamNameVoltage) };
+
+    // +/- infinity
+    yield return new object[] { double.PositiveInfinity, Vdd_5V0, ThrowsArgumentException(ParamNameVoltage) };
+    yield return new object[] { double.NegativeInfinity, Vdd_5V0, ThrowsArgumentException(ParamNameVoltage) };
+    yield return new object[] { 0.0, double.PositiveInfinity, ThrowsArgumentException(ParamNameReferenceVoltage) };
+    yield return new object[] { 0.0, double.NegativeInfinity, ThrowsArgumentException(ParamNameReferenceVoltage) };
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_WriteAnalogVoltageSyncOrAsync_WithReferenceVoltage_ArgumentException))]
+  public void WriteAnalogVoltageAsync_WithReferenceVoltage_ArgumentException(
+    double voltage,
+    double referenceVoltage,
+    IResolveConstraint throwsArgumentExceptionConstraint
+  )
+    => WriteAnalogVoltageSyncOrAsync_WithReferenceVoltage_ArgumentException(
+      voltage: voltage,
+      referenceVoltage: referenceVoltage,
+      throwsArgumentExceptionConstraint: throwsArgumentExceptionConstraint,
+      static async (gpPins, voltage, referenceVoltage) => await gpPins.WriteAnalogVoltageAsync(voltage, referenceVoltage).ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_WriteAnalogVoltageSyncOrAsync_WithReferenceVoltage_ArgumentException))]
+  public void WriteAnalogVoltage_WithReferenceVoltage_ArgumentException(
+    double voltage,
+    double referenceVoltage,
+    IResolveConstraint throwsArgumentExceptionConstraint
+  )
+    => WriteAnalogVoltageSyncOrAsync_WithReferenceVoltage_ArgumentException(
+      voltage: voltage,
+      referenceVoltage: referenceVoltage,
+      throwsArgumentExceptionConstraint: throwsArgumentExceptionConstraint,
+      static (gpPins, voltage, referenceVoltage) => {
+        gpPins.WriteAnalogVoltage(voltage, referenceVoltage);
+        return default;
+      }
+    );
+
+  private void WriteAnalogVoltageSyncOrAsync_WithReferenceVoltage_ArgumentException(
+    double voltage,
+    double referenceVoltage,
+    IResolveConstraint throwsArgumentExceptionConstraint,
+    Func<IGpControllerGroup, double, double, ValueTask> writeAnalogVoltageAsyncFunc
+  )
+  {
+    const byte InitialChipSettings2 = 0b_00_0_00000; // DAC: VDD; Output = 0
+
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        chipSettings2: InitialChipSettings2
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    // command should not be sent
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await writeAnalogVoltageAsyncFunc(mcp2221A.GpPins, voltage, referenceVoltage),
+      throwsArgumentExceptionConstraint
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
   }
 }

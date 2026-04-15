@@ -149,6 +149,12 @@ internal sealed class SramSettings {
     }
   }
 
+  public byte ReadDacVoltageReferenceByte()
+    => settings[OffsetOfDacVoltageReference];
+
+  public byte ReadDacOutputValueByte()
+    => settings[OffsetOfDacOutputValue];
+
   public byte ReadAdcVoltageReferenceByte()
     => settings[OffsetOfAdcVoltageReference];
 

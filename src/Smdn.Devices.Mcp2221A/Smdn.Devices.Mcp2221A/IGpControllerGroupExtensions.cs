@@ -908,5 +908,173 @@ public static class IGpControllerGroupExtensions {
         ).ConfigureAwait(false)
       ).AsVoltage(referenceVoltage);
     }
+
+    /// <summary>
+    /// Sets the DAC output to the specified voltage [V] based on the currently
+    /// configured voltage reference source (VRM).
+    /// </summary>
+    /// <param name="voltage">
+    /// The target voltage [V] to be output from the GP pins assigned to DAC output.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+    /// The default value is <see cref="CancellationToken.None"/>.
+    /// </param>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when <paramref name="voltage"/> is negative, or the converted DAC output
+    /// value is out of range (exceeds the reference voltage specified by
+    /// <see cref="IGpControllerGroup.CurrentDacReferenceSource"/>).
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="voltage"/> is <see cref="double.NaN"/>,
+    /// <see cref="double.PositiveInfinity"/> or <see cref="double.NegativeInfinity"/>.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when <see cref="IGpControllerGroup.CurrentDacReferenceSource"/> is
+    /// <see cref="VoltageReferenceSource.Vdd"/>, because the Vdd voltage value
+    /// required for calculation is not provided in this overload.
+    /// </exception>
+    /// <remarks>
+    /// <para>
+    /// This method calculates the nearest 5-bit raw value (0-31) based on the
+    /// current <see cref="IGpControllerGroup.CurrentDacReferenceSource"/> and applies
+    /// it to the DAC module.
+    /// </para>
+    /// <para>
+    /// If <see cref="IGpControllerGroup.CurrentDacReferenceSource"/> is
+    /// <see cref="VoltageReferenceSource.VrmOff"/>, this method always sets <c>0</c> for
+    /// the DAC output regardless of the value of <paramref name="voltage"/>.
+    /// </para>
+    /// <para>
+    /// Note that this method does not account for cases where the actual VDD supplied
+    /// to the MCP2221A is lower than the reference voltage specified by
+    /// <see cref="IGpControllerGroup.CurrentDacReferenceSource"/>.
+    /// </para>
+    /// </remarks>
+    /// <seealso cref="WriteAnalogVoltage(IGpControllerGroup, double, double, CancellationToken)"/>
+    /// <seealso cref="IGpControllerGroup.ApplyDacRawValue"/>
+    public void WriteAnalogVoltage(
+      double voltage,
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      gpPins.ApplyDacRawValue(
+        value: DacVoltageConverter.ToOutputValue(
+          voltage: voltage,
+          dacVoltageReference: gpPins.CurrentDacReferenceSource
+        ),
+        cancellationToken: cancellationToken
+      );
+    }
+
+    /// <summary>
+    /// Asynchronously sets the DAC output to the specified voltage [V]
+    /// based on the currently configured voltage reference source (VRM).
+    /// </summary>
+    /// <inheritdoc cref="WriteAnalogVoltage(IGpControllerGroup, double, CancellationToken)"/>
+    public ValueTask WriteAnalogVoltageAsync(
+      double voltage,
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      return gpPins.ApplyDacRawValueAsync(
+        value: DacVoltageConverter.ToOutputValue(
+          voltage: voltage,
+          dacVoltageReference: gpPins.CurrentDacReferenceSource
+        ),
+        cancellationToken: cancellationToken
+      );
+    }
+
+    /// <summary>
+    /// Sets the DAC output to the specified voltage [V] based on the specified
+    /// reference voltage value.
+    /// </summary>
+    /// <param name="voltage">
+    /// The target voltage [V] to be output from the GP pins assigned to DAC output.
+    /// </param>
+    /// <param name="referenceVoltage">
+    /// The reference voltage [V] used for calculation (e.g., the measured VDD voltage
+    /// or a specific internal reference voltage).
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+    /// The default value is <see cref="CancellationToken.None"/>.
+    /// </param>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when <paramref name="voltage"/> is negative, <paramref name="voltage"/> exceeds
+    /// <paramref name="referenceVoltage"/>, or <paramref name="referenceVoltage"/> is negative.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="voltage"/> or <paramref name="referenceVoltage"/> is
+    /// <see cref="double.NaN"/>, <see cref="double.PositiveInfinity"/> or <see cref="double.NegativeInfinity"/>.
+    /// </exception>
+    /// <remarks>
+    /// <para>
+    /// This method calculates the 5-bit raw value (0-31) using the following formula,
+    /// rounding the result to the nearest integer (away from zero):
+    /// <c>
+    ///   OutputValue = <see cref="Math.Round(double, MidpointRounding)"/>(31 * <paramref name="voltage"/> / <paramref name="referenceVoltage"/>, <see cref="MidpointRounding.AwayFromZero"/>);
+    /// </c>
+    /// The resulting value is clamped to the range 0 to 31 and applied to the DAC module.
+    /// </para>
+    /// <para>
+    /// If <paramref name="referenceVoltage"/> is <c>0.0</c>, this method always sets
+    /// <c>0</c> for the DAC output regardless of the value of <paramref name="voltage"/>.
+    /// </para>
+    /// <para>
+    /// Unlike the overload that uses the current VRM configuration, this method
+    /// uses the provided <paramref name="referenceVoltage"/> for calculation
+    /// regardless of the actual <see cref="IGpControllerGroup.CurrentDacReferenceSource"/>
+    /// setting.
+    /// </para>
+    /// <para>
+    /// Note that this method does not change the hardware's reference voltage source
+    /// configuration; it only affects the output raw value.
+    /// </para>
+    /// </remarks>
+    /// <seealso cref="IGpControllerGroup.ApplyDacRawValue"/>
+    public void WriteAnalogVoltage(
+      double voltage,
+      double referenceVoltage,
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      gpPins.ApplyDacRawValue(
+        value: DacVoltageConverter.ToOutputValue(
+          voltage: voltage,
+          referenceVoltage: referenceVoltage
+        ),
+        cancellationToken: cancellationToken
+      );
+    }
+
+    /// <summary>
+    /// Asynchronously sets the DAC output to the specified voltage [V] based on the
+    /// specified reference voltage value.
+    /// </summary>
+    /// <inheritdoc cref="WriteAnalogVoltage(IGpControllerGroup, double, double, CancellationToken)"/>
+    public ValueTask WriteAnalogVoltageAsync(
+      double voltage,
+      double referenceVoltage,
+      CancellationToken cancellationToken = default
+    )
+    {
+      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+
+      return gpPins.ApplyDacRawValueAsync(
+        value: DacVoltageConverter.ToOutputValue(
+          voltage: voltage,
+          referenceVoltage: referenceVoltage
+        ),
+        cancellationToken: cancellationToken
+      );
+    }
   }
 }
