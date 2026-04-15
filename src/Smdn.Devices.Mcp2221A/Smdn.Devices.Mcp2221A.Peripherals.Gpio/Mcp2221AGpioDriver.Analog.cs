@@ -90,7 +90,7 @@ partial class Mcp2221AGpioDriver {
   )
   {
     try {
-      SetGpSettings(
+      SetSramSettings(
         sramSettings: sramSettings.ModifyDacSettings(
           dacVoltageReferenceSource: null,
           dacOutputValue: ThrowIfDacOutputValueOutOfRange(value, nameof(value))
@@ -113,7 +113,7 @@ partial class Mcp2221AGpioDriver {
   )
   {
     try {
-      await SetGpSettingsAsync(
+      await SetSramSettingsAsync(
         sramSettings: sramSettings.ModifyDacSettings(
           dacVoltageReferenceSource: null,
           dacOutputValue: ThrowIfDacOutputValueOutOfRange(value, nameof(value))
