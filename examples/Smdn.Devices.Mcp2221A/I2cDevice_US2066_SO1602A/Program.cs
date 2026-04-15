@@ -8,7 +8,6 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
 using Smdn.Devices.Mcp2221A;
-using Smdn.Devices.Mcp2221A.Peripherals.I2c;
 using Smdn.Devices.US2066;
 using Smdn.IO.UsbHid.DependencyInjection;
 

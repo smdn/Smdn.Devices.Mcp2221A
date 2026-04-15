@@ -12,7 +12,6 @@ using Iot.Device.Common;
 using Microsoft.Extensions.DependencyInjection;
 
 using Smdn.Devices.Mcp2221A;
-using Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
 using Smdn.IO.UsbHid.DependencyInjection;
 

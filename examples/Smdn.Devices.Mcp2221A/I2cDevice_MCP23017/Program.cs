@@ -9,7 +9,6 @@ using Iot.Device.Mcp23xxx;
 using Microsoft.Extensions.DependencyInjection;
 
 using Smdn.Devices.Mcp2221A;
-using Smdn.Devices.Mcp2221A.Peripherals.I2c;
 using Smdn.IO.UsbHid.DependencyInjection;
 
 var services = new ServiceCollection();
