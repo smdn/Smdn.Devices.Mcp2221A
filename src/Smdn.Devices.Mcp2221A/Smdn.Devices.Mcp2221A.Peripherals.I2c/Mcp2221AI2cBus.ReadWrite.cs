@@ -200,6 +200,8 @@ partial class Mcp2221AI2cBus {
 
           buffer = buffer.Slice(stateMachine.ReadLength);
 
+          totalReadLength += stateMachine.ReadLength;
+
           if (stateMachine.ReadLength < lengthToTransfer)
             break;
           if (buffer.IsEmpty)
@@ -279,6 +281,8 @@ partial class Mcp2221AI2cBus {
           readBufferMemory.Span.Slice(0, stateMachine.ReadLength).CopyTo(buffer);
 
           buffer = buffer.Slice(stateMachine.ReadLength);
+
+          totalReadLength += stateMachine.ReadLength;
 
           if (stateMachine.ReadLength < lengthToTransfer)
             break;
