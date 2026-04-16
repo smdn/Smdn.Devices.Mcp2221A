@@ -4,7 +4,6 @@
 #pragma warning disable CA1848, CA1873, CA2254
 
 using System;
-using System.Buffers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -57,8 +56,9 @@ partial class Mcp2221AI2cBus {
 
         foreach (var (constructCommand, parseResponse) in stateMachine.IterateWriteCommands()) {
           await Device.CommandAsync(
-            userData: buffer.Slice(0, lengthToTransfer),
-            arg: (address, Memory<byte>.Empty),
+            commandInput: buffer.Slice(0, lengthToTransfer),
+            responseOutput: default,
+            arg: address,
             cancellationToken: cancellationToken,
             constructCommand: constructCommand,
             parseResponse: parseResponse
@@ -118,8 +118,9 @@ partial class Mcp2221AI2cBus {
 
         foreach (var (constructCommand, parseResponse) in stateMachine.IterateWriteCommands()) {
           Device.Command(
-            userData: buffer.Slice(0, lengthToTransfer),
-            arg: (address, Memory<byte>.Empty),
+            commandInput: buffer.Slice(0, lengthToTransfer),
+            responseOutput: default,
+            arg: address,
             cancellationToken: cancellationToken,
             constructCommand: constructCommand,
             parseResponse: parseResponse
@@ -173,46 +174,37 @@ partial class Mcp2221AI2cBus {
     try {
       logger?.LogInformation(EventIdI2cCommand, $"I2C Read {buffer.Length} bytes from 0x{address}");
 
-      var readBuffer = ArrayPool<byte>.Shared.Rent(MaxTransferLengthPerCommand);
+      var totalReadLength = 0;
 
-      try {
-        var totalReadLength = 0;
+      for (; ; ) {
+        var lengthToTransfer = Math.Min(buffer.Length, MaxTransferLengthPerCommand);
+        var stateMachine = new I2cOperationStateMachine(logger, busSpeedDivider);
 
-        for (; ; ) {
-          var lengthToTransfer = Math.Min(buffer.Length, MaxTransferLengthPerCommand);
-          var readBufferMemory = readBuffer.AsMemory(0, lengthToTransfer);
-          var stateMachine = new I2cOperationStateMachine(logger, busSpeedDivider);
-
-          foreach (var (constructCommand, parseResponse) in stateMachine.IterateReadCommands()) {
-            await Device.CommandAsync(
-              userData: buffer.Slice(0, lengthToTransfer),
-              arg: (address, readBufferMemory),
-              cancellationToken: cancellationToken,
-              constructCommand: constructCommand,
-              parseResponse: parseResponse
-            ).ConfigureAwait(false);
-          }
-
-          if (stateMachine.ReadLength < 0)
-            break;
-
-          readBufferMemory.Slice(0, stateMachine.ReadLength).CopyTo(buffer);
-
-          buffer = buffer.Slice(stateMachine.ReadLength);
-
-          totalReadLength += stateMachine.ReadLength;
-
-          if (stateMachine.ReadLength < lengthToTransfer)
-            break;
-          if (buffer.IsEmpty)
-            break;
+        foreach (var (constructCommand, parseResponse) in stateMachine.IterateReadCommands()) {
+          await Device.CommandAsync(
+            commandInput: buffer.Slice(0, lengthToTransfer),
+            responseOutput: buffer.Slice(0, lengthToTransfer),
+            arg: address,
+            cancellationToken: cancellationToken,
+            constructCommand: constructCommand,
+            parseResponse: parseResponse
+          ).ConfigureAwait(false);
         }
 
-        return totalReadLength;
+        if (stateMachine.ReadLength < 0)
+          break;
+
+        buffer = buffer.Slice(stateMachine.ReadLength);
+
+        totalReadLength += stateMachine.ReadLength;
+
+        if (stateMachine.ReadLength < lengthToTransfer)
+          break;
+        if (buffer.IsEmpty)
+          break;
       }
-      finally {
-        ArrayPool<byte>.Shared.Return(readBuffer);
-      }
+
+      return totalReadLength;
     }
     catch (Exception ex) {
       logger?.LogError(EventIdI2cCommand, $"I2C Read from 0x{address} failed: {ex.Message}");
@@ -255,46 +247,37 @@ partial class Mcp2221AI2cBus {
     try {
       logger?.LogInformation(EventIdI2cCommand, $"I2C Read {buffer.Length} bytes from 0x{address}");
 
-      var readBuffer = ArrayPool<byte>.Shared.Rent(MaxTransferLengthPerCommand);
+      var totalReadLength = 0;
 
-      try {
-        var totalReadLength = 0;
+      for (; ; ) {
+        var lengthToTransfer = Math.Min(buffer.Length, MaxTransferLengthPerCommand);
+        var stateMachine = new I2cOperationStateMachine(logger, busSpeedDivider);
 
-        for (; ; ) {
-          var lengthToTransfer = Math.Min(buffer.Length, MaxTransferLengthPerCommand);
-          var readBufferMemory = readBuffer.AsMemory(0, lengthToTransfer);
-          var stateMachine = new I2cOperationStateMachine(logger, busSpeedDivider);
-
-          foreach (var (constructCommand, parseResponse) in stateMachine.IterateReadCommands()) {
-            Device.Command(
-              userData: buffer.Slice(0, lengthToTransfer),
-              arg: (address, readBufferMemory),
-              cancellationToken: cancellationToken,
-              constructCommand: constructCommand,
-              parseResponse: parseResponse
-            );
-          }
-
-          if (stateMachine.ReadLength < 0)
-            break;
-
-          readBufferMemory.Span.Slice(0, stateMachine.ReadLength).CopyTo(buffer);
-
-          buffer = buffer.Slice(stateMachine.ReadLength);
-
-          totalReadLength += stateMachine.ReadLength;
-
-          if (stateMachine.ReadLength < lengthToTransfer)
-            break;
-          if (buffer.IsEmpty)
-            break;
+        foreach (var (constructCommand, parseResponse) in stateMachine.IterateReadCommands()) {
+          Device.Command(
+            commandInput: buffer.Slice(0, lengthToTransfer),
+            responseOutput: buffer.Slice(0, lengthToTransfer),
+            arg: address,
+            cancellationToken: cancellationToken,
+            constructCommand: constructCommand,
+            parseResponse: parseResponse
+          );
         }
 
-        return totalReadLength;
+        if (stateMachine.ReadLength < 0)
+          break;
+
+        buffer = buffer.Slice(stateMachine.ReadLength);
+
+        totalReadLength += stateMachine.ReadLength;
+
+        if (stateMachine.ReadLength < lengthToTransfer)
+          break;
+        if (buffer.IsEmpty)
+          break;
       }
-      finally {
-        ArrayPool<byte>.Shared.Return(readBuffer);
-      }
+
+      return totalReadLength;
     }
     catch (Exception ex) {
       logger?.LogError(EventIdI2cCommand, $"I2C Read from 0x{address} failed: {ex.Message}");

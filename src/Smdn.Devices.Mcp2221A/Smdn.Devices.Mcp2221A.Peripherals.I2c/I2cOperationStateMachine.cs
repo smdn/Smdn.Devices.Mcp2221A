@@ -58,8 +58,8 @@ internal class I2cOperationStateMachine {
 
 #pragma warning disable CS0164
   public IEnumerable<(
-    Mcp2221AConstructCommandAction<(I2cAddress Address, Memory<byte> Buffer)> ConstructCommand,
-    Mcp2221AParseResponseFunc<(I2cAddress Address, Memory<byte> Buffer), bool> ParseResponse
+    Mcp2221AConstructCommandWithSpanAction<I2cAddress> ConstructCommand,
+    Mcp2221AParseResponseWithSpanFunc<I2cAddress, bool> ParseResponse
   )>
   IterateWriteCommands()
   {
@@ -108,8 +108,8 @@ internal class I2cOperationStateMachine {
 
 #pragma warning disable CS0164
   public IEnumerable<(
-    Mcp2221AConstructCommandAction<(I2cAddress Address, Memory<byte> Buffer)> ConstructCommand,
-    Mcp2221AParseResponseFunc<(I2cAddress Address, Memory<byte> Buffer), bool> ParseResponse
+    Mcp2221AConstructCommandWithSpanAction<I2cAddress> ConstructCommand,
+    Mcp2221AParseResponseWithSpanFunc<I2cAddress, bool> ParseResponse
   )>
   IterateReadCommands()
   {
@@ -203,8 +203,8 @@ internal class I2cOperationStateMachine {
 
   private void StatusConstructCommand(
     Span<byte> comm,
-    ReadOnlySpan<byte> userData,
-    (I2cAddress Address, Memory<byte> _) args
+    ReadOnlySpan<byte> buffer,
+    I2cAddress address
   )
   {
     // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
@@ -223,10 +223,10 @@ internal class I2cOperationStateMachine {
 
   private bool StatusParseResponse(
     ReadOnlySpan<byte> resp,
-    (I2cAddress Address, Memory<byte> _) args)
+    Span<byte> buffer,
+    I2cAddress address
+  )
   {
-    var (address, _) = args;
-
     // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
     _ = resp[1] switch {
       0x00 => default, // Command completed successfully
@@ -260,27 +260,24 @@ internal class I2cOperationStateMachine {
 
   private void WriteConstructCommand(
     Span<byte> comm,
-    ReadOnlySpan<byte> userData,
-    (I2cAddress Address, Memory<byte> _) args
+    ReadOnlySpan<byte> data,
+    I2cAddress address
   )
   {
-    var (address, _) = args;
-
     // [MCP2221A] 3.1.5 I2C WRITE DATA
     comm[0] = 0x90; // I2C Write Data
-    comm[1] = (byte)(userData.Length & 0x00FF); // Requested I2C transfer length - low byte
-    comm[2] = (byte)(userData.Length >> 8); // Requested I2C transfer length - high byte
+    comm[1] = (byte)(data.Length & 0x00FF); // Requested I2C transfer length - low byte
+    comm[2] = (byte)(data.Length >> 8); // Requested I2C transfer length - high byte
     comm[3] = address.GetWriteAddress(); // I2C slave address to communicate with
-    userData.CopyTo(comm.Slice(4));
+    data.CopyTo(comm.Slice(4));
   }
 
   private bool WriteParseResponse(
     ReadOnlySpan<byte> resp,
-    (I2cAddress Address, Memory<byte> _) args
+    Span<byte> data,
+    I2cAddress address
   )
   {
-    var (address, _) = args;
-
     // [MCP2221A] 3.1.5 I2C WRITE DATA
     operationState = resp[1] switch {
       0x00 => OperationState.AdvanceToNextStep, // Command completed successfully
@@ -293,26 +290,23 @@ internal class I2cOperationStateMachine {
 
   private void ReadConstructCommand(
     Span<byte> comm,
-    ReadOnlySpan<byte> userData,
-    (I2cAddress Address, Memory<byte> Buffer) args
+    ReadOnlySpan<byte> buffer,
+    I2cAddress address
   )
   {
-    var (address, _) = args;
-
     // [MCP2221A] 3.1.8 I2C READ DATA
     comm[0] = 0x91; // I2C Read Data
-    comm[1] = (byte)(userData.Length & 0x00FF); // Requested I2C transfer length - low byte
-    comm[2] = (byte)(userData.Length >> 8); // Requested I2C transfer length - high byte
+    comm[1] = (byte)(buffer.Length & 0x00FF); // Requested I2C transfer length - low byte
+    comm[2] = (byte)(buffer.Length >> 8); // Requested I2C transfer length - high byte
     comm[3] = address.GetReadAddress(); // I2C slave address to communicate with
   }
 
   private bool ReadParseResponse(
     ReadOnlySpan<byte> resp,
-    (I2cAddress Address, Memory<byte> Buffer) args
+    Span<byte> buffer,
+    I2cAddress address
   )
   {
-    var (address, _) = args;
-
     // [MCP2221A] 3.1.8 I2C READ DATA
     operationState = resp[1] switch {
       0x00 => OperationState.AdvanceToNextStep, // Command completed successfully
@@ -325,23 +319,22 @@ internal class I2cOperationStateMachine {
 
   private void GetConstructCommand(
     Span<byte> comm,
-    ReadOnlySpan<byte> userData,
-    (I2cAddress Address, Memory<byte> Buffer) args
+    ReadOnlySpan<byte> buffer,
+    I2cAddress address
   )
   {
     // [MCP2221A] 3.1.10 I2C READ DATA - GET I2C DATA
     comm[0] = 0x40; // I2C Read Data - Get I2C Data
-    comm[1] = (byte)(userData.Length & 0x00FF); // [??] Requested I2C transfer length - low byte
-    comm[2] = (byte)(userData.Length >> 8); // [??] Requested I2C transfer length - high byte
+    comm[1] = (byte)(buffer.Length & 0x00FF); // [??] Requested I2C transfer length - low byte
+    comm[2] = (byte)(buffer.Length >> 8); // [??] Requested I2C transfer length - high byte
   }
 
   private bool GetParseResponse(
     ReadOnlySpan<byte> resp,
-    (I2cAddress Address, Memory<byte> Buffer) args
+    Span<byte> buffer,
+    I2cAddress address
   )
   {
-    var (address, buffer) = args;
-
     // [MCP2221A] 3.1.10 I2C READ DATA - GET I2C DATA
     operationState = resp[1] switch {
       0x00 => OperationState.AdvanceToNextStep, // Command completed successfully
@@ -357,7 +350,7 @@ internal class I2cOperationStateMachine {
         _ => throw new I2cCommandException(address, $"unexpected data length ({resp[3]})"),
       };
 
-      resp.Slice(4, ReadLength).CopyTo(buffer.Span);
+      resp.Slice(4, ReadLength).CopyTo(buffer);
     }
 
     return operationState == OperationState.AdvanceToNextStep;

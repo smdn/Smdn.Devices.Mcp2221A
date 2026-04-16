@@ -16,9 +16,9 @@ namespace Smdn.Devices.Mcp2221A;
 /// </summary>
 public sealed class Mcp2221AInfo : IMcp2221AInfo {
   private static class RetrieveRevisionCommand {
-#pragma warning disable IDE0060, SA1313 // [IDE0060] Remove unused parameter [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
-    public static void ConstructCommand(Span<byte> comm, ReadOnlySpan<byte> userData, None _)
-#pragma warning restore IDE0060, SA1313
+#pragma warning disable SA1313 // [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
+    public static void ConstructCommand(Span<byte> comm, None _)
+#pragma warning restore SA1313
     {
       // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
       comm[0] = 0x10; // Status/Set Parameter
@@ -46,9 +46,7 @@ public sealed class Mcp2221AInfo : IMcp2221AInfo {
   }
 
   private static class RetrieveFlashStringCommand {
-#pragma warning disable IDE0060 // [IDE0060] Remove unused parameter
-    public static void ConstructCommand(Span<byte> comm, ReadOnlySpan<byte> userData, ReadFlashDataSubCode subCode)
-#pragma warning restore IDE0060
+    public static void ConstructCommand(Span<byte> comm, ReadFlashDataSubCode subCode)
     {
       // [MCP2221A] 3.1.2 READ FLASH DATA
       comm[0] = 0xB0; // Read Flash Data

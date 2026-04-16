@@ -13,11 +13,12 @@ internal static class IMcp2221ATransceiverExtensions {
       CancellationToken cancellationToken
     )
       => transceiver.Command(
-        userData: default,
-        arg: default,
-        cancellationToken: cancellationToken,
-        constructCommand: constructCommand,
-        parseResponse: parseResponse
+        commandInput: default,
+        responseOutput: default,
+        arg: (ConstructCommand: constructCommand, ParseResponse: parseResponse),
+        constructCommand: static (command, _, arg) => arg.ConstructCommand(command, default),
+        parseResponse: static (response, _, arg) => arg.ParseResponse(response, default),
+        cancellationToken: cancellationToken
       );
 
     public ValueTask<TResponse> CommandAsync<TResponse>(
@@ -26,10 +27,11 @@ internal static class IMcp2221ATransceiverExtensions {
       CancellationToken cancellationToken
     )
       => transceiver.CommandAsync(
-        userData: default,
-        arg: default,
-        constructCommand: constructCommand,
-        parseResponse: parseResponse,
+        commandInput: default,
+        responseOutput: default,
+        arg: (ConstructCommand: constructCommand, ParseResponse: parseResponse),
+        constructCommand: static (command, _, arg) => arg.ConstructCommand(command, default),
+        parseResponse: static (response, _, arg) => arg.ParseResponse(response, default),
         cancellationToken: cancellationToken
       );
 
@@ -40,11 +42,12 @@ internal static class IMcp2221ATransceiverExtensions {
       CancellationToken cancellationToken
     )
       => transceiver.Command(
-        userData: default,
-        arg: arg,
-        cancellationToken: cancellationToken,
-        constructCommand: constructCommand,
-        parseResponse: parseResponse
+        commandInput: default,
+        responseOutput: default,
+        arg: (Argument: arg, ConstructCommand: constructCommand, ParseResponse: parseResponse),
+        constructCommand: static (command, _, arg) => arg.ConstructCommand(command, arg.Argument),
+        parseResponse: static (response, _, arg) => arg.ParseResponse(response, arg.Argument),
+        cancellationToken: cancellationToken
       );
 
     public ValueTask<TResponse> CommandAsync<TArg, TResponse>(
@@ -54,10 +57,11 @@ internal static class IMcp2221ATransceiverExtensions {
       CancellationToken cancellationToken
     )
       => transceiver.CommandAsync(
-        userData: default,
-        arg: arg,
-        constructCommand: constructCommand,
-        parseResponse: parseResponse,
+        commandInput: default,
+        responseOutput: default,
+        arg: (Argument: arg, ConstructCommand: constructCommand, ParseResponse: parseResponse),
+        constructCommand: static (command, _, arg) => arg.ConstructCommand(command, arg.Argument),
+        parseResponse: static (response, _, arg) => arg.ParseResponse(response, arg.Argument),
         cancellationToken: cancellationToken
       );
   }

@@ -38,13 +38,10 @@ partial class Mcp2221AGpioDriver {
   private const byte GpioDirectionInvalid = 0xEF;
 
   private static class SetGpioOutputValuesCommand {
-#pragma warning disable IDE0060 // [IDE0060] Remove unused parameter
     public static void ConstructCommand(
       Span<byte> comm,
-      ReadOnlySpan<byte> userData,
       Memory<byte> gpioValueBytes
     )
-#pragma warning restore IDE0060
     {
       // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
       comm[0] = 0x50; // Set GPIO Output Values
@@ -226,7 +223,6 @@ partial class Mcp2221AGpioDriver {
 #pragma warning disable IDE0060 // [IDE0060] Remove unused parameter
     public static void ConstructCommand(
       Span<byte> comm,
-      ReadOnlySpan<byte> userData,
       Memory<byte> gpioValueBytes
     )
 #pragma warning restore IDE0060

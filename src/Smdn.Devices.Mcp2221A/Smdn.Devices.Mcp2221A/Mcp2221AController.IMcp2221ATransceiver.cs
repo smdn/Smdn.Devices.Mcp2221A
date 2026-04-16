@@ -10,14 +10,16 @@ namespace Smdn.Devices.Mcp2221A;
 public partial class Mcp2221AController : IMcp2221ATransceiver {
 #pragma warning restore IDE0040
   TResponse IMcp2221ATransceiver.Command<TArg, TResponse>(
-    ReadOnlySpan<byte> userData,
+    ReadOnlySpan<byte> commandInput,
+    Span<byte> responseOutput,
     TArg arg,
-    Mcp2221AConstructCommandAction<TArg> constructCommand,
-    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse,
+    Mcp2221AConstructCommandWithSpanAction<TArg> constructCommand,
+    Mcp2221AParseResponseWithSpanFunc<TArg, TResponse> parseResponse,
     CancellationToken cancellationToken
   )
     => Transceiver.Command(
-      userData: userData,
+      commandInput: commandInput,
+      responseOutput: responseOutput,
       arg: arg,
       cancellationToken: cancellationToken,
       constructCommand: constructCommand,
@@ -25,14 +27,16 @@ public partial class Mcp2221AController : IMcp2221ATransceiver {
     );
 
   internal TResponse Command<TArg, TResponse>(
-    ReadOnlySpan<byte> userData,
+    ReadOnlySpan<byte> commandInput,
+    Span<byte> responseOutput,
     TArg arg,
-    Mcp2221AConstructCommandAction<TArg> constructCommand,
-    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse,
+    Mcp2221AConstructCommandWithSpanAction<TArg> constructCommand,
+    Mcp2221AParseResponseWithSpanFunc<TArg, TResponse> parseResponse,
     CancellationToken cancellationToken
   )
     => Transceiver.Command(
-      userData: userData,
+      commandInput: commandInput,
+      responseOutput: responseOutput,
       arg: arg,
       cancellationToken: cancellationToken,
       constructCommand: constructCommand,
@@ -40,14 +44,16 @@ public partial class Mcp2221AController : IMcp2221ATransceiver {
     );
 
   ValueTask<TResponse> IMcp2221ATransceiver.CommandAsync<TArg, TResponse>(
-    ReadOnlyMemory<byte> userData,
+    ReadOnlyMemory<byte> commandInput,
+    Memory<byte> responseOutput,
     TArg arg,
-    Mcp2221AConstructCommandAction<TArg> constructCommand,
-    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse,
+    Mcp2221AConstructCommandWithSpanAction<TArg> constructCommand,
+    Mcp2221AParseResponseWithSpanFunc<TArg, TResponse> parseResponse,
     CancellationToken cancellationToken
   )
     => Transceiver.CommandAsync(
-      userData: userData,
+      commandInput: commandInput,
+      responseOutput: responseOutput,
       arg: arg,
       constructCommand: constructCommand,
       parseResponse: parseResponse,
@@ -55,14 +61,16 @@ public partial class Mcp2221AController : IMcp2221ATransceiver {
     );
 
   internal ValueTask<TResponse> CommandAsync<TArg, TResponse>(
-    ReadOnlyMemory<byte> userData,
+    ReadOnlyMemory<byte> commandInput,
+    Memory<byte> responseOutput,
     TArg arg,
-    Mcp2221AConstructCommandAction<TArg> constructCommand,
-    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse,
+    Mcp2221AConstructCommandWithSpanAction<TArg> constructCommand,
+    Mcp2221AParseResponseWithSpanFunc<TArg, TResponse> parseResponse,
     CancellationToken cancellationToken
   )
     => Transceiver.CommandAsync(
-      userData: userData,
+      commandInput: commandInput,
+      responseOutput: responseOutput,
       arg: arg,
       constructCommand: constructCommand,
       parseResponse: parseResponse,

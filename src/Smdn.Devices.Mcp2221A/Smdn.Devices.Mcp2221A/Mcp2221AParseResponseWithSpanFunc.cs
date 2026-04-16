@@ -4,7 +4,8 @@ using System;
 
 namespace Smdn.Devices.Mcp2221A;
 
-internal delegate void Mcp2221AConstructCommandAction<TArg>(
-  Span<byte> command,
+internal delegate TResponse Mcp2221AParseResponseWithSpanFunc<TArg, TResponse>(
+  ReadOnlySpan<byte> response,
+  Span<byte> responseOutput,
   TArg arg
 );

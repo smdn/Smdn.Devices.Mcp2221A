@@ -111,10 +111,11 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
   }
 
   public async ValueTask<TResponse> CommandAsync<TArg, TResponse>(
-    ReadOnlyMemory<byte> userData,
+    ReadOnlyMemory<byte> commandInput,
+    Memory<byte> responseOutput,
     TArg arg,
-    Mcp2221AConstructCommandAction<TArg> constructCommand,
-    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse,
+    Mcp2221AConstructCommandWithSpanAction<TArg> constructCommand,
+    Mcp2221AParseResponseWithSpanFunc<TArg, TResponse> parseResponse,
     CancellationToken cancellationToken
   )
   {
@@ -140,9 +141,9 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
       var commandSpan = commandReportMemory.Slice(LengthOfReportId, CommandLength).Span; // span except first byte (report IN)
 
       constructCommand(
-        commandSpan,
-        userData.Span,
-        arg
+        command: commandSpan,
+        commandInput: commandInput.Span,
+        arg: arg
       );
 
       logger?.LogTrace(EventIdCommand, "> " + ConvertByteSequenceToString(commandSpan));
@@ -201,7 +202,11 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
 
       VerifyResponseReport(commandSpan, responseSpan, readReportLength);
 
-      return parseResponse(responseSpan, arg);
+      return parseResponse(
+        response: responseSpan,
+        responseOutput: responseOutput.Span,
+        arg: arg
+      );
     }
     finally {
       ArrayPool<byte>.Shared.Return(commandReport);
@@ -210,10 +215,11 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
   }
 
   public TResponse Command<TArg, TResponse>(
-    ReadOnlySpan<byte> userData,
+    ReadOnlySpan<byte> commandInput,
+    Span<byte> responseOutput,
     TArg arg,
-    Mcp2221AConstructCommandAction<TArg> constructCommand,
-    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse,
+    Mcp2221AConstructCommandWithSpanAction<TArg> constructCommand,
+    Mcp2221AParseResponseWithSpanFunc<TArg, TResponse> parseResponse,
     CancellationToken cancellationToken
   )
   {
@@ -236,9 +242,9 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
     var responseSpan = responseReport.Slice(LengthOfReportId, ResponseLength); // span except first byte (report OUT)
 
     constructCommand(
-      commandSpan,
-      userData,
-      arg
+      command: commandSpan,
+      commandInput: commandInput,
+      arg: arg
     );
 
     logger?.LogTrace(EventIdCommand, "> " + ConvertByteSequenceToString(commandSpan));
@@ -291,17 +297,18 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
 
     VerifyResponseReport(commandSpan, responseSpan, readReportLength);
 
-    return parseResponse(responseSpan, arg);
+    return parseResponse(
+      response: responseSpan,
+      responseOutput: responseOutput,
+      arg: arg
+    );
   }
 
   private static class ResetChipCommand {
-#pragma warning disable IDE0060 // [IDE0060] Remove unused parameter
     public static void ConstructCommand(
       Span<byte> comm,
-      ReadOnlySpan<byte> userData,
       Mcp2221ATransceiver self
     )
-#pragma warning restore IDE0060
     {
       // [MCP2221A] 3.1.15 RESET CHIP
       comm[0] = 0x70; // Reset Chip
@@ -323,8 +330,8 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
   public ValueTask ResetChipAsync(
     CancellationToken cancellationToken = default
   )
-    => CommandAsync(
-      userData: default,
+    => IMcp2221ATransceiverExtensions.CommandAsync(
+      transceiver: this,
       arg: this,
       cancellationToken: cancellationToken,
       constructCommand: ResetChipCommand.ConstructCommand,
@@ -334,8 +341,8 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
   public void ResetChip(
     CancellationToken cancellationToken = default
   )
-    => Command(
-      userData: default,
+    => IMcp2221ATransceiverExtensions.Command(
+      transceiver: this,
       arg: this,
       cancellationToken: cancellationToken,
       constructCommand: ResetChipCommand.ConstructCommand,

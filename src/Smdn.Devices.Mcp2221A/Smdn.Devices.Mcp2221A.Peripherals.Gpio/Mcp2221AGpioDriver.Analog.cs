@@ -41,24 +41,23 @@ partial class Mcp2221AGpioDriver {
     => (VoltageReferenceSource)(sramSettings.ReadAdcVoltageReferenceByte() & 0b_0_0000_11_1);
 
   private static class GetAdcChannelValuesCommand {
-#pragma warning disable IDE0060, SA1313
+#pragma warning disable SA1313
     public static void ConstructCommand(
       Span<byte> comm,
-      ReadOnlySpan<byte> userData,
       None _
     )
-#pragma warning restore IDE0060, SA1313
+#pragma warning restore SA1313
     {
       // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
       comm[0] = 0x10; // [0] Status/Set Parameters
     }
 
-#pragma warning disable IDE0060, SA1313
+#pragma warning disable SA1313
     public static AdcAllChannelSample ParseResponse(
       ReadOnlySpan<byte> resp,
       None _
     )
-#pragma warning restore IDE0060, SA1313
+#pragma warning restore SA1313
     {
       // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
       if (resp[1] != 0x00) // Command completed successfully

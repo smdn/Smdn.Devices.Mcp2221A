@@ -16,7 +16,6 @@ partial class Mcp2221AI2cBus {
 #pragma warning disable IDE0060 // [IDE0060] Remove unused parameter
     public static void ConstructCommand(
       Span<byte> comm,
-      ReadOnlySpan<byte> userData,
       (I2cAddress Address, Exception? ExceptionCauseOfCancellation) args
     )
 #pragma warning restore IDE0060

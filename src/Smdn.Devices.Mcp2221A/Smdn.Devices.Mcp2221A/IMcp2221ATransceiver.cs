@@ -8,18 +8,20 @@ namespace Smdn.Devices.Mcp2221A;
 
 internal interface IMcp2221ATransceiver {
   ValueTask<TResponse> CommandAsync<TArg, TResponse>(
-    ReadOnlyMemory<byte> userData,
+    ReadOnlyMemory<byte> commandInput,
+    Memory<byte> responseOutput,
     TArg arg,
-    Mcp2221AConstructCommandAction<TArg> constructCommand,
-    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse,
+    Mcp2221AConstructCommandWithSpanAction<TArg> constructCommand,
+    Mcp2221AParseResponseWithSpanFunc<TArg, TResponse> parseResponse,
     CancellationToken cancellationToken
   );
 
   TResponse Command<TArg, TResponse>(
-    ReadOnlySpan<byte> userData,
+    ReadOnlySpan<byte> commandInput,
+    Span<byte> responseOutput,
     TArg arg,
-    Mcp2221AConstructCommandAction<TArg> constructCommand,
-    Mcp2221AParseResponseFunc<TArg, TResponse> parseResponse,
+    Mcp2221AConstructCommandWithSpanAction<TArg> constructCommand,
+    Mcp2221AParseResponseWithSpanFunc<TArg, TResponse> parseResponse,
     CancellationToken cancellationToken
   );
 }

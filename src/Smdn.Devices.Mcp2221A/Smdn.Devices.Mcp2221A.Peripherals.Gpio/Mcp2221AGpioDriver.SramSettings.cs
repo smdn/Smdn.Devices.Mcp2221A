@@ -17,7 +17,6 @@ partial class Mcp2221AGpioDriver {
 #pragma warning disable IDE0060 // [IDE0060] Remove unused parameter
     public static void ConstructCommand(
       Span<byte> comm,
-      ReadOnlySpan<byte> userData,
       SramSettings sramSettings
     )
 #pragma warning restore IDE0060
@@ -79,13 +78,10 @@ partial class Mcp2221AGpioDriver {
   }
 
   private static class SetSramSettingsCommand {
-#pragma warning disable IDE0060
     public static void ConstructCommand(
       Span<byte> comm,
-      ReadOnlySpan<byte> userData,
       SramSettings sramSettings
     )
-#pragma warning restore IDE0060
     {
       // [MCP2221A] 3.1.13 SET SRAM SETTINGS
       comm[0] = 0x60; // Set SRAM settings
