@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 SPDX-License-Identifier: MIT
 -->
@@ -43,8 +43,11 @@ SPDX-License-Identifier: MIT
   <Folder Name="/Smdn.Devices.Mcp2221A/I2cDevice_HT16K33_4Digit14SegmentDisplay/">
     <Project Path="Smdn.Devices.Mcp2221A/I2cDevice_HT16K33_4Digit14SegmentDisplay/Program.csproj" />
   </Folder>
-  <Folder Name="/Smdn.Devices.Mcp2221A/I2cDevice_MCP23017/">
-    <Project Path="Smdn.Devices.Mcp2221A/I2cDevice_MCP23017/Program.csproj" />
+  <Folder Name="/Smdn.Devices.Mcp2221A/I2cDevice_MCP23017_Input/">
+    <Project Path="Smdn.Devices.Mcp2221A/I2cDevice_MCP23017_Input/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/I2cDevice_MCP23017_Output/">
+    <Project Path="Smdn.Devices.Mcp2221A/I2cDevice_MCP23017_Output/Program.csproj" />
   </Folder>
   <Folder Name="/Smdn.Devices.Mcp2221A/I2cDevice_US2066_SO1602A/">
     <Project Path="Smdn.Devices.Mcp2221A/I2cDevice_US2066_SO1602A/Program.csproj" />
