@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Smdn.Devices.Mcp2221A" Version="1.0.0-preview2" />
+    <PackageReference Include="Smdn.Devices.Mcp2221A" Version="1.0.0-preview3" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
 
     <!-- Add HidSharp (Apache License 2.0) as the USB HID backend provider. -->
