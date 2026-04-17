@@ -5,9 +5,11 @@ using System.Buffers;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
+using Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
-public static partial class II2cControllerExtensions {
+namespace Smdn.Devices.Mcp2221A;
+
+public static class II2cControllerExtensions {
   /// <remarks>
   ///   <include
   ///     file="../Smdn.Devices.Mcp2221A.docs.xml"

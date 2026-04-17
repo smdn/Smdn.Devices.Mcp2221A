@@ -4,7 +4,9 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
+using Smdn.Devices.Mcp2221A.Peripherals.I2c;
+
+namespace Smdn.Devices.Mcp2221A;
 
 public static class II2cDeviceExtensions {
   /// <seealso cref="II2cController.Read(I2cAddress, int, Span{byte},CancellationToken)"/>

@@ -16,9 +16,7 @@ System.Collections.Generic.IReadOnlyCollection
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
-#pragma warning disable IDE0040
-partial class II2cControllerExtensions {
-#pragma warning restore IDE0040
+public static class II2cControllerBusScanningExtensions {
   /// <remarks>
   ///   <include
   ///     file="../Smdn.Devices.Mcp2221A.docs.xml"
@@ -67,8 +65,7 @@ partial class II2cControllerExtensions {
       }
 
       try {
-        _ = await ReadByteAsync(
-          controller,
+        _ = await controller.ReadByteAsync(
           address,
           i2cBusTransmissionSpeedInKbps,
           cancellationToken
@@ -132,8 +129,7 @@ partial class II2cControllerExtensions {
       }
 
       try {
-        _ = ReadByte(
-          controller,
+        _ = controller.ReadByte(
           address,
           i2cBusTransmissionSpeedInKbps,
           cancellationToken
