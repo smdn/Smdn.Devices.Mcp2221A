@@ -16,7 +16,20 @@ System.Collections.Generic.IReadOnlyCollection
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
+/// <summary>
+/// Provides extension methods for <see cref="II2cController"/> to
+/// perform I2C bus scanning operations.
+/// </summary>
 public static class II2cControllerBusScanningExtensions {
+  /// <summary>
+  /// Asynchronously scans the I2C bus for responding devices by attempting
+  /// Write and Read operations across a specified range of addresses.
+  /// </summary>
+  /// <inheritdoc cref="ScanBus(II2cController, I2cAddress, I2cAddress, int, IProgress{I2cScanBusProgress}?, CancellationToken)" path="/param|/exception"/>
+  /// <returns>
+  /// A task representing the asynchronous operation, containing the <c>WriteAddressSet</c>
+  /// and <c>ReadAddressSet</c> of responding addresses.
+  /// </returns>
   /// <remarks>
   ///   <include
   ///     file="../Smdn.Devices.Mcp2221A.docs.xml"
@@ -81,6 +94,40 @@ public static class II2cControllerBusScanningExtensions {
     return (writeAddressSet, readAddressSet);
   }
 
+  /// <summary>
+  /// Scans the I2C bus for responding devices by attempting
+  /// Write and Read operations across a specified range of addresses.
+  /// </summary>
+  /// <param name="controller">
+  /// The <see cref="II2cController"/> to perform the scan.
+  /// </param>
+  /// <param name="addressRangeMin">
+  /// The inclusive lower bound of the address range to scan.
+  /// If set to <see langword="default"/>, <see cref="I2cAddress.DeviceMinValue"/> (0x08) is used.
+  /// </param>
+  /// <param name="addressRangeMax">
+  /// The inclusive upper bound of the address range to scan.
+  /// If set to <see langword="default"/>, <see cref="I2cAddress.DeviceMaxValue"/> (0x77) is used.
+  /// </param>
+  /// <param name="i2cBusTransmissionSpeedInKbps">
+  /// The I2C transmission speed in kbps used during the scan.
+  /// Defaults to <see cref="Mcp2221AI2cBus.DefaultTransmissionSpeedInKbps"/> (100 kbps).
+  /// </param>
+  /// <param name="progress">
+  /// An optional <see cref="IProgress{I2cScanBusProgress}"/> to receive
+  /// updates on the scan progress.
+  /// </param>
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// </param>
+  /// <returns>
+  /// A tuple containing two sets: <c>WriteAddressSet</c> (addresses that
+  /// responded to a Write operation) and <c>ReadAddressSet</c> (addresses that
+  /// responded to a Read operation).
+  /// </returns>
+  /// <exception cref="ArgumentException">
+  /// Thrown when <paramref name="addressRangeMax"/> is less than <paramref name="addressRangeMin"/>.
+  /// </exception>
   /// <remarks>
   ///   <include
   ///     file="../Smdn.Devices.Mcp2221A.docs.xml"

@@ -9,6 +9,9 @@ using Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
 namespace Smdn.Devices.Mcp2221A;
 
+/// <summary>
+/// Provides extension methods for <see cref="II2cController"/>.
+/// </summary>
 public static class II2cControllerExtensions {
   /// <remarks>
   ///   <include

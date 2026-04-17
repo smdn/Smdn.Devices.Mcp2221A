@@ -8,6 +8,9 @@ using Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
 namespace Smdn.Devices.Mcp2221A;
 
+/// <summary>
+/// Provides extension methods for <see cref="II2cDevice"/>.
+/// </summary>
 public static class II2cDeviceExtensions {
   /// <seealso cref="II2cController.Read(I2cAddress, int, Span{byte},CancellationToken)"/>
   public static void Read(
