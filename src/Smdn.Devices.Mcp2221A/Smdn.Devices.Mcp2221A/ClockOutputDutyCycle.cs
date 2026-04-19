@@ -19,6 +19,8 @@ public enum ClockOutputDutyCycle {
   /// completely disable the clock output. Some form of clock signal may
   /// still be observed on the GP1 pin.
   /// </remarks>
+  /// <seealso cref="Smdn.Devices.Mcp2221A.Peripherals.Gpio.IClockOutputController.SuspendClockOutput"/>
+  /// <seealso cref="Smdn.Devices.Mcp2221A.Peripherals.Gpio.IClockOutputController.SuspendClockOutputAsync"/>
   Duty0 = 0b_00,
 
   /// <summary>
