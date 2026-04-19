@@ -244,8 +244,8 @@ public abstract partial class GpController {
     PinValue? gpioInitialValue = null,
     CancellationToken cancellationToken = default
   )
-    => GpioDriver.ConfigureGpDesignationAsync(
-      gp: Index,
+    => GpioDriver.ConfigureGpPinSettingsAsync(
+      gpIndex: Index,
       configureSramSettings: sram => sram
         .ModifyGpSettings(
           gp: Index,
@@ -262,8 +262,8 @@ public abstract partial class GpController {
     PinValue? gpioInitialValue = null,
     CancellationToken cancellationToken = default
   )
-    => GpioDriver.ConfigureGpDesignation(
-      gp: Index,
+    => GpioDriver.ConfigureGpPinSettings(
+      gpIndex: Index,
       configureSramSettings: sram => sram
         .ModifyGpSettings(
           gp: Index,
@@ -279,8 +279,8 @@ public abstract partial class GpController {
     int? initialOutputValue,
     CancellationToken cancellationToken = default
   )
-    => GpioDriver.ConfigureGpDesignationAsync(
-      gp: Index,
+    => GpioDriver.ConfigureGpPinSettingsAsync(
+      gpIndex: Index,
       configureSramSettings: sram => sram
         .ModifyGpSettings(
           gp: Index,
@@ -300,8 +300,8 @@ public abstract partial class GpController {
     int? initialOutputValue,
     CancellationToken cancellationToken = default
   )
-    => GpioDriver.ConfigureGpDesignation(
-      gp: Index,
+    => GpioDriver.ConfigureGpPinSettings(
+      gpIndex: Index,
       configureSramSettings: sram => sram
         .ModifyGpSettings(
           gp: Index,
@@ -320,8 +320,8 @@ public abstract partial class GpController {
     VoltageReferenceSource voltageReferenceSource,
     CancellationToken cancellationToken
   )
-    => GpioDriver.ConfigureGpDesignationAsync(
-      gp: Index,
+    => GpioDriver.ConfigureGpPinSettingsAsync(
+      gpIndex: Index,
       configureSramSettings: sram => sram
         .ModifyGpSettings(
           gp: Index,
@@ -337,8 +337,8 @@ public abstract partial class GpController {
     VoltageReferenceSource voltageReferenceSource,
     CancellationToken cancellationToken
   )
-    => GpioDriver.ConfigureGpDesignation(
-      gp: Index,
+    => GpioDriver.ConfigureGpPinSettings(
+      gpIndex: Index,
       configureSramSettings: sram => sram
         .ModifyGpSettings(
           gp: Index,
