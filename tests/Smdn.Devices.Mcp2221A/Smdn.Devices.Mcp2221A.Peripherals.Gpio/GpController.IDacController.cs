@@ -18,8 +18,8 @@ partial class GpControllerTests {
 #pragma warning restore IDE0040
   private static System.Collections.IEnumerable YieldTestCases_ConfigureAsDacSyncOrAsync()
   {
-    const byte InitialChipSettings2_DacVrm = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
-    const byte InitialChipSettings2_DacVdd = 0b_00_0_00111; // DAC: VDD; Output = 7
+    const byte InitialChipSettings2_DacVrm = 0b_01_1_00111; // DAC: VRM 1.024V; Output = 7
+    const byte InitialChipSettings2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     for (var gpIndex = 2; gpIndex <= 3; gpIndex++) {
       yield return new object[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vdd };
@@ -191,8 +191,8 @@ partial class GpControllerTests {
 
   private static System.Collections.IEnumerable YieldTestCases_ConfigureAsDacSyncOrAsync_WithInitialOutputValue()
   {
-    const byte InitialChipSettings2_DacVrm = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
-    const byte InitialChipSettings2_DacVdd = 0b_00_0_00111; // DAC: VDD; Output = 7
+    const byte InitialChipSettings2_DacVrm = 0b_01_1_00111; // DAC: VRM 1.024V; Output = 7
+    const byte InitialChipSettings2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     for (var gpIndex = 2; gpIndex <= 3; gpIndex++) {
       yield return new object[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vdd, 31 };
@@ -393,7 +393,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
+    const byte InitialChipSettings2 = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -485,7 +485,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
+    const byte InitialChipSettings2 = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -636,7 +636,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
+    const byte InitialChipSettings2 = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -789,7 +789,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
+    const byte InitialChipSettings2 = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -946,8 +946,8 @@ partial class GpControllerTests {
 
   private static System.Collections.IEnumerable YieldTestCases_WriteAnalogRawSyncOrAsync()
   {
-    const byte InitialChipSettings2_DacVrm = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
-    const byte InitialChipSettings2_DacVdd = 0b_00_0_00111; // DAC: VDD; Output = 7
+    const byte InitialChipSettings2_DacVrm = 0b_01_1_00111; // DAC: VRM 1.024V; Output = 7
+    const byte InitialChipSettings2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     yield return new object[] { InitialChipSettings2_DacVrm, 0 };
     yield return new object[] { InitialChipSettings2_DacVdd, 0 };

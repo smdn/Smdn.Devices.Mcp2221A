@@ -1950,7 +1950,7 @@ partial class Mcp2221AGpioDriverTests {
     const byte InitialGp1Settings = 0b_000_0_0_000; // GPIO operation
     const byte InitialGp2Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC1)
     const byte InitialGp3Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC2)
-    const byte InitialChipSettings2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
+    const byte InitialChipSettings2 = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -1996,8 +1996,8 @@ partial class Mcp2221AGpioDriverTests {
 
   private static System.Collections.IEnumerable YieldTestCases_ApplyDacRawValueSyncOrAsync()
   {
-    const byte InitialChipSettings2_DacVrm = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
-    const byte InitialChipSettings2_DacVdd = 0b_00_0_00111; // DAC: VDD; Output = 7
+    const byte InitialChipSettings2_DacVrm = 0b_01_1_00111; // DAC: VRM 1.024V; Output = 7
+    const byte InitialChipSettings2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     yield return new object[] { InitialChipSettings2_DacVrm, 0 };
     yield return new object[] { InitialChipSettings2_DacVdd, 0 };

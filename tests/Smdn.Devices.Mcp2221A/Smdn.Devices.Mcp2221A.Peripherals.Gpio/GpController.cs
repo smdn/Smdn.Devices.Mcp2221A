@@ -74,7 +74,7 @@ public partial class GpControllerTests {
   }
 
   private static Mcp2221AController CreateMcp2221AConfiguredAsDac(
-    byte chipSettings2 = 0b_01_1_01000 // DAC: VRM 1.024V; Output = 8 (factory default)
+    byte chipSettings2 = 0b_10_0_01000 // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
   )
   {
     const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation

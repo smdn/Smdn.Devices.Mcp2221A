@@ -3560,7 +3560,7 @@ public class IGpControllerGroupExtensionsTests {
     Func<IGpControllerGroup, CancellationToken, ValueTask> writeAnalogVoltageAsyncFunc
   )
   {
-    const byte InitialChipSettings2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
+    const byte InitialChipSettings2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -3642,10 +3642,10 @@ public class IGpControllerGroupExtensionsTests {
 
   private static System.Collections.IEnumerable YieldTestCases_WriteAnalogVoltageSyncOrAsync()
   {
-    const byte InitialChipSettings2_DacVrm1024 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
+    const byte InitialChipSettings2_DacVrm1024 = 0b_01_1_00100; // DAC: VRM 1.024V; Output = 4
     const byte InitialChipSettings2_DacVrm2048 = 0b_10_1_00001; // DAC: VRM 2.048V; Output = 1
     const byte InitialChipSettings2_DacVrm4096 = 0b_11_1_00010; // DAC: VRM 4.096V; Output = 2
-    const byte InitialChipSettings2_DacVrmOff = 0b_00_1_00100; // DAC: VRM Off; Output = 4
+    const byte InitialChipSettings2_DacVrmOff = 0b_00_1_01000; // DAC: VRM Off; Output = 8
 
     yield return new object[] { InitialChipSettings2_DacVrm1024, 0.0, 0 };
     yield return new object[] { InitialChipSettings2_DacVrm1024, 0.033, 1 };
@@ -3810,7 +3810,7 @@ public class IGpControllerGroupExtensionsTests {
     Func<IGpControllerGroup, CancellationToken, ValueTask> writeAnalogVoltageAsyncFunc
   )
   {
-    const byte InitialChipSettings2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
+    const byte InitialChipSettings2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(

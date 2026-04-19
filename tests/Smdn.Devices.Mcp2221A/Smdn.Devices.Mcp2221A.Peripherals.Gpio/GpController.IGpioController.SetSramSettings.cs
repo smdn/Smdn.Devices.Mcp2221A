@@ -129,9 +129,9 @@ partial class GpControllerTests {
   {
     const byte ChipSettings2_DacVrm4096 = 0b_11_1_00010; // DAC: VRM 4.096V; Output = 2
     const byte ChipSettings2_DacVrm2048 = 0b_10_1_00100; // DAC: VRM 2.048V; Output = 4
-    const byte ChipSettings2_DacVrm1024 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8 (factory default)
+    const byte ChipSettings2_DacVrm1024 = 0b_01_1_10000; // DAC: VRM 1.024V; Output = 16
     const byte ChipSettings2_DacVrmOff = 0b_00_1_00001; // DAC: VRM Off; Output = 1
-    const byte ChipSettings2_DacVdd = 0b_00_0_11111; // DAC: Vdd; Output = 31
+    const byte ChipSettings2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
     const byte ChipSettings3_AdcVrm4096 = 0b_0_1_1_11_1_00; // ADC: VRM 4.096V
     const byte ChipSettings3_AdcVrm2048 = 0b_0_1_1_10_1_00; // ADC: VRM 2.048V
     const byte ChipSettings3_AdcVrm1024 = 0b_0_1_1_01_1_00; // ADC: VRM 1.024V (factory default)
