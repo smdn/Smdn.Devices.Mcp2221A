@@ -709,6 +709,93 @@ partial class GpControllerTests {
     );
   }
 
+  [Test]
+  public void SuspendClockOutputAsync_ThrowsWhenUsedByGpioController()
+    => SuspendClockOutputSyncOrAsync_ThrowsWhenUsedByGpioController(
+      static async gp1 => await ((IClockOutputController)gp1).SuspendClockOutputAsync().ConfigureAwait(false)
+    );
+
+  [Test]
+  public void SuspendClockOutput_ThrowsWhenUsedByGpioController()
+    => SuspendClockOutputSyncOrAsync_ThrowsWhenUsedByGpioController(
+      static gp1 => {
+        ((IClockOutputController)gp1).SuspendClockOutput();
+        return default;
+      }
+    );
+
+  private void SuspendClockOutputSyncOrAsync_ThrowsWhenUsedByGpioController(
+    Func<Gp1Controller, ValueTask> suspendClockOutputAsyncFunc
+  )
+  {
+    const byte InitialGp0Settings = 0b_000_1_0_010; // Alternate Function 0 (LED UART RX)
+    const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
+    const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
+    const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
+    const byte InitialChipSettings1 = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
+
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: InitialGp0Settings,
+        gp1Settings: InitialGp1Settings,
+        gp2Settings: InitialGp2Settings,
+        gp3Settings: InitialGp3Settings,
+        chipSettings1: InitialChipSettings1
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    for (var gp = 0; gp < 4; gp++) {
+      Mcp2221AControllerTests.AppendPseudoResponse(
+        mcp2221A,
+        // [MCP2221A] 3.1.13 SET SRAM SETTINGS
+        // [1] 0x00: Command completed successfully
+        // [2-63] Don't care
+        "60-00-" + string.Join("-", Enumerable.Repeat("00", 62))
+      );
+
+      Assert.That(
+        () =>
+#if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
+          _ =
+#endif
+          mcp2221A.GpioController.OpenPin(gp),
+        Throws.Nothing
+      );
+      Assert.That(mcp2221A.GpPins[gp].IsUsedByGpioController, Is.True);
+    }
+
+    Assert.That(mcp2221A.GpPin1.CurrentFunction, Is.EqualTo(GpFunction.Gpio));
+
+    // command should not be sent
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await suspendClockOutputAsyncFunc(mcp2221A.GpPin1),
+      Throws
+        .InvalidOperationException
+        .With
+        .Property(nameof(InvalidOperationException.Message))
+        .Contains(mcp2221A.GpPin1.PinName)
+        // Since the check for `CurrentFunction` is performed first, the exception resulting
+        // from the subsequent check for `IsUsedByGpioController` will not be thrown.
+#if false
+        .And
+        .Property(nameof(InvalidOperationException.Message))
+        .Contains(nameof(GpioController))
+#endif
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+
+    Assert.That(mcp2221A.GpPin1.CurrentFunction, Is.EqualTo(GpFunction.Gpio));
+  }
+
   private static System.Collections.IEnumerable YieldTestCases_SuspendClockOutputSyncOrAsync()
   {
     const byte InitialChipSettings1_50Percent12MHz = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
