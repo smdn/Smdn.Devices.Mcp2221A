@@ -645,6 +645,9 @@ public partial class Mcp2221AControllerTests {
   }
 
   [TestCase(0b_0_0_0_00_0_00, VoltageReferenceSource.Vdd)]
+  [TestCase(0b_0_0_0_01_0_00, VoltageReferenceSource.Vdd)] // VRM 1.024V/VDD
+  [TestCase(0b_0_0_0_10_0_00, VoltageReferenceSource.Vdd)] // VRM 2.048V/VDD
+  [TestCase(0b_0_0_0_11_0_00, VoltageReferenceSource.Vdd)] // VRM 4.096V/VDD
   [TestCase(0b_0_0_0_00_1_00, VoltageReferenceSource.VrmOff)]
   [TestCase(0b_0_0_0_01_1_00, VoltageReferenceSource.Vrm1024)]
   [TestCase(0b_0_0_0_10_1_00, VoltageReferenceSource.Vrm2048)]
@@ -653,13 +656,13 @@ public partial class Mcp2221AControllerTests {
   [TestCase(0b_0_1_0_01_1_00, VoltageReferenceSource.Vrm1024)] // INTDETFEEN: 1, INTDETREEN: 0
   [TestCase(0b_0_1_1_01_1_00, VoltageReferenceSource.Vrm1024)] // INTDETFEEN: 1, INTDETREEN: 1 (factory default)
   public void CurrentAdcReferenceSource(
-    byte chipSettings3AdcBits,
+    byte chipSettings3,
     VoltageReferenceSource expected
   )
   {
     using var mcp2221A = Mcp2221AController.Create(
       CreatePseudoDevice(
-        chipSettings3: chipSettings3AdcBits
+        chipSettings3: chipSettings3
       ),
       shouldDisposeUsbHidDevice: true
     );

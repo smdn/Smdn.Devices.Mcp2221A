@@ -34,11 +34,19 @@ partial class Mcp2221AGpioDriver {
 
   /// <inheritdoc/>
   public VoltageReferenceSource CurrentDacReferenceSource
-    => (VoltageReferenceSource)(sramSettings.ReadDacVoltageReferenceByte() & 0b_0_0000_11_1);
+    => ParseVoltageReferenceSource(sramSettings.ReadDacVoltageReferenceByte() & 0b_0_0000_11_1);
 
   /// <inheritdoc/>
   public VoltageReferenceSource CurrentAdcReferenceSource
-    => (VoltageReferenceSource)(sramSettings.ReadAdcVoltageReferenceByte() & 0b_0_0000_11_1);
+    => ParseVoltageReferenceSource(sramSettings.ReadAdcVoltageReferenceByte() & 0b_0_0000_11_1);
+
+  // If the least significant bit is 0, return it as VDD regardless of the VRM voltage bits.
+  // Otherwise, return it as representing the VRM voltage.
+  // This ensures that the VRM reference voltage selection is maintained even when VDD is selected.
+  private static VoltageReferenceSource ParseVoltageReferenceSource(int voltageReferenceBits)
+    => (voltageReferenceBits & 0b_001) == 0
+      ? VoltageReferenceSource.Vdd
+      : (VoltageReferenceSource)voltageReferenceBits;
 
   private static class GetAdcChannelValuesCommand {
 #pragma warning disable SA1313

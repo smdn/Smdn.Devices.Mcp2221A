@@ -90,6 +90,24 @@ internal sealed class SramSettings {
   public void WriteAsSetSramSettingsCommand(Span<byte> destination)
     => unsentSettings.CopyTo(destination);
 
+  public void StoreDacVoltageReferenceByte(byte dacVoltageReferenceByte)
+  {
+    currentSettings[OffsetOfDacVoltageReference] = dacVoltageReferenceByte;
+    unsentSettings[OffsetOfDacVoltageReference] = dacVoltageReferenceByte;
+  }
+
+  public void StoreDacOutputValueByte(byte dacOutputValueByte)
+  {
+    currentSettings[OffsetOfDacOutputValue] = dacOutputValueByte;
+    unsentSettings[OffsetOfDacOutputValue] = dacOutputValueByte;
+  }
+
+  public void StoreAdcVoltageReferenceByte(byte adcVoltageReferenceByte)
+  {
+    currentSettings[OffsetOfAdcVoltageReference] = adcVoltageReferenceByte;
+    unsentSettings[OffsetOfAdcVoltageReference] = adcVoltageReferenceByte;
+  }
+
   public void StoreGpSettingsBytes(ReadOnlySpan<byte> gpSettingBytes)
   {
     gpSettingBytes.CopyTo(currentSettings.AsSpan(OffsetOfGpSettings, SizeOfGpSettings));
@@ -125,7 +143,10 @@ internal sealed class SramSettings {
 
       // Bit 2-1: DAC V_RM voltage selection
       // Bit 0: DAC reference voltage (1: DAC V_RM, 0: VDD)
-      unsentSettings[OffsetOfDacVoltageReference] |= GetVoltageSelectionAndReferenceVoltageBits(dacVoltageReferenceSource.Value);
+      ModifyVoltageSelectionAndReferenceVoltageBits(
+        ref unsentSettings[OffsetOfDacVoltageReference],
+        dacVoltageReferenceSource.Value
+      );
     }
 
     // [2] Set DAC Output Value
@@ -157,29 +178,42 @@ internal sealed class SramSettings {
 
     // Bit 2-1: ADC V_RM voltage selection
     // Bit 0: ADC reference voltage (1: ADC V_RM, 0: VDD)
-    unsentSettings[OffsetOfAdcVoltageReference] |= GetVoltageSelectionAndReferenceVoltageBits(adcVoltageReferenceSource.Value);
+    ModifyVoltageSelectionAndReferenceVoltageBits(
+      ref unsentSettings[OffsetOfAdcVoltageReference],
+      adcVoltageReferenceSource.Value
+    );
 
     return this;
   }
 
-  private static byte GetVoltageSelectionAndReferenceVoltageBits(
+  private static void ModifyVoltageSelectionAndReferenceVoltageBits(
+    ref byte voltageReferenceBits,
     VoltageReferenceSource voltageReferenceSource
   )
+  {
     // Bit 2-1: DAC/ADC V_RM voltage selection
     // Bit 0: DAC/ADC reference voltage (1: V_RM, 0: VDD)
-    => voltageReferenceSource switch {
-      VoltageReferenceSource.Vdd => 0b_0_0000_00_0,
+    switch (voltageReferenceSource) {
+      case VoltageReferenceSource.Vdd:
+        // If the reference voltage is changed to VDD, set only the least
+        // significant bit to 0. This ensures that the VRM voltage selection
+        // bits are maintained internally.
+        voltageReferenceBits &= 0b_1_1111_11_0;
+        return;
 
-      var vrm when vrm is
-        VoltageReferenceSource.VrmOff or
-        VoltageReferenceSource.Vrm1024 or
-        VoltageReferenceSource.Vrm2048 or
-        VoltageReferenceSource.Vrm4096 => (byte)((byte)vrm & 0b_0_0000_11_1),
+      case VoltageReferenceSource.VrmOff:
+      case VoltageReferenceSource.Vrm1024:
+      case VoltageReferenceSource.Vrm2048:
+      case VoltageReferenceSource.Vrm4096:
+        voltageReferenceBits = (byte)((voltageReferenceBits & 0b_1_1111_00_0) | ((byte)voltageReferenceSource & 0b_0_0000_11_1));
+        return;
 
-      var invalid => throw new NotSupportedException(
-        message: $"The voltage reference source value cannot set to {invalid}. The value must be one of the values defined in {nameof(VoltageReferenceSource)}."
-      ),
-    };
+      default:
+        throw new NotSupportedException(
+          message: $"The voltage reference source value cannot set to {voltageReferenceSource}. The value must be one of the values defined in {nameof(VoltageReferenceSource)}."
+        );
+    }
+  }
 
   public SramSettings ModifyGpSettings(
     int gp,

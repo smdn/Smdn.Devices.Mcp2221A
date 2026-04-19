@@ -39,42 +39,33 @@ partial class Mcp2221AGpioDriver {
 
       // [6] Bit 7-6: DAC Reference voltage option
       // [6] Bit 5: DAC reference option
+      // Note: The DAC option bits in the SRAM settings are stored as-is.
+      // In other words, even if the least significant bit specifies VDD as
+      // the reference voltage, the VRM voltage bits are maintained as-is.
+      sramSettings.StoreDacVoltageReferenceByte(
+        (byte)((resp[6] & 0b_11_1_00000) >> 5)
+      );
+
       // [6] Bit 4-0: Power-up DAC value
-      sramSettings.ModifyDacSettings(
-        dacVoltageReferenceSource: ParseVoltageSelectionAndReferenceVoltageBits((resp[6] & 0b_11_1_00000) >> 5),
-        dacOutputValue: resp[6] & 0b_00_0_11111
+      sramSettings.StoreDacOutputValueByte(
+        (byte)(resp[6] & 0b_00_0_11111)
       );
 
       // [7] Bit 4-3: ADC Reference Voltage
       // [7] Bit 2: ADC Reference Option
-      sramSettings.ModifyAdcSettings(
-        adcVoltageReferenceSource: ParseVoltageSelectionAndReferenceVoltageBits((resp[7] & 0b_0_0_0_11_1_0_0) >> 2)
+      // Note: The DAC option bits in the SRAM settings are stored as-is.
+      // In other words, even if the least significant bit specifies VDD as
+      // the reference voltage, the VRM voltage bits are maintained as-is.
+      sramSettings.StoreAdcVoltageReferenceByte(
+        (byte)((resp[7] & 0b_0_0_0_11_1_0_0) >> 2)
       );
 
       sramSettings.StoreGpSettingsBytes(
         gpSettingBytes: resp.Slice(22, SramSettings.SizeOfGpSettings) // [22-25] GP0-3 Settings
       );
 
-      // store the settings modified and updated from the response
-      sramSettings.Store();
-
       return default;
     }
-
-    private static VoltageReferenceSource ParseVoltageSelectionAndReferenceVoltageBits(
-      int voltageSelectionAndReferenceVoltageBits
-    )
-      => voltageSelectionAndReferenceVoltageBits switch {
-        0b_00_0 => VoltageReferenceSource.Vdd,
-
-        var vrm when (vrm & 0b_11_0) is
-          0b_11_0 or
-          0b_10_0 or
-          0b_01_0 or
-          0b_00_0 => (VoltageReferenceSource)(vrm | 0b_00_1),
-
-        _ => default, // unknown
-      };
   }
 
   private static class SetSramSettingsCommand {
