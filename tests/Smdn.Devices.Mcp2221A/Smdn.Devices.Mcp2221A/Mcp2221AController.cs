@@ -369,6 +369,8 @@ public partial class Mcp2221AControllerTests {
     Assert.That(() => _ = device.I2cBus, Throws.Nothing);
     Assert.That(() => _ = device.GpioController, Throws.Nothing);
     Assert.That(() => _ = device.CurrentAdcReferenceSource, Throws.Nothing);
+    Assert.That(() => _ = device.CurrentDacReferenceSource, Throws.Nothing);
+    Assert.That(() => _ = device.LastWriteAnalogRawValue, Throws.Nothing);
 
     var i2cBus = device.I2cBus;
     var gp0 = device.GpPin0;
@@ -395,6 +397,8 @@ public partial class Mcp2221AControllerTests {
     Assert.That(() => _ = device.I2cBus, Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => _ = device.GpioController, Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => _ = device.CurrentAdcReferenceSource, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = device.CurrentDacReferenceSource, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = device.LastWriteAnalogRawValue, Throws.TypeOf<ObjectDisposedException>());
 
     Assert.That(() => _ = device.HardwareRevision, Throws.Nothing);
     Assert.That(() => _ = device.FirmwareRevision, Throws.Nothing);
@@ -662,6 +666,60 @@ public partial class Mcp2221AControllerTests {
 
     Assert.That(
       mcp2221A.CurrentAdcReferenceSource,
+      Is.EqualTo(expected)
+    );
+  }
+
+  [TestCase(0b_00_0_00000, VoltageReferenceSource.Vdd)]
+  [TestCase(0b_00_1_00000, VoltageReferenceSource.VrmOff)]
+  [TestCase(0b_01_1_00000, VoltageReferenceSource.Vrm1024)]
+  [TestCase(0b_10_1_00000, VoltageReferenceSource.Vrm2048)]
+  [TestCase(0b_11_1_11111, VoltageReferenceSource.Vrm4096)] // DAC output: 31
+  [TestCase(0b_11_0_10000, VoltageReferenceSource.Vdd)] // 4.096V/VDD DAC output: 16
+  [TestCase(0b_10_0_01000, VoltageReferenceSource.Vdd)] // 2.048V/VDD; DAC output: 8 (factory default)
+  [TestCase(0b_01_0_00100, VoltageReferenceSource.Vdd)] // 1.024V/VDD; DAC output: 4
+  [TestCase(0b_00_0_00010, VoltageReferenceSource.Vdd)] // Off/VDD; DAC output: 2
+  public void CurrentDacReferenceSource(
+    byte chipSettings2,
+    VoltageReferenceSource expected
+  )
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      CreatePseudoDevice(
+        chipSettings2: chipSettings2
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(
+      mcp2221A.CurrentDacReferenceSource,
+      Is.EqualTo(expected)
+    );
+  }
+
+  [TestCase(0b_00_0_00001, 1)]
+  [TestCase(0b_00_1_00011, 3)]
+  [TestCase(0b_01_1_00111, 7)]
+  [TestCase(0b_10_1_01111, 15)]
+  [TestCase(0b_11_1_11111, 31)]
+  [TestCase(0b_11_0_10000, 16)]
+  [TestCase(0b_10_0_01000, 8)] // 2.048V/VDD; DAC output: 8 (factory default)
+  [TestCase(0b_01_0_00100, 4)]
+  [TestCase(0b_00_0_00010, 2)]
+  public void LastWriteAnalogRawValue_InitialValue(
+    byte chipSettings2,
+    int expected
+  )
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      CreatePseudoDevice(
+        chipSettings2: chipSettings2
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(
+      mcp2221A.LastWriteAnalogRawValue,
       Is.EqualTo(expected)
     );
   }
