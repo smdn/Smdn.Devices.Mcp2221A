@@ -152,13 +152,13 @@ partial class Mcp2221AGpioDriver {
     }
   }
 
-  internal async ValueTask ConfigureGpDesignationAsync(
-    int gp,
+  internal async ValueTask ConfigureGpPinSettingsAsync(
+    int gpIndex,
     Func<SramSettings, SramSettings> configureSramSettings,
     CancellationToken cancellationToken
   )
   {
-    ThrowIfUsedByGpioController(gp);
+    ThrowIfUsedByGpioController(gpIndex);
 
     try {
       await SetSramSettingsAsync(
@@ -172,13 +172,13 @@ partial class Mcp2221AGpioDriver {
     }
   }
 
-  internal void ConfigureGpDesignation(
-    int gp,
+  internal void ConfigureGpPinSettings(
+    int gpIndex,
     Func<SramSettings, SramSettings> configureSramSettings,
     CancellationToken cancellationToken
   )
   {
-    ThrowIfUsedByGpioController(gp);
+    ThrowIfUsedByGpioController(gpIndex);
 
     try {
       SetSramSettings(
