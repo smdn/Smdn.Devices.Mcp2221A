@@ -218,8 +218,8 @@ internal sealed class SramSettings {
   public SramSettings ModifyGpSettings(
     int gp,
     GpDesignation designation,
-    PinMode? direction,
-    PinValue? outputValue
+    PinMode? direction = null,
+    PinValue? outputValue = null
   )
   {
     if (designation != GpDesignation.GpioOperation) {

@@ -123,49 +123,6 @@ partial class Mcp2221AGpioDriver {
     SyncGpioStates(sramSettings);
   }
 
-  internal async ValueTask ConfigureGpDesignationAsync(
-    int gp,
-    GpDesignation gpDesignation,
-    PinMode? gpioDirection,
-    PinValue? gpioValue,
-    CancellationToken cancellationToken
-  )
-  {
-    ThrowIfUsedByGpioController(gp);
-
-    try {
-      await SetSramSettingsAsync(
-        sramSettings: sramSettings.ModifyGpSettings(
-          gp: gp,
-          designation: gpDesignation,
-          direction: gpioDirection,
-          outputValue: gpioValue
-        ),
-        cancellationToken: cancellationToken
-      ).ConfigureAwait(false);
-    }
-    catch {
-      sramSettings.Restore();
-      throw;
-    }
-  }
-
-  internal void ConfigureGpDesignation(
-    int gp,
-    GpDesignation gpDesignation,
-    PinMode? gpioDirection,
-    PinValue? gpioValue,
-    CancellationToken cancellationToken
-  )
-    => ConfigureGpDesignation(
-      gp: gp,
-      gpDesignation: gpDesignation,
-      gpioDirection: gpioDirection,
-      gpioValue: gpioValue,
-      shouldThrowIfUsedByGpioController: true,
-      cancellationToken: cancellationToken
-    );
-
   private void ConfigureGpDesignation(
     int gp,
     GpDesignation gpDesignation,
@@ -197,10 +154,7 @@ partial class Mcp2221AGpioDriver {
 
   internal async ValueTask ConfigureGpDesignationAsync(
     int gp,
-    GpDesignation gpDesignation,
-    VoltageReferenceSource? dacVoltageReferenceSource,
-    int? dacOutputValue,
-    VoltageReferenceSource? adcVoltageReferenceSource,
+    Func<SramSettings, SramSettings> configureSramSettings,
     CancellationToken cancellationToken
   )
   {
@@ -208,20 +162,7 @@ partial class Mcp2221AGpioDriver {
 
     try {
       await SetSramSettingsAsync(
-        sramSettings: sramSettings
-          .ModifyGpSettings(
-            gp: gp,
-            designation: gpDesignation,
-            direction: null,
-            outputValue: null
-          )
-          .ModifyDacSettings(
-            dacVoltageReferenceSource: dacVoltageReferenceSource,
-            dacOutputValue: dacOutputValue
-          )
-          .ModifyAdcSettings(
-            adcVoltageReferenceSource: adcVoltageReferenceSource
-          ),
+        sramSettings: configureSramSettings(sramSettings),
         cancellationToken: cancellationToken
       ).ConfigureAwait(false);
     }
@@ -233,10 +174,7 @@ partial class Mcp2221AGpioDriver {
 
   internal void ConfigureGpDesignation(
     int gp,
-    GpDesignation gpDesignation,
-    VoltageReferenceSource? dacVoltageReferenceSource,
-    int? dacOutputValue,
-    VoltageReferenceSource? adcVoltageReferenceSource,
+    Func<SramSettings, SramSettings> configureSramSettings,
     CancellationToken cancellationToken
   )
   {
@@ -244,20 +182,7 @@ partial class Mcp2221AGpioDriver {
 
     try {
       SetSramSettings(
-        sramSettings: sramSettings
-          .ModifyGpSettings(
-            gp: gp,
-            designation: gpDesignation,
-            direction: null,
-            outputValue: null
-          )
-          .ModifyDacSettings(
-            dacVoltageReferenceSource: dacVoltageReferenceSource,
-            dacOutputValue: dacOutputValue
-          )
-          .ModifyAdcSettings(
-            adcVoltageReferenceSource: adcVoltageReferenceSource
-          ),
+        sramSettings: configureSramSettings(sramSettings),
         cancellationToken: cancellationToken
       );
     }

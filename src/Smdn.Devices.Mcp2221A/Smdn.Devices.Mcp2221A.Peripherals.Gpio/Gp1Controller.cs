@@ -108,11 +108,8 @@ public sealed class Gp1Controller :
     VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd,
     CancellationToken cancellationToken = default
   )
-    => ConfigureGpDesignationAsync(
-      gpDesignation: GpDesignation.AlternateFunction0,
-      dacVoltageReferenceSource: null,
-      dacOutputValue: null,
-      adcVoltageReferenceSource: voltageReferenceSource,
+    => ConfigureAsAdcAsyncCore(
+      voltageReferenceSource: voltageReferenceSource,
       cancellationToken: cancellationToken
     );
 
@@ -121,11 +118,8 @@ public sealed class Gp1Controller :
     VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd,
     CancellationToken cancellationToken = default
   )
-    => ConfigureGpDesignation(
-      gpDesignation: GpDesignation.AlternateFunction0,
-      dacVoltageReferenceSource: null,
-      dacOutputValue: null,
-      adcVoltageReferenceSource: voltageReferenceSource,
+    => ConfigureAsAdcCore(
+      voltageReferenceSource: voltageReferenceSource,
       cancellationToken: cancellationToken
     );
 

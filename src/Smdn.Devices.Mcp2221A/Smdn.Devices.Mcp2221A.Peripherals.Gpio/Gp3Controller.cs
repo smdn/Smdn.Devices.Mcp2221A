@@ -78,13 +78,9 @@ public sealed class Gp3Controller :
     int? initialOutputValue = null,
     CancellationToken cancellationToken = default
   )
-    => ConfigureGpDesignationAsync(
-      gpDesignation: GpDesignation.AlternateFunction1,
-      dacVoltageReferenceSource: voltageReferenceSource,
-      dacOutputValue: initialOutputValue.HasValue
-        ? Mcp2221AGpioDriver.ThrowIfDacOutputValueOutOfRange(initialOutputValue.Value, nameof(initialOutputValue))
-        : null,
-      adcVoltageReferenceSource: null,
+    => ConfigureAsDacAsyncCore(
+      voltageReferenceSource: voltageReferenceSource,
+      initialOutputValue: initialOutputValue,
       cancellationToken: cancellationToken
     );
 
@@ -94,13 +90,9 @@ public sealed class Gp3Controller :
     int? initialOutputValue = null,
     CancellationToken cancellationToken = default
   )
-    => ConfigureGpDesignation(
-      gpDesignation: GpDesignation.AlternateFunction1,
-      dacVoltageReferenceSource: voltageReferenceSource,
-      dacOutputValue: initialOutputValue.HasValue
-        ? Mcp2221AGpioDriver.ThrowIfDacOutputValueOutOfRange(initialOutputValue.Value, nameof(initialOutputValue))
-        : null,
-      adcVoltageReferenceSource: null,
+    => ConfigureAsDacCore(
+      voltageReferenceSource: voltageReferenceSource,
+      initialOutputValue: initialOutputValue,
       cancellationToken: cancellationToken
     );
 
@@ -141,11 +133,8 @@ public sealed class Gp3Controller :
     VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd,
     CancellationToken cancellationToken = default
   )
-    => ConfigureGpDesignationAsync(
-      gpDesignation: GpDesignation.AlternateFunction0,
-      dacVoltageReferenceSource: null,
-      dacOutputValue: null,
-      adcVoltageReferenceSource: voltageReferenceSource,
+    => ConfigureAsAdcAsyncCore(
+      voltageReferenceSource: voltageReferenceSource,
       cancellationToken: cancellationToken
     );
 
@@ -154,11 +143,8 @@ public sealed class Gp3Controller :
     VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd,
     CancellationToken cancellationToken = default
   )
-    => ConfigureGpDesignation(
-      gpDesignation: GpDesignation.AlternateFunction0,
-      dacVoltageReferenceSource: null,
-      dacOutputValue: null,
-      adcVoltageReferenceSource: voltageReferenceSource,
+    => ConfigureAsAdcCore(
+      voltageReferenceSource: voltageReferenceSource,
       cancellationToken: cancellationToken
     );
 
