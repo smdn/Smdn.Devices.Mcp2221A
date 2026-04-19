@@ -166,8 +166,8 @@ public sealed class Gp1Controller :
     ClockOutputDutyCycle? dutyCycle = null,
     CancellationToken cancellationToken = default
   )
-    => GpioDriver.ConfigureGpDesignationAsync(
-      gp: Index,
+    => GpioDriver.ConfigureGpPinSettingsAsync(
+      gpIndex: Index,
       configureSramSettings: sram => sram
         .ModifyGpSettings(
           gp: Index,
@@ -186,8 +186,8 @@ public sealed class Gp1Controller :
     ClockOutputDutyCycle? dutyCycle = null,
     CancellationToken cancellationToken = default
   )
-    => GpioDriver.ConfigureGpDesignation(
-      gp: Index,
+    => GpioDriver.ConfigureGpPinSettings(
+      gpIndex: Index,
       configureSramSettings: sram => sram
         .ModifyGpSettings(
           gp: Index,
