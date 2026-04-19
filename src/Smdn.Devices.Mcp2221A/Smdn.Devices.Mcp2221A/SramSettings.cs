@@ -14,7 +14,7 @@ internal sealed class SramSettings {
   // [MCP2221A] 3.1.13 SET SRAM SETTINGS
   // [-] Set SRAM settings (not included in this field)
   // [-] Don't care (not included in this field)
-  // [0] Clock Output Driver Value
+  // [0] Clock Output Divider Value
   // [1] DAC Voltage Reference
   // [2] Set DAC Output Value
   // [3] ADC Voltage Reference
@@ -24,7 +24,7 @@ internal sealed class SramSettings {
   // [7] GP1 Settings
   // [8] GP2 Settings
   // [9] GP3 Settings
-  private const int OffsetOfClockOutputDriverValue = 0;
+  private const int OffsetOfClockOutputDividerValue = 0;
   private const int OffsetOfDacVoltageReference = 1;
   private const int OffsetOfDacOutputValue = 2;
   private const int OffsetOfAdcVoltageReference = 3;
@@ -67,12 +67,12 @@ internal sealed class SramSettings {
 
     // For each of the following byte entries, set the bit that
     // commands the alteration of settings to 0:
-    //   [0] Clock Output Driver Value
+    //   [0] Clock Output Divider Value
     //   [1] DAC Voltage Reference
     //   [2] Set DAC Output Value
     //   [3] ADC Voltage Reference
     //   [4] Setup the interrupt detection mechanism and clear the detection flag
-    for (var i = OffsetOfClockOutputDriverValue; i <= OffsetOfInterruptDetectionModuleSetup; i++) {
+    for (var i = OffsetOfClockOutputDividerValue; i <= OffsetOfInterruptDetectionModuleSetup; i++) {
       currentSettings[i] &= 0b_0_1111111;
       unsentSettings[i] &= 0b_0_1111111;
     }
@@ -89,6 +89,12 @@ internal sealed class SramSettings {
 
   public void WriteAsSetSramSettingsCommand(Span<byte> destination)
     => unsentSettings.CopyTo(destination);
+
+  public void StoreClockOutputDividerValueByte(byte clockOutputDividerValue)
+  {
+    currentSettings[OffsetOfClockOutputDividerValue] = clockOutputDividerValue;
+    unsentSettings[OffsetOfClockOutputDividerValue] = clockOutputDividerValue;
+  }
 
   public void StoreDacVoltageReferenceByte(byte dacVoltageReferenceByte)
   {
@@ -114,6 +120,9 @@ internal sealed class SramSettings {
     gpSettingBytes.CopyTo(unsentSettings.AsSpan(OffsetOfGpSettings, SizeOfGpSettings));
   }
 
+  public byte ReadClockOutputDividerValueByte()
+    => currentSettings[OffsetOfClockOutputDividerValue];
+
   public byte ReadDacVoltageReferenceByte()
     => currentSettings[OffsetOfDacVoltageReference];
 
@@ -125,6 +134,64 @@ internal sealed class SramSettings {
 
   public byte ReadGpSettingsByte(int gp)
     => currentSettings[OffsetOfGpSettings + gp];
+
+  public SramSettings ModifyClockOutputSettings(
+    ClockOutputFrequency? frequency,
+    ClockOutputDutyCycle? dutyCycle
+  )
+  {
+    if (!frequency.HasValue && !dutyCycle.HasValue)
+      return this;
+
+    ref var settings = ref unsentSettings[OffsetOfClockOutputDividerValue];
+
+    // [0] Clock Output Divider Value
+    // Bit 7: Enable loading of a new clock divider
+    settings |= 0b_1_00_00_000;
+
+    // Bit 6-5: Don't care
+
+    // Bit 4-3: Duty cycle
+    if (dutyCycle.HasValue)
+      settings = (byte)((settings & 0b_1_11_00_111) | GetDutyCycleBits(dutyCycle.Value));
+
+    // Bit 2-0: Clock divider value
+    if (frequency.HasValue)
+      settings = (byte)((settings & 0b_1_11_11_000) | GetClockDividerValueBits(frequency.Value));
+
+    return this;
+
+    static byte GetDutyCycleBits(ClockOutputDutyCycle duty)
+      => duty switch {
+        ClockOutputDutyCycle.Duty0 or
+        ClockOutputDutyCycle.Duty25 or
+        ClockOutputDutyCycle.Duty50 or
+        ClockOutputDutyCycle.Duty75 => (byte)((int)duty << 3),
+
+        var invalid => throw new ArgumentException(
+          message: $"The clock duty cycle cannot set to {invalid}. The value must be one of the values defined in {nameof(ClockOutputDutyCycle)}."
+        ),
+      };
+
+    static byte GetClockDividerValueBits(ClockOutputFrequency freq)
+      => freq switch {
+        ClockOutputFrequency.Frequency24MHz or
+        ClockOutputFrequency.Frequency12MHz or
+        ClockOutputFrequency.Frequency6MHz or
+        ClockOutputFrequency.Frequency3MHz or
+        ClockOutputFrequency.Frequency1500kHz or
+        ClockOutputFrequency.Frequency750kHz or
+        ClockOutputFrequency.Frequency375kHz => (byte)freq,
+
+        ClockOutputFrequency.Reserved => throw new ArgumentException(
+          message: $"The clock output frequency cannot set to {nameof(ClockOutputFrequency.Reserved)}. This value is reserved by the device."
+        ),
+
+        var invalid => throw new ArgumentException(
+          message: $"The clock output frequency cannot set to {invalid}. The value must be one of the values defined in {nameof(ClockOutputFrequency)}."
+        ),
+      };
+  }
 
   public SramSettings ModifyDacSettings(
     VoltageReferenceSource? dacVoltageReferenceSource,
