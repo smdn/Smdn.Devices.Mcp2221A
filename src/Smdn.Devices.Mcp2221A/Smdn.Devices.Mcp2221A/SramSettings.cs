@@ -231,11 +231,7 @@ internal sealed class SramSettings {
     // Alter GPIO configuration = Alter the GP designation (1)
     unsentSettings[OffsetOfAlterGpioConfiguration] |= 0b_1_0000000;
 
-#if SYSTEM_RUNTIME_COMPILERSERVICES_INLINEARRAYATTRIBUTE
     ref var gpSettings = ref unsentSettings[OffsetOfGpSettings + gp];
-#else
-    var gpSettings = unsentSettings[OffsetOfGpSettings + gp];
-#endif
     var currentGpSettings = gpSettings;
 
     gpSettings = 0b_000_0_0_000;
@@ -259,10 +255,6 @@ internal sealed class SramSettings {
 
     // Bit 7-5: Don't care
     // gpSettings |= 0b_000_0_0_000;
-
-#if !SYSTEM_RUNTIME_COMPILERSERVICES_INLINEARRAYATTRIBUTE
-    unsentSettings[OffsetOfGpSettings + gp] = gpSettings;
-#endif
 
     return this;
   }
