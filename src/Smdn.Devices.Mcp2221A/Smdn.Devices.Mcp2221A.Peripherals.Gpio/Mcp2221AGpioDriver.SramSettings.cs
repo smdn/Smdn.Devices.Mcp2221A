@@ -37,6 +37,17 @@ partial class Mcp2221AGpioDriver {
 
       // TODO: update other SRAM settings
 
+      // [5] Bit 7-5: Don't care
+      // [5] Bit 4-0: Clock Output divider value
+      //   Bits[4:3]: duty cycle
+      //   Bits[2:0]: clock divider
+      // Note: The clock output bits in the SRAM settings are stored as-is.
+      // In other words, even if a bit value marked as "Reserved" is specified
+      // in the clock divider value, it will remain unchanged.
+      sramSettings.StoreClockOutputDividerValueByte(
+        (byte)(resp[5] & 0b_000_11_111)
+      );
+
       // [6] Bit 7-6: DAC Reference voltage option
       // [6] Bit 5: DAC reference option
       // Note: The DAC option bits in the SRAM settings are stored as-is.

@@ -31,7 +31,7 @@ See [Smdn.Devices.Mcp2221A examples](examples/Smdn.Devices.Mcp2221A/).
     - [x] GPIO get/set direction
   - [x] ADC inputs
   - [x] DAC outputs
-  - [ ] Clock output
+  - [x] Clock output
   - [ ] Interrupt detection
   - [x] Other functionalities
     - [x] Configure GP0 as SSPND
@@ -54,7 +54,7 @@ See [Smdn.Devices.Mcp2221A examples](examples/Smdn.Devices.Mcp2221A/).
     - [x] GP settings
     - [ ] Chip settings
       - [ ] Pin options
-      - [ ] Clock output
+      - [x] Clock output
       - [x] DAC outputs
       - [x] ADC inputs
       - [ ] Interrupt detection

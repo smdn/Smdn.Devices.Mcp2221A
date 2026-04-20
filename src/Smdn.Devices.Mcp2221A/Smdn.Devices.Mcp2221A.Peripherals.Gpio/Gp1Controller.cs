@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 using System;
+using System.Device.Gpio;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ public sealed class Gp1Controller :
   GpController,
   IInterruptController,
   IAdcController,
-  IClockController
+  IClockOutputController
 {
 #pragma warning restore IDE0055
   /// <inheritdoc/>
@@ -53,6 +54,14 @@ public sealed class Gp1Controller :
   /// <inheritdoc/>
   public int LastReadAnalogRawValue
     => GpioDriver.GetLastFetchedAdcRawValue(Index);
+
+  /// <inheritdoc/>
+  public ClockOutputFrequency CurrentClockOutputFrequency
+    => GpioDriver.CurrentClockOutputFrequency;
+
+  /// <inheritdoc/>
+  public ClockOutputDutyCycle CurrentClockOutputDutyCycle
+    => GpioDriver.CurrentClockOutputDutyCycle;
 
   internal Gp1Controller(Mcp2221AGpioDriver gpioDriver)
     : base(gpioDriver)
@@ -152,16 +161,76 @@ public sealed class Gp1Controller :
   }
 
   /// <inheritdoc/>
-  public ValueTask ConfigureAsClockOutputAsync(CancellationToken cancellationToken = default)
-    => ConfigureGpDesignationAsync(
-      gpDesignation: GpDesignation.DedicatedFunctionOperation,
+  public ValueTask ConfigureAsClockOutputAsync(
+    ClockOutputFrequency? frequency = null,
+    ClockOutputDutyCycle? dutyCycle = null,
+    CancellationToken cancellationToken = default
+  )
+    => GpioDriver.ConfigureGpPinSettingsAsync(
+      gpIndex: Index,
+      configureSramSettings: sram => sram
+        .ModifyGpSettings(
+          gp: Index,
+          designation: GpDesignation.DedicatedFunctionOperation
+        )
+        .ModifyClockOutputSettings(
+          frequency: frequency,
+          dutyCycle: dutyCycle
+        ),
       cancellationToken: cancellationToken
     );
 
   /// <inheritdoc/>
-  public void ConfigureAsClockOutput(CancellationToken cancellationToken = default)
-    => ConfigureGpDesignation(
-      gpDesignation: GpDesignation.DedicatedFunctionOperation,
+  public void ConfigureAsClockOutput(
+    ClockOutputFrequency? frequency = null,
+    ClockOutputDutyCycle? dutyCycle = null,
+    CancellationToken cancellationToken = default
+  )
+    => GpioDriver.ConfigureGpPinSettings(
+      gpIndex: Index,
+      configureSramSettings: sram => sram
+        .ModifyGpSettings(
+          gp: Index,
+          designation: GpDesignation.DedicatedFunctionOperation
+        )
+        .ModifyClockOutputSettings(
+          frequency: frequency,
+          dutyCycle: dutyCycle
+        ),
       cancellationToken: cancellationToken
     );
+
+  /// <inheritdoc/>
+  public ValueTask SuspendClockOutputAsync(
+    CancellationToken cancellationToken = default
+  )
+  {
+    GpioDriver.Transceiver.ThrowIfDisposed();
+
+    ThrowIfInvalidConfiguration(GpFunction.ClockOutput);
+
+    return ConfigureGpDesignationAsync(
+      gpDesignation: GpDesignation.GpioOperation,
+      gpioDirection: PinMode.Output,
+      gpioInitialValue: PinValue.Low,
+      cancellationToken: cancellationToken
+    );
+  }
+
+  /// <inheritdoc/>
+  public void SuspendClockOutput(
+    CancellationToken cancellationToken = default
+  )
+  {
+    GpioDriver.Transceiver.ThrowIfDisposed();
+
+    ThrowIfInvalidConfiguration(GpFunction.ClockOutput);
+
+    ConfigureGpDesignation(
+      gpDesignation: GpDesignation.GpioOperation,
+      gpioDirection: PinMode.Output,
+      gpioInitialValue: PinValue.Low,
+      cancellationToken: cancellationToken
+    );
+  }
 }
