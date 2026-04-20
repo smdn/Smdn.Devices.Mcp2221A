@@ -19,7 +19,7 @@ public class Gp1ControllerTests {
     yield return new object[] { GpFunction.ClockOutput, IsSupported };
     yield return new object[] { GpFunction.Adc, IsSupported };
     yield return new object[] { GpFunction.LedOutput, IsSupported };
-    yield return new object[] { GpFunction.ExternalInterrupt, IsSupported };
+    yield return new object[] { GpFunction.InterruptOnChange, IsSupported };
 
     yield return new object[] { GpFunction.Dac, IsNotSupported };
     yield return new object[] { GpFunction.UsbSuspendStatus, IsNotSupported };
@@ -48,7 +48,7 @@ public class Gp1ControllerTests {
     yield return (0b_000_0_0_001, null, null, GpFunction.ClockOutput, "CLK OUT");
     yield return (0b_000_0_0_010, null, null, GpFunction.Adc, "ADC1");
     yield return (0b_000_0_0_011, null, null, GpFunction.LedOutput, "LED_UTX");
-    yield return (0b_000_0_0_100, null, null, GpFunction.ExternalInterrupt, "IOC");
+    yield return (0b_000_0_0_100, null, null, GpFunction.InterruptOnChange, "IOC");
 
     yield return (0b_000_0_0_000, PinValue.Low, PinMode.Output, GpFunction.Gpio, "GPIO1");
     yield return (0b_000_0_1_000, PinValue.Low, PinMode.Input, GpFunction.Gpio, "GPIO1");

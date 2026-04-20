@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
-internal interface IInterruptController {
+/// <summary>
+/// Defines an interface for controlling the Interrupt-on-Change (IOC)
+/// pins of the MCP2221/MCP2221A.
+/// </summary>
+public interface IInterruptOnChangeController {
   /// <param name="cancellationToken">
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// The default value is <see cref="CancellationToken.None"/>.
@@ -14,8 +18,8 @@ internal interface IInterruptController {
   /// <exception cref="InvalidOperationException">
   /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
   /// </exception>
-  /// <seealso cref="GpFunction.ExternalInterrupt"/>
-  ValueTask ConfigureAsExternalInterruptAsync(
+  /// <seealso cref="GpFunction.InterruptOnChange"/>
+  ValueTask ConfigureAsInterruptOnChangeAsync(
     CancellationToken cancellationToken = default
   );
 
@@ -26,8 +30,8 @@ internal interface IInterruptController {
   /// <exception cref="InvalidOperationException">
   /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
   /// </exception>
-  /// <seealso cref="GpFunction.ExternalInterrupt"/>
-  void ConfigureAsExternalInterrupt(
+  /// <seealso cref="GpFunction.InterruptOnChange"/>
+  void ConfigureAsInterruptOnChange(
     CancellationToken cancellationToken = default
   );
 }

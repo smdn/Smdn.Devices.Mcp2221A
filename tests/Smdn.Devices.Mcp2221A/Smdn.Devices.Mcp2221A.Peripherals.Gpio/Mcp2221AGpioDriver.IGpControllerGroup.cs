@@ -182,7 +182,7 @@ partial class Mcp2221AGpioDriverTests {
     yield return new object?[] { null, GpFunction.ClockOutput, null, null, null, (byte?)0b_000_0_0_001, null, null };
     yield return new object?[] { null, GpFunction.Adc, null, null, null, (byte?)0b_000_0_0_010, null, null };
     yield return new object?[] { null, GpFunction.LedOutput, null, null, null, (byte?)0b_000_0_0_011, null, null };
-    yield return new object?[] { null, GpFunction.ExternalInterrupt, null, null, null, (byte?)0b_000_0_0_100, null, null };
+    yield return new object?[] { null, GpFunction.InterruptOnChange, null, null, null, (byte?)0b_000_0_0_100, null, null };
 
     yield return new object?[] { null, null, GpFunction.UsbConfigureStatus, null, null, null, (byte?)0b_000_0_0_001, null };
     yield return new object?[] { null, null, GpFunction.Adc, null, null, null, (byte?)0b_000_0_0_010, null };
@@ -580,7 +580,7 @@ partial class Mcp2221AGpioDriverTests {
       GpFunction.ClockOutput,
       GpFunction.Adc,
       GpFunction.LedOutput,
-      GpFunction.ExternalInterrupt,
+      GpFunction.InterruptOnChange,
     }) {
       yield return new object?[] {
         new[] { 0, 1, 2, 3 },

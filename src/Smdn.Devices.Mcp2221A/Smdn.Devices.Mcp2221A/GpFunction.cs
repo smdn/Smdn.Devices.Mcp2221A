@@ -52,13 +52,15 @@ public enum GpFunction {
   Dac,
 
   /// <summary>
-  /// External Interrupt-on-Change (IOC) input.
+  /// Interrupt-on-Change (IOC) input.
   /// </summary>
   /// <remarks>
   /// Supported on: GP1 (IOC).
+  /// This function detects signal edges (rising, falling, or both) on the
+  /// pin and sets a detection flag.
   /// </remarks>
   /// <seealso cref="Mcp2221AController.GpPin1"/>
-  ExternalInterrupt,
+  InterruptOnChange,
 
   /// <summary>
   /// UART or I2C Status LED output.

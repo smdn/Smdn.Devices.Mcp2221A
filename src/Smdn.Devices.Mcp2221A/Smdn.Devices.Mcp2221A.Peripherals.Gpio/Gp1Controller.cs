@@ -10,7 +10,7 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 #pragma warning disable IDE0055
 public sealed class Gp1Controller :
   GpController,
-  IInterruptController,
+  IInterruptOnChangeController,
   IAdcController,
   IClockOutputController
 {
@@ -33,7 +33,7 @@ public sealed class Gp1Controller :
     GpDesignation.DedicatedFunctionOperation => GpFunction.ClockOutput, // CLK OUT
     GpDesignation.AlternateFunction0 => GpFunction.Adc, // ADC1
     GpDesignation.AlternateFunction1 => GpFunction.LedOutput, // LED_UTX
-    GpDesignation.AlternateFunction2 => GpFunction.ExternalInterrupt, // IOC
+    GpDesignation.AlternateFunction2 => GpFunction.InterruptOnChange, // IOC
     _ => throw new NotSupportedException(),
   };
 
@@ -74,19 +74,19 @@ public sealed class Gp1Controller :
       GpFunction.ClockOutput => GpDesignation.DedicatedFunctionOperation, // CLK OUT
       GpFunction.Adc => GpDesignation.AlternateFunction0, // ADC1
       GpFunction.LedOutput => GpDesignation.AlternateFunction1, // LED_UTX
-      GpFunction.ExternalInterrupt => GpDesignation.AlternateFunction2, // IOC
+      GpFunction.InterruptOnChange => GpDesignation.AlternateFunction2, // IOC
       _ => null,
     };
 
   /// <inheritdoc/>
-  public ValueTask ConfigureAsExternalInterruptAsync(CancellationToken cancellationToken = default)
+  public ValueTask ConfigureAsInterruptOnChangeAsync(CancellationToken cancellationToken = default)
     => ConfigureGpDesignationAsync(
       gpDesignation: GpDesignation.AlternateFunction2,
       cancellationToken: cancellationToken
     );
 
   /// <inheritdoc/>
-  public void ConfigureAsExternalInterrupt(CancellationToken cancellationToken = default)
+  public void ConfigureAsInterruptOnChange(CancellationToken cancellationToken = default)
     => ConfigureGpDesignation(
       gpDesignation: GpDesignation.AlternateFunction2,
       cancellationToken: cancellationToken

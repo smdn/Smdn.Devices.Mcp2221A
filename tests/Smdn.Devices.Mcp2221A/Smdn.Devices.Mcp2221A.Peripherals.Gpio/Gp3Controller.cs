@@ -20,7 +20,7 @@ public class Gp3ControllerTests {
     yield return new object[] { GpFunction.Adc, IsSupported };
     yield return new object[] { GpFunction.Dac, IsSupported };
 
-    yield return new object[] { GpFunction.ExternalInterrupt, IsNotSupported };
+    yield return new object[] { GpFunction.InterruptOnChange, IsNotSupported };
     yield return new object[] { GpFunction.ClockOutput, IsNotSupported };
     yield return new object[] { GpFunction.UsbSuspendStatus, IsNotSupported };
     yield return new object[] { GpFunction.UsbConfigureStatus, IsNotSupported };

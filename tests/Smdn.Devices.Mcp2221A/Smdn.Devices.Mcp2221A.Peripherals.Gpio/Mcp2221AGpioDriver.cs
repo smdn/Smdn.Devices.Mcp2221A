@@ -21,7 +21,7 @@ public partial class Mcp2221AGpioDriverTests {
         GpFunction.ClockOutput => 0b_000_0_0_001, // CLK OUT
         GpFunction.Adc => 0b_000_0_0_010, // ADC1
         GpFunction.LedOutput => 0b_000_0_0_011, // LED_UTX
-        GpFunction.ExternalInterrupt => 0b_000_0_0_100, // IOC
+        GpFunction.InterruptOnChange => 0b_000_0_0_100, // IOC
         _ => throw new NotSupportedException(),
       },
       2 => function switch {

@@ -167,7 +167,7 @@ public class IGpControllerGroupExtensionsTests {
     // GP0
     yield return new object?[] { GpFunction.Adc, null, null, null };
     yield return new object?[] { GpFunction.Dac, null, null, null };
-    yield return new object?[] { GpFunction.ExternalInterrupt, null, null, null };
+    yield return new object?[] { GpFunction.InterruptOnChange, null, null, null };
     yield return new object?[] { GpFunction.ClockOutput, null, null, null };
     yield return new object?[] { GpFunction.UsbConfigureStatus, null, null, null };
     // GP1
@@ -175,17 +175,17 @@ public class IGpControllerGroupExtensionsTests {
     yield return new object?[] { null, GpFunction.UsbSuspendStatus, null, null };
     yield return new object?[] { null, GpFunction.UsbConfigureStatus, null, null };
     // GP2
-    yield return new object?[] { null, null, GpFunction.ExternalInterrupt, null };
+    yield return new object?[] { null, null, GpFunction.InterruptOnChange, null };
     yield return new object?[] { null, null, GpFunction.LedOutput, null };
     yield return new object?[] { null, null, GpFunction.ClockOutput, null };
     yield return new object?[] { null, null, GpFunction.UsbSuspendStatus, null };
     // GP3
-    yield return new object?[] { null, null, null, GpFunction.ExternalInterrupt };
+    yield return new object?[] { null, null, null, GpFunction.InterruptOnChange };
     yield return new object?[] { null, null, null, GpFunction.ClockOutput };
     yield return new object?[] { null, null, null, GpFunction.UsbSuspendStatus };
     yield return new object?[] { null, null, null, GpFunction.UsbConfigureStatus };
     // GP0-3
-    yield return new object?[] { GpFunction.ExternalInterrupt, GpFunction.UsbSuspendStatus, GpFunction.UsbSuspendStatus, GpFunction.UsbSuspendStatus };
+    yield return new object?[] { GpFunction.InterruptOnChange, GpFunction.UsbSuspendStatus, GpFunction.UsbSuspendStatus, GpFunction.UsbSuspendStatus };
     yield return new object?[] { null, GpFunction.UsbSuspendStatus, GpFunction.UsbSuspendStatus, GpFunction.UsbSuspendStatus };
     yield return new object?[] { null, null, GpFunction.UsbSuspendStatus, GpFunction.UsbSuspendStatus };
     yield return new object?[] { null, null, null, GpFunction.UsbSuspendStatus };
@@ -295,7 +295,7 @@ public class IGpControllerGroupExtensionsTests {
     yield return new object?[] { null, null, null, GpFunction.Adc };
     yield return new object?[] { null, null, GpFunction.Dac, null };
     yield return new object?[] { null, null, null, GpFunction.Dac };
-    yield return new object?[] { null, GpFunction.ExternalInterrupt, null, null };
+    yield return new object?[] { null, GpFunction.InterruptOnChange, null, null };
     yield return new object?[] { GpFunction.LedOutput, null, null, null };
     yield return new object?[] { null, GpFunction.LedOutput, null, null };
     yield return new object?[] { null, null, null, GpFunction.LedOutput };

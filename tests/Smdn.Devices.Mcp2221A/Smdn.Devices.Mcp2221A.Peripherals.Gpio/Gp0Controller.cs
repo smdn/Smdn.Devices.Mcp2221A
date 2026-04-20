@@ -21,7 +21,7 @@ public class Gp0ControllerTests {
 
     yield return new object[] { GpFunction.Adc, IsNotSupported };
     yield return new object[] { GpFunction.Dac, IsNotSupported };
-    yield return new object[] { GpFunction.ExternalInterrupt, IsNotSupported };
+    yield return new object[] { GpFunction.InterruptOnChange, IsNotSupported };
     yield return new object[] { GpFunction.ClockOutput, IsNotSupported };
     yield return new object[] { GpFunction.UsbConfigureStatus, IsNotSupported };
 
