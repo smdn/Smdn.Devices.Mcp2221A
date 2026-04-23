@@ -608,6 +608,10 @@ partial class GpControllerTests {
     );
     var initialGpFunction = mcp2221A.GpPin1.CurrentFunction;
 
+    // command should not be sent
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
     Assert.That(
       async () => await suspendClockOutputAsyncFunc(mcp2221A.GpPin1),
       Throws
@@ -621,6 +625,11 @@ partial class GpControllerTests {
       mcp2221A.GpPin1.CurrentFunction,
       Is.EqualTo(initialGpFunction),
       $"must not be reconfigured ({nameof(mcp2221A.GpPin1.CurrentFunction)})"
+    );
+    Assert.That(
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
     );
   }
 
