@@ -96,21 +96,15 @@ partial class Mcp2221AGpioDriver {
     CancellationToken cancellationToken = default
   )
   {
-    try {
-      SetSramSettings(
-        sramSettings: sramSettings.ModifyDacSettings(
-          dacVoltageReferenceSource: null,
-          dacOutputValue: ThrowIfDacOutputValueOutOfRange(value, nameof(value))
-        ),
-        cancellationToken: cancellationToken
-      );
+    SetSramSettings(
+      sramSettings: sramSettings.ModifyDacSettings(
+        dacVoltageReferenceSource: null,
+        dacOutputValue: ThrowIfDacOutputValueOutOfRange(value, nameof(value))
+      ),
+      cancellationToken: cancellationToken
+    );
 
-      lastAppliedDacRawValue = value;
-    }
-    catch {
-      sramSettings.Restore();
-      throw;
-    }
+    lastAppliedDacRawValue = value;
   }
 
   /// <inheritdoc/>
@@ -119,21 +113,15 @@ partial class Mcp2221AGpioDriver {
     CancellationToken cancellationToken = default
   )
   {
-    try {
-      await SetSramSettingsAsync(
-        sramSettings: sramSettings.ModifyDacSettings(
-          dacVoltageReferenceSource: null,
-          dacOutputValue: ThrowIfDacOutputValueOutOfRange(value, nameof(value))
-        ),
-        cancellationToken: cancellationToken
-      ).ConfigureAwait(false);
+    await SetSramSettingsAsync(
+      sramSettings: sramSettings.ModifyDacSettings(
+        dacVoltageReferenceSource: null,
+        dacOutputValue: ThrowIfDacOutputValueOutOfRange(value, nameof(value))
+      ),
+      cancellationToken: cancellationToken
+    ).ConfigureAwait(false);
 
-      lastAppliedDacRawValue = value;
-    }
-    catch {
-      sramSettings.Restore();
-      throw;
-    }
+    lastAppliedDacRawValue = value;
   }
 
   /// <summary>

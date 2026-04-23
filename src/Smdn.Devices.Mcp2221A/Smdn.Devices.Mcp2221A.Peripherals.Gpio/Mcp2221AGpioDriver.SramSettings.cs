@@ -112,7 +112,7 @@ partial class Mcp2221AGpioDriver {
 
   internal async ValueTask FetchSramSettingsAsync(CancellationToken cancellationToken)
   {
-    _ = await Transceiver.CommandAsync<SramSettings, None>(
+    _ = await Transceiver.CommandAsync(
       arg: sramSettings,
       cancellationToken: cancellationToken,
       constructCommand: GetSramSettingsCommand.ConstructCommand,
@@ -124,7 +124,7 @@ partial class Mcp2221AGpioDriver {
 
   internal void FetchSramSettings(CancellationToken cancellationToken)
   {
-    _ = Transceiver.Command<SramSettings, None>(
+    _ = Transceiver.Command(
       arg: sramSettings,
       cancellationToken: cancellationToken,
       constructCommand: GetSramSettingsCommand.ConstructCommand,
@@ -146,24 +146,18 @@ partial class Mcp2221AGpioDriver {
     if (shouldThrowIfUsedByGpioController)
       ThrowIfUsedByGpioController(gp);
 
-    try {
-      SetSramSettings(
-        sramSettings: sramSettings.ModifyGpSettings(
-          gp: gp,
-          designation: gpDesignation,
-          direction: gpioDirection,
-          outputValue: gpioValue
-        ),
-        cancellationToken: cancellationToken
-      );
-    }
-    catch {
-      sramSettings.Restore();
-      throw;
-    }
+    SetSramSettings(
+      sramSettings: sramSettings.ModifyGpSettings(
+        gp: gp,
+        designation: gpDesignation,
+        direction: gpioDirection,
+        outputValue: gpioValue
+      ),
+      cancellationToken: cancellationToken
+    );
   }
 
-  internal async ValueTask ConfigureGpPinSettingsAsync(
+  internal ValueTask ConfigureGpPinSettingsAsync(
     int gpIndex,
     Func<SramSettings, SramSettings> configureSramSettings,
     CancellationToken cancellationToken
@@ -171,16 +165,10 @@ partial class Mcp2221AGpioDriver {
   {
     ThrowIfUsedByGpioController(gpIndex);
 
-    try {
-      await SetSramSettingsAsync(
-        sramSettings: configureSramSettings(sramSettings),
-        cancellationToken: cancellationToken
-      ).ConfigureAwait(false);
-    }
-    catch {
-      sramSettings.Restore();
-      throw;
-    }
+    return SetSramSettingsAsync(
+      sramSettings: configureSramSettings(sramSettings),
+      cancellationToken: cancellationToken
+    );
   }
 
   internal void ConfigureGpPinSettings(
@@ -191,20 +179,14 @@ partial class Mcp2221AGpioDriver {
   {
     ThrowIfUsedByGpioController(gpIndex);
 
-    try {
-      SetSramSettings(
-        sramSettings: configureSramSettings(sramSettings),
-        cancellationToken: cancellationToken
-      );
-    }
-    catch {
-      sramSettings.Restore();
-      throw;
-    }
+    SetSramSettings(
+      sramSettings: configureSramSettings(sramSettings),
+      cancellationToken: cancellationToken
+    );
   }
 
   /// <inheritdoc/>
-  public async ValueTask ConfigureAllGpSettingsAsync(
+  public ValueTask ConfigureAllGpSettingsAsync(
     GpFunction? gp0Function = default,
     PinMode? gp0Mode = default,
     PinValue? gp0InitialValue = default,
@@ -219,31 +201,23 @@ partial class Mcp2221AGpioDriver {
     PinValue? gp3InitialValue = default,
     CancellationToken cancellationToken = default
   )
-  {
-    try {
-      await SetSramSettingsAsync(
-        sramSettings: ModifyAllGpSettings(
-          gp0Function,
-          gp0Mode,
-          gp0InitialValue,
-          gp1Function,
-          gp1Mode,
-          gp1InitialValue,
-          gp2Function,
-          gp2Mode,
-          gp2InitialValue,
-          gp3Function,
-          gp3Mode,
-          gp3InitialValue
-        ),
-        cancellationToken: cancellationToken
-      ).ConfigureAwait(false);
-    }
-    catch {
-      sramSettings.Restore();
-      throw;
-    }
-  }
+    => SetSramSettingsAsync(
+      sramSettings: ModifyAllGpSettings(
+        gp0Function,
+        gp0Mode,
+        gp0InitialValue,
+        gp1Function,
+        gp1Mode,
+        gp1InitialValue,
+        gp2Function,
+        gp2Mode,
+        gp2InitialValue,
+        gp3Function,
+        gp3Mode,
+        gp3InitialValue
+      ),
+      cancellationToken: cancellationToken
+    );
 
   /// <inheritdoc/>
   public void ConfigureAllGpSettings(
@@ -261,31 +235,23 @@ partial class Mcp2221AGpioDriver {
     PinValue? gp3InitialValue = default,
     CancellationToken cancellationToken = default
   )
-  {
-    try {
-      SetSramSettings(
-        sramSettings: ModifyAllGpSettings(
-          gp0Function,
-          gp0Mode,
-          gp0InitialValue,
-          gp1Function,
-          gp1Mode,
-          gp1InitialValue,
-          gp2Function,
-          gp2Mode,
-          gp2InitialValue,
-          gp3Function,
-          gp3Mode,
-          gp3InitialValue
-        ),
-        cancellationToken: cancellationToken
-      );
-    }
-    catch {
-      sramSettings.Restore();
-      throw;
-    }
-  }
+    => SetSramSettings(
+      sramSettings: ModifyAllGpSettings(
+        gp0Function,
+        gp0Mode,
+        gp0InitialValue,
+        gp1Function,
+        gp1Mode,
+        gp1InitialValue,
+        gp2Function,
+        gp2Mode,
+        gp2InitialValue,
+        gp3Function,
+        gp3Mode,
+        gp3InitialValue
+      ),
+      cancellationToken: cancellationToken
+    );
 
   private SramSettings ModifyAllGpSettings(
     GpFunction? gp0Function,
@@ -339,21 +305,27 @@ partial class Mcp2221AGpioDriver {
 
     cancellationToken.ThrowIfCancellationRequested();
 
-    // attempt to set new SRAM settings
-    _ = await Transceiver.CommandAsync<SramSettings, None>(
-      arg: sramSettings,
-      cancellationToken: cancellationToken,
-      constructCommand: SetSramSettingsCommand.ConstructCommand,
-      parseResponse: SetSramSettingsCommand.ParseResponse
-    ).ConfigureAwait(false);
-
-    if (sramSettings.ShouldReenableVrm()) {
-      _ = await Transceiver.CommandAsync<SramSettings, None>(
+    try {
+      // attempt to set new SRAM settings
+      _ = await Transceiver.CommandAsync(
         arg: sramSettings,
         cancellationToken: cancellationToken,
         constructCommand: SetSramSettingsCommand.ConstructCommand,
         parseResponse: SetSramSettingsCommand.ParseResponse
       ).ConfigureAwait(false);
+
+      if (sramSettings.ShouldReenableVrm()) {
+        _ = await Transceiver.CommandAsync(
+          arg: sramSettings,
+          cancellationToken: cancellationToken,
+          constructCommand: SetSramSettingsCommand.ConstructCommand,
+          parseResponse: SetSramSettingsCommand.ParseResponse
+        ).ConfigureAwait(false);
+      }
+    }
+    catch {
+      sramSettings.Restore();
+      throw;
     }
 
     // save the successfully configured settings as the current state
@@ -372,21 +344,27 @@ partial class Mcp2221AGpioDriver {
 
     cancellationToken.ThrowIfCancellationRequested();
 
-    // attempt to set new GP0-GP3 settings
-    _ = Transceiver.Command<SramSettings, None>(
-      arg: sramSettings,
-      cancellationToken: cancellationToken,
-      constructCommand: SetSramSettingsCommand.ConstructCommand,
-      parseResponse: SetSramSettingsCommand.ParseResponse
-    );
-
-    if (sramSettings.ShouldReenableVrm()) {
-      _ = Transceiver.Command<SramSettings, None>(
+    try {
+      // attempt to set new SRAM settings
+      _ = Transceiver.Command(
         arg: sramSettings,
         cancellationToken: cancellationToken,
         constructCommand: SetSramSettingsCommand.ConstructCommand,
         parseResponse: SetSramSettingsCommand.ParseResponse
       );
+
+      if (sramSettings.ShouldReenableVrm()) {
+        _ = Transceiver.Command(
+          arg: sramSettings,
+          cancellationToken: cancellationToken,
+          constructCommand: SetSramSettingsCommand.ConstructCommand,
+          parseResponse: SetSramSettingsCommand.ParseResponse
+        );
+      }
+    }
+    catch {
+      sramSettings.Restore();
+      throw;
     }
 
     // save the successfully configured settings as the current state
