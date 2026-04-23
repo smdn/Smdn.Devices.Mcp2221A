@@ -10,6 +10,14 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 #pragma warning disable IDE0040
 partial class Mcp2221AGpioDriver {
 #pragma warning restore IDE0040
+  private readonly record struct GpSettings(
+    GpDesignation? Designation,
+    PinMode? Direction,
+    PinValue? OutputValue
+  ) {
+    public bool HasValue => Designation.HasValue || Direction.HasValue || OutputValue.HasValue;
+  }
+
   internal GpDesignation GetCurrentGpDesignation(int gp)
     => (GpDesignation)sramSettings.ReadGpSettingsByte(gp) & GpDesignation.BitMask;
 
@@ -147,40 +155,58 @@ partial class Mcp2221AGpioDriver {
       ThrowIfUsedByGpioController(gp);
 
     SetSramSettings(
-      sramSettings: sramSettings.ModifyGpSettings(
-        gp: gp,
-        designation: gpDesignation,
-        direction: gpioDirection,
-        outputValue: gpioValue
+      argSramSettings: (
+        GpIndex: gp,
+        GpSettings: new GpSettings(gpDesignation, gpioDirection, gpioValue)
+      ),
+      modifySramSettings: static (sramSettings, arg) => sramSettings.ModifyGpSettings(
+        gp: arg.GpIndex,
+        designation: arg.GpSettings.Designation!.Value, // [NotNullIfNotNull]
+        direction: arg.GpSettings.Direction,
+        outputValue: arg.GpSettings.OutputValue
       ),
       cancellationToken: cancellationToken
     );
   }
 
-  internal ValueTask ConfigureGpPinSettingsAsync(
+  internal ValueTask ConfigureGpPinSettingsAsync<TArg>(
     int gpIndex,
-    Func<SramSettings, SramSettings> configureSramSettings,
+    TArg arg,
+    Action<SramSettings, int, TArg> modifyGpPinSettings,
     CancellationToken cancellationToken
   )
   {
     ThrowIfUsedByGpioController(gpIndex);
 
     return SetSramSettingsAsync(
-      sramSettings: configureSramSettings(sramSettings),
+      argSramSettings: (
+        ModifyGpPinSettings: modifyGpPinSettings,
+        GpIndex: gpIndex,
+        Argument: arg
+      ),
+      modifySramSettings: static (sramSettings, arg)
+        => arg.ModifyGpPinSettings(sramSettings, arg.GpIndex, arg.Argument),
       cancellationToken: cancellationToken
     );
   }
 
-  internal void ConfigureGpPinSettings(
+  internal void ConfigureGpPinSettings<TArg>(
     int gpIndex,
-    Func<SramSettings, SramSettings> configureSramSettings,
+    TArg arg,
+    Action<SramSettings, int, TArg> modifyGpPinSettings,
     CancellationToken cancellationToken
   )
   {
     ThrowIfUsedByGpioController(gpIndex);
 
     SetSramSettings(
-      sramSettings: configureSramSettings(sramSettings),
+      argSramSettings: (
+        ModifyGpPinSettings: modifyGpPinSettings,
+        GpIndex: gpIndex,
+        Argument: arg
+      ),
+      modifySramSettings: static (sramSettings, arg)
+        => arg.ModifyGpPinSettings(sramSettings, arg.GpIndex, arg.Argument),
       cancellationToken: cancellationToken
     );
   }
@@ -201,23 +227,43 @@ partial class Mcp2221AGpioDriver {
     PinValue? gp3InitialValue = default,
     CancellationToken cancellationToken = default
   )
-    => SetSramSettingsAsync(
-      sramSettings: ModifyAllGpSettings(
-        gp0Function,
-        gp0Mode,
-        gp0InitialValue,
-        gp1Function,
-        gp1Mode,
-        gp1InitialValue,
-        gp2Function,
-        gp2Mode,
-        gp2InitialValue,
-        gp3Function,
-        gp3Mode,
-        gp3InitialValue
-      ),
+  {
+    GpSettings gp0Settings = new(
+      gp0Function.HasValue ? Gp0.GetDesignationForFunctionOrThrow(gp0Function.Value) : null,
+      gp0Mode,
+      gp0InitialValue
+    );
+    GpSettings gp1Settings = new(
+      gp1Function.HasValue ? Gp1.GetDesignationForFunctionOrThrow(gp1Function.Value) : null,
+      gp1Mode,
+      gp1InitialValue
+    );
+    GpSettings gp2Settings = new(
+      gp2Function.HasValue ? Gp2.GetDesignationForFunctionOrThrow(gp2Function.Value) : null,
+      gp2Mode,
+      gp2InitialValue
+    );
+    GpSettings gp3Settings = new(
+      gp3Function.HasValue ? Gp3.GetDesignationForFunctionOrThrow(gp3Function.Value) : null,
+      gp3Mode,
+      gp3InitialValue
+    );
+
+    if (gp0Settings.HasValue)
+      ThrowIfUsedByGpioController(gp: 0);
+    if (gp1Settings.HasValue)
+      ThrowIfUsedByGpioController(gp: 1);
+    if (gp2Settings.HasValue)
+      ThrowIfUsedByGpioController(gp: 2);
+    if (gp3Settings.HasValue)
+      ThrowIfUsedByGpioController(gp: 3);
+
+    return SetSramSettingsAsync(
+      argSramSettings: (gp0Settings, gp1Settings, gp2Settings, gp3Settings),
+      modifySramSettings: ModifyAllGpSettings,
       cancellationToken: cancellationToken
     );
+  }
 
   /// <inheritdoc/>
   public void ConfigureAllGpSettings(
@@ -235,71 +281,84 @@ partial class Mcp2221AGpioDriver {
     PinValue? gp3InitialValue = default,
     CancellationToken cancellationToken = default
   )
-    => SetSramSettings(
-      sramSettings: ModifyAllGpSettings(
-        gp0Function,
-        gp0Mode,
-        gp0InitialValue,
-        gp1Function,
-        gp1Mode,
-        gp1InitialValue,
-        gp2Function,
-        gp2Mode,
-        gp2InitialValue,
-        gp3Function,
-        gp3Mode,
-        gp3InitialValue
-      ),
-      cancellationToken: cancellationToken
+  {
+    GpSettings gp0Settings = new(
+      gp0Function.HasValue ? Gp0.GetDesignationForFunctionOrThrow(gp0Function.Value) : null,
+      gp0Mode,
+      gp0InitialValue
+    );
+    GpSettings gp1Settings = new(
+      gp1Function.HasValue ? Gp1.GetDesignationForFunctionOrThrow(gp1Function.Value) : null,
+      gp1Mode,
+      gp1InitialValue
+    );
+    GpSettings gp2Settings = new(
+      gp2Function.HasValue ? Gp2.GetDesignationForFunctionOrThrow(gp2Function.Value) : null,
+      gp2Mode,
+      gp2InitialValue
+    );
+    GpSettings gp3Settings = new(
+      gp3Function.HasValue ? Gp3.GetDesignationForFunctionOrThrow(gp3Function.Value) : null,
+      gp3Mode,
+      gp3InitialValue
     );
 
-  private SramSettings ModifyAllGpSettings(
-    GpFunction? gp0Function,
-    PinMode? gp0Mode,
-    PinValue? gp0InitialValue,
-    GpFunction? gp1Function,
-    PinMode? gp1Mode,
-    PinValue? gp1InitialValue,
-    GpFunction? gp2Function,
-    PinMode? gp2Mode,
-    PinValue? gp2InitialValue,
-    GpFunction? gp3Function,
-    PinMode? gp3Mode,
-    PinValue? gp3InitialValue
+    if (gp0Settings.HasValue)
+      ThrowIfUsedByGpioController(gp: 0);
+    if (gp1Settings.HasValue)
+      ThrowIfUsedByGpioController(gp: 1);
+    if (gp2Settings.HasValue)
+      ThrowIfUsedByGpioController(gp: 2);
+    if (gp3Settings.HasValue)
+      ThrowIfUsedByGpioController(gp: 3);
+
+    SetSramSettings(
+      argSramSettings: (gp0Settings, gp1Settings, gp2Settings, gp3Settings),
+      modifySramSettings: ModifyAllGpSettings,
+      cancellationToken: cancellationToken
+    );
+  }
+
+  private static void ModifyAllGpSettings(
+    SramSettings sramSettings,
+    (
+      GpSettings Gp0Settings,
+      GpSettings Gp1Settings,
+      GpSettings Gp2Settings,
+      GpSettings Gp3Settings
+    ) arg
   )
   {
-    ReadOnlySpan<(GpController, GpFunction?, PinMode?, PinValue?)> allGpAndSettings = [
-      (Gp0, gp0Function, gp0Mode, gp0InitialValue),
-      (Gp1, gp1Function, gp1Mode, gp1InitialValue),
-      (Gp2, gp2Function, gp2Mode, gp2InitialValue),
-      (Gp3, gp3Function, gp3Mode, gp3InitialValue),
+    ReadOnlySpan<GpSettings> allGpSettings = [
+      arg.Gp0Settings,
+      arg.Gp1Settings,
+      arg.Gp2Settings,
+      arg.Gp3Settings,
     ];
 
-    for (var gp = 0; gp < allGpAndSettings.Length; gp++) {
-      var (gpController, gpFunction, gpMode, gpInitialValue) = allGpAndSettings[gp];
+    for (var gpIndex = 0; gpIndex < allGpSettings.Length; gpIndex++) {
+      var (designation, direction, outputValue) = allGpSettings[gpIndex];
 
-      if (gpFunction.HasValue || gpMode.HasValue || gpInitialValue.HasValue)
-        ThrowIfUsedByGpioController(gp);
-
-      if (!gpFunction.HasValue)
+      if (!designation.HasValue)
         continue;
 
       sramSettings.ModifyGpSettings(
-        gp: gp,
-        designation: gpController.GetDesignationForFunctionOrThrow(gpFunction.Value),
-        direction: gpMode,
-        outputValue: gpInitialValue
+        gp: gpIndex,
+        designation: designation.Value,
+        direction: direction,
+        outputValue: outputValue
       );
     }
-
-    return sramSettings;
   }
 
-  private async ValueTask SetSramSettingsAsync(
-    SramSettings sramSettings,
+  private async ValueTask SetSramSettingsAsync<TArg>(
+    TArg argSramSettings,
+    Action<SramSettings, TArg> modifySramSettings,
     CancellationToken cancellationToken
   )
   {
+    modifySramSettings(sramSettings, argSramSettings);
+
     if (!sramSettings.IsDirty)
       return; // nothing to configure, do nothing and just return
 
@@ -334,11 +393,14 @@ partial class Mcp2221AGpioDriver {
     SyncGpioStates(sramSettings);
   }
 
-  private void SetSramSettings(
-    SramSettings sramSettings,
+  private void SetSramSettings<TArg>(
+    TArg argSramSettings,
+    Action<SramSettings, TArg> modifySramSettings,
     CancellationToken cancellationToken
   )
   {
+    modifySramSettings(sramSettings, argSramSettings);
+
     if (!sramSettings.IsDirty)
       return; // nothing to configure, do nothing and just return
 

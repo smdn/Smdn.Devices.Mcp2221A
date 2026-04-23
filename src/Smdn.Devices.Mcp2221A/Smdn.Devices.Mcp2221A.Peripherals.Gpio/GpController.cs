@@ -246,13 +246,8 @@ public abstract partial class GpController {
   )
     => GpioDriver.ConfigureGpPinSettingsAsync(
       gpIndex: Index,
-      configureSramSettings: sram => sram
-        .ModifyGpSettings(
-          gp: Index,
-          designation: gpDesignation,
-          direction: gpioDirection,
-          outputValue: gpioInitialValue
-        ),
+      arg: (gpDesignation, gpioDirection, gpioInitialValue),
+      modifyGpPinSettings: ConfigureGpPinSettings,
       cancellationToken: cancellationToken
     );
 
@@ -264,14 +259,25 @@ public abstract partial class GpController {
   )
     => GpioDriver.ConfigureGpPinSettings(
       gpIndex: Index,
-      configureSramSettings: sram => sram
-        .ModifyGpSettings(
-          gp: Index,
-          designation: gpDesignation,
-          direction: gpioDirection,
-          outputValue: gpioInitialValue
-        ),
+      arg: (gpDesignation, gpioDirection, gpioInitialValue),
+      modifyGpPinSettings: ConfigureGpPinSettings,
       cancellationToken: cancellationToken
+    );
+
+  private static void ConfigureGpPinSettings(
+    SramSettings sramSettings,
+    int gpIndex,
+    (
+      GpDesignation Designation,
+      PinMode? Direction,
+      PinValue? OutputValue
+    ) arg
+  )
+    => sramSettings.ModifyGpSettings(
+      gp: gpIndex,
+      designation: arg.Designation,
+      direction: arg.Direction,
+      outputValue: arg.OutputValue
     );
 
   private protected ValueTask ConfigureAsDacAsyncCore(
@@ -281,17 +287,11 @@ public abstract partial class GpController {
   )
     => GpioDriver.ConfigureGpPinSettingsAsync(
       gpIndex: Index,
-      configureSramSettings: sram => sram
-        .ModifyGpSettings(
-          gp: Index,
-          designation: GpDesignation.AlternateFunction1
-        )
-        .ModifyDacSettings(
-          dacVoltageReferenceSource: voltageReferenceSource,
-          dacOutputValue: initialOutputValue.HasValue
-            ? Mcp2221AGpioDriver.ThrowIfDacOutputValueOutOfRange(initialOutputValue.Value, nameof(initialOutputValue))
-            : null
-        ),
+      arg: (
+        voltageReferenceSource,
+        Mcp2221AGpioDriver.ThrowIfDacOutputValueOutOfRange(initialOutputValue, nameof(initialOutputValue))
+      ),
+      modifyGpPinSettings: ConfigureGpPinSettingsAsDac,
       cancellationToken: cancellationToken
     );
 
@@ -302,19 +302,31 @@ public abstract partial class GpController {
   )
     => GpioDriver.ConfigureGpPinSettings(
       gpIndex: Index,
-      configureSramSettings: sram => sram
-        .ModifyGpSettings(
-          gp: Index,
-          designation: GpDesignation.AlternateFunction1
-        )
-        .ModifyDacSettings(
-          dacVoltageReferenceSource: voltageReferenceSource,
-          dacOutputValue: initialOutputValue.HasValue
-            ? Mcp2221AGpioDriver.ThrowIfDacOutputValueOutOfRange(initialOutputValue.Value, nameof(initialOutputValue))
-            : null
-        ),
+      arg: (
+        voltageReferenceSource,
+        Mcp2221AGpioDriver.ThrowIfDacOutputValueOutOfRange(initialOutputValue, nameof(initialOutputValue))
+      ),
+      modifyGpPinSettings: ConfigureGpPinSettingsAsDac,
       cancellationToken: cancellationToken
     );
+
+  private static void ConfigureGpPinSettingsAsDac(
+    SramSettings sramSettings,
+    int gpIndex,
+    (
+      VoltageReferenceSource VoltageReferenceSource,
+      int? OutputValue
+    ) arg
+  )
+    => sramSettings
+      .ModifyGpSettings(
+        gp: gpIndex,
+        designation: GpDesignation.AlternateFunction1
+      )
+      .ModifyDacSettings(
+        dacVoltageReferenceSource: arg.VoltageReferenceSource,
+        dacOutputValue: arg.OutputValue
+      );
 
   private protected ValueTask ConfigureAsAdcAsyncCore(
     VoltageReferenceSource voltageReferenceSource,
@@ -322,14 +334,8 @@ public abstract partial class GpController {
   )
     => GpioDriver.ConfigureGpPinSettingsAsync(
       gpIndex: Index,
-      configureSramSettings: sram => sram
-        .ModifyGpSettings(
-          gp: Index,
-          designation: GpDesignation.AlternateFunction0
-        )
-        .ModifyAdcSettings(
-          adcVoltageReferenceSource: voltageReferenceSource
-        ),
+      arg: voltageReferenceSource,
+      modifyGpPinSettings: ConfigureGpPinSettingsAsAdc,
       cancellationToken: cancellationToken
     );
 
@@ -339,14 +345,22 @@ public abstract partial class GpController {
   )
     => GpioDriver.ConfigureGpPinSettings(
       gpIndex: Index,
-      configureSramSettings: sram => sram
-        .ModifyGpSettings(
-          gp: Index,
-          designation: GpDesignation.AlternateFunction0
-        )
-        .ModifyAdcSettings(
-          adcVoltageReferenceSource: voltageReferenceSource
-        ),
+      arg: voltageReferenceSource,
+      modifyGpPinSettings: ConfigureGpPinSettingsAsAdc,
       cancellationToken: cancellationToken
     );
+
+  private static void ConfigureGpPinSettingsAsAdc(
+    SramSettings sramSettings,
+    int gpIndex,
+    VoltageReferenceSource voltageReferenceSource
+  )
+    => sramSettings
+      .ModifyGpSettings(
+        gp: gpIndex,
+        designation: GpDesignation.AlternateFunction0
+      )
+      .ModifyAdcSettings(
+        adcVoltageReferenceSource: voltageReferenceSource
+      );
 }

@@ -10,6 +10,9 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 #pragma warning disable IDE0040
 partial class Mcp2221AGpioDriver {
 #pragma warning restore IDE0040
+  internal static int? ThrowIfDacOutputValueOutOfRange(int? value, string paramName)
+    => value.HasValue ? ThrowIfDacOutputValueOutOfRange(value.Value, paramName) : null;
+
   /// <exception cref="ArgumentOutOfRangeException">
   /// <paramref name="value"/> is negative, or greater than 31 (the maximum
   /// value for a 5-bit DAC).
@@ -97,9 +100,10 @@ partial class Mcp2221AGpioDriver {
   )
   {
     SetSramSettings(
-      sramSettings: sramSettings.ModifyDacSettings(
+      argSramSettings: ThrowIfDacOutputValueOutOfRange(value, nameof(value)),
+      modifySramSettings: static (sramSettings, val) => sramSettings.ModifyDacSettings(
         dacVoltageReferenceSource: null,
-        dacOutputValue: ThrowIfDacOutputValueOutOfRange(value, nameof(value))
+        dacOutputValue: val
       ),
       cancellationToken: cancellationToken
     );
@@ -114,9 +118,10 @@ partial class Mcp2221AGpioDriver {
   )
   {
     await SetSramSettingsAsync(
-      sramSettings: sramSettings.ModifyDacSettings(
+      argSramSettings: ThrowIfDacOutputValueOutOfRange(value, nameof(value)),
+      modifySramSettings: static (sramSettings, val) => sramSettings.ModifyDacSettings(
         dacVoltageReferenceSource: null,
-        dacOutputValue: ThrowIfDacOutputValueOutOfRange(value, nameof(value))
+        dacOutputValue: val
       ),
       cancellationToken: cancellationToken
     ).ConfigureAwait(false);

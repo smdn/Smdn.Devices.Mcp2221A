@@ -168,15 +168,8 @@ public sealed class Gp1Controller :
   )
     => GpioDriver.ConfigureGpPinSettingsAsync(
       gpIndex: Index,
-      configureSramSettings: sram => sram
-        .ModifyGpSettings(
-          gp: Index,
-          designation: GpDesignation.DedicatedFunctionOperation
-        )
-        .ModifyClockOutputSettings(
-          frequency: frequency,
-          dutyCycle: dutyCycle
-        ),
+      arg: (frequency, dutyCycle),
+      modifyGpPinSettings: ConfigureGpPinSettingsAsClockOutput,
       cancellationToken: cancellationToken
     );
 
@@ -188,17 +181,28 @@ public sealed class Gp1Controller :
   )
     => GpioDriver.ConfigureGpPinSettings(
       gpIndex: Index,
-      configureSramSettings: sram => sram
-        .ModifyGpSettings(
-          gp: Index,
-          designation: GpDesignation.DedicatedFunctionOperation
-        )
-        .ModifyClockOutputSettings(
-          frequency: frequency,
-          dutyCycle: dutyCycle
-        ),
+      arg: (frequency, dutyCycle),
+      modifyGpPinSettings: ConfigureGpPinSettingsAsClockOutput,
       cancellationToken: cancellationToken
     );
+
+  private static void ConfigureGpPinSettingsAsClockOutput(
+    SramSettings sramSettings,
+    int gpIndex,
+    (
+      ClockOutputFrequency? Frequency,
+      ClockOutputDutyCycle? DutyCycle
+    ) arg
+  )
+    => sramSettings
+      .ModifyGpSettings(
+        gp: gpIndex,
+        designation: GpDesignation.DedicatedFunctionOperation
+      )
+      .ModifyClockOutputSettings(
+        frequency: arg.Frequency,
+        dutyCycle: arg.DutyCycle
+      );
 
   /// <inheritdoc/>
   public ValueTask SuspendClockOutputAsync(
