@@ -55,14 +55,16 @@ partial class Mcp2221AI2cBus {
         var stateMachine = new I2cOperationStateMachine(logger, busSpeedDivider);
 
         foreach (var (constructCommand, parseResponse) in stateMachine.IterateWriteCommands()) {
-          await Device.Transceiver.CommandAsync(
-            commandInput: buffer.Slice(0, lengthToTransfer),
-            responseOutput: default,
-            arg: address,
-            cancellationToken: cancellationToken,
-            constructCommand: constructCommand,
-            parseResponse: parseResponse
-          ).ConfigureAwait(false);
+          using (await Device.Transceiver.EnterCommandTransactionAsync(cancellationToken).ConfigureAwait(false)) {
+            await Device.Transceiver.CommandAsync(
+              commandInput: buffer.Slice(0, lengthToTransfer),
+              responseOutput: default,
+              arg: address,
+              cancellationToken: cancellationToken,
+              constructCommand: constructCommand,
+              parseResponse: parseResponse
+            ).ConfigureAwait(false);
+          }
         }
 
         buffer = buffer.Slice(lengthToTransfer);
@@ -117,14 +119,16 @@ partial class Mcp2221AI2cBus {
         var stateMachine = new I2cOperationStateMachine(logger, busSpeedDivider);
 
         foreach (var (constructCommand, parseResponse) in stateMachine.IterateWriteCommands()) {
-          Device.Transceiver.Command(
-            commandInput: buffer.Slice(0, lengthToTransfer),
-            responseOutput: default,
-            arg: address,
-            cancellationToken: cancellationToken,
-            constructCommand: constructCommand,
-            parseResponse: parseResponse
-          );
+          using (Device.Transceiver.EnterCommandTransaction(cancellationToken)) {
+            Device.Transceiver.Command(
+              commandInput: buffer.Slice(0, lengthToTransfer),
+              responseOutput: default,
+              arg: address,
+              cancellationToken: cancellationToken,
+              constructCommand: constructCommand,
+              parseResponse: parseResponse
+            );
+          }
         }
 
         buffer = buffer.Slice(lengthToTransfer);
@@ -181,14 +185,16 @@ partial class Mcp2221AI2cBus {
         var stateMachine = new I2cOperationStateMachine(logger, busSpeedDivider);
 
         foreach (var (constructCommand, parseResponse) in stateMachine.IterateReadCommands()) {
-          await Device.Transceiver.CommandAsync(
-            commandInput: buffer.Slice(0, lengthToTransfer),
-            responseOutput: buffer.Slice(0, lengthToTransfer),
-            arg: address,
-            cancellationToken: cancellationToken,
-            constructCommand: constructCommand,
-            parseResponse: parseResponse
-          ).ConfigureAwait(false);
+          using (await Device.Transceiver.EnterCommandTransactionAsync(cancellationToken).ConfigureAwait(false)) {
+            await Device.Transceiver.CommandAsync(
+              commandInput: buffer.Slice(0, lengthToTransfer),
+              responseOutput: buffer.Slice(0, lengthToTransfer),
+              arg: address,
+              cancellationToken: cancellationToken,
+              constructCommand: constructCommand,
+              parseResponse: parseResponse
+            ).ConfigureAwait(false);
+          }
         }
 
         if (stateMachine.ReadLength < 0)
@@ -254,14 +260,16 @@ partial class Mcp2221AI2cBus {
         var stateMachine = new I2cOperationStateMachine(logger, busSpeedDivider);
 
         foreach (var (constructCommand, parseResponse) in stateMachine.IterateReadCommands()) {
-          Device.Transceiver.Command(
-            commandInput: buffer.Slice(0, lengthToTransfer),
-            responseOutput: buffer.Slice(0, lengthToTransfer),
-            arg: address,
-            cancellationToken: cancellationToken,
-            constructCommand: constructCommand,
-            parseResponse: parseResponse
-          );
+          using (Device.Transceiver.EnterCommandTransaction(cancellationToken)) {
+            Device.Transceiver.Command(
+              commandInput: buffer.Slice(0, lengthToTransfer),
+              responseOutput: buffer.Slice(0, lengthToTransfer),
+              arg: address,
+              cancellationToken: cancellationToken,
+              constructCommand: constructCommand,
+              parseResponse: parseResponse
+            );
+          }
         }
 
         if (stateMachine.ReadLength < 0)

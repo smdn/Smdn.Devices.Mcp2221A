@@ -183,7 +183,7 @@ partial class GpControllerTests {
       Assert.That(
         async () => await setModeAsyncFunc(gp, cts.Token),
         Throws
-          .TypeOf<OperationCanceledException>()
+          .InstanceOf<OperationCanceledException>()
           .With
           .Property(nameof(OperationCanceledException.CancellationToken))
           .EqualTo(cts.Token),
@@ -488,7 +488,7 @@ partial class GpControllerTests {
       Assert.That(
         async () => await writeAsyncFunc(gp, cts.Token),
         Throws
-          .TypeOf<OperationCanceledException>()
+          .InstanceOf<OperationCanceledException>()
           .With
           .Property(nameof(OperationCanceledException.CancellationToken))
           .EqualTo(cts.Token),

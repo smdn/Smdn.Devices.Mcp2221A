@@ -202,7 +202,7 @@ public class IClockOutputControllerExtensionsTests {
         cts.Token
       ),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)

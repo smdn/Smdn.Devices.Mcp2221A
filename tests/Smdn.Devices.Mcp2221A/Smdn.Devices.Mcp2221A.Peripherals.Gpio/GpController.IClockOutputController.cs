@@ -496,7 +496,7 @@ partial class GpControllerTests {
     Assert.That(
       async () => await configureAsClockOutputAsyncFunc(mcp2221A.GpPin1, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token),
@@ -710,7 +710,7 @@ partial class GpControllerTests {
     Assert.That(
       async () => await suspendClockOutputAsyncFunc(mcp2221A.GpPin1, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token),

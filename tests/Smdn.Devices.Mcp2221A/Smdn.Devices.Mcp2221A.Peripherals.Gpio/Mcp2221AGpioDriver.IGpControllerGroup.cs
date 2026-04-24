@@ -91,7 +91,7 @@ partial class Mcp2221AGpioDriverTests {
     Assert.That(
       async () => await configureAllGpSettingsAsyncFunc(mcp2221A.GpPins, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -958,7 +958,7 @@ partial class Mcp2221AGpioDriverTests {
     Assert.That(
       async () => await fetchGpioStatesAsyncFunc(mcp2221A.GpPins, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -1361,7 +1361,7 @@ partial class Mcp2221AGpioDriverTests {
     Assert.That(
       async () => await applyGpioStatesAsyncFunc(mcp2221A.GpPins, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -1903,7 +1903,7 @@ partial class Mcp2221AGpioDriverTests {
     Assert.That(
       async () => await applyDacRawValueAsyncFunc(mcp2221A.GpPins, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -2158,7 +2158,7 @@ partial class Mcp2221AGpioDriverTests {
     Assert.That(
       async () => await fetchAdcRawValuesAsyncFunc(mcp2221A.GpPins, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)

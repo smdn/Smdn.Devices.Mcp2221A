@@ -165,11 +165,13 @@ partial class Mcp2221AGpioDriver {
     CancellationToken cancellationToken
   )
   {
-    return lastFetchedAdcSample = Transceiver.Command(
-      cancellationToken: cancellationToken,
-      constructCommand: GetAdcChannelValuesCommand.ConstructCommand,
-      parseResponse: GetAdcChannelValuesCommand.ParseResponse
-    );
+    using (Transceiver.EnterCommandTransaction(cancellationToken)) {
+      return lastFetchedAdcSample = Transceiver.Command(
+        cancellationToken: cancellationToken,
+        constructCommand: GetAdcChannelValuesCommand.ConstructCommand,
+        parseResponse: GetAdcChannelValuesCommand.ParseResponse
+      );
+    }
   }
 
   /// <inheritdoc/>
@@ -177,10 +179,12 @@ partial class Mcp2221AGpioDriver {
     CancellationToken cancellationToken
   )
   {
-    return lastFetchedAdcSample = await Transceiver.CommandAsync(
-      cancellationToken: cancellationToken,
-      constructCommand: GetAdcChannelValuesCommand.ConstructCommand,
-      parseResponse: GetAdcChannelValuesCommand.ParseResponse
-    ).ConfigureAwait(false);
+    using (await Transceiver.EnterCommandTransactionAsync(cancellationToken).ConfigureAwait(false)) {
+      return lastFetchedAdcSample = await Transceiver.CommandAsync(
+        cancellationToken: cancellationToken,
+        constructCommand: GetAdcChannelValuesCommand.ConstructCommand,
+        parseResponse: GetAdcChannelValuesCommand.ParseResponse
+      ).ConfigureAwait(false);
+    }
   }
 }

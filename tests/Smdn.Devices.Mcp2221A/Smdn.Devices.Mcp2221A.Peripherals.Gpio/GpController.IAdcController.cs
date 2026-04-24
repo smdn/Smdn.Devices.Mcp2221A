@@ -372,7 +372,7 @@ partial class GpControllerTests {
       Assert.That(
         async () => await configureAsAdcAsyncFunc(gp, cts.Token),
         Throws
-          .TypeOf<OperationCanceledException>()
+          .InstanceOf<OperationCanceledException>()
           .With
           .Property(nameof(OperationCanceledException.CancellationToken))
           .EqualTo(cts.Token),
@@ -616,7 +616,7 @@ partial class GpControllerTests {
       Assert.That(
         async () => await readAnalogRawAsyncFunc(gp, cts.Token),
         Throws
-          .TypeOf<OperationCanceledException>()
+          .InstanceOf<OperationCanceledException>()
           .With
           .Property(nameof(OperationCanceledException.CancellationToken))
           .EqualTo(cts.Token),

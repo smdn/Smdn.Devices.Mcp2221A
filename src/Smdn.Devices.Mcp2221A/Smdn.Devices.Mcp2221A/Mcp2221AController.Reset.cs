@@ -21,6 +21,8 @@ partial class Mcp2221AController {
     CancellationToken cancellationToken = default
   )
   {
+    // Since mutual exclusion control is performed within the ResetChipAsync() method,
+    // the EnterCommandTransactionAsync() method must not be called here.
     await Transceiver.ResetChipAsync(cancellationToken).ConfigureAwait(false);
 
     // Performing a reset will invalidate the current USB HID endpoint,
@@ -55,6 +57,8 @@ partial class Mcp2221AController {
     CancellationToken cancellationToken = default
   )
   {
+    // Since mutual exclusion control is performed within the ResetChip() method,
+    // the EnterCommandTransaction() method must not be called here.
     Transceiver.ResetChip(cancellationToken);
 
     // Performing a reset will invalidate the current USB HID endpoint,

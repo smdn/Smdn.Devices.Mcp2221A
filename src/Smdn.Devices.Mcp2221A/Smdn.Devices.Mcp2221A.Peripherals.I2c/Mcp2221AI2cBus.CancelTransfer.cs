@@ -59,14 +59,16 @@ partial class Mcp2221AI2cBus {
 
   private async ValueTask CancelTransferAsync(I2cAddress address, Exception? exceptionCauseOfCancellation)
   {
-    var engineState = await Device.Transceiver.CommandAsync(
-      arg: (address, exceptionCauseOfCancellation),
-      cancellationToken: default,
-      constructCommand: CancelTransferCommand.ConstructCommand,
-      parseResponse: CancelTransferCommand.ParseResponse
-    ).ConfigureAwait(false);
+    using (await Device.Transceiver.EnterCommandTransactionAsync(default).ConfigureAwait(false)) {
+      var engineState = await Device.Transceiver.CommandAsync(
+        arg: (address, exceptionCauseOfCancellation),
+        cancellationToken: default,
+        constructCommand: CancelTransferCommand.ConstructCommand,
+        parseResponse: CancelTransferCommand.ParseResponse
+      ).ConfigureAwait(false);
 
-    logger?.LogWarning(EventIdI2cEngineState, $"CANCEL TRANSFER: {engineState}");
+      logger?.LogWarning(EventIdI2cEngineState, $"CANCEL TRANSFER: {engineState}");
+    }
   }
 
   void II2cController.CancelTransfer(I2cAddress address)
@@ -74,13 +76,15 @@ partial class Mcp2221AI2cBus {
 
   private void CancelTransfer(I2cAddress address, Exception? exceptionCauseOfCancellation)
   {
-    var engineState = Device.Transceiver.Command(
-      arg: (address, exceptionCauseOfCancellation),
-      cancellationToken: default,
-      constructCommand: CancelTransferCommand.ConstructCommand,
-      parseResponse: CancelTransferCommand.ParseResponse
-    );
+    using (Device.Transceiver.EnterCommandTransaction(default)) {
+      var engineState = Device.Transceiver.Command(
+        arg: (address, exceptionCauseOfCancellation),
+        cancellationToken: default,
+        constructCommand: CancelTransferCommand.ConstructCommand,
+        parseResponse: CancelTransferCommand.ParseResponse
+      );
 
-    logger?.LogWarning(EventIdI2cEngineState, $"CANCEL TRANSFER: {engineState}");
+      logger?.LogWarning(EventIdI2cEngineState, $"CANCEL TRANSFER: {engineState}");
+    }
   }
 }

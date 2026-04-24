@@ -508,7 +508,7 @@ partial class GpControllerTests {
       Assert.That(
         async () => await configureAsGpioAsyncFunc(gp, cts.Token),
         Throws
-          .TypeOf<OperationCanceledException>()
+          .InstanceOf<OperationCanceledException>()
           .With
           .Property(nameof(OperationCanceledException.CancellationToken))
           .EqualTo(cts.Token),
