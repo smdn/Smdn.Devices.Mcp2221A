@@ -55,7 +55,7 @@ partial class Mcp2221AI2cBus {
         var stateMachine = new I2cOperationStateMachine(logger, busSpeedDivider);
 
         foreach (var (constructCommand, parseResponse) in stateMachine.IterateWriteCommands()) {
-          await Device.CommandAsync(
+          await Device.Transceiver.CommandAsync(
             commandInput: buffer.Slice(0, lengthToTransfer),
             responseOutput: default,
             arg: address,
@@ -117,7 +117,7 @@ partial class Mcp2221AI2cBus {
         var stateMachine = new I2cOperationStateMachine(logger, busSpeedDivider);
 
         foreach (var (constructCommand, parseResponse) in stateMachine.IterateWriteCommands()) {
-          Device.Command(
+          Device.Transceiver.Command(
             commandInput: buffer.Slice(0, lengthToTransfer),
             responseOutput: default,
             arg: address,
@@ -181,7 +181,7 @@ partial class Mcp2221AI2cBus {
         var stateMachine = new I2cOperationStateMachine(logger, busSpeedDivider);
 
         foreach (var (constructCommand, parseResponse) in stateMachine.IterateReadCommands()) {
-          await Device.CommandAsync(
+          await Device.Transceiver.CommandAsync(
             commandInput: buffer.Slice(0, lengthToTransfer),
             responseOutput: buffer.Slice(0, lengthToTransfer),
             arg: address,
@@ -254,7 +254,7 @@ partial class Mcp2221AI2cBus {
         var stateMachine = new I2cOperationStateMachine(logger, busSpeedDivider);
 
         foreach (var (constructCommand, parseResponse) in stateMachine.IterateReadCommands()) {
-          Device.Command(
+          Device.Transceiver.Command(
             commandInput: buffer.Slice(0, lengthToTransfer),
             responseOutput: buffer.Slice(0, lengthToTransfer),
             arg: address,

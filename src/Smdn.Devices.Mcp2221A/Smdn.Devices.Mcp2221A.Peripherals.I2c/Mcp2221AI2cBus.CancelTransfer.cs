@@ -59,7 +59,7 @@ partial class Mcp2221AI2cBus {
 
   private async ValueTask CancelTransferAsync(I2cAddress address, Exception? exceptionCauseOfCancellation)
   {
-    var engineState = await Device.CommandAsync(
+    var engineState = await Device.Transceiver.CommandAsync(
       arg: (address, exceptionCauseOfCancellation),
       cancellationToken: default,
       constructCommand: CancelTransferCommand.ConstructCommand,
@@ -74,7 +74,7 @@ partial class Mcp2221AI2cBus {
 
   private void CancelTransfer(I2cAddress address, Exception? exceptionCauseOfCancellation)
   {
-    var engineState = Device.Command(
+    var engineState = Device.Transceiver.Command(
       arg: (address, exceptionCauseOfCancellation),
       cancellationToken: default,
       constructCommand: CancelTransferCommand.ConstructCommand,
