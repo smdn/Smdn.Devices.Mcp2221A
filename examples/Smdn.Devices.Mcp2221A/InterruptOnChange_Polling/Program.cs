@@ -29,7 +29,7 @@ device.GpPin1.ConfigureAsInterruptOnChange(
   clearDetectionFlag: true
 );
 
-// Configure GP2 and GP2 as GPIO output.
+// Configure GP2 and GP3 as GPIO output.
 device.GpPin2.ConfigureAsGpioOutput(PinValue.Low);
 device.GpPin3.ConfigureAsGpioOutput(PinValue.Low);
 
