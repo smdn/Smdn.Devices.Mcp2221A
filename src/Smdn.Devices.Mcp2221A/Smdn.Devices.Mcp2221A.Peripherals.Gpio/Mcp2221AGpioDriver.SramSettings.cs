@@ -70,6 +70,15 @@ partial class Mcp2221AGpioDriver {
         (byte)(resp[6] & 0b_00_0_11111)
       );
 
+      // [7] Bit 6: If set, the interrupt detection flag will be set when a negative edge occurs
+      // [7] Bit 5: If set, the interrupt detection flag will be set when a positive edge occurs
+      sramSettings.StoreInterruptDetectionModuleSetupByte(
+        (byte)(
+          (((resp[7] & 0b_0_1_0_00_0_0_0) == 0) ? 0b_0_00_0_0_0_0_0 : 0b_0_00_0_0_0_1_0 /* trigger on negative edge */) |
+          (((resp[7] & 0b_0_0_1_00_0_0_0) == 0) ? 0b_0_00_0_0_0_0_0 : 0b_0_00_0_1_0_0_0 /* trigger on positive edge */)
+        )
+      );
+
       // [7] Bit 4-3: ADC Reference Voltage
       // [7] Bit 2: ADC Reference Option
       // Note: The DAC option bits in the SRAM settings are stored as-is.
@@ -390,6 +399,9 @@ partial class Mcp2221AGpioDriver {
         throw;
       }
 
+      if (sramSettings.ShouldResetInterruptDetectionFlag())
+        LastFetchedInterruptDetectionFlag = default;
+
       // save the successfully configured settings as the current state
       sramSettings.Store();
 
@@ -431,6 +443,9 @@ partial class Mcp2221AGpioDriver {
         sramSettings.Restore();
         throw;
       }
+
+      if (sramSettings.ShouldResetInterruptDetectionFlag())
+        LastFetchedInterruptDetectionFlag = default;
 
       // save the successfully configured settings as the current state
       sramSettings.Store();

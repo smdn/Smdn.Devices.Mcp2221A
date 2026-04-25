@@ -20,8 +20,8 @@ partial class GpControllerTests {
 #pragma warning restore IDE0040
   private static System.Collections.IEnumerable YieldTestCases_ConfigureAsAdcSyncOrAsync()
   {
-    const byte InitialChipSettings3_AdcVrm = 0b_0_1_1_01_1_00; // ADC: VRM 1.024V (factory default)
-    const byte InitialChipSettings3_AdcVdd = 0b_0_1_1_00_0_00; // ADC: VDD
+    const byte InitialChipSettings3_AdcVrm = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
+    const byte InitialChipSettings3_AdcVdd = 0b_0_0_0_00_0_00; // INTDETFEEN: 0, INTDETREEN: 0, ADCVRM: 00(Off), ADCREF: 0(Vdd)
 
     for (var gpIndex = 1; gpIndex <= 3; gpIndex++) {
       yield return new object[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.Vdd };
@@ -89,6 +89,10 @@ partial class GpControllerTests {
       ),
       shouldDisposeUsbHidDevice: true
     );
+    var expectedInterruptOnChangeBits = (byte)(
+      ((initialChipSettings3 & 0b_0_0_1_00_0_00) == 0 ? 0 : 0b_0_00_0_1_0_0_0) | // positive edge
+      ((initialChipSettings3 & 0b_0_1_0_00_0_00) == 0 ? 0 : 0b_0_00_0_0_0_1_0) // negative edge
+    );
     var expectedAssignments = mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList();
     var currentGpSettings = new byte[4] { InitialGp0Settings, InitialGp1Settings, InitialGp2Settings, InitialGp3Settings };
 
@@ -136,7 +140,7 @@ partial class GpControllerTests {
     expectedSentSramSettingsCommand[0] = 0x60; // [0] SET SRAM SETTINGS
     // [1-4] don't care
     expectedSentSramSettingsCommand[5] = (byte)(0b10000000 | expectedVoltageReferenceBits); // [5] ADC Voltage Reference
-    // [6] don't care
+    expectedSentSramSettingsCommand[6] = expectedInterruptOnChangeBits; // [6] Set Up the Interrupt Detection Mechanism and Clear the Detection Flag
     expectedSentSramSettingsCommand[7] = 0b10000000; // [7] Alter GPIO configuration = Alter the GP designation (1)
     expectedSentSramSettingsCommand[8] = currentGpSettings[0]; // [8] GP0 settings
     expectedSentSramSettingsCommand[9] = currentGpSettings[1]; // [9] GP1 settings
@@ -148,7 +152,7 @@ partial class GpControllerTests {
     expectedSentReenableVrmCommand[0] = 0x60; // [0] SET SRAM SETTINGS
     // [1-4] don't care
     expectedSentReenableVrmCommand[5] = (byte)(0b10000000 | expectedVoltageReferenceBits); // [5] ADC Voltage Reference
-    // [6] don't care
+    expectedSentReenableVrmCommand[6] = expectedInterruptOnChangeBits; // [6] Set Up the Interrupt Detection Mechanism and Clear the Detection Flag
     expectedSentReenableVrmCommand[7] = 0b00000000; // [7] Alter GPIO configuration = Do not alter the current GP designation (0)
     expectedSentReenableVrmCommand[8] = currentGpSettings[0]; // [8] GP0 settings
     expectedSentReenableVrmCommand[9] = currentGpSettings[1]; // [9] GP1 settings

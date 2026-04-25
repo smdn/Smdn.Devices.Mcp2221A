@@ -48,6 +48,14 @@ public sealed class Gp1Controller :
   };
 
   /// <inheritdoc/>
+  public InterruptOnChangeTrigger CurrentInterruptOnChangeTrigger
+    => GpioDriver.CurrentInterruptOnChangeTrigger;
+
+  /// <inheritdoc/>
+  public bool LastReadInterruptDetectionFlag
+    => GpioDriver.LastFetchedInterruptDetectionFlag;
+
+  /// <inheritdoc/>
   VoltageReferenceSource IAdcController.CurrentAdcReferenceSource
     => GpioDriver.CurrentAdcReferenceSource;
 
@@ -79,18 +87,118 @@ public sealed class Gp1Controller :
     };
 
   /// <inheritdoc/>
-  public ValueTask ConfigureAsInterruptOnChangeAsync(CancellationToken cancellationToken = default)
-    => ConfigureGpDesignationAsync(
-      gpDesignation: GpDesignation.AlternateFunction2,
+  public ValueTask ConfigureAsInterruptOnChangeAsync(
+    InterruptOnChangeTrigger? detectionTrigger = null,
+    bool clearDetectionFlag = true,
+    CancellationToken cancellationToken = default
+  )
+    => GpioDriver.ConfigureGpPinSettingsAsync(
+      gpIndex: Index,
+      arg: (detectionTrigger, clearDetectionFlag),
+      modifyGpPinSettings: ConfigureGpPinSettingsAsInterruptOnChange,
       cancellationToken: cancellationToken
     );
 
   /// <inheritdoc/>
-  public void ConfigureAsInterruptOnChange(CancellationToken cancellationToken = default)
-    => ConfigureGpDesignation(
-      gpDesignation: GpDesignation.AlternateFunction2,
+  public void ConfigureAsInterruptOnChange(
+    InterruptOnChangeTrigger? detectionTrigger = null,
+    bool clearDetectionFlag = true,
+    CancellationToken cancellationToken = default
+  )
+    => GpioDriver.ConfigureGpPinSettings(
+      gpIndex: Index,
+      arg: (detectionTrigger, clearDetectionFlag),
+      modifyGpPinSettings: ConfigureGpPinSettingsAsInterruptOnChange,
       cancellationToken: cancellationToken
     );
+
+  private static void ConfigureGpPinSettingsAsInterruptOnChange(
+    SramSettings sramSettings,
+    int gpIndex,
+    (
+      InterruptOnChangeTrigger? DetectionTrigger,
+      bool ClearDetectionFlag
+    ) arg
+  )
+    => sramSettings
+      .ModifyGpSettings(
+        gp: gpIndex,
+        designation: GpDesignation.AlternateFunction2
+      )
+      .ModifyInterruptDetectionModuleSetup(
+        detectionTrigger: arg.DetectionTrigger,
+        clearDetectionFlag: arg.ClearDetectionFlag
+      );
+
+  /// <inheritdoc/>
+  public async ValueTask<bool> ReadInterruptDetectionAsync(
+    CancellationToken cancellationToken = default
+  )
+  {
+    GpioDriver.Transceiver.ThrowIfDisposed();
+
+    ThrowIfInvalidConfiguration(GpFunction.InterruptOnChange);
+
+    return await GpioDriver.FetchInterruptDetectionFlagAsync(
+      cancellationToken
+    ).ConfigureAwait(false);
+  }
+
+  /// <inheritdoc/>
+  public bool ReadInterruptDetection(
+    CancellationToken cancellationToken = default
+  )
+  {
+    GpioDriver.Transceiver.ThrowIfDisposed();
+
+    ThrowIfInvalidConfiguration(GpFunction.InterruptOnChange);
+
+    return GpioDriver.FetchInterruptDetectionFlag(
+      cancellationToken
+    );
+  }
+
+  /// <inheritdoc/>
+  public ValueTask ClearInterruptDetectionAsync(
+    CancellationToken cancellationToken = default
+  )
+  {
+    GpioDriver.Transceiver.ThrowIfDisposed();
+
+    ThrowIfInvalidConfiguration(GpFunction.InterruptOnChange);
+
+    return GpioDriver.ConfigureGpPinSettingsAsync<None>(
+      gpIndex: Index,
+      arg: default,
+      modifyGpPinSettings: static (sramSettings, _, _)
+        => sramSettings.ModifyInterruptDetectionModuleSetup(
+          detectionTrigger: null,
+          clearDetectionFlag: true
+        ),
+      cancellationToken: cancellationToken
+    );
+  }
+
+  /// <inheritdoc/>
+  public void ClearInterruptDetection(
+    CancellationToken cancellationToken = default
+  )
+  {
+    GpioDriver.Transceiver.ThrowIfDisposed();
+
+    ThrowIfInvalidConfiguration(GpFunction.InterruptOnChange);
+
+    GpioDriver.ConfigureGpPinSettings<None>(
+      gpIndex: Index,
+      arg: default,
+      modifyGpPinSettings: static (sramSettings, _, _)
+        => sramSettings.ModifyInterruptDetectionModuleSetup(
+          detectionTrigger: null,
+          clearDetectionFlag: true
+        ),
+      cancellationToken: cancellationToken
+    );
+  }
 
   /// <exception cref="InvalidOperationException">
   /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.

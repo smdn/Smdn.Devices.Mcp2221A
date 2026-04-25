@@ -27,9 +27,16 @@ public interface IAdcController {
   /// last read operation.
   /// </summary>
   /// <remarks>
+  /// <para>
   /// This property returns the cached value from the last call to
   /// <see cref="ReadAnalogRaw(CancellationToken)"/> or <see cref="ReadAnalogRawAsync(CancellationToken)"/>.
   /// If no read operation has been performed yet, this property returns 0.
+  /// </para>
+  /// <para>
+  /// Note that this value is also updated by calling
+  /// <see cref="IInterruptOnChangeController.ReadInterruptDetection"/> or
+  /// <see cref="IInterruptOnChangeController.ReadInterruptDetectionAsync"/>.
+  /// </para>
   /// </remarks>
   /// <seealso cref="GpFunction.Adc"/>
   /// <seealso cref="ReadAnalogRaw(CancellationToken)"/>
@@ -84,6 +91,10 @@ public interface IAdcController {
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
   /// <returns>The 10-bit raw analog value (0-1023).</returns>
+  /// <remarks>
+  /// Calling this method also updates <see cref="IInterruptOnChangeController.LastReadInterruptDetectionFlag"/>
+  /// simultaneously, as both values are retrieved using the same device command.
+  /// </remarks>
   int ReadAnalogRaw(
     CancellationToken cancellationToken = default
   );
