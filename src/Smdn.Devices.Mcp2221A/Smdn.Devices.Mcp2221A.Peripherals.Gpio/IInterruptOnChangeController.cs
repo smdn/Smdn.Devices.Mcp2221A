@@ -105,8 +105,14 @@ public interface IInterruptOnChangeController {
   /// cleared; otherwise, <see langword="false"/>.
   /// </returns>
   /// <remarks>
+  /// <para>
   /// This method performs a communication with the device to fetch the latest
   /// 'interrupt edge detector state'.
+  /// </para>
+  /// <para>
+  /// Calling this method also updates <see cref="IAdcController.LastReadAnalogRawValue"/>
+  /// simultaneously, as both values are retrieved using the same device command.
+  /// </para>
   /// </remarks>
   bool ReadInterruptDetection(
     CancellationToken cancellationToken = default
@@ -133,16 +139,10 @@ public interface IInterruptOnChangeController {
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
   /// <remarks>
-  /// <para>
   /// This method resets the 'interrupt edge detector state' in the device.
   /// After calling this method, <see cref="LastReadInterruptDetectionFlag"/> is set to <see langword="false"/>,
   /// and <see cref="ReadInterruptDetection"/> will return <see langword="false"/>
   /// until the next configured edge transition occurs.
-  /// </para>
-  /// <para>
-  /// Calling this method also updates <see cref="IAdcController.LastReadAnalogRawValue"/>
-  /// simultaneously, as both values are retrieved using the same device command.
-  /// </para>
   /// </remarks>
   /// <exception cref="InvalidOperationException">
   /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
