@@ -408,6 +408,11 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
     CancellationToken cancellationToken = default
   )
   {
+    // If the execution of the RESET CHIP command completes successfully,
+    // this instance calls the Dispose method on its own, and since the
+    // synchronization primitive is also disposed of at that point,
+    // attempting to utilize automatic disposal via the `using` statement
+    // here will cause an ObjectDisposedException.
     var transaction = EnterCommandTransaction(cancellationToken);
 
     try {
