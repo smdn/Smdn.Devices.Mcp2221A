@@ -141,4 +141,56 @@ public class Gp0ControllerTests {
 
     Assert.That(mcp2221A.GpPin0.CurrentDesignation, Is.EqualTo(expected));
   }
+
+  private static IEnumerable<byte> YieldTestCases_Gp0Settings_Undefined()
+  {
+    // 0b_000_0_0_000: GPIO0
+    // 0b_000_0_0_001: SSPND
+    // 0b_000_0_0_010: LED_URX
+    yield return 0b_000_0_0_011;
+    yield return 0b_000_0_0_100;
+    yield return 0b_000_0_0_101;
+    yield return 0b_000_0_0_110;
+    yield return 0b_000_0_0_111;
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_Gp0Settings_Undefined))]
+  public void CurrentFunction_Undefined(byte gp0Settings)
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: gp0Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(
+      () => _ = mcp2221A.GpPin0.CurrentFunction,
+      Throws
+        .TypeOf<NotSupportedException>()
+        .With
+        .Property(nameof(NotSupportedException.Message))
+        .Contains(mcp2221A.GpPin0.PinName)
+    );
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_Gp0Settings_Undefined))]
+  public void CurrentDesignation_Undefined(byte gp0Settings)
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: gp0Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(
+      () => _ = mcp2221A.GpPin0.CurrentDesignation,
+      Throws
+        .TypeOf<NotSupportedException>()
+        .With
+        .Property(nameof(NotSupportedException.Message))
+        .Contains(mcp2221A.GpPin0.PinName)
+    );
+  }
 }

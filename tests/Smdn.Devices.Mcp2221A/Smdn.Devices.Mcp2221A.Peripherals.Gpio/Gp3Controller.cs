@@ -142,4 +142,56 @@ public class Gp3ControllerTests {
 
     Assert.That(mcp2221A.GpPin3.CurrentDesignation, Is.EqualTo(expected));
   }
+
+  private static IEnumerable<byte> YieldTestCases_Gp3Settings_Undefined()
+  {
+    // 0b_000_0_0_000: GPIO3
+    // 0b_000_0_0_001: LED_I2C
+    // 0b_000_0_0_010: ADC3
+    // 0b_000_0_0_011: DAC2
+    yield return 0b_000_0_0_100;
+    yield return 0b_000_0_0_101;
+    yield return 0b_000_0_0_110;
+    yield return 0b_000_0_0_111;
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_Gp3Settings_Undefined))]
+  public void CurrentFunction_Undefined(byte gp3Settings)
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp3Settings: gp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(
+      () => _ = mcp2221A.GpPin3.CurrentFunction,
+      Throws
+        .TypeOf<NotSupportedException>()
+        .With
+        .Property(nameof(NotSupportedException.Message))
+        .Contains(mcp2221A.GpPin3.PinName)
+    );
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_Gp3Settings_Undefined))]
+  public void CurrentDesignation_Undefined(byte gp3Settings)
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp3Settings: gp3Settings
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    Assert.That(
+      () => _ = mcp2221A.GpPin3.CurrentDesignation,
+      Throws
+        .TypeOf<NotSupportedException>()
+        .With
+        .Property(nameof(NotSupportedException.Message))
+        .Contains(mcp2221A.GpPin3.PinName)
+    );
+  }
 }

@@ -30,7 +30,7 @@ public sealed class Gp2Controller :
     GpDesignation.DedicatedFunctionOperation => GpFunction.UsbConfigureStatus, // USBCFG
     GpDesignation.AlternateFunction0 => GpFunction.Adc, // ADC2
     GpDesignation.AlternateFunction1 => GpFunction.Dac, // DAC1
-    _ => throw new NotSupportedException(),
+    var unsupported => throw CreateUnsupportedGpDesignationException(Index, unsupported),
   };
 
   /// <inheritdoc/>
@@ -39,7 +39,7 @@ public sealed class Gp2Controller :
     GpDesignation.DedicatedFunctionOperation => "USBCFG",
     GpDesignation.AlternateFunction0 => "ADC2",
     GpDesignation.AlternateFunction1 => "DAC1",
-    _ => throw new NotSupportedException(),
+    var unsupported => throw CreateUnsupportedGpDesignationException(Index, unsupported),
   };
 
   /// <inheritdoc/>

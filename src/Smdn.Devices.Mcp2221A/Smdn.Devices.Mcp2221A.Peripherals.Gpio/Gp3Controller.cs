@@ -30,7 +30,7 @@ public sealed class Gp3Controller :
     GpDesignation.DedicatedFunctionOperation => GpFunction.LedOutput, // LED_I2C
     GpDesignation.AlternateFunction0 => GpFunction.Adc, // ADC3
     GpDesignation.AlternateFunction1 => GpFunction.Dac, // DAC2
-    _ => throw new NotSupportedException(),
+    var unsupported => throw CreateUnsupportedGpDesignationException(Index, unsupported),
   };
 
   /// <inheritdoc/>
@@ -39,7 +39,7 @@ public sealed class Gp3Controller :
     GpDesignation.DedicatedFunctionOperation => "LED_I2C",
     GpDesignation.AlternateFunction0 => "ADC3",
     GpDesignation.AlternateFunction1 => "DAC2",
-    _ => throw new NotSupportedException(),
+    var unsupported => throw CreateUnsupportedGpDesignationException(Index, unsupported),
   };
 
   /// <inheritdoc/>

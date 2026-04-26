@@ -34,7 +34,7 @@ public sealed class Gp1Controller :
     GpDesignation.AlternateFunction0 => GpFunction.Adc, // ADC1
     GpDesignation.AlternateFunction1 => GpFunction.LedOutput, // LED_UTX
     GpDesignation.AlternateFunction2 => GpFunction.InterruptOnChange, // IOC
-    _ => throw new NotSupportedException(),
+    var unsupported => throw CreateUnsupportedGpDesignationException(Index, unsupported),
   };
 
   /// <inheritdoc/>
@@ -44,7 +44,7 @@ public sealed class Gp1Controller :
     GpDesignation.AlternateFunction0 => "ADC1",
     GpDesignation.AlternateFunction1 => "LED_UTX",
     GpDesignation.AlternateFunction2 => "IOC",
-    _ => throw new NotSupportedException(),
+    var unsupported => throw CreateUnsupportedGpDesignationException(Index, unsupported),
   };
 
   /// <inheritdoc/>

@@ -24,7 +24,7 @@ public sealed class Gp0Controller : GpController {
     GpDesignation.GpioOperation => GpFunction.Gpio, // GPIO
     GpDesignation.DedicatedFunctionOperation => GpFunction.UsbSuspendStatus, // SSPND
     GpDesignation.AlternateFunction0 => GpFunction.LedOutput, // LED_URX
-    _ => throw new NotSupportedException(),
+    var unsupported => throw CreateUnsupportedGpDesignationException(Index, unsupported),
   };
 
   /// <inheritdoc/>
@@ -32,7 +32,7 @@ public sealed class Gp0Controller : GpController {
     GpDesignation.GpioOperation => "GPIO0",
     GpDesignation.DedicatedFunctionOperation => "SSPND",
     GpDesignation.AlternateFunction0 => "LED_URX",
-    _ => throw new NotSupportedException(),
+    var unsupported => throw CreateUnsupportedGpDesignationException(Index, unsupported),
   };
 
   internal Gp0Controller(Mcp2221AGpioDriver gpioDriver)
