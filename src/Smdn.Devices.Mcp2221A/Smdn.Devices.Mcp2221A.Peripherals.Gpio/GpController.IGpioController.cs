@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 using System;
 using System.Buffers;
+using System.ComponentModel;
 using System.Device.Gpio;
 #if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
 using System.Diagnostics.CodeAnalysis;
@@ -23,10 +24,20 @@ partial class GpController : IGpioController {
 #if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
   [DoesNotReturn]
 #endif
-  internal static int ThrowDirectionNotSupportedException(PinMode mode)
-    => throw new NotSupportedException(
-      message: $"The GPIO direction cannot be set to {mode}. The direction must be either {nameof(PinMode.Output)} or {nameof(PinMode.Input)}."
+  internal static int ThrowDirectionNotSupportedOrInvalidException(PinMode mode, string paramName)
+  {
+    if (mode == PinMode.InputPullDown || mode == PinMode.InputPullUp) {
+      throw new NotSupportedException(
+        message: $"The GPIO direction cannot be set to {mode}. The direction must be either {nameof(PinMode.Output)} or {nameof(PinMode.Input)}."
+      );
+    }
+
+    throw new InvalidEnumArgumentException(
+      argumentName: paramName,
+      invalidValue: (int)mode,
+      enumClass: typeof(PinMode)
     );
+  }
 
   /// <inheritdoc/>
   [CLSCompliant(false)]

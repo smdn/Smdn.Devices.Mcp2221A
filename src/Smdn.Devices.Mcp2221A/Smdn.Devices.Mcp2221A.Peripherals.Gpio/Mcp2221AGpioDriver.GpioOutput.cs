@@ -217,7 +217,9 @@ partial class Mcp2221AGpioDriver {
       destination[3 + (gp * 4)] = mode switch {
         PinMode.Output => 0x00,
         PinMode.Input => 0xFF,
-        var unsupportedMode => (byte)GpController.ThrowDirectionNotSupportedException(unsupportedMode),
+
+        var unsupportedOrInvalidMode
+          => (byte)GpController.ThrowDirectionNotSupportedOrInvalidException(unsupportedOrInvalidMode, nameof(mode)),
       };
     }
   }

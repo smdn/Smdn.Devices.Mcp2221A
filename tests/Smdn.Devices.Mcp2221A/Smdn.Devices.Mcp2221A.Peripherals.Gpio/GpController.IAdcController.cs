@@ -202,16 +202,16 @@ partial class GpControllerTests {
     );
   }
 
-  [TestCaseSource(nameof(YieldTestCases_UnsupportedVoltageReferenceSource))]
-  public void ConfigureAsAdcAsync_UnsupportedVoltageReferenceSource(VoltageReferenceSource voltageReferenceSource)
-    => ConfigureAsAdcSyncOrAsync_UnsupportedVoltageReferenceSource(
+  [TestCaseSource(nameof(YieldTestCases_UndefinedVoltageReferenceSource))]
+  public void ConfigureAsAdcAsync_UndefinedVoltageReferenceSource(VoltageReferenceSource voltageReferenceSource)
+    => ConfigureAsAdcSyncOrAsync_UndefinedVoltageReferenceSource(
       voltageReferenceSource,
       static async (gp, vr) => await ((IAdcController)gp).ConfigureAsAdcAsync(voltageReferenceSource: vr).ConfigureAwait(false)
     );
 
-  [TestCaseSource(nameof(YieldTestCases_UnsupportedVoltageReferenceSource))]
-  public void ConfigureAsAdc_UnsupportedVoltageReferenceSource(VoltageReferenceSource voltageReferenceSource)
-    => ConfigureAsAdcSyncOrAsync_UnsupportedVoltageReferenceSource(
+  [TestCaseSource(nameof(YieldTestCases_UndefinedVoltageReferenceSource))]
+  public void ConfigureAsAdc_UndefinedVoltageReferenceSource(VoltageReferenceSource voltageReferenceSource)
+    => ConfigureAsAdcSyncOrAsync_UndefinedVoltageReferenceSource(
       voltageReferenceSource,
       static (gp, vr) => {
         ((IAdcController)gp).ConfigureAsAdc(voltageReferenceSource: vr);
@@ -219,7 +219,7 @@ partial class GpControllerTests {
       }
     );
 
-  private void ConfigureAsAdcSyncOrAsync_UnsupportedVoltageReferenceSource(
+  private void ConfigureAsAdcSyncOrAsync_UndefinedVoltageReferenceSource(
     VoltageReferenceSource voltageReferenceSource,
     Func<GpController, VoltageReferenceSource, ValueTask> configureAsAdcAsyncFunc
   )
@@ -246,8 +246,15 @@ partial class GpControllerTests {
     foreach (var gp in new GpController[] { mcp2221A.GpPin1, mcp2221A.GpPin2, mcp2221A.GpPin3 }) {
       Assert.That(
         async () => await configureAsAdcAsyncFunc(gp, voltageReferenceSource),
-        Throws.TypeOf<NotSupportedException>(),
-        $"unsupported voltage reference source ({gp.PinName}, {voltageReferenceSource})"
+        Throws
+          .InstanceOf<ArgumentException>()
+          .With
+          .Property(nameof(ArgumentException.ParamName))
+          .EqualTo(nameof(voltageReferenceSource))
+          .And
+          .Property(nameof(ArgumentException.Message))
+          .Contains($"{voltageReferenceSource}"),
+        $"undefined voltage reference source ({gp.PinName}, {voltageReferenceSource})"
       );
 
       Assert.That(
@@ -263,7 +270,6 @@ partial class GpControllerTests {
       );
     }
   }
-
 
   [Test]
   public void ConfigureAsAdcAsync_ThrowsWhenUsedByGpioController()

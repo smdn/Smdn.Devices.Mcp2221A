@@ -126,8 +126,8 @@ partial class Mcp2221AGpioDriver {
     SetSramSettings(
       argSramSettings: ThrowIfDacOutputValueOutOfRange(value, nameof(value)),
       modifySramSettings: static (sramSettings, val) => sramSettings.ModifyDacSettings(
-        dacVoltageReferenceSource: null,
-        dacOutputValue: val
+        voltageReferenceSource: null,
+        outputValue: val
       ),
       cancellationToken: cancellationToken
     );
@@ -144,8 +144,8 @@ partial class Mcp2221AGpioDriver {
     await SetSramSettingsAsync(
       argSramSettings: ThrowIfDacOutputValueOutOfRange(value, nameof(value)),
       modifySramSettings: static (sramSettings, val) => sramSettings.ModifyDacSettings(
-        dacVoltageReferenceSource: null,
-        dacOutputValue: val
+        voltageReferenceSource: null,
+        outputValue: val
       ),
       cancellationToken: cancellationToken
     ).ConfigureAwait(false);

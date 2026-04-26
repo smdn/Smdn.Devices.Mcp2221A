@@ -122,6 +122,68 @@ partial class GpControllerTests {
     );
   }
 
+  [TestCaseSource(nameof(YieldTestCases_UndefinedPinMode))]
+  public void SetMode_GPO_UndefinedPinMode(PinMode mode)
+    => SetModeSyncAndAsync_UndefinedPinMode(
+      mode: mode,
+      selectGpPin: static mcp2221A => mcp2221A.GpPin0
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_UndefinedPinMode))]
+  public void SetMode_GP1_UndefinedPinMode(PinMode mode)
+    => SetModeSyncAndAsync_UndefinedPinMode(
+      mode: mode,
+      selectGpPin: static mcp2221A => mcp2221A.GpPin1
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_UndefinedPinMode))]
+  public void SetMode_GP2_UndefinedPinMode(PinMode mode)
+    => SetModeSyncAndAsync_UndefinedPinMode(
+      mode: mode,
+      selectGpPin: static mcp2221A => mcp2221A.GpPin2
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_UndefinedPinMode))]
+  public void SetMode_GP3_UndefinedPinMode(PinMode mode)
+    => SetModeSyncAndAsync_UndefinedPinMode(
+      mode: mode,
+      selectGpPin: static mcp2221A => mcp2221A.GpPin3
+    );
+
+  private void SetModeSyncAndAsync_UndefinedPinMode(
+    PinMode mode,
+    Func<Mcp2221AController, GpController> selectGpPin
+  )
+  {
+    using var mcp2221A = CreateMcp2221AConfiguredAsGpio();
+    var gp = selectGpPin(mcp2221A);
+
+    Assert.That(
+      () => gp.SetMode(mode),
+      Throws
+        .InstanceOf<ArgumentException>()
+        .With
+        .Property(nameof(ArgumentException.ParamName))
+        .EqualTo(nameof(mode))
+        .And
+        .Property(nameof(ArgumentException.Message))
+        .Contains($"{mode}"),
+      $"undefined pin mode ({gp.PinName}, {mode})"
+    );
+    Assert.That(
+      async () => await gp.SetModeAsync(mode),
+      Throws
+        .InstanceOf<ArgumentException>()
+        .With
+        .Property(nameof(ArgumentException.ParamName))
+        .EqualTo(nameof(mode))
+        .And
+        .Property(nameof(ArgumentException.Message))
+        .Contains($"{mode}"),
+      $"undefined pin mode ({gp.PinName}, {mode})"
+    );
+  }
+
   [Test]
   public void SetModeAsync_Disposed()
     => SetModeSyncOrAsync_Disposed(

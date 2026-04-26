@@ -226,9 +226,9 @@ partial class GpControllerTests {
     Assert.That(
       async () => await configureAsClockOutputAsyncFunc(mcp2221A.GpPin1),
       Throws
-        .ArgumentException
+        .TypeOf<NotSupportedException>()
         .With
-        .Property(nameof(ArgumentException.Message))
+        .Property(nameof(NotSupportedException.Message))
         .Contains(nameof(ClockOutputFrequency.Reserved)),
       $"unsupported frequency ({nameof(ClockOutputFrequency)}.{nameof(ClockOutputFrequency.Reserved)})"
     );
@@ -251,7 +251,7 @@ partial class GpControllerTests {
     );
   }
 
-  private static IEnumerable<ClockOutputFrequency> YieldTestCases_UnsupportedClockOutputFrequency()
+  private static IEnumerable<ClockOutputFrequency> YieldTestCases_UndefinedClockOutputFrequency()
   {
     yield return (ClockOutputFrequency)int.MinValue;
     yield return (ClockOutputFrequency)(-1);
@@ -259,17 +259,17 @@ partial class GpControllerTests {
     yield return (ClockOutputFrequency)int.MaxValue;
   }
 
-  [TestCaseSource(nameof(YieldTestCases_UnsupportedClockOutputFrequency))]
-  public void ConfigureAsClockOutputAsync_UnsupportedClockOutputFrequency(ClockOutputFrequency frequency)
-    => ConfigureAsClockOutputSyncOrAsync_UnsupportedClockOutputFrequencyOrDutyCycle(
+  [TestCaseSource(nameof(YieldTestCases_UndefinedClockOutputFrequency))]
+  public void ConfigureAsClockOutputAsync_UndefinedClockOutputFrequency(ClockOutputFrequency frequency)
+    => ConfigureAsClockOutputSyncOrAsync_UndefinedClockOutputFrequencyOrDutyCycle(
       frequency,
       null,
       static async (gp1, f, d) => await ((IClockOutputController)gp1).ConfigureAsClockOutputAsync(f, d).ConfigureAwait(false)
     );
 
-  [TestCaseSource(nameof(YieldTestCases_UnsupportedClockOutputFrequency))]
-  public void ConfigureAsClockOutput_UnsupportedClockOutputFrequency(ClockOutputFrequency frequency)
-    => ConfigureAsClockOutputSyncOrAsync_UnsupportedClockOutputFrequencyOrDutyCycle(
+  [TestCaseSource(nameof(YieldTestCases_UndefinedClockOutputFrequency))]
+  public void ConfigureAsClockOutput_UndefinedClockOutputFrequency(ClockOutputFrequency frequency)
+    => ConfigureAsClockOutputSyncOrAsync_UndefinedClockOutputFrequencyOrDutyCycle(
       frequency,
       null,
       static (gp1, f, d) => {
@@ -278,7 +278,7 @@ partial class GpControllerTests {
       }
     );
 
-  private static IEnumerable<ClockOutputDutyCycle> YieldTestCases_UnsupportedClockOutputDutyCycle()
+  private static IEnumerable<ClockOutputDutyCycle> YieldTestCases_UndefinedClockOutputDutyCycle()
   {
     yield return (ClockOutputDutyCycle)int.MinValue;
     yield return (ClockOutputDutyCycle)(-1);
@@ -286,17 +286,17 @@ partial class GpControllerTests {
     yield return (ClockOutputDutyCycle)int.MaxValue;
   }
 
-  [TestCaseSource(nameof(YieldTestCases_UnsupportedClockOutputDutyCycle))]
-  public void ConfigureAsClockOutputAsync_UnsupportedClockOutputDutyCycle(ClockOutputDutyCycle dutyCycle)
-    => ConfigureAsClockOutputSyncOrAsync_UnsupportedClockOutputFrequencyOrDutyCycle(
+  [TestCaseSource(nameof(YieldTestCases_UndefinedClockOutputDutyCycle))]
+  public void ConfigureAsClockOutputAsync_UndefinedClockOutputDutyCycle(ClockOutputDutyCycle dutyCycle)
+    => ConfigureAsClockOutputSyncOrAsync_UndefinedClockOutputFrequencyOrDutyCycle(
       null,
       dutyCycle,
       static async (gp1, f, d) => await ((IClockOutputController)gp1).ConfigureAsClockOutputAsync(f, d).ConfigureAwait(false)
     );
 
-  [TestCaseSource(nameof(YieldTestCases_UnsupportedClockOutputDutyCycle))]
-  public void ConfigureAsClockOutput_UnsupportedClockOutputDutyCycle(ClockOutputDutyCycle dutyCycle)
-    => ConfigureAsClockOutputSyncOrAsync_UnsupportedClockOutputFrequencyOrDutyCycle(
+  [TestCaseSource(nameof(YieldTestCases_UndefinedClockOutputDutyCycle))]
+  public void ConfigureAsClockOutput_UndefinedClockOutputDutyCycle(ClockOutputDutyCycle dutyCycle)
+    => ConfigureAsClockOutputSyncOrAsync_UndefinedClockOutputFrequencyOrDutyCycle(
       null,
       dutyCycle,
       static (gp1, f, d) => {
@@ -305,7 +305,7 @@ partial class GpControllerTests {
       }
     );
 
-  private void ConfigureAsClockOutputSyncOrAsync_UnsupportedClockOutputFrequencyOrDutyCycle(
+  private void ConfigureAsClockOutputSyncOrAsync_UndefinedClockOutputFrequencyOrDutyCycle(
     ClockOutputFrequency? frequency,
     ClockOutputDutyCycle? dutyCycle,
     Func<Gp1Controller, ClockOutputFrequency?, ClockOutputDutyCycle?, ValueTask> configureAsClockOutputAsyncFunc
@@ -334,11 +334,14 @@ partial class GpControllerTests {
     Assert.That(
       async () => await configureAsClockOutputAsyncFunc(mcp2221A.GpPin1, frequency, dutyCycle),
       Throws
-        .ArgumentException
+        .InstanceOf<ArgumentException>()
         .With
+        .Property(nameof(ArgumentException.ParamName))
+        .EqualTo(frequency.HasValue ? nameof(frequency) : nameof(dutyCycle))
+        .And
         .Property(nameof(ArgumentException.Message))
         .Contains(frequency.HasValue ? $"{frequency}" : $"{dutyCycle}"),
-      $"unsupported frequency or duty cycle ({mcp2221A.GpPin1.PinName}, {frequency}/{dutyCycle})"
+      $"undefined frequency or duty cycle ({mcp2221A.GpPin1.PinName}, {frequency}/{dutyCycle})"
     );
 
     Assert.That(

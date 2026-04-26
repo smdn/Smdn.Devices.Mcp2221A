@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 using System;
+using System.ComponentModel;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
@@ -121,9 +122,10 @@ public readonly record struct AdcAllChannelSample {
         ),
 
       var invalid
-        => throw new ArgumentException(
-          message: $"Undefined {nameof(VoltageReferenceSource)} value: {invalid}",
-          paramName: nameof(adcVoltageReference)
+        => throw new InvalidEnumArgumentException(
+          argumentName: nameof(adcVoltageReference),
+          invalidValue: (int)adcVoltageReference,
+          enumClass: typeof(VoltageReferenceSource)
         ),
     };
 

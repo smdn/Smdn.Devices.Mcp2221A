@@ -446,7 +446,6 @@ partial class GpControllerTests {
   {
     yield return PinMode.InputPullUp;
     yield return PinMode.InputPullDown;
-    yield return (PinMode)(-1);
   }
 
   [TestCaseSource(nameof(YieldTestCases_UnsupportedPinMode))]
@@ -487,6 +486,67 @@ partial class GpControllerTests {
         async () => await configureAsGpioAsyncFunc(gp, mode),
         Throws.TypeOf<NotSupportedException>(),
         $"unsupported pin mode ({gp.PinName}, {mode})"
+      );
+
+      Assert.That(
+        mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList(),
+        Is.EqualTo(initialAssignments).AsCollection,
+        $"must not be configured ({gp.PinName})"
+      );
+    }
+  }
+
+  private static IEnumerable<PinMode> YieldTestCases_UndefinedPinMode()
+  {
+    yield return (PinMode)(-1);
+    yield return (PinMode)int.MaxValue;
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_UndefinedPinMode))]
+  public void ConfigureAsGpioAsync_UndefinedPinMode(PinMode mode)
+    => ConfigureAsGpioSyncOrAsync_UndefinedPinMode(
+      mode,
+      static async (gp, m) => await gp.ConfigureAsGpioAsync(mode: m).ConfigureAwait(false)
+    );
+
+  [TestCaseSource(nameof(YieldTestCases_UndefinedPinMode))]
+  public void ConfigureAsGpio_UndefinedPinMode(PinMode mode)
+    => ConfigureAsGpioSyncOrAsync_UndefinedPinMode(
+      mode,
+      static (gp, m) => {
+        gp.ConfigureAsGpio(mode: m);
+        return default;
+      }
+    );
+
+  private void ConfigureAsGpioSyncOrAsync_UndefinedPinMode(
+    PinMode mode,
+    Func<GpController, PinMode, ValueTask> configureAsGpioAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        gp0Settings: 0b_000_1_0_010, // Alternate Function 0 (LED UART RX)
+        gp1Settings: 0b_000_1_0_011, // Alternate Function 1 (LED UART TX)
+        gp2Settings: 0b_000_1_0_001, // Dedicated function operation (USBCFG)
+        gp3Settings: 0b_000_1_0_001 // Dedicated function operation (LED I2C)
+      ),
+      shouldDisposeUsbHidDevice: true
+    );
+    var initialAssignments = mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList();
+
+    foreach (var gp in mcp2221A.GpPins) {
+      Assert.That(
+        async () => await configureAsGpioAsyncFunc(gp, mode),
+        Throws
+          .InstanceOf<ArgumentException>()
+          .With
+          .Property(nameof(ArgumentException.ParamName))
+          .EqualTo("direction") // .EqualTo(nameof(mode))
+          .And
+          .Property(nameof(ArgumentException.Message))
+          .Contains($"{mode}"),
+        $"undefined pin mode ({gp.PinName}, {mode})"
       );
 
       Assert.That(

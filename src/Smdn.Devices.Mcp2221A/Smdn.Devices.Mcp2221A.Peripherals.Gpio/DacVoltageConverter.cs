@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 using System;
+using System.ComponentModel;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
@@ -14,7 +15,7 @@ internal static class DacVoltageConverter {
   /// <exception cref="InvalidOperationException">
   /// Thrown when <paramref name="dacVoltageReference"/> is <see cref="VoltageReferenceSource.Vdd"/>.
   /// </exception>
-  /// <exception cref="ArgumentException">
+  /// <exception cref="InvalidEnumArgumentException">
   /// Thrown when <paramref name="dacVoltageReference"/> is an undefined or unsupported
   /// <see cref="VoltageReferenceSource"/> value.
   /// </exception>
@@ -31,9 +32,10 @@ internal static class DacVoltageConverter {
         ),
 
       var invalid
-        => throw new ArgumentException(
-          message: $"Undefined {nameof(VoltageReferenceSource)} value: {invalid}",
-          paramName: nameof(dacVoltageReference)
+        => throw new InvalidEnumArgumentException(
+          argumentName: nameof(dacVoltageReference),
+          invalidValue: (int)dacVoltageReference,
+          enumClass: typeof(VoltageReferenceSource)
         ),
     };
 

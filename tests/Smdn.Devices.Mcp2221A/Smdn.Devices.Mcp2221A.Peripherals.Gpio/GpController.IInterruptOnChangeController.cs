@@ -233,7 +233,7 @@ partial class GpControllerTests {
     );
   }
 
-  private static IEnumerable<InterruptOnChangeTrigger> YieldTestCases_UnsupportedInterruptOnChangeTrigger()
+  private static IEnumerable<InterruptOnChangeTrigger> YieldTestCases_UndefinedInterruptOnChangeTrigger()
   {
     yield return (InterruptOnChangeTrigger)int.MinValue;
     yield return (InterruptOnChangeTrigger)(-1);
@@ -241,25 +241,29 @@ partial class GpControllerTests {
     yield return (InterruptOnChangeTrigger)int.MaxValue;
   }
 
-  [TestCaseSource(nameof(YieldTestCases_UnsupportedInterruptOnChangeTrigger))]
-  public void ConfigureAsInterruptOnChangeAsync_UnsupportedInterruptOnChangeTrigger(InterruptOnChangeTrigger trigger)
-    => ConfigureAsInterruptOnChangeSyncOrAsync_UnsupportedInterruptOnChangeTrigger(
-      trigger,
+  [TestCaseSource(nameof(YieldTestCases_UndefinedInterruptOnChangeTrigger))]
+  public void ConfigureAsInterruptOnChangeAsync_UndefinedInterruptOnChangeTrigger(
+    InterruptOnChangeTrigger detectionTrigger
+  )
+    => ConfigureAsInterruptOnChangeSyncOrAsync_UndefinedInterruptOnChangeTrigger(
+      detectionTrigger,
       static async (gp1, t) => await ((IInterruptOnChangeController)gp1).ConfigureAsInterruptOnChangeAsync(detectionTrigger: t, clearDetectionFlag: default).ConfigureAwait(false)
     );
 
-  [TestCaseSource(nameof(YieldTestCases_UnsupportedInterruptOnChangeTrigger))]
-  public void ConfigureAsInterruptOnChange_UnsupportedInterruptOnChangeTrigger(InterruptOnChangeTrigger trigger)
-    => ConfigureAsInterruptOnChangeSyncOrAsync_UnsupportedInterruptOnChangeTrigger(
-      trigger,
+  [TestCaseSource(nameof(YieldTestCases_UndefinedInterruptOnChangeTrigger))]
+  public void ConfigureAsInterruptOnChange_UndefinedInterruptOnChangeTrigger(
+    InterruptOnChangeTrigger detectionTrigger
+  )
+    => ConfigureAsInterruptOnChangeSyncOrAsync_UndefinedInterruptOnChangeTrigger(
+      detectionTrigger,
       static (gp1, t) => {
         ((IInterruptOnChangeController)gp1).ConfigureAsInterruptOnChange(detectionTrigger: t, clearDetectionFlag: default);
         return default;
       }
     );
 
-  private void ConfigureAsInterruptOnChangeSyncOrAsync_UnsupportedInterruptOnChangeTrigger(
-    InterruptOnChangeTrigger trigger,
+  private void ConfigureAsInterruptOnChangeSyncOrAsync_UndefinedInterruptOnChangeTrigger(
+    InterruptOnChangeTrigger detectionTrigger,
     Func<Gp1Controller, InterruptOnChangeTrigger, ValueTask> configureAsInterruptOnChangeAsyncFunc
   )
   {
@@ -283,13 +287,16 @@ partial class GpControllerTests {
     var initialDetectionTrigger = mcp2221A.GpPin1.CurrentInterruptOnChangeTrigger;
 
     Assert.That(
-      async () => await configureAsInterruptOnChangeAsyncFunc(mcp2221A.GpPin1, trigger),
+      async () => await configureAsInterruptOnChangeAsyncFunc(mcp2221A.GpPin1, detectionTrigger),
       Throws
-        .ArgumentException
+        .InstanceOf<ArgumentException>()
         .With
+        .Property(nameof(ArgumentException.ParamName))
+        .EqualTo(nameof(detectionTrigger))
+        .And
         .Property(nameof(ArgumentException.Message))
-        .Contains($"{trigger}"),
-      $"unsupported trigger ({mcp2221A.GpPin1.PinName}, {trigger})"
+        .Contains($"{detectionTrigger}"),
+      $"undefined trigger ({mcp2221A.GpPin1.PinName}, {detectionTrigger})"
     );
 
     Assert.That(

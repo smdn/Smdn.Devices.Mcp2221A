@@ -409,16 +409,16 @@ partial class GpControllerTests {
     );
   }
 
-  [TestCaseSource(nameof(YieldTestCases_UnsupportedVoltageReferenceSource))]
-  public void ConfigureAsDacAsync_UnsupportedVoltageReferenceSource(VoltageReferenceSource voltageReferenceSource)
-    => ConfigureAsDacSyncOrAsync_UnsupportedVoltageReferenceSource(
+  [TestCaseSource(nameof(YieldTestCases_UndefinedVoltageReferenceSource))]
+  public void ConfigureAsDacAsync_UndefinedVoltageReferenceSource(VoltageReferenceSource voltageReferenceSource)
+    => ConfigureAsDacSyncOrAsync_UndefinedVoltageReferenceSource(
       voltageReferenceSource,
       static async (gp, vr) => await ((IDacController)gp).ConfigureAsDacAsync(voltageReferenceSource: vr).ConfigureAwait(false)
     );
 
-  [TestCaseSource(nameof(YieldTestCases_UnsupportedVoltageReferenceSource))]
-  public void ConfigureAsDac_UnsupportedVoltageReferenceSource(VoltageReferenceSource voltageReferenceSource)
-    => ConfigureAsDacSyncOrAsync_UnsupportedVoltageReferenceSource(
+  [TestCaseSource(nameof(YieldTestCases_UndefinedVoltageReferenceSource))]
+  public void ConfigureAsDac_UndefinedVoltageReferenceSource(VoltageReferenceSource voltageReferenceSource)
+    => ConfigureAsDacSyncOrAsync_UndefinedVoltageReferenceSource(
       voltageReferenceSource,
       static (gp, vr) => {
         ((IDacController)gp).ConfigureAsDac(voltageReferenceSource: vr);
@@ -426,7 +426,7 @@ partial class GpControllerTests {
       }
     );
 
-  private void ConfigureAsDacSyncOrAsync_UnsupportedVoltageReferenceSource(
+  private void ConfigureAsDacSyncOrAsync_UndefinedVoltageReferenceSource(
     VoltageReferenceSource voltageReferenceSource,
     Func<GpController, VoltageReferenceSource, ValueTask> configureAsDacAsyncFunc
   )
@@ -454,8 +454,15 @@ partial class GpControllerTests {
     foreach (var gp in new GpController[] { mcp2221A.GpPin2, mcp2221A.GpPin3 }) {
       Assert.That(
         async () => await configureAsDacAsyncFunc(gp, voltageReferenceSource),
-        Throws.TypeOf<NotSupportedException>(),
-        $"unsupported voltage reference source ({gp.PinName}, {voltageReferenceSource})"
+        Throws
+          .InstanceOf<ArgumentException>()
+          .With
+          .Property(nameof(ArgumentException.ParamName))
+          .EqualTo(nameof(voltageReferenceSource))
+          .And
+          .Property(nameof(ArgumentException.Message))
+          .Contains($"{voltageReferenceSource}"),
+        $"undefined voltage reference source ({gp.PinName}, {voltageReferenceSource})"
       );
 
       Assert.That(

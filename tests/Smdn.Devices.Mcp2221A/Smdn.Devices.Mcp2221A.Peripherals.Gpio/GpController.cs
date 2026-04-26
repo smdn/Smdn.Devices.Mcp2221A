@@ -122,7 +122,7 @@ public partial class GpControllerTests {
     yield return 0b_000_1_0_001; // LED_I2C
   }
 
-  private static IEnumerable<VoltageReferenceSource> YieldTestCases_UnsupportedVoltageReferenceSource()
+  private static IEnumerable<VoltageReferenceSource> YieldTestCases_UndefinedVoltageReferenceSource()
   {
     yield return (VoltageReferenceSource)(-1);
     yield return (VoltageReferenceSource)0b_0_0000_01_0; // VRM 4.096 + ADC voltage reference is VDD

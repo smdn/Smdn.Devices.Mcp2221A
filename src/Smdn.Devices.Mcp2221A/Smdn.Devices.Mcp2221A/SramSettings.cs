@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 using System;
+using System.ComponentModel;
 using System.Device.Gpio;
 
 using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
@@ -162,27 +163,30 @@ internal sealed class SramSettings {
 
     // Bit 4-3: Duty cycle
     if (dutyCycle.HasValue)
-      settings = (byte)((settings & 0b_1_11_00_111) | GetDutyCycleBits(dutyCycle.Value));
+      settings = (byte)((settings & 0b_1_11_00_111) | GetDutyCycleBits(dutyCycle.Value, nameof(dutyCycle)));
 
     // Bit 2-0: Clock divider value
     if (frequency.HasValue)
-      settings = (byte)((settings & 0b_1_11_11_000) | GetClockDividerValueBits(frequency.Value));
+      settings = (byte)((settings & 0b_1_11_11_000) | GetClockDividerValueBits(frequency.Value, nameof(frequency)));
 
     return this;
 
-    static byte GetDutyCycleBits(ClockOutputDutyCycle duty)
+    static byte GetDutyCycleBits(ClockOutputDutyCycle duty, string paramName)
       => duty switch {
         ClockOutputDutyCycle.Duty0 or
         ClockOutputDutyCycle.Duty25 or
         ClockOutputDutyCycle.Duty50 or
         ClockOutputDutyCycle.Duty75 => (byte)((int)duty << 3),
 
-        var invalid => throw new ArgumentException(
-          message: $"The clock duty cycle cannot set to {invalid}. The value must be one of the values defined in {nameof(ClockOutputDutyCycle)}."
+        var invalid => throw new InvalidEnumArgumentException(
+          argumentName: paramName,
+          invalidValue: (int)invalid,
+          enumClass: typeof(ClockOutputDutyCycle)
         ),
+        // message: $"The clock duty cycle cannot set to {invalid}. The value must be one of the values defined in {nameof(ClockOutputDutyCycle)}."
       };
 
-    static byte GetClockDividerValueBits(ClockOutputFrequency freq)
+    static byte GetClockDividerValueBits(ClockOutputFrequency freq, string paramName)
       => freq switch {
         ClockOutputFrequency.Frequency24MHz or
         ClockOutputFrequency.Frequency12MHz or
@@ -192,26 +196,29 @@ internal sealed class SramSettings {
         ClockOutputFrequency.Frequency750kHz or
         ClockOutputFrequency.Frequency375kHz => (byte)freq,
 
-        ClockOutputFrequency.Reserved => throw new ArgumentException(
+        ClockOutputFrequency.Reserved => throw new NotSupportedException(
           message: $"The clock output frequency cannot set to {nameof(ClockOutputFrequency.Reserved)}. This value is reserved by the device."
         ),
 
-        var invalid => throw new ArgumentException(
-          message: $"The clock output frequency cannot set to {invalid}. The value must be one of the values defined in {nameof(ClockOutputFrequency)}."
+        var invalid => throw new InvalidEnumArgumentException(
+          argumentName: paramName,
+          invalidValue: (int)invalid,
+          enumClass: typeof(ClockOutputFrequency)
         ),
+        // message: $"The clock output frequency cannot set to {invalid}. The value must be one of the values defined in {nameof(ClockOutputFrequency)}."
       };
   }
 
   public SramSettings ModifyDacSettings(
-    VoltageReferenceSource? dacVoltageReferenceSource,
-    int? dacOutputValue
+    VoltageReferenceSource? voltageReferenceSource,
+    int? outputValue
   )
   {
-    if (!dacVoltageReferenceSource.HasValue && !dacOutputValue.HasValue)
+    if (!voltageReferenceSource.HasValue && !outputValue.HasValue)
       return this;
 
     // [1] DAC Voltage Reference
-    if (dacVoltageReferenceSource.HasValue) {
+    if (voltageReferenceSource.HasValue) {
       // Bit 7: Enable loading of a new DAC reference
       unsentSettings[OffsetOfDacVoltageReference] = 0b_1_0000_00_0;
 
@@ -221,29 +228,30 @@ internal sealed class SramSettings {
       // Bit 0: DAC reference voltage (1: DAC V_RM, 0: VDD)
       ModifyVoltageSelectionAndReferenceVoltageBits(
         ref unsentSettings[OffsetOfDacVoltageReference],
-        dacVoltageReferenceSource.Value
+        voltageReferenceSource.Value,
+        nameof(voltageReferenceSource)
       );
     }
 
     // [2] Set DAC Output Value
-    if (dacOutputValue.HasValue) {
+    if (outputValue.HasValue) {
       // Bit 7: Enable loading of a new DAC value
       unsentSettings[OffsetOfDacOutputValue] = 0b_1_00_00000;
 
       // Bit 6-5: Don't care
 
       // Bit 4-0: The new DAC value
-      unsentSettings[OffsetOfDacOutputValue] |= (byte)((byte)dacOutputValue.Value & 0b_0_00_11111);
+      unsentSettings[OffsetOfDacOutputValue] |= (byte)((byte)outputValue.Value & 0b_0_00_11111);
     }
 
     return this;
   }
 
   public SramSettings ModifyAdcSettings(
-    VoltageReferenceSource? adcVoltageReferenceSource
+    VoltageReferenceSource? voltageReferenceSource
   )
   {
-    if (!adcVoltageReferenceSource.HasValue)
+    if (!voltageReferenceSource.HasValue)
       return this;
 
     // [3] ADC Voltage Reference
@@ -256,7 +264,8 @@ internal sealed class SramSettings {
     // Bit 0: ADC reference voltage (1: ADC V_RM, 0: VDD)
     ModifyVoltageSelectionAndReferenceVoltageBits(
       ref unsentSettings[OffsetOfAdcVoltageReference],
-      adcVoltageReferenceSource.Value
+      voltageReferenceSource.Value,
+      nameof(voltageReferenceSource)
     );
 
     return this;
@@ -264,7 +273,8 @@ internal sealed class SramSettings {
 
   private static void ModifyVoltageSelectionAndReferenceVoltageBits(
     ref byte voltageReferenceBits,
-    VoltageReferenceSource voltageReferenceSource
+    VoltageReferenceSource voltageReferenceSource,
+    string paramName
   )
   {
     // Bit 2-1: DAC/ADC V_RM voltage selection
@@ -285,9 +295,12 @@ internal sealed class SramSettings {
         return;
 
       default:
-        throw new NotSupportedException(
-          message: $"The voltage reference source value cannot set to {voltageReferenceSource}. The value must be one of the values defined in {nameof(VoltageReferenceSource)}."
+        throw new InvalidEnumArgumentException(
+          argumentName: paramName,
+          invalidValue: (int)voltageReferenceSource,
+          enumClass: typeof(VoltageReferenceSource)
         );
+        // message: $"The voltage reference source value cannot set to {voltageReferenceSource}. The value must be one of the values defined in {nameof(VoltageReferenceSource)}."
     }
   }
 
@@ -309,9 +322,12 @@ internal sealed class SramSettings {
 
     if (detectionTrigger is { } trigger) {
       if (trigger is < InterruptOnChangeTrigger.None or > InterruptOnChangeTrigger.Both) {
-        throw new ArgumentException(
-          message: $"The interrupt detection trigger cannot set to {trigger}. The value must be one of the values defined in {nameof(InterruptOnChangeTrigger)}."
+        throw new InvalidEnumArgumentException(
+          argumentName: nameof(detectionTrigger),
+          invalidValue: (int)trigger,
+          enumClass: typeof(InterruptOnChangeTrigger)
         );
+        // message: $"The interrupt detection trigger cannot set to {trigger}. The value must be one of the values defined in {nameof(InterruptOnChangeTrigger)}."
       }
 
       settings &= 0b_1_11_0_0_0_0_1;
@@ -369,7 +385,8 @@ internal sealed class SramSettings {
       null => (byte)(currentGpSettings & 0b_000_0_1_000), // maintain the current settings
       PinMode.Input => 0b_000_0_1_000,
       PinMode.Output => 0b_000_0_0_000,
-      PinMode unsupportedMode => (byte)GpController.ThrowDirectionNotSupportedException(unsupportedMode),
+
+      _ => (byte)GpController.ThrowDirectionNotSupportedOrInvalidException(direction.Value, nameof(direction)),
     };
 
     // Bit 4: GPIO Output value

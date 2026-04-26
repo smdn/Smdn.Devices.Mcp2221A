@@ -469,9 +469,9 @@ public class Mcp2221AGpioControllerTests {
   }
 
   [Test]
-  public void SetPinMode_UnsupportedMode(
+  public void SetPinMode_UnsupportedOrUndefinedMode(
     [Values(0, 1, 2, 3)] int pinNumber,
-    [Values(PinMode.InputPullUp, PinMode.InputPullDown)] PinMode unsupportedPinMode
+    [Values(PinMode.InputPullUp, PinMode.InputPullDown, -1, int.MaxValue)] PinMode unsupportedOrUndefinedPinMode
   )
   {
     const byte InitialGp0Settings = 0b_000_1_1_000; // HIGH - INPUT - GPIO operation (GPIO0)
@@ -503,7 +503,7 @@ public class Mcp2221AGpioControllerTests {
     Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     Assert.That(
-      () => mcp2221A.GpioController.SetPinMode(pinNumber, unsupportedPinMode),
+      () => mcp2221A.GpioController.SetPinMode(pinNumber, unsupportedOrUndefinedPinMode),
       Throws.TypeOf<InvalidOperationException>()
     );
 

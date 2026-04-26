@@ -119,12 +119,16 @@ public class AdcAllChannelSampleTests {
   [TestCase((VoltageReferenceSource)8)]
   [TestCase((VoltageReferenceSource)int.MaxValue)]
   public void AsVoltage_WithAdcVoltageReference_InvalidVoltageReferenceSource(
-    VoltageReferenceSource voltageReferenceSource
+    VoltageReferenceSource adcVoltageReference
   )
   {
     Assert.That(
-      () => _ = new AdcAllChannelSample().AsVoltage(voltageReferenceSource),
-      Throws.ArgumentException
+      () => _ = new AdcAllChannelSample().AsVoltage(adcVoltageReference: adcVoltageReference),
+      Throws
+        .InstanceOf<ArgumentException>()
+        .With
+        .Property(nameof(ArgumentException.ParamName))
+        .EqualTo("adcVoltageReference")
     );
   }
 

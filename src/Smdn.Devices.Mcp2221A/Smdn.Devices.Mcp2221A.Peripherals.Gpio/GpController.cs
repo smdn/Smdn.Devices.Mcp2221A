@@ -324,8 +324,8 @@ public abstract partial class GpController {
         designation: GpDesignation.AlternateFunction1
       )
       .ModifyDacSettings(
-        dacVoltageReferenceSource: arg.VoltageReferenceSource,
-        dacOutputValue: arg.OutputValue
+        voltageReferenceSource: arg.VoltageReferenceSource,
+        outputValue: arg.OutputValue
       );
 
   private protected ValueTask ConfigureAsAdcAsyncCore(
@@ -361,6 +361,6 @@ public abstract partial class GpController {
         designation: GpDesignation.AlternateFunction0
       )
       .ModifyAdcSettings(
-        adcVoltageReferenceSource: voltageReferenceSource
+        voltageReferenceSource: voltageReferenceSource
       );
 }
