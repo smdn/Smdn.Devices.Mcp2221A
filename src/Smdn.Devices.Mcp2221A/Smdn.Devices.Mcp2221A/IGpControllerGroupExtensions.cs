@@ -15,11 +15,8 @@ namespace Smdn.Devices.Mcp2221A;
 /// </summary>
 public static class IGpControllerGroupExtensions {
 #pragma warning disable IDE0051
-  private static void ThrowIfThisArgumentIsNull(IGpControllerGroup gpPins, string paramName)
-  {
-    if (gpPins is null)
-      throw new ArgumentNullException(paramName: paramName);
-  }
+  private static IGpControllerGroup ThrowIfReceiverIsNull(IGpControllerGroup gpPins, string paramName)
+    => gpPins ?? throw new ArgumentNullException(paramName: paramName);
 #pragma warning restore IDE0051
 
 #pragma warning disable CA1034
@@ -77,7 +74,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       gpPins.ConfigureAllGpSettings(
         gp0Function: gp0Function,
@@ -105,7 +102,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       return gpPins.ConfigureAllGpSettingsAsync(
         gp0Function: gp0Function,
@@ -180,7 +177,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       gpPins.ConfigureAllGpSettings(
         gp0Function: GpFunction.Gpio,
@@ -220,7 +217,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       return gpPins.ConfigureAllGpSettingsAsync(
         gp0Function: GpFunction.Gpio,
@@ -279,7 +276,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       gpPins.ConfigureAllGpSettings(
         gp0Function: GpFunction.Gpio,
@@ -315,7 +312,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       return gpPins.ConfigureAllGpSettingsAsync(
         gp0Function: GpFunction.Gpio,
@@ -355,7 +352,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       gpPins.ConfigureAllGpSettings(
         gp0Function: GpFunction.Gpio,
@@ -387,7 +384,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       return gpPins.ConfigureAllGpSettingsAsync(
         gp0Function: GpFunction.Gpio,
@@ -433,7 +430,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       gpPins.FetchGpioStates(
         pinValuePairs: pinValuePairs,
@@ -454,7 +451,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       return gpPins.FetchGpioStatesAsync(
         pinValuePairs: pinValuePairs,
@@ -491,7 +488,7 @@ public static class IGpControllerGroupExtensions {
     (PinValue Gp0Value, PinValue Gp1Value, PinValue Gp2Value, PinValue Gp3Value)
     Read(CancellationToken cancellationToken = default)
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       gpPins.FetchGpioStates(
         pinValuePairs: default,
@@ -518,7 +515,7 @@ public static class IGpControllerGroupExtensions {
     ValueTask<(PinValue Gp0Value, PinValue Gp1Value, PinValue Gp2Value, PinValue Gp3Value)>
     ReadAsync(CancellationToken cancellationToken = default)
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       await gpPins.FetchGpioStatesAsync(
         pinValuePairs: default,
@@ -568,7 +565,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       gpPins.ApplyGpioStates(
         pinValuePairs: pinValuePairs,
@@ -589,7 +586,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       return gpPins.ApplyGpioStatesAsync(
         pinValuePairs: pinValuePairs,
@@ -648,7 +645,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       Span<PinValuePair> pinValuePairs = stackalloc PinValuePair[Mcp2221AGpioDriver.NumberOfGpPins];
       var pinValuePairCount = 0;
@@ -686,7 +683,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       var pinValuePairArray = ArrayPool<PinValuePair>.Shared.Rent(Mcp2221AGpioDriver.NumberOfGpPins);
       var pinValuePairCount = 0;
@@ -738,7 +735,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       return gpPins
         .FetchAdcRawValues(
@@ -764,7 +761,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       return (
         await gpPins.FetchAdcRawValuesAsync(
@@ -801,7 +798,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       return gpPins
         .FetchAdcRawValues(
@@ -830,7 +827,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       return (
         await gpPins.FetchAdcRawValuesAsync(
@@ -870,7 +867,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       return gpPins
         .FetchAdcRawValues(
@@ -900,7 +897,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       return (
         await gpPins.FetchAdcRawValuesAsync(
@@ -958,7 +955,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       gpPins.ApplyDacRawValue(
         value: DacVoltageConverter.ToOutputValue(
@@ -979,7 +976,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       return gpPins.ApplyDacRawValueAsync(
         value: DacVoltageConverter.ToOutputValue(
@@ -1044,7 +1041,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       gpPins.ApplyDacRawValue(
         value: DacVoltageConverter.ToOutputValue(
@@ -1066,7 +1063,7 @@ public static class IGpControllerGroupExtensions {
       CancellationToken cancellationToken = default
     )
     {
-      ThrowIfThisArgumentIsNull(gpPins, nameof(gpPins));
+      ThrowIfReceiverIsNull(gpPins, nameof(gpPins));
 
       return gpPins.ApplyDacRawValueAsync(
         value: DacVoltageConverter.ToOutputValue(
