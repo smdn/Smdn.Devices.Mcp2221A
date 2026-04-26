@@ -32,6 +32,24 @@ partial class Mcp2221AGpioDriver {
     return value;
   }
 
+  /// <exception cref="ArgumentOutOfRangeException">
+  /// <paramref name="value"/> is greater than 1023 (the maximum value for a 10-bit ADC).
+  /// </exception>
+  internal static ushort ThrowIfAdcRawValueOutOfRange(ushort value, string paramName)
+  {
+    const ushort AdcRawMaxValue = 0b_0000_0011_1111_1111;
+
+    if (AdcRawMaxValue < value) {
+      throw new ArgumentOutOfRangeException(
+        message: $"The ADC raw value must be in range of 0 to {AdcRawMaxValue} (10-bit).",
+        actualValue: value,
+        paramName: paramName
+      );
+    }
+
+    return value;
+  }
+
   private int? lastAppliedDacRawValue;
   private AdcAllChannelSample lastFetchedAdcSample;
 

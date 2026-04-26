@@ -59,16 +59,9 @@ public readonly record struct AdcAllChannelSample {
   /// </exception>
   public AdcAllChannelSample(ushort adc1, ushort adc2, ushort adc3)
   {
-    if (1024 <= adc1)
-      throw new ArgumentOutOfRangeException(message: "Value must be 10-bit (0-1023).", paramName: nameof(adc1), actualValue: adc1);
-    if (1024 <= adc2)
-      throw new ArgumentOutOfRangeException(message: "Value must be 10-bit (0-1023).", paramName: nameof(adc2), actualValue: adc2);
-    if (1024 <= adc3)
-      throw new ArgumentOutOfRangeException(message: "Value must be 10-bit (0-1023).", paramName: nameof(adc3), actualValue: adc3);
-
-    Adc1 = adc1;
-    Adc2 = adc2;
-    Adc3 = adc3;
+    Adc1 = Mcp2221AGpioDriver.ThrowIfAdcRawValueOutOfRange(adc1, nameof(adc1));
+    Adc2 = Mcp2221AGpioDriver.ThrowIfAdcRawValueOutOfRange(adc2, nameof(adc2));
+    Adc3 = Mcp2221AGpioDriver.ThrowIfAdcRawValueOutOfRange(adc3, nameof(adc3));
   }
 
   /// <summary>
