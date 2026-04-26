@@ -16,7 +16,7 @@ using Smdn.IO.UsbHid;
 namespace Smdn.Devices.Mcp2221A;
 
 #pragma warning disable IDE0055
-public partial class Mcp2221AController :
+public sealed partial class Mcp2221AController :
   IDisposable,
   IAsyncDisposable
 {
@@ -156,7 +156,8 @@ public partial class Mcp2221AController :
   /// <seealso cref="Reset(System.Threading.CancellationToken)"/>
   public void Dispose()
   {
-    Dispose(disposing: true);
+    transceiver?.Dispose();
+    transceiver = null;
 
     GC.SuppressFinalize(this);
   }
@@ -165,27 +166,12 @@ public partial class Mcp2221AController :
   /// <seealso cref="ResetAsync(System.Threading.CancellationToken)"/>
   public async ValueTask DisposeAsync()
   {
-    await DisposeAsyncCore().ConfigureAwait(false);
-
-    Dispose(disposing: false);
-
-    GC.SuppressFinalize(this);
-  }
-
-  protected virtual void Dispose(bool disposing)
-  {
-    if (disposing) {
-      transceiver?.Dispose();
-      transceiver = null;
-    }
-  }
-
-  protected virtual async ValueTask DisposeAsyncCore()
-  {
     if (transceiver is not null) {
       await transceiver.DisposeAsync().ConfigureAwait(false);
       transceiver = null;
     }
+
+    GC.SuppressFinalize(this);
   }
 
 #if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
