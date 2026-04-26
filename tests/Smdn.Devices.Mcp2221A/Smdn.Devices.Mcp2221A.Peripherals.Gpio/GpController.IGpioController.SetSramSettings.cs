@@ -54,7 +54,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings3 = 0b_0_1_1_00_0_00; // ADC: VDD
+    const byte InitialChipSettings3 = 0b_0_1_1_00_0_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 00(Off), ADCREF: 0(Vdd)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -97,7 +97,8 @@ partial class GpControllerTests {
       var expectedSentCommand = new byte[64];
 
       expectedSentCommand[0] = 0x60; // [0] SET SRAM SETTINGS
-      // [1-6] don't care
+      // [1-5] don't care
+      expectedSentCommand[6] = 0b_0_00_0_1_0_1_0; // [6] Set Up the Interrupt Detection Mechanism and Clear the Detection Flag
       expectedSentCommand[7] = 0b10000000; // [7] Alter GPIO configuration = Alter the GP designation (1)
       expectedSentCommand[8] = currentGpSettings[0]; // [8] GP0 settings
       expectedSentCommand[9] = currentGpSettings[1]; // [9] GP1 settings
@@ -132,10 +133,10 @@ partial class GpControllerTests {
     const byte ChipSettings2_DacVrm1024 = 0b_01_1_10000; // DAC: VRM 1.024V; Output = 16
     const byte ChipSettings2_DacVrmOff = 0b_00_1_00001; // DAC: VRM Off; Output = 1
     const byte ChipSettings2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
-    const byte ChipSettings3_AdcVrm4096 = 0b_0_1_1_11_1_00; // ADC: VRM 4.096V
-    const byte ChipSettings3_AdcVrm2048 = 0b_0_1_1_10_1_00; // ADC: VRM 2.048V
+    const byte ChipSettings3_AdcVrm4096 = 0b_0_0_0_11_1_00; // ADC: VRM 4.096V
+    const byte ChipSettings3_AdcVrm2048 = 0b_0_1_0_10_1_00; // ADC: VRM 2.048V
     const byte ChipSettings3_AdcVrm1024 = 0b_0_1_1_01_1_00; // ADC: VRM 1.024V (factory default)
-    const byte ChipSettings3_AdcVrmOff = 0b_0_1_1_00_1_00; // ADC: VRM Off
+    const byte ChipSettings3_AdcVrmOff = 0b_0_0_1_00_1_00; // ADC: VRM Off
     const byte ChipSettings3_AdcVdd = 0b_0_1_1_00_0_00; // ADC: Vdd
 
     const bool ShouldReenableDacVrm = true;
@@ -224,6 +225,11 @@ partial class GpControllerTests {
     var expectedDacVoltageReferenceBits = (byte)((chipSettings2 & 0b_11_1_00000) >> 5);
     var expectedDacOutputValueBits = (byte)(chipSettings2 & 0b_00_0_11111);
     var expectedAdcVoltageReferenceBits = (byte)((chipSettings3 & 0b_0_0_0_11_1_00) >> 2);
+    var expectedInterruptOnChangeBits = (byte)(
+      ((chipSettings3 & 0b_0_0_1_00_0_00) == 0 ? 0 : 0b_0_00_0_1_0_0_0) | // positive edge
+      ((chipSettings3 & 0b_0_1_0_00_0_00) == 0 ? 0 : 0b_0_00_0_0_0_1_0) // negative edge
+    );
+
     var expectedAssignments = mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList();
     var currentGpSettings = new byte[4] { InitialGp0Settings, InitialGp1Settings, InitialGp2Settings, InitialGp3Settings };
 
@@ -275,7 +281,7 @@ partial class GpControllerTests {
       expectedSentSramSettingsCommand[3] = expectedDacVoltageReferenceBits; // [3] DAC Voltage Reference
       expectedSentSramSettingsCommand[4] = expectedDacOutputValueBits; // [4] Set DAC Output Value
       expectedSentSramSettingsCommand[5] = expectedAdcVoltageReferenceBits; // [5] ADC Voltage Reference
-      // [1-6] don't care
+      expectedSentSramSettingsCommand[6] = expectedInterruptOnChangeBits; // [6] Set Up the Interrupt Detection Mechanism and Clear the Detection Flag
       expectedSentSramSettingsCommand[7] = 0b10000000; // [7] Alter GPIO configuration = Alter the GP designation (1)
       expectedSentSramSettingsCommand[8] = currentGpSettings[0]; // [8] GP0 settings
       expectedSentSramSettingsCommand[9] = currentGpSettings[1]; // [9] GP1 settings
@@ -289,7 +295,7 @@ partial class GpControllerTests {
       expectedSentReenableVrmCommand[3] = (byte)((shouldReenableDacVrm ? 0b_1_0000000 : 0b_0_0000000) | expectedDacVoltageReferenceBits); // [3] DAC Voltage Reference
       expectedSentReenableVrmCommand[4] = expectedDacOutputValueBits; // [4] Set DAC Output Value
       expectedSentReenableVrmCommand[5] = (byte)((shouldReenableAdcVrm ? 0b_1_0000000 : 0b_0_0000000) | expectedAdcVoltageReferenceBits); // [5] ADC Voltage Reference
-      // [6] don't care
+      expectedSentReenableVrmCommand[6] = expectedInterruptOnChangeBits; // [6] Set Up the Interrupt Detection Mechanism and Clear the Detection Flag
       expectedSentReenableVrmCommand[7] = 0b00000000; // [7] Alter GPIO configuration = Do not alter the current GP designation (0)
       expectedSentReenableVrmCommand[8] = currentGpSettings[0]; // [8] GP0 settings
       expectedSentReenableVrmCommand[9] = currentGpSettings[1]; // [9] GP1 settings
@@ -508,7 +514,7 @@ partial class GpControllerTests {
       Assert.That(
         async () => await configureAsGpioAsyncFunc(gp, cts.Token),
         Throws
-          .TypeOf<OperationCanceledException>()
+          .InstanceOf<OperationCanceledException>()
           .With
           .Property(nameof(OperationCanceledException.CancellationToken))
           .EqualTo(cts.Token),

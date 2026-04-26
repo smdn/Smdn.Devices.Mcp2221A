@@ -70,6 +70,15 @@ partial class Mcp2221AGpioDriver {
         (byte)(resp[6] & 0b_00_0_11111)
       );
 
+      // [7] Bit 6: If set, the interrupt detection flag will be set when a negative edge occurs
+      // [7] Bit 5: If set, the interrupt detection flag will be set when a positive edge occurs
+      sramSettings.StoreInterruptDetectionModuleSetupByte(
+        (byte)(
+          (((resp[7] & 0b_0_1_0_00_0_0_0) == 0) ? 0b_0_00_0_0_0_0_0 : 0b_0_00_0_0_0_1_0 /* trigger on negative edge */) |
+          (((resp[7] & 0b_0_0_1_00_0_0_0) == 0) ? 0b_0_00_0_0_0_0_0 : 0b_0_00_0_1_0_0_0 /* trigger on positive edge */)
+        )
+      );
+
       // [7] Bit 4-3: ADC Reference Voltage
       // [7] Bit 2: ADC Reference Option
       // Note: The DAC option bits in the SRAM settings are stored as-is.
@@ -120,26 +129,30 @@ partial class Mcp2221AGpioDriver {
 
   internal async ValueTask FetchSramSettingsAsync(CancellationToken cancellationToken)
   {
-    _ = await Transceiver.CommandAsync(
-      arg: sramSettings,
-      cancellationToken: cancellationToken,
-      constructCommand: GetSramSettingsCommand.ConstructCommand,
-      parseResponse: GetSramSettingsCommand.ParseResponse
-    ).ConfigureAwait(false);
+    using (await Transceiver.EnterCommandTransactionAsync(cancellationToken).ConfigureAwait(false)) {
+      _ = await Transceiver.CommandAsync(
+        arg: sramSettings,
+        cancellationToken: cancellationToken,
+        constructCommand: GetSramSettingsCommand.ConstructCommand,
+        parseResponse: GetSramSettingsCommand.ParseResponse
+      ).ConfigureAwait(false);
 
-    SyncGpioStates(sramSettings);
+      SyncGpioStates(sramSettings);
+    }
   }
 
   internal void FetchSramSettings(CancellationToken cancellationToken)
   {
-    _ = Transceiver.Command(
-      arg: sramSettings,
-      cancellationToken: cancellationToken,
-      constructCommand: GetSramSettingsCommand.ConstructCommand,
-      parseResponse: GetSramSettingsCommand.ParseResponse
-    );
+    using (Transceiver.EnterCommandTransaction(cancellationToken)) {
+      _ = Transceiver.Command(
+        arg: sramSettings,
+        cancellationToken: cancellationToken,
+        constructCommand: GetSramSettingsCommand.ConstructCommand,
+        parseResponse: GetSramSettingsCommand.ParseResponse
+      );
 
-    SyncGpioStates(sramSettings);
+      SyncGpioStates(sramSettings);
+    }
   }
 
   private void ConfigureGpDesignation(
@@ -357,40 +370,43 @@ partial class Mcp2221AGpioDriver {
     CancellationToken cancellationToken
   )
   {
-    modifySramSettings(sramSettings, argSramSettings);
+    using (await Transceiver.EnterCommandTransactionAsync(cancellationToken).ConfigureAwait(false)) {
+      modifySramSettings(sramSettings, argSramSettings);
 
-    if (!sramSettings.IsDirty)
-      return; // nothing to configure, do nothing and just return
+      if (!sramSettings.IsDirty)
+        return; // nothing to configure, do nothing and just return
 
-    cancellationToken.ThrowIfCancellationRequested();
-
-    try {
-      // attempt to set new SRAM settings
-      _ = await Transceiver.CommandAsync(
-        arg: sramSettings,
-        cancellationToken: cancellationToken,
-        constructCommand: SetSramSettingsCommand.ConstructCommand,
-        parseResponse: SetSramSettingsCommand.ParseResponse
-      ).ConfigureAwait(false);
-
-      if (sramSettings.ShouldReenableVrm()) {
+      try {
+        // attempt to set new SRAM settings
         _ = await Transceiver.CommandAsync(
           arg: sramSettings,
           cancellationToken: cancellationToken,
           constructCommand: SetSramSettingsCommand.ConstructCommand,
           parseResponse: SetSramSettingsCommand.ParseResponse
         ).ConfigureAwait(false);
+
+        if (sramSettings.ShouldReenableVrm()) {
+          _ = await Transceiver.CommandAsync(
+            arg: sramSettings,
+            cancellationToken: cancellationToken,
+            constructCommand: SetSramSettingsCommand.ConstructCommand,
+            parseResponse: SetSramSettingsCommand.ParseResponse
+          ).ConfigureAwait(false);
+        }
       }
-    }
-    catch {
-      sramSettings.Restore();
-      throw;
-    }
+      catch {
+        sramSettings.Restore();
+        throw;
+      }
 
-    // save the successfully configured settings as the current state
-    sramSettings.Store();
+      if (sramSettings.ShouldResetInterruptDetectionFlag())
+        LastFetchedInterruptDetectionFlag = default;
 
-    SyncGpioStates(sramSettings);
+      // save the successfully configured settings as the current state
+      sramSettings.Store();
+
+      SyncGpioStates(sramSettings);
+    } // end of using
   }
 
   private void SetSramSettings<TArg>(
@@ -399,39 +415,42 @@ partial class Mcp2221AGpioDriver {
     CancellationToken cancellationToken
   )
   {
-    modifySramSettings(sramSettings, argSramSettings);
+    using (Transceiver.EnterCommandTransaction(cancellationToken)) {
+      modifySramSettings(sramSettings, argSramSettings);
 
-    if (!sramSettings.IsDirty)
-      return; // nothing to configure, do nothing and just return
+      if (!sramSettings.IsDirty)
+        return; // nothing to configure, do nothing and just return
 
-    cancellationToken.ThrowIfCancellationRequested();
-
-    try {
-      // attempt to set new SRAM settings
-      _ = Transceiver.Command(
-        arg: sramSettings,
-        cancellationToken: cancellationToken,
-        constructCommand: SetSramSettingsCommand.ConstructCommand,
-        parseResponse: SetSramSettingsCommand.ParseResponse
-      );
-
-      if (sramSettings.ShouldReenableVrm()) {
+      try {
+        // attempt to set new SRAM settings
         _ = Transceiver.Command(
           arg: sramSettings,
           cancellationToken: cancellationToken,
           constructCommand: SetSramSettingsCommand.ConstructCommand,
           parseResponse: SetSramSettingsCommand.ParseResponse
         );
+
+        if (sramSettings.ShouldReenableVrm()) {
+          _ = Transceiver.Command(
+            arg: sramSettings,
+            cancellationToken: cancellationToken,
+            constructCommand: SetSramSettingsCommand.ConstructCommand,
+            parseResponse: SetSramSettingsCommand.ParseResponse
+          );
+        }
       }
-    }
-    catch {
-      sramSettings.Restore();
-      throw;
-    }
+      catch {
+        sramSettings.Restore();
+        throw;
+      }
 
-    // save the successfully configured settings as the current state
-    sramSettings.Store();
+      if (sramSettings.ShouldResetInterruptDetectionFlag())
+        LastFetchedInterruptDetectionFlag = default;
 
-    SyncGpioStates(sramSettings);
+      // save the successfully configured settings as the current state
+      sramSettings.Store();
+
+      SyncGpioStates(sramSettings);
+    } // end of using
   }
 }

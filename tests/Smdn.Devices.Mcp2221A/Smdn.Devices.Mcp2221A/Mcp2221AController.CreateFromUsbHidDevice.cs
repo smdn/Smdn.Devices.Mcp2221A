@@ -424,7 +424,7 @@ public partial class Mcp2221AControllerTests {
         cancellationToken: cts.Token
       ).ConfigureAwait(false),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)

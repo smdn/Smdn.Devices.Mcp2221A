@@ -10,6 +10,8 @@ using Microsoft.Extensions.Logging.Testing;
 
 using NUnit.Framework;
 
+using Smdn.IO.UsbHid;
+
 namespace Smdn.Devices.Mcp2221A;
 
 #pragma warning disable IDE0040
@@ -115,7 +117,7 @@ partial class Mcp2221AControllerTests {
     Assert.That(
       async () => await resetAsyncFunc(mcp2221A, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -133,5 +135,57 @@ partial class Mcp2221AControllerTests {
     Assert.That(() => _ = mcp2221A.GpioController, Throws.Nothing);
 
     Assert.That(() => mcp2221A.Dispose(), Throws.Nothing);
+  }
+
+  [Test]
+  public void ResetAsync_ExceptionWhileSendingCommand()
+    => ResetSyncOrAsync_ExceptionWhileSendingCommand(
+      resetAsyncFunc: static async mcp2221A => await mcp2221A.ResetAsync().ConfigureAwait(false)
+    );
+
+  [Test]
+  public void Reset_ExceptionWhileSendingCommand()
+    => ResetSyncOrAsync_ExceptionWhileSendingCommand(
+      resetAsyncFunc: static mcp2221A => {
+        mcp2221A.Reset();
+        return default;
+      }
+    );
+
+  private void ResetSyncOrAsync_ExceptionWhileSendingCommand(
+    Func<Mcp2221AController, ValueTask> resetAsyncFunc
+  )
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(),
+      shouldDisposeUsbHidDevice: true
+    );
+
+    var endPoint = (mcp2221A.HidDevice as PseudoUsbHidDevice)!.EndPoint;
+
+    endPoint.OnWritingAction = () => throw new NotSupportedException();
+
+    Assert.That(
+      async () => await resetAsyncFunc(mcp2221A),
+      Throws.TypeOf<Mcp2221ACommandException>().And.InnerException.TypeOf<NotSupportedException>()
+    );
+
+    Assert.That(() => _ = mcp2221A.HidDevice, Throws.Nothing, "The instance should remains available.");
+    Assert.That(() => _ = mcp2221A.GpPins, Throws.Nothing, "The instance should remains available.");
+    Assert.That(() => _ = mcp2221A.I2cBus, Throws.Nothing, "The instance should remains available.");
+    Assert.That(() => _ = mcp2221A.GpioController, Throws.Nothing, "The instance should remains available.");
+
+    endPoint.OnWritingAction = null;
+
+    Assert.That(
+      async () => await resetAsyncFunc(mcp2221A),
+      Throws.Nothing,
+      "The instance should remains available. The reset should be successful here."
+    );
+
+    Assert.That(() => _ = mcp2221A.HidDevice, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = mcp2221A.GpPins, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = mcp2221A.I2cBus, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = mcp2221A.GpioController, Throws.TypeOf<ObjectDisposedException>());
   }
 }

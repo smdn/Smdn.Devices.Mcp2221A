@@ -51,7 +51,7 @@ partial class Mcp2221AGpioDriver {
       ? VoltageReferenceSource.Vdd
       : (VoltageReferenceSource)voltageReferenceBits;
 
-  private static class GetAdcChannelValuesCommand {
+  private static class FetchGpPinInputsCommand {
 #pragma warning disable SA1313
     public static void ConstructCommand(
       Span<byte> comm,
@@ -64,7 +64,9 @@ partial class Mcp2221AGpioDriver {
     }
 
 #pragma warning disable SA1313
-    public static AdcAllChannelSample ParseResponse(
+    public static
+    (bool InterruptDetectionFlag, AdcAllChannelSample AdcSample)
+    ParseResponse(
       ReadOnlySpan<byte> resp,
       None _
     )
@@ -74,11 +76,15 @@ partial class Mcp2221AGpioDriver {
       if (resp[1] != 0x00) // Command completed successfully
         throw new Mcp2221ACommandException($"unexpected command response ({resp[1]:X2})");
 
-      // [50-55] ADC Data (16-bit) values; 3x(16-bit) little-endian ADC channel values
-      return new(
-        adc1: BinaryPrimitives.ReadUInt16LittleEndian(resp.Slice(50, 2)),
-        adc2: BinaryPrimitives.ReadUInt16LittleEndian(resp.Slice(52, 2)),
-        adc3: BinaryPrimitives.ReadUInt16LittleEndian(resp.Slice(54, 2))
+      return (
+        // [24] Interrupt edge detector state
+        InterruptDetectionFlag: resp[24] != 0,
+        // [50-55] ADC Data (16-bit) values; 3x(16-bit) little-endian ADC channel values
+        AdcSample: new(
+          adc1: BinaryPrimitives.ReadUInt16LittleEndian(resp.Slice(50, 2)),
+          adc2: BinaryPrimitives.ReadUInt16LittleEndian(resp.Slice(52, 2)),
+          adc3: BinaryPrimitives.ReadUInt16LittleEndian(resp.Slice(54, 2))
+        )
       );
     }
   }
@@ -160,16 +166,48 @@ partial class Mcp2221AGpioDriver {
       ),
     };
 
+  private void FetchGpPinInputs(
+    CancellationToken cancellationToken
+  )
+  {
+    using (Transceiver.EnterCommandTransaction(cancellationToken)) {
+      (
+        LastFetchedInterruptDetectionFlag,
+        lastFetchedAdcSample
+      )
+        = Transceiver.Command(
+          cancellationToken: cancellationToken,
+          constructCommand: FetchGpPinInputsCommand.ConstructCommand,
+          parseResponse: FetchGpPinInputsCommand.ParseResponse
+        );
+    }
+  }
+
+  private async ValueTask FetchGpPinInputsAsync(
+    CancellationToken cancellationToken
+  )
+  {
+    using (await Transceiver.EnterCommandTransactionAsync(cancellationToken).ConfigureAwait(false)) {
+      (
+        LastFetchedInterruptDetectionFlag,
+        lastFetchedAdcSample
+      )
+        = await Transceiver.CommandAsync(
+          cancellationToken: cancellationToken,
+          constructCommand: FetchGpPinInputsCommand.ConstructCommand,
+          parseResponse: FetchGpPinInputsCommand.ParseResponse
+        ).ConfigureAwait(false);
+    }
+  }
+
   /// <inheritdoc/>
   public AdcAllChannelSample FetchAdcRawValues(
     CancellationToken cancellationToken
   )
   {
-    return lastFetchedAdcSample = Transceiver.Command(
-      cancellationToken: cancellationToken,
-      constructCommand: GetAdcChannelValuesCommand.ConstructCommand,
-      parseResponse: GetAdcChannelValuesCommand.ParseResponse
-    );
+    FetchGpPinInputs(cancellationToken);
+
+    return lastFetchedAdcSample;
   }
 
   /// <inheritdoc/>
@@ -177,10 +215,8 @@ partial class Mcp2221AGpioDriver {
     CancellationToken cancellationToken
   )
   {
-    return lastFetchedAdcSample = await Transceiver.CommandAsync(
-      cancellationToken: cancellationToken,
-      constructCommand: GetAdcChannelValuesCommand.ConstructCommand,
-      parseResponse: GetAdcChannelValuesCommand.ParseResponse
-    ).ConfigureAwait(false);
+    await FetchGpPinInputsAsync(cancellationToken).ConfigureAwait(false);
+
+    return lastFetchedAdcSample;
   }
 }

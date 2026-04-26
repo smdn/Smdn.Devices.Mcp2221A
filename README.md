@@ -32,7 +32,7 @@ See [Smdn.Devices.Mcp2221A examples](examples/Smdn.Devices.Mcp2221A/).
   - [x] ADC inputs
   - [x] DAC outputs
   - [x] Clock output
-  - [ ] Interrupt detection
+  - [x] Interrupt detection
   - [x] Other functionalities
     - [x] Configure GP0 as SSPND
     - [x] Configure GP0 as LED_URx
@@ -57,7 +57,7 @@ See [Smdn.Devices.Mcp2221A examples](examples/Smdn.Devices.Mcp2221A/).
       - [x] Clock output
       - [x] DAC outputs
       - [x] ADC inputs
-      - [ ] Interrupt detection
+      - [x] Interrupt detection
   - [ ] Flash read/write
     - [ ] GP Settings
     - [ ] Chip Settings
@@ -80,6 +80,7 @@ Haven't tested with the actual MCP2221, but it is expected that works as same as
     - Supports `Span<byte>`/`Memory<byte>`
     - Supports `async`, `CancellationToken`
     - Supports logging with `ILogger`, [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging/) ([example](examples/Smdn.Devices.Mcp2221A/DependencyInjection_Logging/))
+  - All command requests to the MCP2221/MCP2221A (sending and receiving USB HID reports) are internally thread-safe by utilizing synchronous primitives.
   - Can handle multiple MCP2221/MCP2221A by finding target with `Predicate<IUsbHidDevice>` and/or `Predicate<IMcp2221AInfo>`. ([example](examples/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/))
   - Can handle MCP2221/MCP2221A with custom VID/PID values written in the chip settings. ([example](examples/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/))
   - I2C bus scanning ([example](examples/Smdn.Devices.Mcp2221A/I2C_ScanBus/))

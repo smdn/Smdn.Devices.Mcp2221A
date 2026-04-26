@@ -44,11 +44,18 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
       throw new Mcp2221ACommandException($"The command echo in the received response does not match; command code '{commandCode:X2}' was expected, but the actual command echo was {commandCodeEcho:X2}.");
   }
 
+  internal readonly struct CommandTransaction(SemaphoreSlim semaphore) : IDisposable {
+    public void Dispose()
+      => semaphore.Release();
+  }
+
   /*
    * instance members
    */
   private IUsbHidEndPoint? endPoint;
   public IUsbHidEndPoint EndPoint => endPoint ?? throw new ObjectDisposedException(GetType().FullName);
+
+  private SemaphoreSlim? transactionSemaphore = new(1, 1);
 
   private readonly ILogger? logger;
 
@@ -65,10 +72,11 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
 
 #if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
   [MemberNotNull(nameof(endPoint))]
+  [MemberNotNull(nameof(transactionSemaphore))]
 #endif
   internal void ThrowIfDisposed()
   {
-    if (endPoint is null)
+    if (endPoint is null || transactionSemaphore is null)
       throw new ObjectDisposedException(GetType().FullName);
   }
 
@@ -76,6 +84,9 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
   {
     endPoint?.Dispose();
     endPoint = null;
+
+    transactionSemaphore?.Dispose();
+    transactionSemaphore = null;
   }
 
   public async ValueTask DisposeAsync()
@@ -84,6 +95,9 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
       await endPoint.DisposeAsync().ConfigureAwait(false);
       endPoint = null;
     }
+
+    transactionSemaphore?.Dispose(); // SemaphoreSlim does not implement IAsyncDisposable
+    transactionSemaphore = null;
   }
 
   private static string ConvertByteSequenceToString(
@@ -108,6 +122,37 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
     finally {
       ArrayPool<byte>.Shared.Return(buffer);
     }
+  }
+
+  public async ValueTask<CommandTransaction> EnterCommandTransactionAsync(
+    CancellationToken cancellationToken
+  )
+  {
+    ThrowIfDisposed();
+
+    await transactionSemaphore
+#if !SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
+      !
+#endif
+      .WaitAsync(cancellationToken)
+      .ConfigureAwait(false);
+
+    return new(transactionSemaphore);
+  }
+
+  public CommandTransaction EnterCommandTransaction(
+    CancellationToken cancellationToken
+  )
+  {
+    ThrowIfDisposed();
+
+    transactionSemaphore
+#if !SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
+      !
+#endif
+      .Wait(cancellationToken);
+
+    return new(transactionSemaphore);
   }
 
   public async ValueTask<TResponse> CommandAsync<TArg, TResponse>(
@@ -327,25 +372,67 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
       => throw new Mcp2221ACommandException("No response to the reset command is defined.");
   }
 
-  public ValueTask ResetChipAsync(
+  public async ValueTask ResetChipAsync(
     CancellationToken cancellationToken = default
   )
-    => IMcp2221ATransceiverExtensions.CommandAsync(
-      transceiver: this,
-      arg: this,
-      cancellationToken: cancellationToken,
-      constructCommand: ResetChipCommand.ConstructCommand,
-      parseResponse: ResetChipCommand.ParseResponse
-    ).AsValueTask();
+  {
+    // If the execution of the RESET CHIP command completes successfully,
+    // this instance calls the Dispose method on its own, and since the
+    // synchronization primitive is also disposed of at that point,
+    // attempting to utilize automatic disposal via the `using` statement
+    // here will cause an ObjectDisposedException.
+    var transaction = await EnterCommandTransactionAsync(cancellationToken).ConfigureAwait(false);
+
+    try {
+      await IMcp2221ATransceiverExtensions.CommandAsync(
+        transceiver: this,
+        arg: this,
+        cancellationToken: cancellationToken,
+        constructCommand: ResetChipCommand.ConstructCommand,
+        parseResponse: ResetChipCommand.ParseResponse
+      ).ConfigureAwait(false);
+    }
+    catch (ObjectDisposedException) {
+      throw;
+    }
+    catch {
+      // If the command execution fails due to an exception, the instance
+      // remains available, so the synchronization primitive must be
+      // released in that case.
+      transaction.Dispose();
+      throw;
+    }
+  }
 
   public void ResetChip(
     CancellationToken cancellationToken = default
   )
-    => IMcp2221ATransceiverExtensions.Command(
-      transceiver: this,
-      arg: this,
-      cancellationToken: cancellationToken,
-      constructCommand: ResetChipCommand.ConstructCommand,
-      parseResponse: ResetChipCommand.ParseResponse
-    );
+  {
+    // If the execution of the RESET CHIP command completes successfully,
+    // this instance calls the Dispose method on its own, and since the
+    // synchronization primitive is also disposed of at that point,
+    // attempting to utilize automatic disposal via the `using` statement
+    // here will cause an ObjectDisposedException.
+    var transaction = EnterCommandTransaction(cancellationToken);
+
+    try {
+      IMcp2221ATransceiverExtensions.Command(
+        transceiver: this,
+        arg: this,
+        cancellationToken: cancellationToken,
+        constructCommand: ResetChipCommand.ConstructCommand,
+        parseResponse: ResetChipCommand.ParseResponse
+      );
+    }
+    catch (ObjectDisposedException) {
+      throw;
+    }
+    catch {
+      // If the command execution fails due to an exception, the instance
+      // remains available, so the synchronization primitive must be
+      // released in that case.
+      transaction.Dispose();
+      throw;
+    }
+  }
 }

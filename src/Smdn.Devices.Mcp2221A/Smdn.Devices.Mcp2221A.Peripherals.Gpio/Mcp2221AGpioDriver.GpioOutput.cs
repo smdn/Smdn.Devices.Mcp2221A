@@ -98,25 +98,27 @@ partial class Mcp2221AGpioDriver {
     try {
       var newGpioOutputBytes = newGpioOutputArray.AsMemory(0, LengthOfGpioOutputValues);
 
-      ConstructNewGpioOutputBytes(
-        destination: newGpioOutputBytes.Span,
-        values: pinValuePairs.Span,
-        modes: pinModePairs.Span,
-        shouldThrowIfUsedByGpioController: shouldThrowIfUsedByGpioController
-      );
+      using (await Transceiver.EnterCommandTransactionAsync(cancellationToken).ConfigureAwait(false)) {
+        ConstructNewGpioOutputBytes(
+          destination: newGpioOutputBytes.Span,
+          values: pinValuePairs.Span,
+          modes: pinModePairs.Span,
+          shouldThrowIfUsedByGpioController: shouldThrowIfUsedByGpioController
+        );
 
-      _ = await Transceiver.CommandAsync(
-        arg: newGpioOutputBytes,
-        cancellationToken: cancellationToken,
-        constructCommand: SetGpioOutputValuesCommand.ConstructCommand,
-        parseResponse: SetGpioOutputValuesCommand.ParseResponse
-      ).ConfigureAwait(false);
+        _ = await Transceiver.CommandAsync(
+          arg: newGpioOutputBytes,
+          cancellationToken: cancellationToken,
+          constructCommand: SetGpioOutputValuesCommand.ConstructCommand,
+          parseResponse: SetGpioOutputValuesCommand.ParseResponse
+        ).ConfigureAwait(false);
 
-      SyncAndVerifyGpioStates(
-        gpioOutputResponseBytes: newGpioOutputBytes.Span,
-        values: pinValuePairs.Span,
-        modes: pinModePairs.Span
-      );
+        SyncAndVerifyGpioStates(
+          gpioOutputResponseBytes: newGpioOutputBytes.Span,
+          values: pinValuePairs.Span,
+          modes: pinModePairs.Span
+        );
+      }
     }
     finally {
       ArrayPool<byte>.Shared.Return(newGpioOutputArray);
@@ -148,25 +150,27 @@ partial class Mcp2221AGpioDriver {
     try {
       var newGpioOutputBytes = newGpioOutputArray.AsMemory(0, LengthOfGpioOutputValues);
 
-      ConstructNewGpioOutputBytes(
-        destination: newGpioOutputBytes.Span,
-        values: pinValuePairs,
-        modes: pinModePairs,
-        shouldThrowIfUsedByGpioController: shouldThrowIfUsedByGpioController
-      );
+      using (Transceiver.EnterCommandTransaction(cancellationToken)) {
+        ConstructNewGpioOutputBytes(
+          destination: newGpioOutputBytes.Span,
+          values: pinValuePairs,
+          modes: pinModePairs,
+          shouldThrowIfUsedByGpioController: shouldThrowIfUsedByGpioController
+        );
 
-      _ = Transceiver.Command(
-        arg: newGpioOutputBytes,
-        cancellationToken: cancellationToken,
-        constructCommand: SetGpioOutputValuesCommand.ConstructCommand,
-        parseResponse: SetGpioOutputValuesCommand.ParseResponse
-      );
+        _ = Transceiver.Command(
+          arg: newGpioOutputBytes,
+          cancellationToken: cancellationToken,
+          constructCommand: SetGpioOutputValuesCommand.ConstructCommand,
+          parseResponse: SetGpioOutputValuesCommand.ParseResponse
+        );
 
-      SyncAndVerifyGpioStates(
-        gpioOutputResponseBytes: newGpioOutputBytes.Span,
-        values: pinValuePairs,
-        modes: pinModePairs
-      );
+        SyncAndVerifyGpioStates(
+          gpioOutputResponseBytes: newGpioOutputBytes.Span,
+          values: pinValuePairs,
+          modes: pinModePairs
+        );
+      }
     }
     finally {
       ArrayPool<byte>.Shared.Return(newGpioOutputArray);
@@ -254,12 +258,14 @@ partial class Mcp2221AGpioDriver {
     CancellationToken cancellationToken = default
   )
   {
-    _ = await Transceiver.CommandAsync(
-      arg: gpioStateBytes,
-      cancellationToken: cancellationToken,
-      constructCommand: GetGpioValuesCommand.ConstructCommand,
-      parseResponse: GetGpioValuesCommand.ParseResponse
-    ).ConfigureAwait(false);
+    using (await Transceiver.EnterCommandTransactionAsync(cancellationToken).ConfigureAwait(false)) {
+      _ = await Transceiver.CommandAsync(
+        arg: gpioStateBytes,
+        cancellationToken: cancellationToken,
+        constructCommand: GetGpioValuesCommand.ConstructCommand,
+        parseResponse: GetGpioValuesCommand.ParseResponse
+      ).ConfigureAwait(false);
+    }
 
     if (!pinValuePairs.IsEmpty)
       GetLastUpdatedValuesOrThrow(pinValuePairs.Span);
@@ -275,12 +281,14 @@ partial class Mcp2221AGpioDriver {
     CancellationToken cancellationToken = default
   )
   {
-    _ = Transceiver.Command(
-      arg: gpioStateBytes,
-      cancellationToken: cancellationToken,
-      constructCommand: GetGpioValuesCommand.ConstructCommand,
-      parseResponse: GetGpioValuesCommand.ParseResponse
-    );
+    using (Transceiver.EnterCommandTransaction(cancellationToken)) {
+      _ = Transceiver.Command(
+        arg: gpioStateBytes,
+        cancellationToken: cancellationToken,
+        constructCommand: GetGpioValuesCommand.ConstructCommand,
+        parseResponse: GetGpioValuesCommand.ParseResponse
+      );
+    }
 
     if (!pinValuePairs.IsEmpty)
       GetLastUpdatedValuesOrThrow(pinValuePairs);

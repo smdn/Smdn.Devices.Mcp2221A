@@ -114,6 +114,12 @@ internal sealed class SramSettings {
     unsentSettings[OffsetOfAdcVoltageReference] = adcVoltageReferenceByte;
   }
 
+  public void StoreInterruptDetectionModuleSetupByte(byte interruptDetectionModuleSetup)
+  {
+    currentSettings[OffsetOfInterruptDetectionModuleSetup] = interruptDetectionModuleSetup;
+    unsentSettings[OffsetOfInterruptDetectionModuleSetup] = interruptDetectionModuleSetup;
+  }
+
   public void StoreGpSettingsBytes(ReadOnlySpan<byte> gpSettingBytes)
   {
     gpSettingBytes.CopyTo(currentSettings.AsSpan(OffsetOfGpSettings, SizeOfGpSettings));
@@ -131,6 +137,9 @@ internal sealed class SramSettings {
 
   public byte ReadAdcVoltageReferenceByte()
     => currentSettings[OffsetOfAdcVoltageReference];
+
+  public byte ReadInterruptDetectionModuleSetupByte()
+    => currentSettings[OffsetOfInterruptDetectionModuleSetup];
 
   public byte ReadGpSettingsByte(int gp)
     => currentSettings[OffsetOfGpSettings + gp];
@@ -282,6 +291,55 @@ internal sealed class SramSettings {
     }
   }
 
+  public SramSettings ModifyInterruptDetectionModuleSetup(
+    InterruptOnChangeTrigger? detectionTrigger,
+    bool clearDetectionFlag
+  )
+  {
+    if (!detectionTrigger.HasValue && !clearDetectionFlag)
+      return this;
+
+    ref var settings = ref unsentSettings[OffsetOfInterruptDetectionModuleSetup];
+
+    // [4] Setup the interrupt detection mechanism and clear the detection flag
+    // Bit 7: Enable the modification of the interrupt detection conditions
+    settings |= 0b_1_00_0_0_0_0_0;
+
+    // Bit 6-5: Don't care
+
+    if (detectionTrigger is { } trigger) {
+      if (trigger is < InterruptOnChangeTrigger.None or > InterruptOnChangeTrigger.Both) {
+        throw new ArgumentException(
+          message: $"The interrupt detection trigger cannot set to {trigger}. The value must be one of the values defined in {nameof(InterruptOnChangeTrigger)}."
+        );
+      }
+
+      settings &= 0b_1_11_0_0_0_0_1;
+
+      // Bit 4: Enable the modification of the positive edge detection
+      // Bit 3: The new value for the positive edge detector
+      if (trigger.HasFlag(InterruptOnChangeTrigger.Rising))
+        settings |= 0b_0_00_1_1_0_0_0;
+      else
+        settings |= 0b_0_00_1_0_0_0_0;
+
+      // Bit 2: Enable the modification of the negative edge detection
+      // Bit 1: The new value for the negative edge detector
+      if (trigger.HasFlag(InterruptOnChangeTrigger.Falling))
+        settings |= 0b_0_00_0_0_1_1_0;
+      else
+        settings |= 0b_0_00_0_0_1_0_0;
+    }
+
+    // Bit 0: Clear the interrupt detection flag
+    if (clearDetectionFlag)
+      settings |= 0b_0_00_0_0_0_0_1;
+    else
+      settings &= 0b_1_11_1_1_1_1_0;
+
+    return this;
+  }
+
   public SramSettings ModifyGpSettings(
     int gp,
     GpDesignation designation,
@@ -401,5 +459,15 @@ internal sealed class SramSettings {
 
       return shouldVrmBeEnabled;
     }
+  }
+
+  public bool ShouldResetInterruptDetectionFlag()
+  {
+    // [4] Setup the interrupt detection mechanism and clear the detection flag
+    // Bit 7: Enable the modification of the interrupt detection conditions
+    // Bit 0: Clear the interrupt detection flag
+    const byte ClearInterruptDetectionFlag = 0b_1_00_0_0_0_0_1;
+
+    return (unsentSettings[OffsetOfInterruptDetectionModuleSetup] & ClearInterruptDetectionFlag) == ClearInterruptDetectionFlag;
   }
 }

@@ -94,7 +94,7 @@ public class IGpControllerGroupExtensionsTests {
         cts.Token
       ),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -671,7 +671,7 @@ public class IGpControllerGroupExtensionsTests {
         cts.Token
       ),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -1327,7 +1327,7 @@ public class IGpControllerGroupExtensionsTests {
         cts.Token
       ),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -1595,7 +1595,7 @@ public class IGpControllerGroupExtensionsTests {
         cts.Token
       ),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -1804,7 +1804,7 @@ public class IGpControllerGroupExtensionsTests {
     Assert.That(
       async () => await readAsyncFunc(mcp2221A.GpPins, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -2194,7 +2194,7 @@ public class IGpControllerGroupExtensionsTests {
     Assert.That(
       async () => await readAsyncFunc(mcp2221A.GpPins, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -2389,7 +2389,7 @@ public class IGpControllerGroupExtensionsTests {
     Assert.That(
       async () => await writeAsyncFunc(mcp2221A.GpPins, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -2738,7 +2738,7 @@ public class IGpControllerGroupExtensionsTests {
     Assert.That(
       async () => await writeAsyncFunc(mcp2221A.GpPins, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -2992,7 +2992,7 @@ public class IGpControllerGroupExtensionsTests {
     Assert.That(
       async () => await readAnalogRawAsyncFunc(mcp2221A.GpPins, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -3181,7 +3181,7 @@ public class IGpControllerGroupExtensionsTests {
     Assert.That(
       async () => await readAnalogVoltageAsyncFunc(mcp2221A.GpPins, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -3380,7 +3380,7 @@ public class IGpControllerGroupExtensionsTests {
     Assert.That(
       async () => await readAnalogVoltageAsyncFunc(mcp2221A.GpPins, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -3579,7 +3579,7 @@ public class IGpControllerGroupExtensionsTests {
     Assert.That(
       async () => await writeAnalogVoltageAsyncFunc(mcp2221A.GpPins, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
@@ -3829,7 +3829,7 @@ public class IGpControllerGroupExtensionsTests {
     Assert.That(
       async () => await writeAnalogVoltageAsyncFunc(mcp2221A.GpPins, cts.Token),
       Throws
-        .TypeOf<OperationCanceledException>()
+        .InstanceOf<OperationCanceledException>()
         .With
         .Property(nameof(OperationCanceledException.CancellationToken))
         .EqualTo(cts.Token)
