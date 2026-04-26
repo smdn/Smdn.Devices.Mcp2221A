@@ -60,7 +60,7 @@ partial class Mcp2221AGpioDriver {
     )
     {
       if (resp[1] != 0x00) // Command completed successfully
-        throw new Mcp2221ACommandException($"unexpected command response ({resp[1]:X2})");
+        Mcp2221ACommandException.ThrowNoSuccessfulResponse("SET GPIO OUTPUT VALUES", resp[1]);
 
       // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
       // [2 + 4n]: Alter GP<n> output (enable/disable) status
@@ -243,7 +243,7 @@ partial class Mcp2221AGpioDriver {
     )
     {
       if (resp[1] != 0x00) // Command completed successfully
-        throw new Mcp2221ACommandException($"unexpected command response ({resp[1]:X2})");
+        Mcp2221ACommandException.ThrowNoSuccessfulResponse("GET GPIO VALUES", resp[1]);
 
       // 2 + 2n: GP<n> pin value
       // 3 + 2n: GP<n> direction value

@@ -32,7 +32,7 @@ partial class Mcp2221AI2cBus {
     )
     {
       if (resp[1] != 0x00) // Command completed successfully
-        throw new Mcp2221ACommandException($"unexpected response (0x{resp[1]:X2})", args.ExceptionCauseOfCancellation);
+        Mcp2221ACommandException.ThrowNoSuccessfulResponse("STATUS/SET PARAMETERS", resp[1], args.ExceptionCauseOfCancellation);
 
       var state = I2cEngineState.Parse(resp);
       var isBusStatusDefined =

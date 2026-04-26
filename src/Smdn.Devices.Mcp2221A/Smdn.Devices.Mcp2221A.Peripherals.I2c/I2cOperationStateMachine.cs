@@ -17,12 +17,14 @@ internal class I2cOperationStateMachine {
 #if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
   [DoesNotReturn]
 #endif
-  private static OperationState ThrowUnexpectedResponseException(I2cAddress? address, byte response)
+  private static OperationState ThrowUnexpectedResponseException(string command, I2cAddress? address, byte response)
   {
     if (address.HasValue)
-      throw new I2cCommandException(address.Value, $"unexpected response (0x{response:X2})");
+      throw new I2cCommandException(address.Value, $"The '{command}' command returned no successful response. (Code: 0x{response:X2})");
     else
-      throw new Mcp2221ACommandException($"unexpected response (0x{response:X2})");
+      Mcp2221ACommandException.ThrowNoSuccessfulResponse(command, response);
+
+    return default;
   }
 
 #if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
@@ -228,10 +230,8 @@ internal class I2cOperationStateMachine {
   )
   {
     // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
-    _ = resp[1] switch {
-      0x00 => default, // Command completed successfully
-      _ => ThrowUnexpectedResponseException(address, resp[1]),
-    };
+    if (resp[1] != 0x00) // Command completed successfully
+      ThrowUnexpectedResponseException("STATUS/SET PARAMETERS", address, resp[1]);
 
     lastEngineState = I2cEngineState.Parse(resp);
 
@@ -282,7 +282,7 @@ internal class I2cOperationStateMachine {
     operationState = resp[1] switch {
       0x00 => OperationState.AdvanceToNextStep, // Command completed successfully
       0x01 => OperationState.Continue, // Command not completed (I2C engine is busy)
-      _ => ThrowUnexpectedResponseException(address, resp[1]),
+      _ => ThrowUnexpectedResponseException("I2C WRITE DATA", address, resp[1]),
     };
 
     return operationState == OperationState.AdvanceToNextStep;
@@ -311,7 +311,7 @@ internal class I2cOperationStateMachine {
     operationState = resp[1] switch {
       0x00 => OperationState.AdvanceToNextStep, // Command completed successfully
       0x01 => OperationState.Continue, // Command not completed (I2C engine is busy)
-      _ => ThrowUnexpectedResponseException(address, resp[1]),
+      _ => ThrowUnexpectedResponseException("I2C READ DATA", address, resp[1]),
     };
 
     return operationState == OperationState.AdvanceToNextStep;
@@ -340,7 +340,7 @@ internal class I2cOperationStateMachine {
       0x00 => OperationState.AdvanceToNextStep, // Command completed successfully
       0x01 => OperationState.Continue, // Command not completed (I2C engine is busy)
       0x41 => throw new I2cReadException(address, "can not read from I2C slave"), // Error reading the I2C slave data
-      _ => ThrowUnexpectedResponseException(address, resp[1]),
+      _ => ThrowUnexpectedResponseException("I2C READ DATA - GET I2C DATA", address, resp[1]),
     };
 
     if (operationState == OperationState.AdvanceToNextStep) {

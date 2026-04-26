@@ -3,6 +3,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+#if SYSTEM_DIAGNOSTICS_UNREACHABLEEXCEPTION
+using System.Diagnostics;
+#endif
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
@@ -35,7 +38,14 @@ internal sealed partial class Mcp2221AGpioDriver : IGpControllerGroup {
       1 => Gp1,
       2 => Gp2,
       3 => Gp3,
-      _ => throw new NotImplementedException(), // never happen
+
+      // never happen
+      _ => throw new
+#if SYSTEM_DIAGNOSTICS_UNREACHABLEEXCEPTION
+        UnreachableException(),
+#else
+        NotImplementedException(),
+#endif
     };
 
   public int Count => NumberOfGpPins;

@@ -92,7 +92,7 @@ partial class Mcp2221AGpioDriver {
     {
       // [MCP2221A] 3.1.1 STATUS/SET PARAMETERS
       if (resp[1] != 0x00) // Command completed successfully
-        throw new Mcp2221ACommandException($"unexpected command response ({resp[1]:X2})");
+        Mcp2221ACommandException.ThrowNoSuccessfulResponse("STATUS/SET PARAMETERS", resp[1]);
 
       return (
         // [24] Interrupt edge detector state

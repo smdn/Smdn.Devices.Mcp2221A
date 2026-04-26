@@ -41,7 +41,7 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
     var commandCodeEcho = response[0];
 
     if (commandCode != commandCodeEcho)
-      throw new Mcp2221ACommandException($"The command echo in the received response does not match; command code '{commandCode:X2}' was expected, but the actual command echo was {commandCodeEcho:X2}.");
+      throw new Mcp2221ACommandException($"The command echo in the received response does not match; command code '0x{commandCode:X2}' was expected, but the actual command echo was 0x{commandCodeEcho:X2}.");
   }
 
   internal readonly struct CommandTransaction(SemaphoreSlim semaphore) : IDisposable {
@@ -209,7 +209,7 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
         throw;
       }
       catch (Exception ex) {
-        throw new Mcp2221ACommandException("writing command report failed", ex);
+        throw new Mcp2221ACommandException("Failed to send the USB HID command report to MCP2221/MCP2221A.", ex);
       }
 
       if (HasResetChipCommandIssued) {
@@ -232,7 +232,7 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
         throw;
       }
       catch (Exception ex) {
-        throw new Mcp2221ACommandException("reading response report failed", ex);
+        throw new Mcp2221ACommandException("Failed to receive a USB HID response report from MCP2221/MCP2221A.", ex);
       }
 
       // recreate and reassign Span/ReadOnlySpan since they cannot cross await boundaries
@@ -309,7 +309,7 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
       throw;
     }
     catch (Exception ex) {
-      throw new Mcp2221ACommandException("writing command report failed", ex);
+      throw new Mcp2221ACommandException("Failed to send the USB HID command report to MCP2221/MCP2221A.", ex);
     }
 
     if (HasResetChipCommandIssued) {
@@ -332,7 +332,7 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
       throw;
     }
     catch (Exception ex) {
-      throw new Mcp2221ACommandException("reading response report failed", ex);
+      throw new Mcp2221ACommandException("Failed to receive a USB HID response report from MCP2221/MCP2221A.", ex);
     }
 
     logger?.LogTrace(

@@ -47,7 +47,7 @@ public partial class Mcp2221AController {
         break;
 
       default:
-        throw new Mcp2221ANotSupportedException($"hardware revision '{revision}' is not supported");
+        throw new Mcp2221ANotSupportedException($"The hardware revision '{revision}' is not supported.");
     }
   }
 
@@ -59,7 +59,7 @@ public partial class Mcp2221AController {
         break;
 
       default:
-        throw new Mcp2221ANotSupportedException($"firmware revision '{revision}' is not supported");
+        throw new Mcp2221ANotSupportedException($"The firmware revision '{revision}' is not supported.");
     }
   }
 }

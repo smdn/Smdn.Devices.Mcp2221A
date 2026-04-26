@@ -38,10 +38,8 @@ partial class Mcp2221AGpioDriver {
       SramSettings sramSettings
     )
     {
-      _ = resp[1] switch {
-        0x00 => true, // Command completed successfully
-        _ => throw new Mcp2221ACommandException($"unexpected command response ({resp[1]:X2})"),
-      };
+      if (resp[1] != 0x00) // Command completed successfully
+        Mcp2221ACommandException.ThrowNoSuccessfulResponse("GET SRAM SETTINGS", resp[1]);
 
       // TODO: update other SRAM settings
 
@@ -118,10 +116,8 @@ partial class Mcp2221AGpioDriver {
     )
 #pragma warning restore IDE0060, SA1313
     {
-      _ = resp[1] switch {
-        0x00 => true, // Command completed successfully
-        _ => throw new Mcp2221ACommandException($"unexpected command response ({resp[1]:X2})"),
-      };
+      if (resp[1] != 0x00) // Command completed successfully
+        Mcp2221ACommandException.ThrowNoSuccessfulResponse("SET SRAM SETTINGS", resp[1]);
 
       return default;
     }
