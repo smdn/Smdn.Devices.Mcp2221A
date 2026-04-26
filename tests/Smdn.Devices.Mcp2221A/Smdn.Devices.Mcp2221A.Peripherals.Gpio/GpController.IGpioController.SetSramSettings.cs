@@ -19,25 +19,28 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 #pragma warning disable IDE0040
 partial class GpControllerTests {
 #pragma warning restore IDE0040
-  [TestCase(PinMode.Input, true)]
-  [TestCase(PinMode.Input, false)]
-  [TestCase(PinMode.Output, true)]
-  [TestCase(PinMode.Output, false)]
-  public void ConfigureAsGpioAsync(PinMode mode, bool initialValue)
+  private static System.Collections.IEnumerable YieldTestCases_ConfigureAsGpioSyncOrAsync()
+  {
+    foreach (var mode in new PinMode?[] { PinMode.Output, PinMode.Input, null }) {
+      foreach (var initialValue in new PinValue?[] { PinValue.High, PinValue.Low, null }) {
+        yield return new object?[] { mode, initialValue };
+      }
+    }
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_ConfigureAsGpioSyncOrAsync))]
+  public void ConfigureAsGpioAsync(PinMode? mode, PinValue? initialValue)
     => ConfigureAsGpioSyncOrAsync(
       mode,
-      (PinValue)initialValue,
+      initialValue,
       static async (gp, m, val) => await gp.ConfigureAsGpioAsync(mode: m, initialValue: val).ConfigureAwait(false)
     );
 
-  [TestCase(PinMode.Input, true)]
-  [TestCase(PinMode.Input, false)]
-  [TestCase(PinMode.Output, true)]
-  [TestCase(PinMode.Output, false)]
-  public void ConfigureAsGpio(PinMode mode, bool initialValue)
+  [TestCaseSource(nameof(YieldTestCases_ConfigureAsGpioSyncOrAsync))]
+  public void ConfigureAsGpio(PinMode? mode, PinValue? initialValue)
     => ConfigureAsGpioSyncOrAsync(
       mode,
-      (PinValue)initialValue,
+      initialValue,
       static (gp, m, val) => {
         gp.ConfigureAsGpio(mode: m, initialValue: val);
         return default;
@@ -45,15 +48,15 @@ partial class GpControllerTests {
     );
 
   private void ConfigureAsGpioSyncOrAsync(
-    PinMode mode,
-    PinValue initialValue,
-    Func<GpController, PinMode, PinValue, ValueTask> configureAsGpioAsyncFunc
+    PinMode? mode,
+    PinValue? initialValue,
+    Func<GpController, PinMode?, PinValue?, ValueTask> configureAsGpioAsyncFunc
   )
   {
-    const byte InitialGp0Settings = 0b_000_1_0_010; // Alternate Function 0 (LED UART RX)
-    const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
+    const byte InitialGp0Settings = 0b_000_0_0_010; // Alternate Function 0 (LED UART RX)
+    const byte InitialGp1Settings = 0b_000_0_1_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
-    const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
+    const byte InitialGp3Settings = 0b_000_1_1_001; // Dedicated function operation (LED I2C)
     const byte InitialChipSettings3 = 0b_0_1_1_00_0_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 00(Off), ADCREF: 0(Vdd)
 
     using var mcp2221A = Mcp2221AController.Create(
@@ -70,6 +73,13 @@ partial class GpControllerTests {
     var currentGpSettings = new byte[4] { InitialGp0Settings, InitialGp1Settings, InitialGp2Settings, InitialGp3Settings };
 
     foreach (var gp in mcp2221A.GpPins) {
+      var initialOutputValue = ((currentGpSettings[gp.Index] & 0b_000_1_0_000) == 0)
+        ? PinValue.Low
+        : PinValue.High;
+      var initialDirection = ((currentGpSettings[gp.Index] & 0b_000_0_1_000) == 0)
+        ? PinMode.Output
+        : PinMode.Input;
+
       Mcp2221AControllerTests.AppendPseudoResponse(
         mcp2221A,
         // [MCP2221A] 3.1.13 SET SRAM SETTINGS
@@ -81,11 +91,11 @@ partial class GpControllerTests {
 
       expectedAssignments[gp.Index] = GpFunction.Gpio;
 
-      var expectedOutputValueBits = (bool)initialValue switch {
+      var expectedOutputValueBits = (bool)(initialValue ?? initialOutputValue) switch {
         true => 0b_000_1_0_000,
         false => 0b_000_0_0_000,
       };
-      var expectedDirectionBits = mode switch {
+      var expectedDirectionBits = (mode ?? initialDirection) switch {
         PinMode.Input => 0b_000_0_1_000,
         PinMode.Output => 0b_000_0_0_000,
         _ => throw new InvalidOperationException(),
@@ -115,8 +125,8 @@ partial class GpControllerTests {
       );
 
       Assert.That(gp.CurrentFunction, Is.EqualTo(GpFunction.Gpio));
-      Assert.That(gp.CurrentMode, Is.EqualTo(mode));
-      Assert.That(gp.LastUpdatedValue, Is.EqualTo(initialValue));
+      Assert.That(gp.CurrentMode, Is.EqualTo(mode ?? initialDirection));
+      Assert.That(gp.LastUpdatedValue, Is.EqualTo(initialValue ?? initialOutputValue));
 
       Assert.That(
         mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList(),
@@ -143,14 +153,14 @@ partial class GpControllerTests {
     const bool ShouldReenableAdcVrm = true;
     const bool ShouldNotReenableVrm = false;
 
-    foreach (var mode in new[] { PinMode.Output, PinMode.Input }) {
-      foreach (var initialValue in new[] { PinValue.High, PinValue.Low }) {
-        yield return new object[] { ChipSettings2_DacVrm1024, ChipSettings3_AdcVrm4096, mode, initialValue, ShouldReenableDacVrm, ShouldReenableAdcVrm };
-        yield return new object[] { ChipSettings2_DacVrm2048, ChipSettings3_AdcVrmOff, mode, initialValue, ShouldReenableDacVrm, ShouldReenableAdcVrm };
-        yield return new object[] { ChipSettings2_DacVrmOff, ChipSettings3_AdcVrm2048, mode, initialValue, ShouldReenableDacVrm, ShouldReenableAdcVrm };
-        yield return new object[] { ChipSettings2_DacVdd, ChipSettings3_AdcVrm1024, mode, initialValue, ShouldNotReenableVrm, ShouldReenableAdcVrm };
-        yield return new object[] { ChipSettings2_DacVrm4096, ChipSettings3_AdcVdd, mode, initialValue, ShouldReenableDacVrm, ShouldNotReenableVrm };
-        yield return new object[] { ChipSettings2_DacVdd, ChipSettings3_AdcVdd, mode, initialValue, ShouldNotReenableVrm, ShouldNotReenableVrm };
+    foreach (var mode in new PinMode?[] { PinMode.Output, PinMode.Input, null }) {
+      foreach (var initialValue in new PinValue?[] { PinValue.High, PinValue.Low, null }) {
+        yield return new object?[] { ChipSettings2_DacVrm1024, ChipSettings3_AdcVrm4096, mode, initialValue, ShouldReenableDacVrm, ShouldReenableAdcVrm };
+        yield return new object?[] { ChipSettings2_DacVrm2048, ChipSettings3_AdcVrmOff, mode, initialValue, ShouldReenableDacVrm, ShouldReenableAdcVrm };
+        yield return new object?[] { ChipSettings2_DacVrmOff, ChipSettings3_AdcVrm2048, mode, initialValue, ShouldReenableDacVrm, ShouldReenableAdcVrm };
+        yield return new object?[] { ChipSettings2_DacVdd, ChipSettings3_AdcVrm1024, mode, initialValue, ShouldNotReenableVrm, ShouldReenableAdcVrm };
+        yield return new object?[] { ChipSettings2_DacVrm4096, ChipSettings3_AdcVdd, mode, initialValue, ShouldReenableDacVrm, ShouldNotReenableVrm };
+        yield return new object?[] { ChipSettings2_DacVdd, ChipSettings3_AdcVdd, mode, initialValue, ShouldNotReenableVrm, ShouldNotReenableVrm };
       }
     }
   }
@@ -159,8 +169,8 @@ partial class GpControllerTests {
   public void ConfigureAsGpioAsync_VmrMustBeReenabled(
     byte chipSettings2,
     byte chipSettings3,
-    PinMode mode,
-    PinValue initialValue,
+    PinMode? mode,
+    PinValue? initialValue,
     bool shouldReenableDacVrm,
     bool shouldReenableAdcVrm
   )
@@ -178,8 +188,8 @@ partial class GpControllerTests {
   public void ConfigureAsGpio_VmrMustBeReenabled(
     byte chipSettings2,
     byte chipSettings3,
-    PinMode mode,
-    PinValue initialValue,
+    PinMode? mode,
+    PinValue? initialValue,
     bool shouldReenableDacVrm,
     bool shouldReenableAdcVrm
   )
@@ -199,11 +209,11 @@ partial class GpControllerTests {
   private void ConfigureAsGpioSyncOrAsync_VmrMustBeReenabled(
     byte chipSettings2,
     byte chipSettings3,
-    PinMode mode,
-    PinValue initialValue,
+    PinMode? mode,
+    PinValue? initialValue,
     bool shouldReenableDacVrm,
     bool shouldReenableAdcVrm,
-    Func<GpController, PinMode, PinValue, ValueTask> configureAsGpioAsyncFunc
+    Func<GpController, PinMode?, PinValue?, ValueTask> configureAsGpioAsyncFunc
   )
   {
     const byte InitialGp0Settings = 0b_000_1_0_010; // Alternate Function 0 (LED UART RX)
@@ -234,6 +244,13 @@ partial class GpControllerTests {
     var currentGpSettings = new byte[4] { InitialGp0Settings, InitialGp1Settings, InitialGp2Settings, InitialGp3Settings };
 
     foreach (var gp in mcp2221A.GpPins) {
+      var initialOutputValue = ((currentGpSettings[gp.Index] & 0b_000_1_0_000) == 0)
+        ? PinValue.Low
+        : PinValue.High;
+      var initialDirection = ((currentGpSettings[gp.Index] & 0b_000_0_1_000) == 0)
+        ? PinMode.Output
+        : PinMode.Input;
+
       if (shouldReenableDacVrm || shouldReenableAdcVrm) {
         Mcp2221AControllerTests.AppendPseudoResponse(
           mcp2221A,
@@ -261,11 +278,11 @@ partial class GpControllerTests {
 
       expectedAssignments[gp.Index] = GpFunction.Gpio;
 
-      var expectedOutputValueBits = (bool)initialValue switch {
+      var expectedOutputValueBits = (bool)(initialValue ?? initialOutputValue) switch {
         true => 0b_000_1_0_000,
         false => 0b_000_0_0_000,
       };
-      var expectedDirectionBits = mode switch {
+      var expectedDirectionBits = (mode ?? initialDirection) switch {
         PinMode.Input => 0b_000_0_1_000,
         PinMode.Output => 0b_000_0_0_000,
         _ => throw new InvalidOperationException(),
@@ -320,8 +337,8 @@ partial class GpControllerTests {
       }
 
       Assert.That(gp.CurrentFunction, Is.EqualTo(GpFunction.Gpio));
-      Assert.That(gp.CurrentMode, Is.EqualTo(mode));
-      Assert.That(gp.LastUpdatedValue, Is.EqualTo(initialValue));
+      Assert.That(gp.CurrentMode, Is.EqualTo(mode ?? initialDirection));
+      Assert.That(gp.LastUpdatedValue, Is.EqualTo(initialValue ?? initialOutputValue));
 
       Assert.That(
         mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList(),
@@ -331,25 +348,28 @@ partial class GpControllerTests {
     }
   }
 
-  [TestCase(PinMode.Input, true)]
-  [TestCase(PinMode.Input, false)]
-  [TestCase(PinMode.Output, true)]
-  [TestCase(PinMode.Output, false)]
-  public void ConfigureAsGpioAsync_ThrowsWhenUsedByGpioController(PinMode mode, bool initialValue)
+  private static System.Collections.IEnumerable YieldTestCases_ConfigureAsGpioSyncOrAsync_ThrowsWhenUsedByGpioController()
+  {
+    foreach (var mode in new PinMode?[] { PinMode.Output, PinMode.Input, null }) {
+      foreach (var initialValue in new PinValue?[] { PinValue.High, PinValue.Low, null }) {
+        yield return new object?[] { mode, initialValue };
+      }
+    }
+  }
+
+  [TestCaseSource(nameof(YieldTestCases_ConfigureAsGpioSyncOrAsync_ThrowsWhenUsedByGpioController))]
+  public void ConfigureAsGpioAsync_ThrowsWhenUsedByGpioController(PinMode? mode, PinValue? initialValue)
     => ConfigureAsGpioSyncOrAsync_ThrowsWhenUsedByGpioController(
       mode,
-      (PinValue)initialValue,
+      initialValue,
       static async (gp, m, val) => await gp.ConfigureAsGpioAsync(mode: m, initialValue: val).ConfigureAwait(false)
     );
 
-  [TestCase(PinMode.Input, true)]
-  [TestCase(PinMode.Input, false)]
-  [TestCase(PinMode.Output, true)]
-  [TestCase(PinMode.Output, false)]
-  public void ConfigureAsGpio_ThrowsWhenUsedByGpioController(PinMode mode, bool initialValue)
+  [TestCaseSource(nameof(YieldTestCases_ConfigureAsGpioSyncOrAsync_ThrowsWhenUsedByGpioController))]
+  public void ConfigureAsGpio_ThrowsWhenUsedByGpioController(PinMode? mode, PinValue? initialValue)
     => ConfigureAsGpioSyncOrAsync_ThrowsWhenUsedByGpioController(
       mode,
-      (PinValue)initialValue,
+      initialValue,
       static (gp, m, val) => {
         gp.ConfigureAsGpio(mode: m, initialValue: val);
         return default;
@@ -357,15 +377,15 @@ partial class GpControllerTests {
     );
 
   private void ConfigureAsGpioSyncOrAsync_ThrowsWhenUsedByGpioController(
-    PinMode mode,
-    PinValue initialValue,
-    Func<GpController, PinMode, PinValue, ValueTask> configureAsGpioAsyncFunc
+    PinMode? mode,
+    PinValue? initialValue,
+    Func<GpController, PinMode?, PinValue?, ValueTask> configureAsGpioAsyncFunc
   )
   {
-    const byte InitialGp0Settings = 0b_000_1_0_010; // Alternate Function 0 (LED UART RX)
-    const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
+    const byte InitialGp0Settings = 0b_000_0_0_010; // Alternate Function 0 (LED UART RX)
+    const byte InitialGp1Settings = 0b_000_0_1_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
-    const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
+    const byte InitialGp3Settings = 0b_000_1_1_001; // Dedicated function operation (LED I2C)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(

@@ -31,8 +31,8 @@ partial class GpController : IGpioController {
   /// <inheritdoc/>
   [CLSCompliant(false)]
   public ValueTask ConfigureAsGpioAsync(
-    PinMode mode = PinMode.Output,
-    PinValue initialValue = default,
+    PinMode? mode = PinMode.Output,
+    PinValue? initialValue = default,
     CancellationToken cancellationToken = default
   )
     => ConfigureGpDesignationAsync(
@@ -45,8 +45,8 @@ partial class GpController : IGpioController {
   /// <inheritdoc/>
   [CLSCompliant(false)]
   public void ConfigureAsGpio(
-    PinMode mode = PinMode.Output,
-    PinValue initialValue = default,
+    PinMode? mode = PinMode.Output,
+    PinValue? initialValue = default,
     CancellationToken cancellationToken = default
   )
     => ConfigureGpDesignation(

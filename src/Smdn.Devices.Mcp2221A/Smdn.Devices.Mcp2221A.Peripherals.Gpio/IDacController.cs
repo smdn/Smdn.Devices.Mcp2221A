@@ -40,6 +40,8 @@ public interface IDacController {
   /// </summary>
   /// <param name="voltageReferenceSource">
   /// The <see cref="VoltageReferenceSource"/> to be used for the DAC.
+  /// If <see langword="null"/>, the current voltage reference source of
+  /// the DAC module is maintained.
   /// </param>
   /// <param name="initialOutputValue">
   /// The initial 5-bit raw analog value (0-31) to be set for the DAC output.
@@ -71,7 +73,7 @@ public interface IDacController {
   /// <seealso cref="CurrentDacReferenceSource"/>
   /// <seealso cref="GpFunction.Dac"/>
   void ConfigureAsDac(
-    VoltageReferenceSource voltageReferenceSource,
+    VoltageReferenceSource? voltageReferenceSource,
     int? initialOutputValue = null,
     CancellationToken cancellationToken = default
   );
@@ -81,12 +83,12 @@ public interface IDacController {
   /// Converter (DAC) output and sets the voltage reference source for the
   /// DAC module.
   /// </summary>
-  /// <inheritdoc cref="ConfigureAsDac(VoltageReferenceSource, int?, CancellationToken)"/>
+  /// <inheritdoc cref="ConfigureAsDac(VoltageReferenceSource?, int?, CancellationToken)"/>
   /// <returns>
   /// A <see cref="ValueTask"/> representing the asynchronous operation.
   /// </returns>
   ValueTask ConfigureAsDacAsync(
-    VoltageReferenceSource voltageReferenceSource,
+    VoltageReferenceSource? voltageReferenceSource,
     int? initialOutputValue = null,
     CancellationToken cancellationToken = default
   );

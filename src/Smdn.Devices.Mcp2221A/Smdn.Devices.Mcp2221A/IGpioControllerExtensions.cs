@@ -35,11 +35,11 @@ public static class IGpioControllerExtensions {
   /// <exception cref="InvalidOperationException">
   /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
   /// </exception>
-  /// <seealso cref="IGpioController.ConfigureAsGpioAsync(PinMode, PinValue, CancellationToken)"/>
+  /// <seealso cref="IGpioController.ConfigureAsGpioAsync(PinMode?, PinValue?, CancellationToken)"/>
   [CLSCompliant(false)]
   public static ValueTask ConfigureAsGpioOutputAsync(
     this IGpioController controller,
-    PinValue initialValue = default,
+    PinValue? initialValue = default,
     CancellationToken cancellationToken = default
   )
     => (controller ?? throw new ArgumentNullException(nameof(controller)))
@@ -68,14 +68,14 @@ public static class IGpioControllerExtensions {
   /// The pin operates in a high-impedance state. Note that the MCP2221/MCP2221A
   /// does not support internal pull-up or pull-down resistors.
   /// </remarks>
-  /// <seealso cref="IGpioController.ConfigureAsGpioAsync(PinMode, PinValue, CancellationToken)"/>
+  /// <seealso cref="IGpioController.ConfigureAsGpioAsync(PinMode?, PinValue?, CancellationToken)"/>
   [CLSCompliant(false)]
   public static ValueTask ConfigureAsGpioInputAsync(
     this IGpioController controller,
     CancellationToken cancellationToken = default
   )
     => (controller ?? throw new ArgumentNullException(nameof(controller)))
-      .ConfigureAsGpioAsync(PinMode.Input, initialValue: default, cancellationToken);
+      .ConfigureAsGpioAsync(PinMode.Input, initialValue: null, cancellationToken);
 
   /// <summary>
   /// Configures the pin as a GPIO and sets its direction to output
@@ -96,11 +96,11 @@ public static class IGpioControllerExtensions {
   /// <exception cref="InvalidOperationException">
   /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
   /// </exception>
-  /// <seealso cref="IGpioController.ConfigureAsGpio(PinMode, PinValue, CancellationToken)"/>
+  /// <seealso cref="IGpioController.ConfigureAsGpio(PinMode?, PinValue?, CancellationToken)"/>
   [CLSCompliant(false)]
   public static void ConfigureAsGpioOutput(
     this IGpioController controller,
-    PinValue initialValue = default,
+    PinValue? initialValue = default,
     CancellationToken cancellationToken = default
   )
     => (controller ?? throw new ArgumentNullException(nameof(controller)))
@@ -126,12 +126,12 @@ public static class IGpioControllerExtensions {
   /// The pin operates in a high-impedance state. Note that the MCP2221/MCP2221A
   /// does not support internal pull-up or pull-down resistors.
   /// </remarks>
-  /// <seealso cref="IGpioController.ConfigureAsGpio(PinMode, PinValue, CancellationToken)"/>
+  /// <seealso cref="IGpioController.ConfigureAsGpio(PinMode?, PinValue?, CancellationToken)"/>
   [CLSCompliant(false)]
   public static void ConfigureAsGpioInput(
     this IGpioController controller,
     CancellationToken cancellationToken = default
   )
     => (controller ?? throw new ArgumentNullException(nameof(controller)))
-      .ConfigureAsGpio(PinMode.Input, initialValue: default, cancellationToken);
+      .ConfigureAsGpio(PinMode.Input, initialValue: null, cancellationToken);
 }

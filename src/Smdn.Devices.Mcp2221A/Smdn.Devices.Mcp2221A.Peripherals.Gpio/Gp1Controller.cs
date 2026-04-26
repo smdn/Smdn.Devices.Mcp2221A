@@ -222,7 +222,7 @@ public sealed class Gp1Controller :
 
   /// <inheritdoc/>
   public ValueTask ConfigureAsAdcAsync(
-    VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd,
+    VoltageReferenceSource? voltageReferenceSource = VoltageReferenceSource.Vdd,
     CancellationToken cancellationToken = default
   )
     => ConfigureAsAdcAsyncCore(
@@ -232,7 +232,7 @@ public sealed class Gp1Controller :
 
   /// <inheritdoc/>
   public void ConfigureAsAdc(
-    VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd,
+    VoltageReferenceSource? voltageReferenceSource = VoltageReferenceSource.Vdd,
     CancellationToken cancellationToken = default
   )
     => ConfigureAsAdcCore(

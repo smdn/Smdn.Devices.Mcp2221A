@@ -24,17 +24,19 @@ partial class GpControllerTests {
     const byte InitialChipSettings3_AdcVdd = 0b_0_0_0_00_0_00; // INTDETFEEN: 0, INTDETREEN: 0, ADCVRM: 00(Off), ADCREF: 0(Vdd)
 
     for (var gpIndex = 1; gpIndex <= 3; gpIndex++) {
-      yield return new object[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.Vdd };
-      yield return new object[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.VrmOff };
-      yield return new object[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.Vrm1024 };
-      yield return new object[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.Vrm2048 };
-      yield return new object[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.Vrm4096 };
+      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.Vdd };
+      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.VrmOff };
+      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.Vrm1024 };
+      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.Vrm2048 };
+      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.Vrm4096 };
+      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVrm, null };
 
-      yield return new object[] { gpIndex, InitialChipSettings3_AdcVdd, VoltageReferenceSource.Vdd };
-      yield return new object[] { gpIndex, InitialChipSettings3_AdcVdd, VoltageReferenceSource.VrmOff };
-      yield return new object[] { gpIndex, InitialChipSettings3_AdcVdd, VoltageReferenceSource.Vrm1024 };
-      yield return new object[] { gpIndex, InitialChipSettings3_AdcVdd, VoltageReferenceSource.Vrm2048 };
-      yield return new object[] { gpIndex, InitialChipSettings3_AdcVdd, VoltageReferenceSource.Vrm4096 };
+      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVdd, VoltageReferenceSource.Vdd };
+      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVdd, VoltageReferenceSource.VrmOff };
+      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVdd, VoltageReferenceSource.Vrm1024 };
+      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVdd, VoltageReferenceSource.Vrm2048 };
+      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVdd, VoltageReferenceSource.Vrm4096 };
+      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVdd, null };
     }
   }
 
@@ -42,7 +44,7 @@ partial class GpControllerTests {
   public void ConfigureAsAdcAsync(
     int gpIndex,
     byte initialChipSettings3,
-    VoltageReferenceSource voltageReferenceSource
+    VoltageReferenceSource? voltageReferenceSource
   )
     => ConfigureAsAdcSyncOrAsync(
       gpIndex,
@@ -55,7 +57,7 @@ partial class GpControllerTests {
   public void ConfigureAsAdc(
     int gpIndex,
     byte initialChipSettings3,
-    VoltageReferenceSource voltageReferenceSource
+    VoltageReferenceSource? voltageReferenceSource
   )
     => ConfigureAsAdcSyncOrAsync(
       gpIndex,
@@ -70,8 +72,8 @@ partial class GpControllerTests {
   private void ConfigureAsAdcSyncOrAsync(
     int gpIndex,
     byte initialChipSettings3,
-    VoltageReferenceSource voltageReferenceSource,
-    Func<GpController, VoltageReferenceSource, ValueTask> configureAsAdcAsyncFunc
+    VoltageReferenceSource? voltageReferenceSource,
+    Func<GpController, VoltageReferenceSource?, ValueTask> configureAsAdcAsyncFunc
   )
   {
     const byte InitialGp0Settings = 0b_000_1_0_010; // Alternate Function 0 (LED UART RX)
@@ -89,6 +91,7 @@ partial class GpControllerTests {
       ),
       shouldDisposeUsbHidDevice: true
     );
+    var initialAdcReferenceSource = mcp2221A.CurrentAdcReferenceSource;
     var expectedInterruptOnChangeBits = (byte)(
       ((initialChipSettings3 & 0b_0_0_1_00_0_00) == 0 ? 0 : 0b_0_00_0_1_0_0_0) | // positive edge
       ((initialChipSettings3 & 0b_0_1_0_00_0_00) == 0 ? 0 : 0b_0_00_0_0_0_1_0) // negative edge
@@ -129,6 +132,7 @@ partial class GpControllerTests {
       VoltageReferenceSource.Vrm1024 => 0b_0_0000_01_1,
       VoltageReferenceSource.Vrm2048 => 0b_0_0000_10_1,
       VoltageReferenceSource.Vrm4096 => 0b_0_0000_11_1,
+      null => (initialChipSettings3 & 0b_0_0_0_11_1_00) >> 2,
       _ => throw new InvalidOperationException(),
     };
     const byte ExpectedDesignationBits = 0b_000_0_0_010; // ADC1/ADC2/ADC3
@@ -139,7 +143,11 @@ partial class GpControllerTests {
 
     expectedSentSramSettingsCommand[0] = 0x60; // [0] SET SRAM SETTINGS
     // [1-4] don't care
-    expectedSentSramSettingsCommand[5] = (byte)(0b10000000 | expectedVoltageReferenceBits); // [5] ADC Voltage Reference
+    // [5] ADC Voltage Reference
+    expectedSentSramSettingsCommand[5] = (byte)(
+      (voltageReferenceSource.HasValue ? 0b10000000 : 0b00000000) |
+      expectedVoltageReferenceBits
+    );
     expectedSentSramSettingsCommand[6] = expectedInterruptOnChangeBits; // [6] Set Up the Interrupt Detection Mechanism and Clear the Detection Flag
     expectedSentSramSettingsCommand[7] = 0b10000000; // [7] Alter GPIO configuration = Alter the GP designation (1)
     expectedSentSramSettingsCommand[8] = currentGpSettings[0]; // [8] GP0 settings
@@ -169,17 +177,23 @@ partial class GpControllerTests {
       SequenceIs.EqualTo(expectedSentSramSettingsCommand)
     );
 
-    if (voltageReferenceSource != VoltageReferenceSource.Vdd) {
+    if ((voltageReferenceSource ?? initialAdcReferenceSource) != VoltageReferenceSource.Vdd) {
       Assert.That(
         Mcp2221AControllerTests.GetSentCommand(mcp2221A, 1),
         SequenceIs.EqualTo(expectedSentReenableVrmCommand)
       );
     }
 
-    Assert.That(mcp2221A.CurrentAdcReferenceSource, Is.EqualTo(voltageReferenceSource));
+    Assert.That(
+      mcp2221A.CurrentAdcReferenceSource,
+      Is.EqualTo(voltageReferenceSource ?? initialAdcReferenceSource)
+    );
 
     Assert.That(mcp2221A.GpPins[gpIndex].CurrentFunction, Is.EqualTo(GpFunction.Adc));
-    Assert.That(((IAdcController)mcp2221A.GpPins[gpIndex]).CurrentAdcReferenceSource, Is.EqualTo(voltageReferenceSource));
+    Assert.That(
+      ((IAdcController)mcp2221A.GpPins[gpIndex]).CurrentAdcReferenceSource,
+      Is.EqualTo(voltageReferenceSource ?? initialAdcReferenceSource)
+    );
 
     Assert.That(
       mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList(),

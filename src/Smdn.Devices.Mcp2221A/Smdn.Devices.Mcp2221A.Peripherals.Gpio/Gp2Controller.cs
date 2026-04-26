@@ -74,7 +74,7 @@ public sealed class Gp2Controller :
 
   /// <inheritdoc/>
   public ValueTask ConfigureAsDacAsync(
-    VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd,
+    VoltageReferenceSource? voltageReferenceSource = VoltageReferenceSource.Vdd,
     int? initialOutputValue = null,
     CancellationToken cancellationToken = default
   )
@@ -86,7 +86,7 @@ public sealed class Gp2Controller :
 
   /// <inheritdoc/>
   public void ConfigureAsDac(
-    VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd,
+    VoltageReferenceSource? voltageReferenceSource = VoltageReferenceSource.Vdd,
     int? initialOutputValue = null,
     CancellationToken cancellationToken = default
   )
@@ -130,7 +130,7 @@ public sealed class Gp2Controller :
 
   /// <inheritdoc/>
   public ValueTask ConfigureAsAdcAsync(
-    VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd,
+    VoltageReferenceSource? voltageReferenceSource = VoltageReferenceSource.Vdd,
     CancellationToken cancellationToken = default
   )
     => ConfigureAsAdcAsyncCore(
@@ -140,7 +140,7 @@ public sealed class Gp2Controller :
 
   /// <inheritdoc/>
   public void ConfigureAsAdc(
-    VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd,
+    VoltageReferenceSource? voltageReferenceSource = VoltageReferenceSource.Vdd,
     CancellationToken cancellationToken = default
   )
     => ConfigureAsAdcCore(

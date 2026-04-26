@@ -49,6 +49,8 @@ public interface IAdcController {
   /// </summary>
   /// <param name="voltageReferenceSource">
   /// The <see cref="VoltageReferenceSource"/> to be used for the ADC.
+  /// If <see langword="null"/>, the current voltage reference source of
+  /// the ADC module is maintained.
   /// </param>
   /// <param name="cancellationToken">
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
@@ -65,7 +67,7 @@ public interface IAdcController {
   /// <seealso cref="CurrentAdcReferenceSource"/>
   /// <seealso cref="GpFunction.Adc"/>
   void ConfigureAsAdc(
-    VoltageReferenceSource voltageReferenceSource,
+    VoltageReferenceSource? voltageReferenceSource,
     CancellationToken cancellationToken = default
   );
 
@@ -74,12 +76,12 @@ public interface IAdcController {
   /// Converter (ADC) input and sets the voltage reference source for the
   /// ADC module.
   /// </summary>
-  /// <inheritdoc cref="ConfigureAsAdc(VoltageReferenceSource, CancellationToken)"/>
+  /// <inheritdoc cref="ConfigureAsAdc(VoltageReferenceSource?, CancellationToken)"/>
   /// <returns>
   /// A <see cref="ValueTask"/> representing the asynchronous operation.
   /// </returns>
   ValueTask ConfigureAsAdcAsync(
-    VoltageReferenceSource voltageReferenceSource,
+    VoltageReferenceSource? voltageReferenceSource,
     CancellationToken cancellationToken = default
   );
 

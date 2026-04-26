@@ -22,17 +22,19 @@ partial class GpControllerTests {
     const byte InitialChipSettings2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     for (var gpIndex = 2; gpIndex <= 3; gpIndex++) {
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vdd };
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.VrmOff };
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vrm1024 };
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vrm2048 };
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vrm4096 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vdd };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.VrmOff };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vrm1024 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vrm2048 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vrm4096 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, null };
 
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vdd };
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.VrmOff };
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vrm1024 };
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vrm2048 };
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vrm4096 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vdd };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.VrmOff };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vrm1024 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vrm2048 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vrm4096 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, null };
     }
   }
 
@@ -40,7 +42,7 @@ partial class GpControllerTests {
   public void ConfigureAsDacAsync(
     int gpIndex,
     byte initialChipSettings2,
-    VoltageReferenceSource voltageReferenceSource
+    VoltageReferenceSource? voltageReferenceSource
   )
     => ConfigureAsDacSyncOrAsync(
       gpIndex,
@@ -53,7 +55,7 @@ partial class GpControllerTests {
   public void ConfigureAsDac(
     int gpIndex,
     byte initialChipSettings2,
-    VoltageReferenceSource voltageReferenceSource
+    VoltageReferenceSource? voltageReferenceSource
   )
     => ConfigureAsDacSyncOrAsync(
       gpIndex,
@@ -68,8 +70,8 @@ partial class GpControllerTests {
   private void ConfigureAsDacSyncOrAsync(
     int gpIndex,
     byte initialChipSettings2,
-    VoltageReferenceSource voltageReferenceSource,
-    Func<GpController, VoltageReferenceSource, ValueTask> configureAsDacAsyncFunc
+    VoltageReferenceSource? voltageReferenceSource,
+    Func<GpController, VoltageReferenceSource?, ValueTask> configureAsDacAsyncFunc
   )
   {
     const byte InitialGp0Settings = 0b_000_1_0_010; // Alternate Function 0 (LED UART RX)
@@ -89,7 +91,7 @@ partial class GpControllerTests {
       ),
       shouldDisposeUsbHidDevice: true
     );
-
+    var initialDacReferenceSource = mcp2221A.CurrentDacReferenceSource;
     var expectedAssignments = mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList();
     var currentGpSettings = new byte[4] { InitialGp0Settings, InitialGp1Settings, InitialGp2Settings, InitialGp3Settings };
 
@@ -126,6 +128,7 @@ partial class GpControllerTests {
       VoltageReferenceSource.Vrm1024 => 0b_0_0000_01_1,
       VoltageReferenceSource.Vrm2048 => 0b_0_0000_10_1,
       VoltageReferenceSource.Vrm4096 => 0b_0_0000_11_1,
+      null => (initialChipSettings2 & 0b_11_1_00000) >> 5,
       _ => throw new InvalidOperationException(),
     };
     const byte ExpectedDesignationBits = 0b_000_0_0_011; // DAC1/DAC2
@@ -136,7 +139,11 @@ partial class GpControllerTests {
 
     expectedSentSramSettingsCommand[0] = 0x60; // [0] SET SRAM SETTINGS
     // [1-2] don't care
-    expectedSentSramSettingsCommand[3] = (byte)(0b10000000 | expectedVoltageReferenceBits); // [3] DAC Voltage Reference
+    // [3] DAC Voltage Reference
+    expectedSentSramSettingsCommand[3] = (byte)(
+      (voltageReferenceSource.HasValue ? 0b10000000 : 0b00000000) |
+      expectedVoltageReferenceBits
+    );
     expectedSentSramSettingsCommand[4] = (byte)(0b_0_00_00000 | initialDacRawValue); // [4] Set DAC Output Value
     // [5-6] don't care
     expectedSentSramSettingsCommand[7] = 0b10000000; // [7] Alter GPIO configuration = Alter the GP designation (1)
@@ -168,18 +175,24 @@ partial class GpControllerTests {
       SequenceIs.EqualTo(expectedSentSramSettingsCommand)
     );
 
-    if (voltageReferenceSource != VoltageReferenceSource.Vdd) {
+    if ((voltageReferenceSource ?? initialDacReferenceSource) != VoltageReferenceSource.Vdd) {
       Assert.That(
         Mcp2221AControllerTests.GetSentCommand(mcp2221A, 1),
         SequenceIs.EqualTo(expectedSentReenableVrmCommand)
       );
     }
 
-    Assert.That(mcp2221A.CurrentDacReferenceSource, Is.EqualTo(voltageReferenceSource));
+    Assert.That(
+      mcp2221A.CurrentDacReferenceSource,
+      Is.EqualTo(voltageReferenceSource ?? initialDacReferenceSource)
+    );
     Assert.That(mcp2221A.LastWriteAnalogRawValue, Is.EqualTo(initialDacRawValue));
 
     Assert.That(mcp2221A.GpPins[gpIndex].CurrentFunction, Is.EqualTo(GpFunction.Dac));
-    Assert.That(((IDacController)mcp2221A.GpPins[gpIndex]).CurrentDacReferenceSource, Is.EqualTo(voltageReferenceSource));
+    Assert.That(
+      ((IDacController)mcp2221A.GpPins[gpIndex]).CurrentDacReferenceSource,
+      Is.EqualTo(voltageReferenceSource ?? initialDacReferenceSource)
+    );
     Assert.That(((IDacController)mcp2221A.GpPins[gpIndex]).LastWriteAnalogRawValue, Is.EqualTo(initialDacRawValue));
 
     Assert.That(
@@ -195,13 +208,17 @@ partial class GpControllerTests {
     const byte InitialChipSettings2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     for (var gpIndex = 2; gpIndex <= 3; gpIndex++) {
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vdd, 31 };
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.VrmOff, 1 };
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vrm1024, 0 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vdd, 31 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.VrmOff, 30 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vrm1024, 1 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, null, 0 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, null, null };
 
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vdd, 0 };
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.VrmOff, 31 };
-      yield return new object[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vrm4096, 1 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vdd, 0 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.VrmOff, 31 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vrm4096, 30 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, null, 1 };
+      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, null, null };
     }
   }
 
@@ -209,8 +226,8 @@ partial class GpControllerTests {
   public void ConfigureAsDacAsync_WithInitialOutputValue(
     int gpIndex,
     byte initialChipSettings2,
-    VoltageReferenceSource voltageReferenceSource,
-    int initialOutputValue
+    VoltageReferenceSource? voltageReferenceSource,
+    int? initialOutputValue
   )
     => ConfigureAsDacSyncOrAsync_WithInitialOutputValue(
       gpIndex,
@@ -227,8 +244,8 @@ partial class GpControllerTests {
   public void ConfigureAsDac_WithInitialOutputValue(
     int gpIndex,
     byte initialChipSettings2,
-    VoltageReferenceSource voltageReferenceSource,
-    int initialOutputValue
+    VoltageReferenceSource? voltageReferenceSource,
+    int? initialOutputValue
   )
     => ConfigureAsDacSyncOrAsync_WithInitialOutputValue(
       gpIndex,
@@ -247,9 +264,9 @@ partial class GpControllerTests {
   private void ConfigureAsDacSyncOrAsync_WithInitialOutputValue(
     int gpIndex,
     byte initialChipSettings2,
-    VoltageReferenceSource voltageReferenceSource,
-    int initialOutputValue,
-    Func<GpController, VoltageReferenceSource, int, ValueTask> configureAsDacAsyncFunc
+    VoltageReferenceSource? voltageReferenceSource,
+    int? initialOutputValue,
+    Func<GpController, VoltageReferenceSource?, int?, ValueTask> configureAsDacAsyncFunc
   )
   {
     const byte InitialGp0Settings = 0b_000_1_0_010; // Alternate Function 0 (LED UART RX)
@@ -267,7 +284,8 @@ partial class GpControllerTests {
       ),
       shouldDisposeUsbHidDevice: true
     );
-
+    var initialDacReferenceSource = mcp2221A.CurrentDacReferenceSource;
+    var initialDacOutputValue = mcp2221A.LastWriteAnalogRawValue;
     var expectedAssignments = mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList();
     var currentGpSettings = new byte[4] { InitialGp0Settings, InitialGp1Settings, InitialGp2Settings, InitialGp3Settings };
 
@@ -304,8 +322,12 @@ partial class GpControllerTests {
       VoltageReferenceSource.Vrm1024 => 0b_0_0000_01_1,
       VoltageReferenceSource.Vrm2048 => 0b_0_0000_10_1,
       VoltageReferenceSource.Vrm4096 => 0b_0_0000_11_1,
+      null => (initialChipSettings2 & 0b_11_1_00000) >> 5,
       _ => throw new InvalidOperationException(),
     };
+    var expectedOutputValueBits = initialOutputValue.HasValue
+      ? initialOutputValue.Value
+      : (initialChipSettings2 & 0b_00_0_11111);
     const byte ExpectedDesignationBits = 0b_000_0_0_011; // DAC1/DAC2
 
     currentGpSettings[gpIndex] = (byte)((currentGpSettings[gpIndex] & 0b_1_1111_00_0) | ExpectedDesignationBits);
@@ -314,8 +336,16 @@ partial class GpControllerTests {
 
     expectedSentSramSettingsCommand[0] = 0x60; // [0] SET SRAM SETTINGS
     // [1-2] don't care
-    expectedSentSramSettingsCommand[3] = (byte)(0b10000000 | expectedVoltageReferenceBits); // [3] DAC Voltage Reference
-    expectedSentSramSettingsCommand[4] = (byte)(0b_1_00_00000 | initialOutputValue); // [4] Set DAC Output Value
+    // [3] DAC Voltage Reference
+    expectedSentSramSettingsCommand[3] = (byte)(
+      (voltageReferenceSource.HasValue ? 0b10000000 : 0b00000000) |
+      expectedVoltageReferenceBits
+    );
+    // [4] Set DAC Output Value
+    expectedSentSramSettingsCommand[4] = (byte)(
+      (initialOutputValue.HasValue ? 0b_1_00_00000 : 0b_0_00_00000) |
+      expectedOutputValueBits
+    );
     // [5-6] don't care
     expectedSentSramSettingsCommand[7] = 0b10000000; // [7] Alter GPIO configuration = Alter the GP designation (1)
     expectedSentSramSettingsCommand[8] = currentGpSettings[0]; // [8] GP0 settings
@@ -328,7 +358,7 @@ partial class GpControllerTests {
     expectedSentReenableVrmCommand[0] = 0x60; // [0] SET SRAM SETTINGS
     // [1-2] don't care
     expectedSentReenableVrmCommand[3] = (byte)(0b10000000 | expectedVoltageReferenceBits); // [3] DAC Voltage Reference
-    expectedSentReenableVrmCommand[4] = (byte)(0b_1_00_00000 | initialOutputValue); // [4] Set DAC Output Value
+    expectedSentReenableVrmCommand[4] = expectedSentSramSettingsCommand[4]; // [4] Set DAC Output Value
     // [5-6] don't care
     expectedSentReenableVrmCommand[7] = 0b00000000; // [7] Alter GPIO configuration = Do not alter the current GP designation (0)
     expectedSentReenableVrmCommand[8] = currentGpSettings[0]; // [8] GP0 settings
@@ -346,19 +376,31 @@ partial class GpControllerTests {
       SequenceIs.EqualTo(expectedSentSramSettingsCommand)
     );
 
-    if (voltageReferenceSource != VoltageReferenceSource.Vdd) {
+    if ((voltageReferenceSource ?? initialDacReferenceSource) != VoltageReferenceSource.Vdd) {
       Assert.That(
         Mcp2221AControllerTests.GetSentCommand(mcp2221A, 1),
         SequenceIs.EqualTo(expectedSentReenableVrmCommand)
       );
     }
 
-    Assert.That(mcp2221A.CurrentDacReferenceSource, Is.EqualTo(voltageReferenceSource));
-    Assert.That(mcp2221A.LastWriteAnalogRawValue, Is.EqualTo(initialOutputValue));
+    Assert.That(
+      mcp2221A.CurrentDacReferenceSource,
+      Is.EqualTo(voltageReferenceSource ?? initialDacReferenceSource)
+    );
+    Assert.That(
+      mcp2221A.LastWriteAnalogRawValue,
+      Is.EqualTo(initialOutputValue ?? initialDacOutputValue)
+    );
 
     Assert.That(mcp2221A.GpPins[gpIndex].CurrentFunction, Is.EqualTo(GpFunction.Dac));
-    Assert.That(((IDacController)mcp2221A.GpPins[gpIndex]).CurrentDacReferenceSource, Is.EqualTo(voltageReferenceSource));
-    Assert.That(((IDacController)mcp2221A.GpPins[gpIndex]).LastWriteAnalogRawValue, Is.EqualTo(initialOutputValue));
+    Assert.That(
+      ((IDacController)mcp2221A.GpPins[gpIndex]).CurrentDacReferenceSource,
+      Is.EqualTo(voltageReferenceSource ?? initialDacReferenceSource)
+    );
+    Assert.That(
+      ((IDacController)mcp2221A.GpPins[gpIndex]).LastWriteAnalogRawValue,
+      Is.EqualTo(initialOutputValue ?? initialDacOutputValue)
+    );
 
     Assert.That(
       mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList(),

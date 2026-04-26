@@ -40,7 +40,7 @@ public abstract partial class GpController {
   /// </value>
   /// <remarks>
   /// This value changes when a configuration method, such as
-  /// <see cref="ConfigureAsGpio(PinMode, PinValue, CancellationToken)"/>,
+  /// <see cref="ConfigureAsGpio(PinMode?, PinValue?, CancellationToken)"/>,
   /// is successfully called.
   /// </remarks>
   /// <seealso cref="CurrentDesignation"/>
@@ -281,7 +281,7 @@ public abstract partial class GpController {
     );
 
   private protected ValueTask ConfigureAsDacAsyncCore(
-    VoltageReferenceSource voltageReferenceSource,
+    VoltageReferenceSource? voltageReferenceSource,
     int? initialOutputValue,
     CancellationToken cancellationToken = default
   )
@@ -296,7 +296,7 @@ public abstract partial class GpController {
     );
 
   private protected void ConfigureAsDacCore(
-    VoltageReferenceSource voltageReferenceSource,
+    VoltageReferenceSource? voltageReferenceSource,
     int? initialOutputValue,
     CancellationToken cancellationToken = default
   )
@@ -314,7 +314,7 @@ public abstract partial class GpController {
     SramSettings sramSettings,
     int gpIndex,
     (
-      VoltageReferenceSource VoltageReferenceSource,
+      VoltageReferenceSource? VoltageReferenceSource,
       int? OutputValue
     ) arg
   )
@@ -329,7 +329,7 @@ public abstract partial class GpController {
       );
 
   private protected ValueTask ConfigureAsAdcAsyncCore(
-    VoltageReferenceSource voltageReferenceSource,
+    VoltageReferenceSource? voltageReferenceSource,
     CancellationToken cancellationToken
   )
     => GpioDriver.ConfigureGpPinSettingsAsync(
@@ -340,7 +340,7 @@ public abstract partial class GpController {
     );
 
   private protected void ConfigureAsAdcCore(
-    VoltageReferenceSource voltageReferenceSource,
+    VoltageReferenceSource? voltageReferenceSource,
     CancellationToken cancellationToken
   )
     => GpioDriver.ConfigureGpPinSettings(
@@ -353,7 +353,7 @@ public abstract partial class GpController {
   private static void ConfigureGpPinSettingsAsAdc(
     SramSettings sramSettings,
     int gpIndex,
-    VoltageReferenceSource voltageReferenceSource
+    VoltageReferenceSource? voltageReferenceSource
   )
     => sramSettings
       .ModifyGpSettings(

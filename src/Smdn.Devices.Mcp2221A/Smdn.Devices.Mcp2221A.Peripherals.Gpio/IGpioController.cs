@@ -19,10 +19,12 @@ public interface IGpioController {
   /// </summary>
   /// <param name="mode">
   /// The <see cref="PinMode"/> to be set (e.g., <see cref="PinMode.Input"/> or <see cref="PinMode.Output"/>).
+  /// If <see langword="null"/>, the current direction is maintained.
   /// </param>
   /// <param name="initialValue">
   /// The initial <see cref="PinValue"/> to be set if the
   /// <paramref name="mode"/> is <see cref="PinMode.Output"/>.
+  /// If <see langword="null"/>, the current output value is maintained.
   /// </param>
   /// <param name="cancellationToken">
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
@@ -46,8 +48,8 @@ public interface IGpioController {
   /// </remarks>
   /// <seealso cref="GpFunction.Gpio"/>
   ValueTask ConfigureAsGpioAsync(
-    PinMode mode,
-    PinValue initialValue,
+    PinMode? mode,
+    PinValue? initialValue,
     CancellationToken cancellationToken = default
   );
 
@@ -56,10 +58,12 @@ public interface IGpioController {
   /// </summary>
   /// <param name="mode">
   /// The <see cref="PinMode"/> to be set (e.g., <see cref="PinMode.Input"/> or <see cref="PinMode.Output"/>).
+  /// If <see langword="null"/>, the current direction is maintained.
   /// </param>
   /// <param name="initialValue">
   /// The initial <see cref="PinValue"/> to be set if the
   /// <paramref name="mode"/> is <see cref="PinMode.Output"/>.
+  /// If <see langword="null"/>, the current output value is maintained.
   /// </param>
   /// <param name="cancellationToken">
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
@@ -80,8 +84,8 @@ public interface IGpioController {
   /// </remarks>
   /// <seealso cref="GpFunction.Gpio"/>
   void ConfigureAsGpio(
-    PinMode mode,
-    PinValue initialValue,
+    PinMode? mode,
+    PinValue? initialValue,
     CancellationToken cancellationToken = default
   );
 
