@@ -195,4 +195,12 @@ public class I2cAddressTests {
 
     Assert.That((byte)addr, Is.EqualTo(address));
   }
+
+  [TestCase(0x08, "0x08")]
+  [TestCase(0x0F, "0x0F")] // upper case
+  [TestCase(0x10, "0x10")]
+  [TestCase(0x70, "0x70")]
+  [TestCase(0x77, "0x77")]
+  public void ToString_WithoutArguments(byte address, string expected)
+    => Assert.That(((I2cAddress)address).ToString(), Is.EqualTo(expected));
 }
