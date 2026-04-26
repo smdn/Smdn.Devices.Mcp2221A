@@ -100,6 +100,9 @@ public interface IGpioController {
   /// A <see cref="ValueTask{T}"/> representing the asynchronous operation,
   /// containing the current <see cref="PinMode"/>.
   /// </returns>
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when the GP pin is not currently configured as <see cref="GpFunction.Gpio"/>.
+  /// </exception>
   ValueTask<PinMode> GetModeAsync(
     CancellationToken cancellationToken = default
   );
@@ -114,6 +117,9 @@ public interface IGpioController {
   /// <returns>
   /// The current <see cref="PinMode"/>.
   /// </returns>
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when the GP pin is not currently configured as <see cref="GpFunction.Gpio"/>.
+  /// </exception>
   PinMode GetMode(
     CancellationToken cancellationToken = default
   );
@@ -131,6 +137,9 @@ public interface IGpioController {
   /// <returns>
   /// A <see cref="ValueTask"/> representing the asynchronous operation.
   /// </returns>
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when the GP pin is not currently configured as <see cref="GpFunction.Gpio"/>.
+  /// </exception>
   /// <exception cref="NotSupportedException">
   /// Thrown when <paramref name="mode"/> is set to <see cref="PinMode.InputPullUp"/>
   /// or <see cref="PinMode.InputPullDown"/> as these modes are not
@@ -159,6 +168,9 @@ public interface IGpioController {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when the GP pin is not currently configured as <see cref="GpFunction.Gpio"/>.
+  /// </exception>
   /// <exception cref="NotSupportedException">
   /// Thrown when <paramref name="mode"/> is set to <see cref="PinMode.InputPullUp"/>
   /// or <see cref="PinMode.InputPullDown"/> as these modes are not
@@ -188,6 +200,9 @@ public interface IGpioController {
   /// A <see cref="ValueTask{PinValue}"/> representing the asynchronous operation,
   /// containing the <see cref="PinValue"/> read from the pin.
   /// </returns>
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when the GP pin is not currently configured as <see cref="GpFunction.Gpio"/>.
+  /// </exception>
   ValueTask<PinValue> ReadAsync(
     CancellationToken cancellationToken = default
   );
@@ -202,6 +217,9 @@ public interface IGpioController {
   /// <returns>
   /// The <see cref="PinValue"/> read from the pin.
   /// </returns>
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when the GP pin is not currently configured as <see cref="GpFunction.Gpio"/>.
+  /// </exception>
   PinValue Read(
     CancellationToken cancellationToken = default
   );
@@ -222,6 +240,9 @@ public interface IGpioController {
   /// <exception cref="InvalidOperationException">
   /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
   /// </exception>
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when the GP pin is not currently configured as <see cref="GpFunction.Gpio"/>.
+  /// </exception>
   ValueTask WriteAsync(
     PinValue value,
     CancellationToken cancellationToken = default
@@ -239,6 +260,9 @@ public interface IGpioController {
   /// </param>
   /// <exception cref="InvalidOperationException">
   /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
+  /// </exception>
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when the GP pin is not currently configured as <see cref="GpFunction.Gpio"/>.
   /// </exception>
   void Write(
     PinValue value,

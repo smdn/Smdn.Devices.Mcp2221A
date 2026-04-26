@@ -93,6 +93,9 @@ public interface IAdcController {
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
   /// <returns>The 10-bit raw analog value (0-1023).</returns>
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when the GP pin is not currently configured as <see cref="GpFunction.Adc"/>.
+  /// </exception>
   /// <remarks>
   /// Calling this method also updates <see cref="IInterruptOnChangeController.LastReadInterruptDetectionFlag"/>
   /// simultaneously, as both values are retrieved using the same device command.

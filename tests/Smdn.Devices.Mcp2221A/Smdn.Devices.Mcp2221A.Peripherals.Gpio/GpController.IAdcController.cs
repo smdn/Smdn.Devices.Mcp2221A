@@ -481,7 +481,7 @@ partial class GpControllerTests {
       gp1Settings: gp1Settings,
       gp2Settings: null,
       gp3Settings: null,
-      expectedAdcPinNumberInExceptionMessage: 1,
+      expectedAdcGpIndexInThrownException: 1,
       static async mcp2221a => _ = await mcp2221a.GpPin1.ReadAnalogRawAsync().ConfigureAwait(false)
     );
 
@@ -491,7 +491,7 @@ partial class GpControllerTests {
       gp1Settings: gp1Settings,
       gp2Settings: null,
       gp3Settings: null,
-      expectedAdcPinNumberInExceptionMessage: 1,
+      expectedAdcGpIndexInThrownException: 1,
       static mcp2221a => {
         _ = mcp2221a.GpPin1.ReadAnalogRaw();
         return default;
@@ -504,7 +504,7 @@ partial class GpControllerTests {
       gp1Settings: null,
       gp2Settings: gp2Settings,
       gp3Settings: null,
-      expectedAdcPinNumberInExceptionMessage: 2,
+      expectedAdcGpIndexInThrownException: 2,
       static async mcp2221a => _ = await mcp2221a.GpPin2.ReadAnalogRawAsync().ConfigureAwait(false)
     );
 
@@ -514,7 +514,7 @@ partial class GpControllerTests {
       gp1Settings: null,
       gp2Settings: gp2Settings,
       gp3Settings: null,
-      expectedAdcPinNumberInExceptionMessage: 2,
+      expectedAdcGpIndexInThrownException: 2,
       static mcp2221a => {
         _ = mcp2221a.GpPin2.ReadAnalogRaw();
         return default;
@@ -527,7 +527,7 @@ partial class GpControllerTests {
       gp1Settings: null,
       gp2Settings: null,
       gp3Settings: gp3Settings,
-      expectedAdcPinNumberInExceptionMessage: 3,
+      expectedAdcGpIndexInThrownException: 3,
       static async mcp2221a => _ = await mcp2221a.GpPin3.ReadAnalogRawAsync().ConfigureAwait(false)
     );
 
@@ -537,7 +537,7 @@ partial class GpControllerTests {
       gp1Settings: null,
       gp2Settings: null,
       gp3Settings: gp3Settings,
-      expectedAdcPinNumberInExceptionMessage: 3,
+      expectedAdcGpIndexInThrownException: 3,
       static mcp2221a => {
         _ = mcp2221a.GpPin3.ReadAnalogRaw();
         return default;
@@ -548,7 +548,7 @@ partial class GpControllerTests {
     byte? gp1Settings,
     byte? gp2Settings,
     byte? gp3Settings,
-    int expectedAdcPinNumberInExceptionMessage,
+    int expectedAdcGpIndexInThrownException,
     Func<Mcp2221AController, ValueTask> readAnalogRawAsyncFunc
   )
   {
@@ -572,10 +572,13 @@ partial class GpControllerTests {
     Assert.That(
       async () => await readAnalogRawAsyncFunc(mcp2221A),
       Throws
-        .InvalidOperationException
+        .TypeOf<Mcp2221AConfigurationException>()
         .With
-        .Property(nameof(InvalidOperationException.Message))
-        .Contains($"GP{expectedAdcPinNumberInExceptionMessage}")
+        .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+        .EqualTo(expectedAdcGpIndexInThrownException)
+        .And
+        .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+        .EqualTo(GpFunction.Adc)
     );
   }
 

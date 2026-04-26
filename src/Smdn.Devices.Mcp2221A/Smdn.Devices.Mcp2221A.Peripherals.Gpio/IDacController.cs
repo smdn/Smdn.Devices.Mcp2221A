@@ -107,6 +107,9 @@ public interface IDacController {
   /// <paramref name="value"/> is negative, or greater than 31 (the maximum
   /// value for a 5-bit DAC).
   /// </exception>
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when the GP pin is not currently configured as <see cref="GpFunction.Dac"/>.
+  /// </exception>
   /// <remarks>
   /// Note that the analog output value is a global setting for the DAC module.
   /// Updating this value through one GP pin will simultaneously change

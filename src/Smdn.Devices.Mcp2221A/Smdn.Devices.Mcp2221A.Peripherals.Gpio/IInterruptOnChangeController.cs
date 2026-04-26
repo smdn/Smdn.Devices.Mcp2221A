@@ -100,6 +100,9 @@ public interface IInterruptOnChangeController {
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
   /// <returns>
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when the GP pin is not currently configured as <see cref="GpFunction.InterruptOnChange"/>.
+  /// </exception>
   /// <see langword="true"/> if an interrupt-on-change event has been detected
   /// (i.e., the configured edge transition has occurred) since the flag was last
   /// cleared; otherwise, <see langword="false"/>.
@@ -144,6 +147,9 @@ public interface IInterruptOnChangeController {
   /// and <see cref="ReadInterruptDetection"/> will return <see langword="false"/>
   /// until the next configured edge transition occurs.
   /// </remarks>
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when the GP pin is not currently configured as <see cref="GpFunction.InterruptOnChange"/>.
+  /// </exception>
   /// <exception cref="InvalidOperationException">
   /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.
   /// </exception>

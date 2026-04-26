@@ -73,10 +73,22 @@ public class Gp0ControllerTests {
       shouldDisposeUsbHidDevice: true
     );
 
-    if (expected.HasValue)
+    if (expected.HasValue) {
       Assert.That(mcp2221A.GpPin0.LastUpdatedValue, Is.EqualTo(expected.Value));
-    else
-      Assert.That(() => _ = mcp2221A.GpPin0.LastUpdatedValue, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP0"));
+    }
+    else {
+      Assert.That(
+        () => _ = mcp2221A.GpPin0.LastUpdatedValue,
+        Throws
+          .TypeOf<Mcp2221AConfigurationException>()
+          .With
+          .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+          .EqualTo(mcp2221A.GpPin0.Index)
+          .And
+          .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+          .EqualTo(GpFunction.Gpio)
+      );
+    }
   }
 
   private static System.Collections.IEnumerable YieldTestCases_CurrentMode_AtStartup()
@@ -96,10 +108,22 @@ public class Gp0ControllerTests {
       shouldDisposeUsbHidDevice: true
     );
 
-    if (expected.HasValue)
+    if (expected.HasValue) {
       Assert.That(mcp2221A.GpPin0.CurrentMode, Is.EqualTo(expected.Value));
-    else
-      Assert.That(() => _ = mcp2221A.GpPin0.CurrentMode, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP0"));
+    }
+    else {
+      Assert.That(
+        () => _ = mcp2221A.GpPin0.CurrentMode,
+        Throws
+          .TypeOf<Mcp2221AConfigurationException>()
+          .With
+          .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+          .EqualTo(mcp2221A.GpPin0.Index)
+          .And
+          .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+          .EqualTo(GpFunction.Gpio)
+      );
+    }
   }
 
   private static System.Collections.IEnumerable YieldTestCases_CurrentFunction_AtStartup()

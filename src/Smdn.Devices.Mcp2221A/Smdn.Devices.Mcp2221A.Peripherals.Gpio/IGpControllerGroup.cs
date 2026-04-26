@@ -245,9 +245,11 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
   /// properties for efficiency.
   /// </para>
   /// </remarks>
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when any of the specified pins are not currently configured as <see cref="GpFunction.Gpio"/>.
+  /// </exception>
   /// <exception cref="InvalidOperationException">
-  /// Thrown when any of the specified pins are not currently configured as GPIO,
-  /// or when an invalid GP index (outside the range 0-3) is encountered
+  /// Thrown when an invalid GP index (outside the range 0-3) is encountered
   /// while populating the results from the device response.
   /// </exception>
   /// <seealso cref="GpController.CurrentMode"/>
@@ -319,9 +321,11 @@ public interface IGpControllerGroup : IReadOnlyList<GpController> {
   /// consolidating multiple updates into a single USB HID transaction.
   /// </para>
   /// </remarks>
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when any of the specified pins are not currently configured as <see cref="GpFunction.Gpio"/>.
+  /// </exception>
   /// <exception cref="InvalidOperationException">
-  /// Thrown when any of the specified pins are not currently configured as GPIO,
-  /// or when an invalid GP index (outside the range 0-3) is detected before
+  /// Thrown when an invalid GP index (outside the range 0-3) is detected before
   /// transmitting the command to the device.
   /// </exception>
   /// <seealso cref="IGpioController.SetMode"/>

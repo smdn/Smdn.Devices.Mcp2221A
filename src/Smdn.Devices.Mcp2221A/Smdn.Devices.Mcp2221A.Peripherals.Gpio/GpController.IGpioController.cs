@@ -17,8 +17,13 @@ partial class GpController : IGpioController {
 #pragma warning restore IDE0040
   protected void ThrowIfInvalidConfiguration(GpFunction requiredFunction)
   {
-    if (CurrentFunction != requiredFunction)
-      throw new InvalidOperationException($"{requiredFunction} operation cannot be performed with the pin currently configured as {CurrentFunction} (GP{Index}: {CurrentDesignation}).");
+    if (CurrentFunction != requiredFunction) {
+      throw new Mcp2221AConfigurationException(
+        gpIndex: Index,
+        requiredFunction: requiredFunction,
+        currentFunction: CurrentFunction
+      );
+    }
   }
 
 #if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES

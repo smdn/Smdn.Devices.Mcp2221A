@@ -131,18 +131,24 @@ partial class GpControllerTests {
     Assert.That(
       () => _ = gp.GetMode(default),
       Throws
-        .InvalidOperationException
+        .TypeOf<Mcp2221AConfigurationException>()
         .With
-        .Property(nameof(InvalidOperationException.Message))
-        .Contains($"GP{gp.Index}")
+        .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+        .EqualTo(gp.Index)
+        .And
+        .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+        .EqualTo(GpFunction.Gpio)
     );
     Assert.That(
       async () => _ = await gp.GetModeAsync(default),
       Throws
-        .InvalidOperationException
+        .TypeOf<Mcp2221AConfigurationException>()
         .With
-        .Property(nameof(InvalidOperationException.Message))
-        .Contains($"GP{gp.Index}")
+        .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+        .EqualTo(gp.Index)
+        .And
+        .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+        .EqualTo(GpFunction.Gpio)
     );
   }
 
@@ -294,18 +300,24 @@ partial class GpControllerTests {
     Assert.That(
       () => _ = gp.Read(default),
       Throws
-        .InvalidOperationException
+        .TypeOf<Mcp2221AConfigurationException>()
         .With
-        .Property(nameof(InvalidOperationException.Message))
-        .Contains($"GP{gp.Index}")
+        .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+        .EqualTo(gp.Index)
+        .And
+        .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+        .EqualTo(GpFunction.Gpio)
     );
     Assert.That(
       async () => _ = await gp.ReadAsync(default),
       Throws
-        .InvalidOperationException
+        .TypeOf<Mcp2221AConfigurationException>()
         .With
-        .Property(nameof(InvalidOperationException.Message))
-        .Contains($"GP{gp.Index}")
+        .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+        .EqualTo(gp.Index)
+        .And
+        .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+        .EqualTo(GpFunction.Gpio)
     );
   }
 

@@ -102,6 +102,9 @@ public interface IClockOutputController {
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// The default value is <see cref="CancellationToken.None"/>.
   /// </param>
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when the GP pin is not currently configured as <see cref="GpFunction.ClockOutput"/>.
+  /// </exception>
   /// <remarks>
   /// Since setting the duty cycle to 0% may not completely stop the clock signal
   /// on the MCP2221A, this method provides a way to physically stop the signal

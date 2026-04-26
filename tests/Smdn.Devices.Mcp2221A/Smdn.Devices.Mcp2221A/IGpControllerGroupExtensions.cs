@@ -683,20 +683,30 @@ public class IGpControllerGroupExtensionsTests {
     );
 
     Assert.That(mcp2221A.GpPin0.CurrentFunction, Is.EqualTo(initialGp0Function));
-    Assert.That(() => _ = mcp2221A.GpPin0.LastUpdatedValue, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP0"));
-    Assert.That(() => _ = mcp2221A.GpPin0.CurrentMode, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP0"));
+    Assert.That(() => _ = mcp2221A.GpPin0.LastUpdatedValue, ThrowsMcp2221AConfigurationException(0));
+    Assert.That(() => _ = mcp2221A.GpPin0.CurrentMode, ThrowsMcp2221AConfigurationException(0));
 
     Assert.That(mcp2221A.GpPin1.CurrentFunction, Is.EqualTo(initialGp1Function));
-    Assert.That(() => _ = mcp2221A.GpPin1.LastUpdatedValue, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP1"));
-    Assert.That(() => _ = mcp2221A.GpPin1.CurrentMode, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP1"));
+    Assert.That(() => _ = mcp2221A.GpPin1.LastUpdatedValue, ThrowsMcp2221AConfigurationException(1));
+    Assert.That(() => _ = mcp2221A.GpPin1.CurrentMode, ThrowsMcp2221AConfigurationException(1));
 
     Assert.That(mcp2221A.GpPin2.CurrentFunction, Is.EqualTo(initialGp2Function));
-    Assert.That(() => _ = mcp2221A.GpPin2.LastUpdatedValue, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP2"));
-    Assert.That(() => _ = mcp2221A.GpPin2.CurrentMode, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP2"));
+    Assert.That(() => _ = mcp2221A.GpPin2.LastUpdatedValue, ThrowsMcp2221AConfigurationException(2));
+    Assert.That(() => _ = mcp2221A.GpPin2.CurrentMode, ThrowsMcp2221AConfigurationException(2));
 
     Assert.That(mcp2221A.GpPin3.CurrentFunction, Is.EqualTo(initialGp3Function));
-    Assert.That(() => _ = mcp2221A.GpPin3.LastUpdatedValue, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP3"));
-    Assert.That(() => _ = mcp2221A.GpPin3.CurrentMode, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP3"));
+    Assert.That(() => _ = mcp2221A.GpPin3.LastUpdatedValue, ThrowsMcp2221AConfigurationException(3));
+    Assert.That(() => _ = mcp2221A.GpPin3.CurrentMode, ThrowsMcp2221AConfigurationException(3));
+
+    static IResolveConstraint ThrowsMcp2221AConfigurationException(int expectedGpIndex)
+      => Throws
+        .TypeOf<Mcp2221AConfigurationException>()
+        .With
+        .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+        .EqualTo(expectedGpIndex)
+        .And
+        .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+        .EqualTo(GpFunction.Gpio);
   }
 
   [Test]
@@ -880,20 +890,30 @@ public class IGpControllerGroupExtensionsTests {
     );
 
     Assert.That(mcp2221A.GpPin0.CurrentFunction, Is.EqualTo(initialGp0Function));
-    Assert.That(() => _ = mcp2221A.GpPin0.LastUpdatedValue, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP0"));
-    Assert.That(() => _ = mcp2221A.GpPin0.CurrentMode, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP0"));
+    Assert.That(() => _ = mcp2221A.GpPin0.LastUpdatedValue, ThrowsMcp2221AConfigurationException(0));
+    Assert.That(() => _ = mcp2221A.GpPin0.CurrentMode, ThrowsMcp2221AConfigurationException(0));
 
     Assert.That(mcp2221A.GpPin1.CurrentFunction, Is.EqualTo(initialGp1Function));
-    Assert.That(() => _ = mcp2221A.GpPin1.LastUpdatedValue, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP1"));
-    Assert.That(() => _ = mcp2221A.GpPin1.CurrentMode, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP1"));
+    Assert.That(() => _ = mcp2221A.GpPin1.LastUpdatedValue, ThrowsMcp2221AConfigurationException(1));
+    Assert.That(() => _ = mcp2221A.GpPin1.CurrentMode, ThrowsMcp2221AConfigurationException(1));
 
     Assert.That(mcp2221A.GpPin2.CurrentFunction, Is.EqualTo(initialGp2Function));
-    Assert.That(() => _ = mcp2221A.GpPin2.LastUpdatedValue, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP2"));
-    Assert.That(() => _ = mcp2221A.GpPin2.CurrentMode, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP2"));
+    Assert.That(() => _ = mcp2221A.GpPin2.LastUpdatedValue, ThrowsMcp2221AConfigurationException(2));
+    Assert.That(() => _ = mcp2221A.GpPin2.CurrentMode, ThrowsMcp2221AConfigurationException(2));
 
     Assert.That(mcp2221A.GpPin3.CurrentFunction, Is.EqualTo(initialGp3Function));
-    Assert.That(() => _ = mcp2221A.GpPin3.LastUpdatedValue, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP3"));
-    Assert.That(() => _ = mcp2221A.GpPin3.CurrentMode, Throws.InvalidOperationException.With.Property(nameof(InvalidOperationException.Message)).Contains("GP3"));
+    Assert.That(() => _ = mcp2221A.GpPin3.LastUpdatedValue, ThrowsMcp2221AConfigurationException(3));
+    Assert.That(() => _ = mcp2221A.GpPin3.CurrentMode, ThrowsMcp2221AConfigurationException(3));
+
+    static IResolveConstraint ThrowsMcp2221AConfigurationException(int expectedGpIndex)
+      => Throws
+        .TypeOf<Mcp2221AConfigurationException>()
+        .With
+        .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+        .EqualTo(expectedGpIndex)
+        .And
+        .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+        .EqualTo(GpFunction.Gpio);
   }
 
   private static System.Collections.IEnumerable YieldTestCases_ConfigureAllAsGpioSyncOrAsync()

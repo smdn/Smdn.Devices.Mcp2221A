@@ -559,10 +559,13 @@ partial class GpControllerTests {
     Assert.That(
       async () => await readInterruptDetectionAsyncFunc(mcp2221A),
       Throws
-        .InvalidOperationException
+        .TypeOf<Mcp2221AConfigurationException>()
         .With
-        .Property(nameof(InvalidOperationException.Message))
-        .Contains(mcp2221A.GpPin1.PinName)
+        .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+        .EqualTo(mcp2221A.GpPin1.Index)
+        .And
+        .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+        .EqualTo(GpFunction.InterruptOnChange)
     );
   }
 
@@ -818,10 +821,13 @@ partial class GpControllerTests {
     Assert.That(
       async () => await clearInterruptDetectionAsyncFunc(mcp2221A.GpPin1),
       Throws
-        .InvalidOperationException
+        .TypeOf<Mcp2221AConfigurationException>()
         .With
-        .Property(nameof(InvalidOperationException.Message))
-        .Contains(mcp2221A.GpPin1.PinName)
+        .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+        .EqualTo(mcp2221A.GpPin1.Index)
+        .And
+        .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+        .EqualTo(GpFunction.InterruptOnChange)
     );
 
     Assert.That(
@@ -981,17 +987,24 @@ partial class GpControllerTests {
     Assert.That(
       async () => await clearInterruptDetectionAsyncFunc(mcp2221A.GpPin1),
       Throws
-        .InvalidOperationException
-        .With
-        .Property(nameof(InvalidOperationException.Message))
-        .Contains(mcp2221A.GpPin1.PinName)
+#if false
         // Since the check for `CurrentFunction` is performed first, the exception resulting
         // from the subsequent check for `IsUsedByGpioController` will not be thrown.
-#if false
-        .And
+        .TypeOf<InvalidOperationException>()
+        .With
         .Property(nameof(InvalidOperationException.Message))
         .Contains(nameof(GpioController))
 #endif
+        .TypeOf<Mcp2221AConfigurationException>()
+        .With
+        .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+        .EqualTo(mcp2221A.GpPin1.Index)
+        .And
+        .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+        .EqualTo(GpFunction.InterruptOnChange)
+        .And
+        .Property(nameof(Mcp2221AConfigurationException.CurrentFunction))
+        .EqualTo(GpFunction.Gpio)
     );
 
     Assert.That(

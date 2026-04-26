@@ -117,8 +117,8 @@ public abstract partial class GpController {
   /// methods on each pin individually.
   /// </para>
   /// </remarks>
-  /// <exception cref="InvalidOperationException">
-  /// Thrown when the current <see cref="CurrentFunction"/> of the pin is not
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when the <see cref="CurrentFunction"/> of the pin is not
   /// <see cref="GpFunction.Gpio"/>.
   /// </exception>
   /// <seealso cref="IGpControllerGroup.ConfigureAllGpSettings"/>
@@ -168,8 +168,8 @@ public abstract partial class GpController {
   /// methods on each pin individually.
   /// </para>
   /// </remarks>
-  /// <exception cref="InvalidOperationException">
-  /// Thrown when the current <see cref="CurrentFunction"/> of the pin is not
+  /// <exception cref="Mcp2221AConfigurationException">
+  /// Thrown when the <see cref="CurrentFunction"/> of the pin is not
   /// <see cref="GpFunction.Gpio"/>.
   /// </exception>
   /// <seealso cref="IGpControllerGroup.ConfigureAllGpSettings"/>

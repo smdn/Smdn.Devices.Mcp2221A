@@ -790,7 +790,7 @@ partial class GpControllerTests {
     => WriteAnalogRawSyncAndAsync_InvalidConfiguration(
       gp2Settings: gp2Settings,
       gp3Settings: null,
-      expectedDacPinNumberInExceptionMessage: 2,
+      expectedDacGpIndexInThrownException: 2,
       static async mcp2221a => await mcp2221a.GpPin2.WriteAnalogRawAsync(0).ConfigureAwait(false)
     );
 
@@ -799,7 +799,7 @@ partial class GpControllerTests {
     => WriteAnalogRawSyncAndAsync_InvalidConfiguration(
       gp2Settings: gp2Settings,
       gp3Settings: null,
-      expectedDacPinNumberInExceptionMessage: 2,
+      expectedDacGpIndexInThrownException: 2,
       static mcp2221a => {
         mcp2221a.GpPin2.WriteAnalogRaw(0);
         return default;
@@ -811,7 +811,7 @@ partial class GpControllerTests {
     => WriteAnalogRawSyncAndAsync_InvalidConfiguration(
       gp2Settings: null,
       gp3Settings: gp3Settings,
-      expectedDacPinNumberInExceptionMessage: 3,
+      expectedDacGpIndexInThrownException: 3,
       static async mcp2221a => await mcp2221a.GpPin3.WriteAnalogRawAsync(0).ConfigureAwait(false)
     );
 
@@ -820,7 +820,7 @@ partial class GpControllerTests {
     => WriteAnalogRawSyncAndAsync_InvalidConfiguration(
       gp2Settings: null,
       gp3Settings: gp3Settings,
-      expectedDacPinNumberInExceptionMessage: 3,
+      expectedDacGpIndexInThrownException: 3,
       static mcp2221a => {
         mcp2221a.GpPin3.WriteAnalogRaw(0);
         return default;
@@ -830,7 +830,7 @@ partial class GpControllerTests {
   private void WriteAnalogRawSyncAndAsync_InvalidConfiguration(
     byte? gp2Settings,
     byte? gp3Settings,
-    int expectedDacPinNumberInExceptionMessage,
+    int expectedDacGpIndexInThrownException,
     Func<Mcp2221AController, ValueTask> writeAnalogRawAsyncFunc
   )
   {
@@ -855,10 +855,13 @@ partial class GpControllerTests {
     Assert.That(
       async () => await writeAnalogRawAsyncFunc(mcp2221A),
       Throws
-        .InvalidOperationException
+        .TypeOf<Mcp2221AConfigurationException>()
         .With
-        .Property(nameof(InvalidOperationException.Message))
-        .Contains($"GP{expectedDacPinNumberInExceptionMessage}")
+        .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+        .EqualTo(expectedDacGpIndexInThrownException)
+        .And
+        .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+        .EqualTo(GpFunction.Dac)
     );
 
     Assert.That(

@@ -332,7 +332,7 @@ partial class Mcp2221AGpioDriver {
     => gpioStateBytes.Span[0 + (gp * 2)] switch {
       GpioValueLow => PinValue.Low,
       GpioValueHigh => PinValue.High,
-      GpioValueInvalid => throw new InvalidOperationException($"GP{gp} is not set for GPIO operation"),
+      GpioValueInvalid => throw new Mcp2221AConfigurationException(gpIndex: gp, requiredFunction: GpFunction.Gpio),
       var unknown => throw new NotSupportedException($"unknown GP pin value: {unknown:X2}"),
     };
 
@@ -341,7 +341,7 @@ partial class Mcp2221AGpioDriver {
     => gpioStateBytes.Span[1 + (gp * 2)] switch {
       GpioDirectionOutput => PinMode.Output,
       GpioDirectionInput => PinMode.Input,
-      GpioDirectionInvalid => throw new InvalidOperationException($"GP{gp} is not set for GPIO operation"),
+      GpioDirectionInvalid => throw new Mcp2221AConfigurationException(gpIndex: gp, requiredFunction: GpFunction.Gpio),
       var unknown => throw new NotSupportedException($"unknown GP direction value: {unknown:X2}"),
     };
 
@@ -410,13 +410,13 @@ partial class Mcp2221AGpioDriver {
       // whether or not a command has been issued to alter the GPIO values of GP<n>
       foreach (var (gp, _) in values) {
         if (gp == firstGpIndexOfNotSetForGpioOperation.Value)
-          throw new InvalidOperationException($"GP{gp} is not set for GPIO operation");
+          throw new Mcp2221AConfigurationException(gpIndex: gp, requiredFunction: GpFunction.Gpio);
       }
 
       // whether or not a command has been issued to alter the GPIO direction of GP<n>
       foreach (var (gp, _) in modes) {
         if (gp == firstGpIndexOfNotSetForGpioOperation.Value)
-          throw new InvalidOperationException($"GP{gp} is not set for GPIO operation");
+          throw new Mcp2221AConfigurationException(gpIndex: gp, requiredFunction: GpFunction.Gpio);
       }
     }
   }

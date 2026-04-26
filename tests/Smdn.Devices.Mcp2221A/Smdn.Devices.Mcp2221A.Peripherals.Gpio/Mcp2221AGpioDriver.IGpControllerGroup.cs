@@ -1067,7 +1067,7 @@ partial class Mcp2221AGpioDriverTests {
     const byte GpEF = 0xEF; // GP<n> direction value: GP<n> is not set for GPIO operation
 
 #pragma warning disable CA1825
-    // InvalidOperationException will be thrown
+    // Mcp2221AConfigurationException will be thrown
     yield return new object?[] {
       new byte[] { GpEE, GpIP, GpLO, GpIP, GpLO, GpIP, GpLO, GpIP },
       new PinValuePair[] { new(0, default) },
@@ -1239,10 +1239,13 @@ partial class Mcp2221AGpioDriverTests {
       async () => await fetchGpioStatesAsyncFunc(mcp2221A.GpPins, pinValuePairsToFetch, pinModePairsToFetch),
       expectedGpIndexInThrownException.HasValue
         ? Throws
-          .InvalidOperationException
+          .TypeOf<Mcp2221AConfigurationException>()
           .With
-          .Property(nameof(InvalidOperationException.Message))
-          .Contains($"GP{expectedGpIndexInThrownException.Value}")
+          .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+          .EqualTo(expectedGpIndexInThrownException.Value)
+          .And
+          .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+          .EqualTo(GpFunction.Gpio)
         : Throws.Nothing
     );
     Assert.That(
@@ -1255,10 +1258,13 @@ partial class Mcp2221AGpioDriverTests {
         Assert.That(
           () => _ = mcp2221A.GpPins[i].LastUpdatedValue,
           Throws
-            .InvalidOperationException
+            .TypeOf<Mcp2221AConfigurationException>()
             .With
-            .Property(nameof(InvalidOperationException.Message))
-            .Contains($"GP{i}"),
+            .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+            .EqualTo(i)
+            .And
+            .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+            .EqualTo(GpFunction.Gpio),
           $"{nameof(GpController.LastUpdatedValue)} GP{i}"
         );
       }
@@ -1276,10 +1282,13 @@ partial class Mcp2221AGpioDriverTests {
         Assert.That(
           () => _ = mcp2221A.GpPins[i].CurrentMode,
           Throws
-            .InvalidOperationException
+            .TypeOf<Mcp2221AConfigurationException>()
             .With
-            .Property(nameof(InvalidOperationException.Message))
-            .Contains($"GP{i}"),
+            .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+            .EqualTo(i)
+            .And
+            .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+            .EqualTo(GpFunction.Gpio),
           $"{nameof(GpController.CurrentMode)} GP{i}"
         );
       }
@@ -1400,7 +1409,7 @@ partial class Mcp2221AGpioDriverTests {
       => [.. gp0, .. gp1, .. gp2, .. gp3];
 
 #pragma warning disable CA1825
-    // InvalidOperationException will be thrown
+    // Mcp2221AConfigurationExceptionMcp2221AConfigurationException will be thrown
     yield return new object?[] {
       new PinValuePair[] { new(0, PinValue.High) },
       new PinModePair[] { },
@@ -1629,10 +1638,13 @@ partial class Mcp2221AGpioDriverTests {
       async () => await applyGpioStatesAsyncFunc(mcp2221A.GpPins, pinValuePairsToApply, pinModePairsToApply),
       expectedGpIndexInThrownException.HasValue
         ? Throws
-          .TypeOf<InvalidOperationException>()
+          .TypeOf<Mcp2221AConfigurationException>()
           .With
-          .Property(nameof(InvalidOperationException.Message))
-          .Contains($"GP{expectedGpIndexInThrownException.Value}")
+          .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+          .EqualTo(expectedGpIndexInThrownException.Value)
+          .And
+          .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+          .EqualTo(GpFunction.Gpio)
         : Throws.Nothing
     );
     Assert.That(
@@ -1645,10 +1657,13 @@ partial class Mcp2221AGpioDriverTests {
         Assert.That(
           () => _ = mcp2221A.GpPins[i].LastUpdatedValue,
           Throws
-            .InvalidOperationException
+            .TypeOf<Mcp2221AConfigurationException>()
             .With
-            .Property(nameof(InvalidOperationException.Message))
-            .Contains($"GP{i}"),
+            .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+            .EqualTo(i)
+            .And
+            .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+            .EqualTo(GpFunction.Gpio),
           $"{nameof(GpController.LastUpdatedValue)} GP{i}"
         );
       }
@@ -1668,10 +1683,13 @@ partial class Mcp2221AGpioDriverTests {
         Assert.That(
           () => _ = mcp2221A.GpPins[i].CurrentMode,
           Throws
-            .InvalidOperationException
+            .TypeOf<Mcp2221AConfigurationException>()
             .With
-            .Property(nameof(InvalidOperationException.Message))
-            .Contains($"GP{i}"),
+            .Property(nameof(Mcp2221AConfigurationException.GpIndex))
+            .EqualTo(i)
+            .And
+            .Property(nameof(Mcp2221AConfigurationException.RequiredFunction))
+            .EqualTo(GpFunction.Gpio),
           $"{nameof(GpController.CurrentMode)} GP{i}"
         );
       }
