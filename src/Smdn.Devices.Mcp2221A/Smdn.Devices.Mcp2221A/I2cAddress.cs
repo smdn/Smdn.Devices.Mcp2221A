@@ -14,9 +14,9 @@ public readonly struct I2cAddress :
   IComparable<I2cAddress>
 {
 #pragma warning disable IDE0055
-  public static readonly I2cAddress Zero = default;
-  public static readonly I2cAddress DeviceMinValue = new((byte)0b_0_0001_000u);
-  public static readonly I2cAddress DeviceMaxValue = new((byte)0b_0_1110_111u);
+  public static I2cAddress Zero { get; } = default;
+  public static I2cAddress DeviceMinValue { get; } = new((byte)0b_0_0001_000u);
+  public static I2cAddress DeviceMaxValue { get; } = new((byte)0b_0_1110_111u);
 
   private readonly byte address;
 
