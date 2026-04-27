@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
+using System;
 using System.Threading.Tasks;
 
 using NUnit.Framework;
@@ -8,6 +9,21 @@ namespace Smdn.Devices.Mcp2221A;
 
 [TestFixture]
 public class IMcp2221AInfoExtensionsTests {
+  [Test]
+  public void IsMcp2221A_ArgumentNull()
+  {
+    IMcp2221AInfo? info = null;
+
+    Assert.That(
+      () => info!.IsMcp2221A,
+      Throws
+        .ArgumentNullException
+        .With
+        .Property(nameof(ArgumentNullException.ParamName))
+        .EqualTo("info")
+    );
+  }
+
   [TestCase('1', '1', false)] // 1.1 (MCP2221)
   [TestCase('1', '2', true)] // 1.2 (MCP2221A)
   public async Task IsMcp2221A(char firmwareRevisionMajor, char firmwareRevisionMinor, bool expected)
