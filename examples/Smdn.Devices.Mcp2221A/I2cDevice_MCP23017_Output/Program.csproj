@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Smdn.Devices.Mcp2221A" Version="1.0.0-preview3" />
+    <PackageReference Include="Smdn.Devices.Mcp2221A" Version="1.0.0-preview4" />
     <PackageReference Include="System.Device.Gpio" Version="4.1.0" />
     <PackageReference Include="Iot.Device.Bindings" Version="4.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
