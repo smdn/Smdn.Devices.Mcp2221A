@@ -1,23 +1,25 @@
-// Smdn.Devices.Mcp2221A.dll (Smdn.Devices.Mcp2221A-1.0.0-preview3)
+// Smdn.Devices.Mcp2221A.dll (Smdn.Devices.Mcp2221A-1.0.0-preview4)
 //   Name: Smdn.Devices.Mcp2221A
 //   AssemblyVersion: 1.0.0.0
-//   InformationalVersion: 1.0.0-preview3+d42e385fe4b06f0ecfa89ea8ad4b2b176d8a4667
+//   InformationalVersion: 1.0.0-preview4+a24148124a7d6bbdc25f3748eb0d77bcf6a78f49
 //   TargetFramework: .NETCoreApp,Version=v8.0
 //   Configuration: Release
 //   Metadata: IsTrimmable=True
 //   Metadata: RepositoryUrl=https://github.com/smdn/Smdn.Devices.Mcp2221A
 //   Metadata: RepositoryBranch=main
-//   Metadata: RepositoryCommit=d42e385fe4b06f0ecfa89ea8ad4b2b176d8a4667
+//   Metadata: RepositoryCommit=a24148124a7d6bbdc25f3748eb0d77bcf6a78f49
 //   Referenced assemblies:
 //     Microsoft.Extensions.DependencyInjection.Abstractions, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
 //     Microsoft.Extensions.Logging.Abstractions, Version=5.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
 //     Smdn.IO.UsbHid.Abstractions, Version=1.0.0.0, Culture=neutral
 //     System.Collections, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
 //     System.ComponentModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
+//     System.ComponentModel.Primitives, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
 //     System.Device.Gpio, Version=4.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35
 //     System.Linq, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
 //     System.Memory, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51
 //     System.Runtime, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
+//     System.Threading, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
 #nullable enable annotations
 
 using System;
@@ -41,15 +43,40 @@ namespace Smdn.Devices.Mcp2221A {
     string SerialNumber { get; }
   }
 
+  public enum ClockOutputDutyCycle : int {
+    Duty0 = 0,
+    Duty25 = 1,
+    Duty50 = 2,
+    Duty75 = 3,
+  }
+
+  public enum ClockOutputFrequency : int {
+    Frequency12MHz = 2,
+    Frequency1500kHz = 5,
+    Frequency24MHz = 1,
+    Frequency375kHz = 7,
+    Frequency3MHz = 4,
+    Frequency6MHz = 3,
+    Frequency750kHz = 6,
+    Reserved = 0,
+  }
+
   public enum GpFunction : int {
     Adc = 1,
     ClockOutput = 5,
     Dac = 2,
-    ExternalInterrupt = 3,
     Gpio = 0,
+    InterruptOnChange = 3,
     LedOutput = 4,
     UsbConfigureStatus = 7,
     UsbSuspendStatus = 6,
+  }
+
+  public enum InterruptOnChangeTrigger : int {
+    Both = 3,
+    Falling = 2,
+    None = 0,
+    Rising = 1,
   }
 
   public enum VoltageReferenceSource : int {
@@ -58,6 +85,17 @@ namespace Smdn.Devices.Mcp2221A {
     Vrm2048 = 5,
     Vrm4096 = 7,
     VrmOff = 1,
+  }
+
+  public static class IClockOutputControllerExtensions {
+    extension(IClockOutputController controller) {
+      public int CurrentClockOutputDutyCycleInPercent { get; }
+      public double CurrentClockOutputDutyRatio { get; }
+      public int CurrentClockOutputFrequencyInHz { get; }
+
+      public void ResumeClockOutput(CancellationToken cancellationToken = default) {}
+      public ValueTask ResumeClockOutputAsync(CancellationToken cancellationToken = default) {}
+    }
   }
 
   public static class IGpControllerGroupExtensions {
@@ -92,32 +130,38 @@ namespace Smdn.Devices.Mcp2221A {
   }
 
   public static class IGpioControllerExtensions {
-    public static void ConfigureAsGpioInput(this IGpioController controller, CancellationToken cancellationToken = default) {}
-    public static ValueTask ConfigureAsGpioInputAsync(this IGpioController controller, CancellationToken cancellationToken = default) {}
-    public static void ConfigureAsGpioOutput(this IGpioController controller, PinValue initialValue = default, CancellationToken cancellationToken = default) {}
-    public static ValueTask ConfigureAsGpioOutputAsync(this IGpioController controller, PinValue initialValue = default, CancellationToken cancellationToken = default) {}
+    extension(IGpioController controller) {
+      public void ConfigureAsGpioInput(CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAsGpioInputAsync(CancellationToken cancellationToken = default) {}
+      public void ConfigureAsGpioOutput(PinValue? initialValue = null, CancellationToken cancellationToken = default) {}
+      public ValueTask ConfigureAsGpioOutputAsync(PinValue? initialValue = null, CancellationToken cancellationToken = default) {}
+    }
   }
 
   public static class II2cControllerExtensions {
-    public static int Read(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
-    public static ValueTask<int> ReadAsync(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
-    public static int ReadByte(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, CancellationToken cancellationToken = default) {}
-    public static async ValueTask<int> ReadByteAsync(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, CancellationToken cancellationToken = default) {}
-    public static void Write(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
-    public static ValueTask WriteAsync(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
-    public static void WriteByte(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte @value, CancellationToken cancellationToken = default) {}
-    public static async ValueTask WriteByteAsync(this II2cController controller, I2cAddress address, int transmissionSpeedInKbps, byte @value, CancellationToken cancellationToken = default) {}
+    extension(II2cController controller) {
+      public int Read(I2cAddress address, int transmissionSpeedInKbps, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
+      public ValueTask<int> ReadAsync(I2cAddress address, int transmissionSpeedInKbps, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
+      public int ReadByte(I2cAddress address, int transmissionSpeedInKbps, CancellationToken cancellationToken = default) {}
+      public ValueTask<int> ReadByteAsync(I2cAddress address, int transmissionSpeedInKbps, CancellationToken cancellationToken = default) {}
+      public void Write(I2cAddress address, int transmissionSpeedInKbps, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
+      public ValueTask WriteAsync(I2cAddress address, int transmissionSpeedInKbps, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default) {}
+      public void WriteByte(I2cAddress address, int transmissionSpeedInKbps, byte @value, CancellationToken cancellationToken = default) {}
+      public ValueTask WriteByteAsync(I2cAddress address, int transmissionSpeedInKbps, byte @value, CancellationToken cancellationToken = default) {}
+    }
   }
 
   public static class II2cDeviceExtensions {
-    public static void Read(this II2cDevice device, Span<byte> buffer, CancellationToken cancellationToken = default) {}
-    public static ValueTask<int> ReadAsync(this II2cDevice device, Memory<byte> buffer, CancellationToken cancellationToken = default) {}
-    public static int ReadByte(this II2cDevice device, CancellationToken cancellationToken = default) {}
-    public static ValueTask<int> ReadByteAsync(this II2cDevice device, CancellationToken cancellationToken = default) {}
-    public static void Write(this II2cDevice device, ReadOnlySpan<byte> buffer, CancellationToken cancellationToken = default) {}
-    public static ValueTask WriteAsync(this II2cDevice device, ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default) {}
-    public static void WriteByte(this II2cDevice device, byte @value, CancellationToken cancellationToken = default) {}
-    public static ValueTask WriteByteAsync(this II2cDevice device, byte @value, CancellationToken cancellationToken = default) {}
+    extension(II2cDevice device) {
+      public void Read(Span<byte> buffer, CancellationToken cancellationToken = default) {}
+      public ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) {}
+      public int ReadByte(CancellationToken cancellationToken = default) {}
+      public ValueTask<int> ReadByteAsync(CancellationToken cancellationToken = default) {}
+      public void Write(ReadOnlySpan<byte> buffer, CancellationToken cancellationToken = default) {}
+      public ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default) {}
+      public void WriteByte(byte @value, CancellationToken cancellationToken = default) {}
+      public ValueTask WriteByteAsync(byte @value, CancellationToken cancellationToken = default) {}
+    }
   }
 
   public static class IMcp2221AInfoExtensions {
@@ -132,7 +176,17 @@ namespace Smdn.Devices.Mcp2221A {
     public Mcp2221ACommandException(string? message, Exception? innerException) {}
   }
 
-  public class Mcp2221AController :
+  public class Mcp2221AConfigurationException : InvalidOperationException {
+    public Mcp2221AConfigurationException() {}
+    public Mcp2221AConfigurationException(string? message) {}
+    public Mcp2221AConfigurationException(string? message, Exception? innerException) {}
+
+    public GpFunction? CurrentFunction { get; }
+    public int? GpIndex { get; }
+    public GpFunction? RequiredFunction { get; }
+  }
+
+  public sealed class Mcp2221AController :
     IAsyncDisposable,
     IDisposable,
     IMcp2221AInfo
@@ -175,23 +229,10 @@ namespace Smdn.Devices.Mcp2221A {
     public string Product { get; }
     public string SerialNumber { get; }
 
-    protected virtual void Dispose(bool disposing) {}
     public void Dispose() {}
     public async ValueTask DisposeAsync() {}
-    protected virtual async ValueTask DisposeAsyncCore() {}
     public void Reset(CancellationToken cancellationToken = default) {}
     public async ValueTask ResetAsync(CancellationToken cancellationToken = default) {}
-    private TResponse Smdn.Devices.Mcp2221A.IMcp2221ATransceiver.Command<TArg, TResponse>(ReadOnlySpan<byte> commandInput, Span<byte> responseOutput, TArg arg, Mcp2221AConstructCommandWithSpanAction<TArg> constructCommand, Mcp2221AParseResponseWithSpanFunc<TArg, TResponse> parseResponse, CancellationToken cancellationToken) {}
-    private ValueTask<TResponse> Smdn.Devices.Mcp2221A.IMcp2221ATransceiver.CommandAsync<TArg, TResponse>(ReadOnlyMemory<byte> commandInput, Memory<byte> responseOutput, TArg arg, Mcp2221AConstructCommandWithSpanAction<TArg> constructCommand, Mcp2221AParseResponseWithSpanFunc<TArg, TResponse> parseResponse, CancellationToken cancellationToken) {}
-  }
-
-  public sealed class Mcp2221AInfo : IMcp2221AInfo {
-    public string ChipFactorySerialNumber { get; init; }
-    public string FirmwareRevision { get; init; }
-    public string HardwareRevision { get; init; }
-    public string Manufacturer { get; init; }
-    public string Product { get; init; }
-    public string SerialNumber { get; init; }
   }
 
   public class Mcp2221ANotFoundException : InvalidOperationException {
@@ -219,9 +260,9 @@ namespace Smdn.Devices.Mcp2221A {
     IEquatable<byte>,
     IEquatable<int>
   {
-    public static readonly I2cAddress DeviceMaxValue; // = "77"
-    public static readonly I2cAddress DeviceMinValue; // = "08"
-    public static readonly I2cAddress Zero; // = "00"
+    public static I2cAddress DeviceMaxValue { get; } // = "0x77"
+    public static I2cAddress DeviceMinValue { get; } // = "0x08"
+    public static I2cAddress Zero { get; } // = "0x00"
 
     public static I2cAddress FromByte(byte address) {}
     public static bool operator == (I2cAddress x, I2cAddress y) {}
@@ -266,18 +307,28 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio {
     VoltageReferenceSource CurrentAdcReferenceSource { get; }
     int LastReadAnalogRawValue { get; }
 
-    void ConfigureAsAdc(VoltageReferenceSource voltageReferenceSource, CancellationToken cancellationToken = default);
-    ValueTask ConfigureAsAdcAsync(VoltageReferenceSource voltageReferenceSource, CancellationToken cancellationToken = default);
+    void ConfigureAsAdc(VoltageReferenceSource? voltageReferenceSource, CancellationToken cancellationToken = default);
+    ValueTask ConfigureAsAdcAsync(VoltageReferenceSource? voltageReferenceSource, CancellationToken cancellationToken = default);
     int ReadAnalogRaw(CancellationToken cancellationToken = default);
     ValueTask<int> ReadAnalogRawAsync(CancellationToken cancellationToken = default);
+  }
+
+  public interface IClockOutputController {
+    ClockOutputDutyCycle CurrentClockOutputDutyCycle { get; }
+    ClockOutputFrequency CurrentClockOutputFrequency { get; }
+
+    void ConfigureAsClockOutput(ClockOutputFrequency? frequency = null, ClockOutputDutyCycle? dutyCycle = null, CancellationToken cancellationToken = default);
+    ValueTask ConfigureAsClockOutputAsync(ClockOutputFrequency? frequency = null, ClockOutputDutyCycle? dutyCycle = null, CancellationToken cancellationToken = default);
+    void SuspendClockOutput(CancellationToken cancellationToken = default);
+    ValueTask SuspendClockOutputAsync(CancellationToken cancellationToken = default);
   }
 
   public interface IDacController {
     VoltageReferenceSource CurrentDacReferenceSource { get; }
     int LastWriteAnalogRawValue { get; }
 
-    void ConfigureAsDac(VoltageReferenceSource voltageReferenceSource, int? initialOutputValue = null, CancellationToken cancellationToken = default);
-    ValueTask ConfigureAsDacAsync(VoltageReferenceSource voltageReferenceSource, int? initialOutputValue = null, CancellationToken cancellationToken = default);
+    void ConfigureAsDac(VoltageReferenceSource? voltageReferenceSource, int? initialOutputValue = null, CancellationToken cancellationToken = default);
+    ValueTask ConfigureAsDacAsync(VoltageReferenceSource? voltageReferenceSource, int? initialOutputValue = null, CancellationToken cancellationToken = default);
     void WriteAnalogRaw(int @value, CancellationToken cancellationToken = default);
     ValueTask WriteAnalogRawAsync(int @value, CancellationToken cancellationToken = default);
   }
@@ -303,8 +354,8 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio {
   }
 
   public interface IGpioController {
-    void ConfigureAsGpio(PinMode mode, PinValue initialValue, CancellationToken cancellationToken = default);
-    ValueTask ConfigureAsGpioAsync(PinMode mode, PinValue initialValue, CancellationToken cancellationToken = default);
+    void ConfigureAsGpio(PinMode? mode, PinValue? initialValue, CancellationToken cancellationToken = default);
+    ValueTask ConfigureAsGpioAsync(PinMode? mode, PinValue? initialValue, CancellationToken cancellationToken = default);
     PinMode GetMode(CancellationToken cancellationToken = default);
     ValueTask<PinMode> GetModeAsync(CancellationToken cancellationToken = default);
     PinValue Read(CancellationToken cancellationToken = default);
@@ -313,6 +364,18 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio {
     ValueTask SetModeAsync(PinMode mode, CancellationToken cancellationToken = default);
     void Write(PinValue @value, CancellationToken cancellationToken = default);
     ValueTask WriteAsync(PinValue @value, CancellationToken cancellationToken = default);
+  }
+
+  public interface IInterruptOnChangeController {
+    InterruptOnChangeTrigger CurrentInterruptOnChangeTrigger { get; }
+    bool LastReadInterruptDetectionFlag { get; }
+
+    void ClearInterruptDetection(CancellationToken cancellationToken = default);
+    ValueTask ClearInterruptDetectionAsync(CancellationToken cancellationToken = default);
+    void ConfigureAsInterruptOnChange(InterruptOnChangeTrigger? detectionTrigger, bool clearDetectionFlag, CancellationToken cancellationToken = default);
+    ValueTask ConfigureAsInterruptOnChangeAsync(InterruptOnChangeTrigger? detectionTrigger, bool clearDetectionFlag, CancellationToken cancellationToken = default);
+    bool ReadInterruptDetection(CancellationToken cancellationToken = default);
+    ValueTask<bool> ReadInterruptDetectionAsync(CancellationToken cancellationToken = default);
   }
 
   public sealed class Gp0Controller : GpController {
@@ -329,25 +392,37 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio {
 
   public sealed class Gp1Controller :
     GpController,
-    IAdcController
+    IAdcController,
+    IClockOutputController,
+    IInterruptOnChangeController
   {
+    public ClockOutputDutyCycle CurrentClockOutputDutyCycle { get; }
+    public ClockOutputFrequency CurrentClockOutputFrequency { get; }
     public override string CurrentDesignation { get; }
     public override GpFunction CurrentFunction { get; }
+    public InterruptOnChangeTrigger CurrentInterruptOnChangeTrigger { get; }
     public override int Index { get; }
     public int LastReadAnalogRawValue { get; }
+    public bool LastReadInterruptDetectionFlag { get; }
     public override string PinName { get; }
     VoltageReferenceSource IAdcController.CurrentAdcReferenceSource { get; }
 
-    public void ConfigureAsAdc(VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd, CancellationToken cancellationToken = default) {}
-    public ValueTask ConfigureAsAdcAsync(VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd, CancellationToken cancellationToken = default) {}
-    public void ConfigureAsClockOutput(CancellationToken cancellationToken = default) {}
-    public ValueTask ConfigureAsClockOutputAsync(CancellationToken cancellationToken = default) {}
-    public void ConfigureAsExternalInterrupt(CancellationToken cancellationToken = default) {}
-    public ValueTask ConfigureAsExternalInterruptAsync(CancellationToken cancellationToken = default) {}
+    public void ClearInterruptDetection(CancellationToken cancellationToken = default) {}
+    public ValueTask ClearInterruptDetectionAsync(CancellationToken cancellationToken = default) {}
+    public void ConfigureAsAdc(VoltageReferenceSource? voltageReferenceSource = (VoltageReferenceSource)0, CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsAdcAsync(VoltageReferenceSource? voltageReferenceSource = (VoltageReferenceSource)0, CancellationToken cancellationToken = default) {}
+    public void ConfigureAsClockOutput(ClockOutputFrequency? frequency = null, ClockOutputDutyCycle? dutyCycle = null, CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsClockOutputAsync(ClockOutputFrequency? frequency = null, ClockOutputDutyCycle? dutyCycle = null, CancellationToken cancellationToken = default) {}
+    public void ConfigureAsInterruptOnChange(InterruptOnChangeTrigger? detectionTrigger = null, bool clearDetectionFlag = true, CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsInterruptOnChangeAsync(InterruptOnChangeTrigger? detectionTrigger = null, bool clearDetectionFlag = true, CancellationToken cancellationToken = default) {}
     public void ConfigureAsUtxLedOutput(CancellationToken cancellationToken = default) {}
     public ValueTask ConfigureAsUtxLedOutputAsync(CancellationToken cancellationToken = default) {}
     public int ReadAnalogRaw(CancellationToken cancellationToken = default) {}
     public async ValueTask<int> ReadAnalogRawAsync(CancellationToken cancellationToken = default) {}
+    public bool ReadInterruptDetection(CancellationToken cancellationToken = default) {}
+    public async ValueTask<bool> ReadInterruptDetectionAsync(CancellationToken cancellationToken = default) {}
+    public void SuspendClockOutput(CancellationToken cancellationToken = default) {}
+    public ValueTask SuspendClockOutputAsync(CancellationToken cancellationToken = default) {}
   }
 
   public sealed class Gp2Controller :
@@ -364,10 +439,10 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio {
     VoltageReferenceSource IDacController.CurrentDacReferenceSource { get; }
     int IDacController.LastWriteAnalogRawValue { get; }
 
-    public void ConfigureAsAdc(VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd, CancellationToken cancellationToken = default) {}
-    public ValueTask ConfigureAsAdcAsync(VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd, CancellationToken cancellationToken = default) {}
-    public void ConfigureAsDac(VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd, int? initialOutputValue = null, CancellationToken cancellationToken = default) {}
-    public ValueTask ConfigureAsDacAsync(VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd, int? initialOutputValue = null, CancellationToken cancellationToken = default) {}
+    public void ConfigureAsAdc(VoltageReferenceSource? voltageReferenceSource = (VoltageReferenceSource)0, CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsAdcAsync(VoltageReferenceSource? voltageReferenceSource = (VoltageReferenceSource)0, CancellationToken cancellationToken = default) {}
+    public void ConfigureAsDac(VoltageReferenceSource? voltageReferenceSource = (VoltageReferenceSource)0, int? initialOutputValue = null, CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsDacAsync(VoltageReferenceSource? voltageReferenceSource = (VoltageReferenceSource)0, int? initialOutputValue = null, CancellationToken cancellationToken = default) {}
     public void ConfigureAsUsbConfigureStatus(CancellationToken cancellationToken = default) {}
     public ValueTask ConfigureAsUsbConfigureStatusAsync(CancellationToken cancellationToken = default) {}
     public int ReadAnalogRaw(CancellationToken cancellationToken = default) {}
@@ -390,10 +465,10 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio {
     VoltageReferenceSource IDacController.CurrentDacReferenceSource { get; }
     int IDacController.LastWriteAnalogRawValue { get; }
 
-    public void ConfigureAsAdc(VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd, CancellationToken cancellationToken = default) {}
-    public ValueTask ConfigureAsAdcAsync(VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd, CancellationToken cancellationToken = default) {}
-    public void ConfigureAsDac(VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd, int? initialOutputValue = null, CancellationToken cancellationToken = default) {}
-    public ValueTask ConfigureAsDacAsync(VoltageReferenceSource voltageReferenceSource = VoltageReferenceSource.Vdd, int? initialOutputValue = null, CancellationToken cancellationToken = default) {}
+    public void ConfigureAsAdc(VoltageReferenceSource? voltageReferenceSource = (VoltageReferenceSource)0, CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsAdcAsync(VoltageReferenceSource? voltageReferenceSource = (VoltageReferenceSource)0, CancellationToken cancellationToken = default) {}
+    public void ConfigureAsDac(VoltageReferenceSource? voltageReferenceSource = (VoltageReferenceSource)0, int? initialOutputValue = null, CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsDacAsync(VoltageReferenceSource? voltageReferenceSource = (VoltageReferenceSource)0, int? initialOutputValue = null, CancellationToken cancellationToken = default) {}
     public void ConfigureAsI2cLedOutput(CancellationToken cancellationToken = default) {}
     public ValueTask ConfigureAsI2cLedOutputAsync(CancellationToken cancellationToken = default) {}
     public int ReadAnalogRaw(CancellationToken cancellationToken = default) {}
@@ -411,8 +486,8 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio {
     public PinValue LastUpdatedValue { get; }
     public abstract string PinName { get; }
 
-    public void ConfigureAsGpio(PinMode mode = PinMode.Output, PinValue initialValue = default, CancellationToken cancellationToken = default) {}
-    public ValueTask ConfigureAsGpioAsync(PinMode mode = PinMode.Output, PinValue initialValue = default, CancellationToken cancellationToken = default) {}
+    public void ConfigureAsGpio(PinMode? mode = (PinMode)1, PinValue? initialValue = null, CancellationToken cancellationToken = default) {}
+    public ValueTask ConfigureAsGpioAsync(PinMode? mode = (PinMode)1, PinValue? initialValue = null, CancellationToken cancellationToken = default) {}
     public PinMode GetMode(CancellationToken cancellationToken = default) {}
     public async ValueTask<PinMode> GetModeAsync(CancellationToken cancellationToken = default) {}
     public bool IsFunctionSupported(GpFunction function) {}
@@ -483,8 +558,10 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.I2c {
   }
 
   public static class II2cControllerBusScanningExtensions {
-    public static (IReadOnlySet<I2cAddress> WriteAddressSet, IReadOnlySet<I2cAddress> ReadAddressSet) ScanBus(this II2cController controller, I2cAddress addressRangeMin = default, I2cAddress addressRangeMax = default, int i2cBusTransmissionSpeedInKbps = 100, IProgress<I2cScanBusProgress>? progress = null, CancellationToken cancellationToken = default) {}
-    public static async ValueTask<(IReadOnlySet<I2cAddress> WriteAddressSet, IReadOnlySet<I2cAddress> ReadAddressSet)> ScanBusAsync(this II2cController controller, I2cAddress addressRangeMin = default, I2cAddress addressRangeMax = default, int i2cBusTransmissionSpeedInKbps = 100, IProgress<I2cScanBusProgress>? progress = null, CancellationToken cancellationToken = default) {}
+    extension(II2cController controller) {
+      public (IReadOnlySet<I2cAddress> WriteAddressSet, IReadOnlySet<I2cAddress> ReadAddressSet) ScanBus(I2cAddress addressRangeMin = default, I2cAddress addressRangeMax = default, int i2cBusTransmissionSpeedInKbps = 100, IProgress<I2cScanBusProgress>? progress = null, CancellationToken cancellationToken = default) {}
+      public ValueTask<(IReadOnlySet<I2cAddress> WriteAddressSet, IReadOnlySet<I2cAddress> ReadAddressSet)> ScanBusAsync(I2cAddress addressRangeMin = default, I2cAddress addressRangeMax = default, int i2cBusTransmissionSpeedInKbps = 100, IProgress<I2cScanBusProgress>? progress = null, CancellationToken cancellationToken = default) {}
+    }
   }
 
   public sealed class Mcp2221AI2cBus :
