@@ -14,7 +14,7 @@ namespace Smdn.Devices.Mcp2221A;
 /// Represents the information set on the MCP2221/MCP2221A or
 /// stored in its flash memory.
 /// </summary>
-public sealed class Mcp2221AInfo : IMcp2221AInfo {
+internal sealed class Mcp2221AInfo : IMcp2221AInfo {
   private static class RetrieveRevisionCommand {
 #pragma warning disable SA1313 // [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
     public static void ConstructCommand(Span<byte> comm, None _)
