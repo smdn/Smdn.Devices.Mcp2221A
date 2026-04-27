@@ -24,7 +24,6 @@ public static class II2cControllerBusScanningExtensions {
 #pragma warning disable IDE0051
   private static II2cController ThrowIfReceiverIsNull(II2cController controller, string paramName)
     => controller ?? throw new ArgumentNullException(paramName: paramName);
-#pragma warning restore IDE0051
 
   private static void ValidateAddressRange(
     ref I2cAddress addressRangeMin,
@@ -39,6 +38,7 @@ public static class II2cControllerBusScanningExtensions {
     if (addressRangeMax.Equals(I2cAddress.Zero))
       addressRangeMax = I2cAddress.DeviceMaxValue;
   }
+#pragma warning restore IDE0051
 
 #pragma warning disable CA1034
   extension(II2cController controller) {
