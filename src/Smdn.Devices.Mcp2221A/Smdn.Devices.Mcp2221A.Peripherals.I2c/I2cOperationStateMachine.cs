@@ -268,7 +268,7 @@ internal class I2cOperationStateMachine {
     comm[0] = 0x90; // I2C Write Data
     comm[1] = (byte)(data.Length & 0x00FF); // Requested I2C transfer length - low byte
     comm[2] = (byte)(data.Length >> 8); // Requested I2C transfer length - high byte
-    comm[3] = address.GetWriteAddress(); // I2C slave address to communicate with
+    comm[3] = address.GetWriteAddress(); // I2C device address to communicate with
     data.CopyTo(comm.Slice(4));
   }
 
@@ -298,7 +298,7 @@ internal class I2cOperationStateMachine {
     comm[0] = 0x91; // I2C Read Data
     comm[1] = (byte)(buffer.Length & 0x00FF); // Requested I2C transfer length - low byte
     comm[2] = (byte)(buffer.Length >> 8); // Requested I2C transfer length - high byte
-    comm[3] = address.GetReadAddress(); // I2C slave address to communicate with
+    comm[3] = address.GetReadAddress(); // I2C device address to communicate with
   }
 
   private bool ReadParseResponse(
@@ -339,7 +339,7 @@ internal class I2cOperationStateMachine {
     operationState = resp[1] switch {
       0x00 => OperationState.AdvanceToNextStep, // Command completed successfully
       0x01 => OperationState.Continue, // Command not completed (I2C engine is busy)
-      0x41 => throw new I2cReadException(address, "can not read from I2C slave"), // Error reading the I2C slave data
+      0x41 => throw new I2cReadException(address, "can not read data from I2C target"),
       _ => ThrowUnexpectedResponseException("I2C READ DATA - GET I2C DATA", address, resp[1]),
     };
 

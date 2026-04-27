@@ -5,29 +5,58 @@ using System;
 
 namespace Smdn.Devices.Mcp2221A;
 
+/// <summary>
+/// The exception that is thrown when an operation is attempted on a General
+/// Purpose (GP) pin that is not configured for the required function.
+/// </summary>
+/// <remarks>
+/// <para>
+/// This exception is thrown when the configuration (<see cref="GpFunction"/>)
+/// of a GP pin required to perform an operation does not match the current
+/// configuration of the device.
+/// </para>
+/// <para>
+/// This includes operations such as:
+/// <list type="bullet">
+/// <item>
+///   GPIO: Changing digital output levels or I/O modes, and reading
+///   input levels or current modes.
+/// </item>
+/// <item>DAC/ADC: Setting or getting analog input/output values.</item>
+/// <item>IOC: Reading or clearing interrupt detection flags.</item>
+/// <item>Clock Output: Changing clock frequency or duty cycle.</item>
+/// </list>
+/// </para>
+/// <para>
+/// The index of the GP pin that caused the exception can be referred to
+/// via the <see cref="GpIndex"/> property, and the function required for
+/// the operation can be referred to via the <see cref="RequiredFunction"/>
+/// property.
+/// </para>
+/// </remarks>
 public class Mcp2221AConfigurationException : InvalidOperationException {
   private const string DefaultMessage = "The requested operation cannot be performed with the current configuration.";
 
   /// <summary>
-  /// Gets the value representing the GP pin number of the target
-  /// on which the requested operation was attempted.
+  /// Gets the index of the GP pin (<c>0</c>-<c>3</c>) that caused the
+  /// exception.
   /// </summary>
   public int? GpIndex { get; }
 
   /// <summary>
-  /// Gets the value of <see cref="GpFunction"/>, which represents the function
-  /// that must be assigned to the GP pin for which the requested operation
-  /// is to be performed.
+  /// Gets the <see cref="GpFunction"/> that must be assigned to the GP
+  /// pin to perform the requested operation.
   /// </summary>
   /// <seealso cref="GpIndex"/>
+  /// <seealso cref="GpFunction"/>
   public GpFunction? RequiredFunction { get; }
 
   /// <summary>
-  /// Gets the value of <see cref="GpFunction"/> representing the function
-  /// currently assigned to the GP pin on which the requested operation
-  /// was attempted.
+  /// Gets the <see cref="GpFunction"/> currently assigned to the GP pin
+  /// on which the requested operation was attempted.
   /// </summary>
   /// <seealso cref="GpIndex"/>
+  /// <seealso cref="GpFunction"/>
   public GpFunction? CurrentFunction { get; }
 
   public Mcp2221AConfigurationException()

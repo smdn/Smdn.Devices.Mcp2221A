@@ -33,7 +33,7 @@ partial class Mcp2221AController {
   /// <see cref="IUsbHidService"/> is not registered in <paramref name="serviceProvider"/>.
   /// </exception>
   /// <exception cref="Mcp2221ANotFoundException">
-  /// No MCP2221/MCP2221 was found on the system.
+  /// No MCP2221/MCP2221A was found on the system.
   /// </exception>
   /// <exception cref="OperationCanceledException">
   /// The operation was cancelled.
@@ -77,7 +77,7 @@ partial class Mcp2221AController {
   /// <see cref="IUsbHidService"/> is not registered in <paramref name="serviceProvider"/>.
   /// </exception>
   /// <exception cref="Mcp2221ANotFoundException">
-  /// No MCP2221/MCP2221 was found on the system.
+  /// No MCP2221/MCP2221A was found on the system.
   /// </exception>
   /// <exception cref="OperationCanceledException">
   /// The operation was cancelled.
@@ -130,7 +130,7 @@ partial class Mcp2221AController {
   /// <see cref="IUsbHidService"/> is not registered in <paramref name="serviceProvider"/>.
   /// </exception>
   /// <exception cref="Mcp2221ANotFoundException">
-  /// No MCP2221/MCP2221 was found on the system.
+  /// No MCP2221/MCP2221A was found on the system.
   /// </exception>
   /// <exception cref="OperationCanceledException">
   /// The operation was cancelled.
@@ -183,7 +183,7 @@ partial class Mcp2221AController {
   /// <see cref="IUsbHidService"/> is not registered in <paramref name="serviceProvider"/>.
   /// </exception>
   /// <exception cref="Mcp2221ANotFoundException">
-  /// No MCP2221/MCP2221 was found on the system.
+  /// No MCP2221/MCP2221A was found on the system.
   /// </exception>
   /// <exception cref="OperationCanceledException">
   /// The operation was cancelled.

@@ -5,9 +5,31 @@ using System;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
+/// <summary>
+/// The exception that is thrown when an I2C-specific command fails
+/// or when the I2C engine inside the MCP2221/MCP2221A enters an
+/// error or unknown state.
+/// </summary>
+/// <remarks>
+/// <para>
+/// This exception is specifically for failures related to I2C operations
+/// that are not covered by the general <see cref="Mcp2221ACommandException"/>.
+/// It is thrown when the MCP2221/MCP2221A's internal I2C engine returns
+/// an error response or reaches a state where it cannot continue the
+/// requested operation.
+/// </para>
+/// <para>
+/// The target I2C device address involved in the failed operation can be
+/// retrieved from the <see cref="Address"/> property.
+/// </para>
+/// </remarks>
 public class I2cCommandException : Mcp2221ACommandException {
   private const string DefaultMessage = "The requested I2C command failed.";
 
+  /// <summary>
+  /// Gets the <see cref="I2cAddress"/> of the I2C device that was
+  /// the target of the failed operation.
+  /// </summary>
   public I2cAddress Address { get; }
 
   public I2cCommandException()

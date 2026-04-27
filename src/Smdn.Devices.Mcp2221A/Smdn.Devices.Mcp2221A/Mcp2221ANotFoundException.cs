@@ -7,6 +7,36 @@ using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
 
+/// <summary>
+/// The exception that is thrown when no MCP2221/MCP2221A device
+/// is found on the system, or no device matches the specified
+/// search criteria.
+/// </summary>
+/// <remarks>
+/// <para>
+/// This exception occurs during the device discovery process when the
+/// <see cref="IUsbHidService"/> cannot find any USB HID devices that
+/// match the required Vendor ID (VID) and Product ID (PID), or when no
+/// devices satisfy the custom filtering conditions provided via
+/// predicates.
+/// </para>
+/// <para>
+/// Common causes include:
+/// <list type="bullet">
+/// <item>
+///   The device is not physically connected to the system.
+/// </item>
+/// <item>
+///   The device is using a custom VID/PID that does not match the
+///   default or specified filters.
+/// </item>
+/// <item>
+///   Multiple devices are connected, but none match the specific
+///   criteria provided in the device information filter.
+/// </item>
+/// </list>
+/// </para>
+/// </remarks>
 public class Mcp2221ANotFoundException : InvalidOperationException {
   private const string DefaultMessage = "The MCP2221/MCP2221A was not found on the current system.";
 
