@@ -80,7 +80,7 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
@@ -97,7 +97,7 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
@@ -113,7 +113,7 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
@@ -140,7 +140,7 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
@@ -159,7 +159,7 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
@@ -176,7 +176,7 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
@@ -192,7 +192,7 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 
@@ -219,7 +219,7 @@ partial class GpController : IGpioController {
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Gpio);
 

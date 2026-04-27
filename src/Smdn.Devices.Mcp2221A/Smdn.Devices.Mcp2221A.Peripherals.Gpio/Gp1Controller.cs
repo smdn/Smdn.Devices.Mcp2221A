@@ -135,7 +135,7 @@ public sealed class Gp1Controller :
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.InterruptOnChange);
 
@@ -149,7 +149,7 @@ public sealed class Gp1Controller :
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.InterruptOnChange);
 
@@ -163,7 +163,7 @@ public sealed class Gp1Controller :
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.InterruptOnChange);
 
@@ -184,7 +184,7 @@ public sealed class Gp1Controller :
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.InterruptOnChange);
 
@@ -245,7 +245,7 @@ public sealed class Gp1Controller :
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Adc);
 
@@ -259,7 +259,7 @@ public sealed class Gp1Controller :
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Adc);
 
@@ -317,7 +317,7 @@ public sealed class Gp1Controller :
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.ClockOutput);
 
@@ -334,7 +334,7 @@ public sealed class Gp1Controller :
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.ClockOutput);
 

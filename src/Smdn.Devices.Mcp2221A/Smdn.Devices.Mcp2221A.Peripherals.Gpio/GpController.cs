@@ -29,8 +29,6 @@ public abstract partial class GpController {
 
   private protected Mcp2221AGpioDriver GpioDriver { get; }
 
-  private protected Mcp2221ATransceiver Transceiver => GpioDriver.Transceiver;
-
   private protected GpDesignation CurrentGpDesignation => GpioDriver.GetCurrentGpDesignation(Index);
 
   /// <summary>

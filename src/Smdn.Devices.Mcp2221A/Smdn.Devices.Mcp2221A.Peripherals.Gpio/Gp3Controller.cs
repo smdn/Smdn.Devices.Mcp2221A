@@ -102,7 +102,7 @@ public sealed class Gp3Controller :
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Dac);
 
@@ -118,7 +118,7 @@ public sealed class Gp3Controller :
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Dac);
 
@@ -153,7 +153,7 @@ public sealed class Gp3Controller :
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Adc);
 
@@ -167,7 +167,7 @@ public sealed class Gp3Controller :
     CancellationToken cancellationToken = default
   )
   {
-    GpioDriver.Transceiver.ThrowIfDisposed();
+    GpioDriver.ThrowIfDisposed();
 
     ThrowIfInvalidConfiguration(GpFunction.Adc);
 
