@@ -48,7 +48,7 @@ public sealed class Gp2Controller :
 
   /// <inheritdoc/>
   int IDacController.LastWriteAnalogRawValue
-    => GpioDriver.GetLastAppliedDacRawValue();
+    => GpioDriver.LastAppliedDacRawValue;
 
   /// <inheritdoc/>
   VoltageReferenceSource IAdcController.CurrentAdcReferenceSource

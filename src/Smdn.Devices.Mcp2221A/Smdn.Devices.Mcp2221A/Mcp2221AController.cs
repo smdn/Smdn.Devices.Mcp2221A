@@ -167,7 +167,7 @@ public sealed partial class Mcp2221AController :
   public int LastWriteAnalogRawValue {
     get {
       ThrowIfDisposed();
-      return gpioDriver.GetLastAppliedDacRawValue();
+      return gpioDriver.LastAppliedDacRawValue;
     }
   }
 

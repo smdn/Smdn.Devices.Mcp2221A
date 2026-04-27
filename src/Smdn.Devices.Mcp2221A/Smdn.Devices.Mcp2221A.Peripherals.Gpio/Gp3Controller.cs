@@ -48,7 +48,7 @@ public sealed class Gp3Controller :
 
   /// <inheritdoc/>
   int IDacController.LastWriteAnalogRawValue
-    => GpioDriver.GetLastAppliedDacRawValue();
+    => GpioDriver.LastAppliedDacRawValue;
 
   /// <inheritdoc/>
   VoltageReferenceSource IAdcController.CurrentAdcReferenceSource

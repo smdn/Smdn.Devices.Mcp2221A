@@ -50,14 +50,18 @@ partial class Mcp2221AGpioDriver {
     return value;
   }
 
-  private int? lastAppliedDacRawValue;
   private AdcAllChannelSample lastFetchedAdcSample;
 
-  /// <inheritdoc/>
   public VoltageReferenceSource CurrentDacReferenceSource
     => ParseVoltageReferenceSource(sramSettings.ReadDacVoltageReferenceByte() & 0b_0_0000_11_1);
 
-  /// <inheritdoc/>
+  /// <remarks>
+  /// If a value has been set most recently, return that value;
+  /// otherwise, return the SRAM power-up DAC value.
+  /// </remarks>
+  public int LastAppliedDacRawValue
+    => sramSettings.ReadDacOutputValueByte() & 0b_0_00_11111;
+
   public VoltageReferenceSource CurrentAdcReferenceSource
     => ParseVoltageReferenceSource(sramSettings.ReadAdcVoltageReferenceByte() & 0b_0_0000_11_1);
 
@@ -107,51 +111,36 @@ partial class Mcp2221AGpioDriver {
     }
   }
 
-  public int GetLastAppliedDacRawValue()
-  {
-    // If a value has been set most recently, return that value;
-    // otherwise, return the SRAM power-up DAC value.
-    if (lastAppliedDacRawValue.HasValue)
-      return lastAppliedDacRawValue.Value;
-    else
-      return sramSettings.ReadDacOutputValueByte() & 0b_0_00_11111;
-  }
-
   /// <inheritdoc/>
   public void ApplyDacRawValue(
     int value,
     CancellationToken cancellationToken = default
   )
-  {
-    SetSramSettings(
+    => SetSramSettings(
       argSramSettings: ThrowIfDacOutputValueOutOfRange(value, nameof(value)),
-      modifySramSettings: static (sramSettings, val) => sramSettings.ModifyDacSettings(
-        voltageReferenceSource: null,
-        outputValue: val
-      ),
+      modifySramSettings: ModifyDacOutputValue,
       cancellationToken: cancellationToken
     );
 
-    lastAppliedDacRawValue = value;
-  }
-
   /// <inheritdoc/>
-  public async ValueTask ApplyDacRawValueAsync(
+  public ValueTask ApplyDacRawValueAsync(
     int value,
     CancellationToken cancellationToken = default
   )
-  {
-    await SetSramSettingsAsync(
+    => SetSramSettingsAsync(
       argSramSettings: ThrowIfDacOutputValueOutOfRange(value, nameof(value)),
-      modifySramSettings: static (sramSettings, val) => sramSettings.ModifyDacSettings(
-        voltageReferenceSource: null,
-        outputValue: val
-      ),
+      modifySramSettings: ModifyDacOutputValue,
       cancellationToken: cancellationToken
-    ).ConfigureAwait(false);
+    );
 
-    lastAppliedDacRawValue = value;
-  }
+  private static void ModifyDacOutputValue(
+    SramSettings sramSettings,
+    int value
+  )
+    => sramSettings.ModifyDacSettings(
+      voltageReferenceSource: null,
+      outputValue: value
+    );
 
   /// <summary>
   /// Returns the cached 10-bit raw ADC input value (0-1023) for the specified GP pin
