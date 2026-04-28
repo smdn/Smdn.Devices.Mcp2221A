@@ -18,8 +18,8 @@ partial class GpControllerTests {
 #pragma warning restore IDE0040
   private static System.Collections.IEnumerable YieldTestCases_ConfigureAsClockOutputSyncOrAsync()
   {
-    const byte InitialChipSettings1_50Percent12MHz = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
-    const byte InitialChipSettings1_00PercentReserved = 0b_000_00_000; // Duty cycle: 0%; Divider: reserved
+    const byte InitialChipSetting1_50Percent12MHz = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
+    const byte InitialChipSetting1_00PercentReserved = 0b_000_00_000; // Duty cycle: 0%; Divider: reserved
 
     foreach (var frequency in new ClockOutputFrequency?[] {
       ClockOutputFrequency.Frequency24MHz,
@@ -38,20 +38,20 @@ partial class GpControllerTests {
         ClockOutputDutyCycle.Duty0,
         null,
       }) {
-        yield return new object?[] { InitialChipSettings1_50Percent12MHz, frequency, dutyCycle };
-        yield return new object?[] { InitialChipSettings1_00PercentReserved, frequency, dutyCycle };
+        yield return new object?[] { InitialChipSetting1_50Percent12MHz, frequency, dutyCycle };
+        yield return new object?[] { InitialChipSetting1_00PercentReserved, frequency, dutyCycle };
       }
     }
   }
 
   [TestCaseSource(nameof(YieldTestCases_ConfigureAsClockOutputSyncOrAsync))]
   public void ConfigureAsClockOutputAsync(
-    byte initialChipSettings1,
+    byte initialChipSetting1,
     ClockOutputFrequency? frequency,
     ClockOutputDutyCycle? dutyCycle
   )
     => ConfigureAsClockOutputSyncOrAsync(
-      initialChipSettings1,
+      initialChipSetting1,
       frequency,
       dutyCycle,
       static async (gp1, f, d) => await ((IClockOutputController)gp1).ConfigureAsClockOutputAsync(f, d).ConfigureAwait(false)
@@ -59,12 +59,12 @@ partial class GpControllerTests {
 
   [TestCaseSource(nameof(YieldTestCases_ConfigureAsClockOutputSyncOrAsync))]
   public void ConfigureAsClockOutput(
-    byte initialChipSettings1,
+    byte initialChipSetting1,
     ClockOutputFrequency? frequency,
     ClockOutputDutyCycle? dutyCycle
   )
     => ConfigureAsClockOutputSyncOrAsync(
-      initialChipSettings1,
+      initialChipSetting1,
       frequency,
       dutyCycle,
       static (gp1, f, d) => {
@@ -74,7 +74,7 @@ partial class GpControllerTests {
     );
 
   private void ConfigureAsClockOutputSyncOrAsync(
-    byte initialChipSettings1,
+    byte initialChipSetting1,
     ClockOutputFrequency? frequency,
     ClockOutputDutyCycle? dutyCycle,
     Func<Gp1Controller, ClockOutputFrequency?, ClockOutputDutyCycle?, ValueTask> configureAsClockOutputAsyncFunc
@@ -99,7 +99,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings1: initialChipSettings1
+        chipSetting1: initialChipSetting1
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -119,7 +119,7 @@ partial class GpControllerTests {
     Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 
     var expectedClockDividerBits = frequency switch {
-      null => initialChipSettings1 & 0b_000_00_111,
+      null => initialChipSetting1 & 0b_000_00_111,
       ClockOutputFrequency.Frequency24MHz => 0b_001,
       ClockOutputFrequency.Frequency12MHz => 0b_010,
       ClockOutputFrequency.Frequency6MHz => 0b_011,
@@ -130,7 +130,7 @@ partial class GpControllerTests {
       _ => throw new InvalidOperationException(),
     };
     var expectedDutyCycleBits = dutyCycle switch {
-      null => (initialChipSettings1 & 0b_000_11_000) >> 3,
+      null => (initialChipSetting1 & 0b_000_11_000) >> 3,
       ClockOutputDutyCycle.Duty0 => 0b_00,
       ClockOutputDutyCycle.Duty25 => 0b_01,
       ClockOutputDutyCycle.Duty50 => 0b_10,
@@ -171,10 +171,10 @@ partial class GpControllerTests {
     Assert.That(mcp2221A.GpPin1.CurrentFunction, Is.EqualTo(GpFunction.ClockOutput));
     Assert.That(
       mcp2221A.GpPin1.CurrentClockOutputFrequency,
-      Is.EqualTo(frequency ?? (ClockOutputFrequency)(initialChipSettings1 & 0b_000_00_111)));
+      Is.EqualTo(frequency ?? (ClockOutputFrequency)(initialChipSetting1 & 0b_000_00_111)));
     Assert.That(
       mcp2221A.GpPin1.CurrentClockOutputDutyCycle,
-      Is.EqualTo(dutyCycle ?? (ClockOutputDutyCycle)((initialChipSettings1 & 0b_000_11_000) >> 3))
+      Is.EqualTo(dutyCycle ?? (ClockOutputDutyCycle)((initialChipSetting1 & 0b_000_11_000) >> 3))
     );
 
     Assert.That(
@@ -207,7 +207,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings1 = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
+    const byte InitialChipSetting1 = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -215,7 +215,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings1: InitialChipSettings1
+        chipSetting1: InitialChipSetting1
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -315,7 +315,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings1 = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
+    const byte InitialChipSetting1 = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -323,7 +323,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings1: InitialChipSettings1
+        chipSetting1: InitialChipSetting1
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -476,7 +476,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings1 = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
+    const byte InitialChipSetting1 = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -484,7 +484,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings1: InitialChipSettings1
+        chipSetting1: InitialChipSetting1
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -659,12 +659,12 @@ partial class GpControllerTests {
   )
   {
     const byte InitialGp1Settings = 0b_000_1_0_001; // Dedicated function operation (CLK OUT)
-    const byte InitialChipSettings1 = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
+    const byte InitialChipSetting1 = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
         gp1Settings: InitialGp1Settings,
-        chipSettings1: InitialChipSettings1
+        chipSetting1: InitialChipSetting1
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -699,12 +699,12 @@ partial class GpControllerTests {
   )
   {
     const byte InitialGp1Settings = 0b_000_1_0_001; // Dedicated function operation (CLK OUT)
-    const byte InitialChipSettings1 = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
+    const byte InitialChipSetting1 = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
         gp1Settings: InitialGp1Settings,
-        chipSettings1: InitialChipSettings1
+        chipSetting1: InitialChipSetting1
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -747,7 +747,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings1 = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
+    const byte InitialChipSetting1 = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -755,7 +755,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings1: InitialChipSettings1
+        chipSetting1: InitialChipSetting1
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -820,28 +820,28 @@ partial class GpControllerTests {
 
   private static System.Collections.IEnumerable YieldTestCases_SuspendClockOutputSyncOrAsync()
   {
-    const byte InitialChipSettings1_50Percent12MHz = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
-    const byte InitialChipSettings1_00PercentReserved = 0b_000_00_000; // Duty cycle: 0%; Divider: reserved
-    const byte InitialChipSettings1_75Percent3MHz = 0b_000_11_100; // Duty cycle: 75%; Divider: 3MHz
-    const byte InitialChipSettings1_25Percent375kHz = 0b_000_01_111; // Duty cycle: 25%; Divider: 375kHz
+    const byte InitialChipSetting1_50Percent12MHz = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)
+    const byte InitialChipSetting1_00PercentReserved = 0b_000_00_000; // Duty cycle: 0%; Divider: reserved
+    const byte InitialChipSetting1_75Percent3MHz = 0b_000_11_100; // Duty cycle: 75%; Divider: 3MHz
+    const byte InitialChipSetting1_25Percent375kHz = 0b_000_01_111; // Duty cycle: 25%; Divider: 375kHz
 
-    yield return new object[] { InitialChipSettings1_50Percent12MHz };
-    yield return new object[] { InitialChipSettings1_00PercentReserved };
-    yield return new object[] { InitialChipSettings1_75Percent3MHz };
-    yield return new object[] { InitialChipSettings1_25Percent375kHz };
+    yield return new object[] { InitialChipSetting1_50Percent12MHz };
+    yield return new object[] { InitialChipSetting1_00PercentReserved };
+    yield return new object[] { InitialChipSetting1_75Percent3MHz };
+    yield return new object[] { InitialChipSetting1_25Percent375kHz };
   }
 
   [TestCaseSource(nameof(YieldTestCases_SuspendClockOutputSyncOrAsync))]
-  public void SuspendClockOutputAsync(byte initialChipSettings1)
+  public void SuspendClockOutputAsync(byte initialChipSetting1)
     => SuspendClockOutputSyncOrAsync(
-      initialChipSettings1: initialChipSettings1,
+      initialChipSetting1: initialChipSetting1,
       static async gp1 => await ((IClockOutputController)gp1).SuspendClockOutputAsync().ConfigureAwait(false)
     );
 
   [TestCaseSource(nameof(YieldTestCases_SuspendClockOutputSyncOrAsync))]
-  public void SuspendClockOutput(byte initialChipSettings1)
+  public void SuspendClockOutput(byte initialChipSetting1)
     => SuspendClockOutputSyncOrAsync(
-      initialChipSettings1: initialChipSettings1,
+      initialChipSetting1: initialChipSetting1,
       static gp1 => {
         ((IClockOutputController)gp1).SuspendClockOutput();
         return default;
@@ -849,7 +849,7 @@ partial class GpControllerTests {
     );
 
   private void SuspendClockOutputSyncOrAsync(
-    byte initialChipSettings1,
+    byte initialChipSetting1,
     Func<Gp1Controller, ValueTask> suspendClockOutputAsyncFunc
   )
   {
@@ -861,7 +861,7 @@ partial class GpControllerTests {
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
         gp1Settings: InitialGp1Settings,
-        chipSettings1: initialChipSettings1
+        chipSetting1: initialChipSetting1
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -884,7 +884,7 @@ partial class GpControllerTests {
     expectedSentCommand[0] = 0x60; // [0] SET SRAM SETTINGS
     // [1] don't care
     // [2] Clock Output Divider Value
-    expectedSentCommand[2] = initialChipSettings1;
+    expectedSentCommand[2] = initialChipSetting1;
     // [3-6] don't care
     expectedSentCommand[7] = 0b10000000; // [7] Alter GPIO configuration = Alter the GP designation (1)
     expectedSentCommand[8] = InitialGp0Settings; // [8] GP0 settings

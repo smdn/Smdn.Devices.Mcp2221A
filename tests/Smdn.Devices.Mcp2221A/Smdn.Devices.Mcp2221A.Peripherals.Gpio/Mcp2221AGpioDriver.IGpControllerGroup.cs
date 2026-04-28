@@ -1968,7 +1968,7 @@ partial class Mcp2221AGpioDriverTests {
     const byte InitialGp1Settings = 0b_000_0_0_000; // GPIO operation
     const byte InitialGp2Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC1)
     const byte InitialGp3Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC2)
-    const byte InitialChipSettings2 = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
+    const byte InitialChipSetting2 = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -1976,7 +1976,7 @@ partial class Mcp2221AGpioDriverTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings2: InitialChipSettings2
+        chipSetting2: InitialChipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -2014,37 +2014,37 @@ partial class Mcp2221AGpioDriverTests {
 
   private static System.Collections.IEnumerable YieldTestCases_ApplyDacRawValueSyncOrAsync()
   {
-    const byte InitialChipSettings2_DacVrm = 0b_01_1_00111; // DAC: VRM 1.024V; Output = 7
-    const byte InitialChipSettings2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
+    const byte InitialChipSetting2_DacVrm = 0b_01_1_00111; // DAC: VRM 1.024V; Output = 7
+    const byte InitialChipSetting2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
-    yield return new object[] { InitialChipSettings2_DacVrm, 0 };
-    yield return new object[] { InitialChipSettings2_DacVdd, 0 };
+    yield return new object[] { InitialChipSetting2_DacVrm, 0 };
+    yield return new object[] { InitialChipSetting2_DacVdd, 0 };
 
-    yield return new object[] { InitialChipSettings2_DacVrm, 1 };
-    yield return new object[] { InitialChipSettings2_DacVdd, 30 };
+    yield return new object[] { InitialChipSetting2_DacVrm, 1 };
+    yield return new object[] { InitialChipSetting2_DacVdd, 30 };
 
-    yield return new object[] { InitialChipSettings2_DacVrm, 31 };
-    yield return new object[] { InitialChipSettings2_DacVdd, 31 };
+    yield return new object[] { InitialChipSetting2_DacVrm, 31 };
+    yield return new object[] { InitialChipSetting2_DacVdd, 31 };
   }
 
   [TestCaseSource(nameof(YieldTestCases_ApplyDacRawValueSyncOrAsync))]
   public ValueTask ApplyDacRawValueAsync(
-    byte chipSettings2,
+    byte chipSetting2,
     int value
   )
     => ApplyDacRawValueSyncOrAsync(
-      chipSettings2: chipSettings2,
+      chipSetting2: chipSetting2,
       value: value,
       static async (gpPins, value) => await gpPins.ApplyDacRawValueAsync(value).ConfigureAwait(false)
     );
 
   [TestCaseSource(nameof(YieldTestCases_ApplyDacRawValueSyncOrAsync))]
   public ValueTask ApplyDacRawValue(
-    byte chipSettings2,
+    byte chipSetting2,
     int value
   )
     => ApplyDacRawValueSyncOrAsync(
-      chipSettings2: chipSettings2,
+      chipSetting2: chipSetting2,
       value: value,
       static (gpPins, value) => {
         gpPins.ApplyDacRawValue(value);
@@ -2053,7 +2053,7 @@ partial class Mcp2221AGpioDriverTests {
     );
 
   private async ValueTask ApplyDacRawValueSyncOrAsync(
-    byte chipSettings2,
+    byte chipSetting2,
     int value,
     Func<IGpControllerGroup, int, ValueTask> applyDacRawValueAsyncFunc
   )
@@ -2069,7 +2069,7 @@ partial class Mcp2221AGpioDriverTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings2: chipSettings2
+        chipSetting2: chipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -2088,7 +2088,7 @@ partial class Mcp2221AGpioDriverTests {
 
     expectedSentCommand[0] = 0x60; // [0] SET SRAM SETTINGS
     // [1-2] don't care
-    expectedSentCommand[3] = (byte)(chipSettings2 >> 5); // [3] DAC Voltage Reference
+    expectedSentCommand[3] = (byte)(chipSetting2 >> 5); // [3] DAC Voltage Reference
     expectedSentCommand[4] = (byte)(0b_1_00_00000 | value); // [4] Set DAC Output Value
     // [5-6] don't care
     expectedSentCommand[7] = 0; // [7] Alter GPIO configuration = Do not alter the current GP designation (0)

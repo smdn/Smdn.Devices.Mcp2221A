@@ -18,10 +18,10 @@ partial class GpControllerTests {
 #pragma warning restore IDE0040
   private static System.Collections.IEnumerable YieldTestCases_ConfigureAsInterruptOnChangeSyncOrAsync()
   {
-    const byte InitialChipSettings3_DetectBothEdge = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
-    const byte InitialChipSettings3_DetectFallingEdge = 0b_0_1_0_11_0_00; // INTDETFEEN: 1, INTDETREEN: 0, ADCVRM: 11(4.096V), ADCREF: 0(VDD)
-    const byte InitialChipSettings3_DetectRisingEdge = 0b_0_0_1_10_0_00; // INTDETFEEN: 0, INTDETREEN: 1, ADCVRM: 10(2.048V), ADCREF: 0(VDD)
-    const byte InitialChipSettings3_DetectNone = 0b_0_0_0_00_1_00; // INTDETFEEN: 0, INTDETREEN: 0, ADCVRM: 00(Off), ADCREF: 1(VRM)
+    const byte InitialChipSetting3_DetectBothEdge = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
+    const byte InitialChipSetting3_DetectFallingEdge = 0b_0_1_0_11_0_00; // INTDETFEEN: 1, INTDETREEN: 0, ADCVRM: 11(4.096V), ADCREF: 0(VDD)
+    const byte InitialChipSetting3_DetectRisingEdge = 0b_0_0_1_10_0_00; // INTDETFEEN: 0, INTDETREEN: 1, ADCVRM: 10(2.048V), ADCREF: 0(VDD)
+    const byte InitialChipSetting3_DetectNone = 0b_0_0_0_00_1_00; // INTDETFEEN: 0, INTDETREEN: 0, ADCVRM: 00(Off), ADCREF: 1(VRM)
 
     const bool InterruptEdgeDetectorState_Detected = true;
     const bool InterruptEdgeDetectorState_NotDetected = false;
@@ -34,23 +34,23 @@ partial class GpControllerTests {
       null,
     }) {
       foreach (var clearDetectionFlag in new[] { true, false }) {
-        yield return new object?[] { InitialChipSettings3_DetectBothEdge, InterruptEdgeDetectorState_Detected, detectionTrigger, clearDetectionFlag };
-        yield return new object?[] { InitialChipSettings3_DetectFallingEdge, InterruptEdgeDetectorState_Detected, detectionTrigger, clearDetectionFlag };
-        yield return new object?[] { InitialChipSettings3_DetectRisingEdge, InterruptEdgeDetectorState_NotDetected, detectionTrigger, clearDetectionFlag };
-        yield return new object?[] { InitialChipSettings3_DetectNone, InterruptEdgeDetectorState_NotDetected, detectionTrigger, clearDetectionFlag };
+        yield return new object?[] { InitialChipSetting3_DetectBothEdge, InterruptEdgeDetectorState_Detected, detectionTrigger, clearDetectionFlag };
+        yield return new object?[] { InitialChipSetting3_DetectFallingEdge, InterruptEdgeDetectorState_Detected, detectionTrigger, clearDetectionFlag };
+        yield return new object?[] { InitialChipSetting3_DetectRisingEdge, InterruptEdgeDetectorState_NotDetected, detectionTrigger, clearDetectionFlag };
+        yield return new object?[] { InitialChipSetting3_DetectNone, InterruptEdgeDetectorState_NotDetected, detectionTrigger, clearDetectionFlag };
       }
     }
   }
 
   [TestCaseSource(nameof(YieldTestCases_ConfigureAsInterruptOnChangeSyncOrAsync))]
   public void ConfigureAsInterruptOnChangeAsync(
-    byte initialChipSettings3,
+    byte initialChipSetting3,
     bool initialInterruptEdgeDetectorState,
     InterruptOnChangeTrigger? detectionTrigger,
     bool clearDetectionFlag
   )
     => ConfigureAsInterruptOnChangeSyncOrAsync(
-      initialChipSettings3,
+      initialChipSetting3,
       initialInterruptEdgeDetectorState,
       detectionTrigger,
       clearDetectionFlag,
@@ -60,13 +60,13 @@ partial class GpControllerTests {
 
   [TestCaseSource(nameof(YieldTestCases_ConfigureAsInterruptOnChangeSyncOrAsync))]
   public void ConfigureAsInterruptOnChange(
-    byte initialChipSettings3,
+    byte initialChipSetting3,
     bool initialInterruptEdgeDetectorState,
     InterruptOnChangeTrigger? detectionTrigger,
     bool clearDetectionFlag
   )
     => ConfigureAsInterruptOnChangeSyncOrAsync(
-      initialChipSettings3,
+      initialChipSetting3,
       initialInterruptEdgeDetectorState,
       detectionTrigger,
       clearDetectionFlag,
@@ -77,7 +77,7 @@ partial class GpControllerTests {
     );
 
   private void ConfigureAsInterruptOnChangeSyncOrAsync(
-    byte initialChipSettings3,
+    byte initialChipSetting3,
     bool initialInterruptEdgeDetectorState,
     InterruptOnChangeTrigger? detectionTrigger,
     bool clearDetectionFlag,
@@ -96,10 +96,10 @@ partial class GpControllerTests {
       InitialGp2Settings,
       InitialGp3Settings
     };
-    var initialAdcVoltageReferenceBits = (initialChipSettings3 & 0b_0_0_0_11_1_00) >> 2;
+    var initialAdcVoltageReferenceBits = (initialChipSetting3 & 0b_0_0_0_11_1_00) >> 2;
     var initialDetectionTrigger =
-      ((initialChipSettings3 & 0b_0_0_1_00_0_00) == 0 ? InterruptOnChangeTrigger.None : InterruptOnChangeTrigger.Rising) | // positive edge
-      ((initialChipSettings3 & 0b_0_1_0_00_0_00) == 0 ? InterruptOnChangeTrigger.None : InterruptOnChangeTrigger.Falling); // negative edge
+      ((initialChipSetting3 & 0b_0_0_1_00_0_00) == 0 ? InterruptOnChangeTrigger.None : InterruptOnChangeTrigger.Rising) | // positive edge
+      ((initialChipSetting3 & 0b_0_1_0_00_0_00) == 0 ? InterruptOnChangeTrigger.None : InterruptOnChangeTrigger.Falling); // negative edge
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -107,7 +107,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings3: initialChipSettings3,
+        chipSetting3: initialChipSetting3,
         interruptEdgeDetectorState: initialInterruptEdgeDetectorState
       ),
       shouldDisposeUsbHidDevice: true
@@ -271,7 +271,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
+    const byte InitialChipSetting3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -279,7 +279,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings3: InitialChipSettings3
+        chipSetting3: InitialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -426,7 +426,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
+    const byte InitialChipSetting3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -434,7 +434,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings3: InitialChipSettings3
+        chipSetting3: InitialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -543,7 +543,7 @@ partial class GpControllerTests {
     // const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
+    const byte InitialChipSetting3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -551,7 +551,7 @@ partial class GpControllerTests {
         gp1Settings: gp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings3: InitialChipSettings3
+        chipSetting3: InitialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -589,12 +589,12 @@ partial class GpControllerTests {
   )
   {
     const byte InitialGp1Settings = 0b_000_1_0_100; // Alternate function 2 (interrupt detector)
-    const byte InitialChipSettings3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
+    const byte InitialChipSetting3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
         gp1Settings: InitialGp1Settings,
-        chipSettings3: InitialChipSettings3
+        chipSetting3: InitialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -629,12 +629,12 @@ partial class GpControllerTests {
   )
   {
     const byte InitialGp1Settings = 0b_000_1_0_100; // Alternate function 2 (interrupt detector)
-    const byte InitialChipSettings3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
+    const byte InitialChipSetting3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
         gp1Settings: InitialGp1Settings,
-        chipSettings3: InitialChipSettings3
+        chipSetting3: InitialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -710,12 +710,12 @@ partial class GpControllerTests {
   )
   {
     const byte InitialGp1Settings = 0b_000_1_0_100; // Alternate function 2 (interrupt detector)
-    const byte InitialChipSettings3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
+    const byte InitialChipSetting3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
         gp1Settings: InitialGp1Settings,
-        chipSettings3: InitialChipSettings3
+        chipSetting3: InitialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -857,12 +857,12 @@ partial class GpControllerTests {
   )
   {
     const byte InitialGp1Settings = 0b_000_1_0_100; // Alternate function 2 (interrupt detector)
-    const byte InitialChipSettings3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
+    const byte InitialChipSetting3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
         gp1Settings: InitialGp1Settings,
-        chipSettings3: InitialChipSettings3
+        chipSetting3: InitialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -897,12 +897,12 @@ partial class GpControllerTests {
   )
   {
     const byte InitialGp1Settings = 0b_000_1_0_100; // Alternate function 2 (interrupt detector)
-    const byte InitialChipSettings3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
+    const byte InitialChipSetting3 = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
         gp1Settings: InitialGp1Settings,
-        chipSettings3: InitialChipSettings3
+        chipSetting3: InitialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -945,7 +945,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings3 = 0b_0_1_1_00_0_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 00(Off), ADCREF: 0(VDD)
+    const byte InitialChipSetting3 = 0b_0_1_1_00_0_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 00(Off), ADCREF: 0(VDD)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -953,7 +953,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings3: InitialChipSettings3
+        chipSetting3: InitialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -1019,10 +1019,10 @@ partial class GpControllerTests {
   private static System.Collections.IEnumerable YieldTestCases_ClearInterruptDetectionSyncOrAsync()
   {
     // INTDETFEEN: 0/1, INTDETREEN: 0/1, ADCVRM: 00(Off), ADCREF: 0(Vdd)
-    const byte InitialChipSettings3_DetectBothEdge = 0b_0_1_1_00_0_00; // INTDETFEEN: 1, INTDETREEN: 1
-    const byte InitialChipSettings3_DetectFallingEdge = 0b_0_1_0_00_0_00; // INTDETFEEN: 1, INTDETREEN: 0
-    const byte InitialChipSettings3_DetectRisingEdge = 0b_0_0_1_00_0_00; // INTDETFEEN: 0, INTDETREEN: 1
-    const byte InitialChipSettings3_DetectNone = 0b_0_0_0_00_0_00; // INTDETFEEN: 0, INTDETREEN: 0
+    const byte InitialChipSetting3_DetectBothEdge = 0b_0_1_1_00_0_00; // INTDETFEEN: 1, INTDETREEN: 1
+    const byte InitialChipSetting3_DetectFallingEdge = 0b_0_1_0_00_0_00; // INTDETFEEN: 1, INTDETREEN: 0
+    const byte InitialChipSetting3_DetectRisingEdge = 0b_0_0_1_00_0_00; // INTDETFEEN: 0, INTDETREEN: 1
+    const byte InitialChipSetting3_DetectNone = 0b_0_0_0_00_0_00; // INTDETFEEN: 0, INTDETREEN: 0
 
     foreach ((byte state, bool expected) in new (byte, bool)[] {
       (0x00, false),
@@ -1030,21 +1030,21 @@ partial class GpControllerTests {
       (0x80, true),
       (0xFF, true),
     }) {
-      yield return new object[] { InitialChipSettings3_DetectBothEdge, state, expected };
-      yield return new object[] { InitialChipSettings3_DetectFallingEdge, state, expected };
-      yield return new object[] { InitialChipSettings3_DetectRisingEdge, state, expected };
-      yield return new object[] { InitialChipSettings3_DetectNone, state, expected };
+      yield return new object[] { InitialChipSetting3_DetectBothEdge, state, expected };
+      yield return new object[] { InitialChipSetting3_DetectFallingEdge, state, expected };
+      yield return new object[] { InitialChipSetting3_DetectRisingEdge, state, expected };
+      yield return new object[] { InitialChipSetting3_DetectNone, state, expected };
     }
   }
 
   [TestCaseSource(nameof(YieldTestCases_ClearInterruptDetectionSyncOrAsync))]
   public void ClearInterruptDetectionAsync(
-    byte initialChipSettings3,
+    byte initialChipSetting3,
     byte interruptEdgeDetectorStateInResponse,
     bool expectedInterruptDetectionFlag
   )
     => ClearInterruptDetectionSyncOrAsync(
-      initialChipSettings3: initialChipSettings3,
+      initialChipSetting3: initialChipSetting3,
       interruptEdgeDetectorStateInResponse: interruptEdgeDetectorStateInResponse,
       expectedInterruptDetectionFlag: expectedInterruptDetectionFlag,
       static async gp1 => await ((IInterruptOnChangeController)gp1).ClearInterruptDetectionAsync().ConfigureAwait(false)
@@ -1052,12 +1052,12 @@ partial class GpControllerTests {
 
   [TestCaseSource(nameof(YieldTestCases_ClearInterruptDetectionSyncOrAsync))]
   public void ClearInterruptDetection(
-    byte initialChipSettings3,
+    byte initialChipSetting3,
     byte interruptEdgeDetectorStateInResponse,
     bool expectedInterruptDetectionFlag
   )
     => ClearInterruptDetectionSyncOrAsync(
-      initialChipSettings3: initialChipSettings3,
+      initialChipSetting3: initialChipSetting3,
       interruptEdgeDetectorStateInResponse: interruptEdgeDetectorStateInResponse,
       expectedInterruptDetectionFlag: expectedInterruptDetectionFlag,
       static gp1 => {
@@ -1067,7 +1067,7 @@ partial class GpControllerTests {
     );
 
   private void ClearInterruptDetectionSyncOrAsync(
-    byte initialChipSettings3,
+    byte initialChipSetting3,
     byte interruptEdgeDetectorStateInResponse,
     bool expectedInterruptDetectionFlag,
     Func<Gp1Controller, ValueTask> clearInterruptDetectionAsyncFunc
@@ -1084,7 +1084,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings3: initialChipSettings3
+        chipSetting3: initialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );

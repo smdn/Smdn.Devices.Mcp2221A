@@ -42,9 +42,9 @@ public partial class Mcp2221AControllerTests {
     byte gp1Settings = 0b_000_1_0_011, // Output: HIGH, Alternate Function 1 (LED UART TX)
     byte gp2Settings = 0b_000_1_0_001, // Output: HIGH, Dedicated function operation (USBCFG)
     byte gp3Settings = 0b_000_1_0_001, // Output: HIGH, Dedicated function operation (LED I2C)
-    byte chipSettings1 = 0b_000_00_000, // CLKDC(4-3): Duty cycle 0%, CLKDIV(2-0): Reserved
-    byte chipSettings2 = 0b_00_0_00000, // DACVRM(7-6): VRM is OFF, DACREF(5): VDD, DACVAL(4-0): 0
-    byte chipSettings3 = 0b_0_0_0_00_0_00, // INTDETFEEN(6): Disable, INTDETREEN(5): Disable, ADCVRM(4-3): VRM is off, ADCREF(2): VDD
+    byte chipSetting1 = 0b_000_00_000, // CLKDC(4-3): Duty cycle 0%, CLKDIV(2-0): Reserved
+    byte chipSetting2 = 0b_00_0_00000, // DACVRM(7-6): VRM is OFF, DACREF(5): VDD, DACVAL(4-0): 0
+    byte chipSetting3 = 0b_0_0_0_00_0_00, // INTDETFEEN(6): Disable, INTDETREEN(5): Disable, ADCVRM(4-3): VRM is off, ADCREF(2): VDD
     bool interruptEdgeDetectorState = false
   )
     => new(
@@ -192,7 +192,7 @@ public partial class Mcp2221AControllerTests {
             ReportInput,
             0x61, 0x00,
             0x00, 0x00,
-            0x00, chipSettings1, chipSettings2, chipSettings3,
+            0x00, chipSetting1, chipSetting2, chipSetting3,
             vendorIdHigh, vendorIdLow, productIdHigh, productIdLow,
             0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -674,13 +674,13 @@ public partial class Mcp2221AControllerTests {
   [TestCase(0b_0_1_0_01_1_00, VoltageReferenceSource.Vrm1024)] // INTDETFEEN: 1, INTDETREEN: 0
   [TestCase(0b_0_1_1_01_1_00, VoltageReferenceSource.Vrm1024)] // INTDETFEEN: 1, INTDETREEN: 1 (factory default)
   public void CurrentAdcReferenceSource(
-    byte chipSettings3,
+    byte chipSetting3,
     VoltageReferenceSource expected
   )
   {
     using var mcp2221A = Mcp2221AController.Create(
       CreatePseudoDevice(
-        chipSettings3: chipSettings3
+        chipSetting3: chipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -701,13 +701,13 @@ public partial class Mcp2221AControllerTests {
   [TestCase(0b_01_0_00100, VoltageReferenceSource.Vdd)] // 1.024V/VDD; DAC output: 4
   [TestCase(0b_00_0_00010, VoltageReferenceSource.Vdd)] // Off/VDD; DAC output: 2
   public void CurrentDacReferenceSource(
-    byte chipSettings2,
+    byte chipSetting2,
     VoltageReferenceSource expected
   )
   {
     using var mcp2221A = Mcp2221AController.Create(
       CreatePseudoDevice(
-        chipSettings2: chipSettings2
+        chipSetting2: chipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -728,13 +728,13 @@ public partial class Mcp2221AControllerTests {
   [TestCase(0b_01_0_00100, 4)]
   [TestCase(0b_00_0_00010, 2)]
   public void LastWriteAnalogRawValue_InitialValue(
-    byte chipSettings2,
+    byte chipSetting2,
     int expected
   )
   {
     using var mcp2221A = Mcp2221AController.Create(
       CreatePseudoDevice(
-        chipSettings2: chipSettings2
+        chipSetting2: chipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );

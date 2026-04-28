@@ -3216,18 +3216,18 @@ public class IGpControllerGroupExtensionsTests {
 
   private static System.Collections.IEnumerable YieldTestCases_ReadAnalogVoltageSyncOrAsync()
   {
-    const byte InitialChipSettings3_AdcVrm1024 = 0b_0_1_1_01_1_00; // ADC: VRM 1.024V (factory default)
-    const byte InitialChipSettings3_AdcVrm2048 = 0b_0_1_1_10_1_00; // ADC: VRM 2.048V
-    const byte InitialChipSettings3_AdcVrm4096 = 0b_0_1_1_11_1_00; // ADC: VRM 4.096V
-    const byte InitialChipSettings3_AdcVrmOff = 0b_0_1_1_00_1_00; // ADC: VRM Off
+    const byte InitialChipSetting3_AdcVrm1024 = 0b_0_1_1_01_1_00; // ADC: VRM 1.024V (factory default)
+    const byte InitialChipSetting3_AdcVrm2048 = 0b_0_1_1_10_1_00; // ADC: VRM 2.048V
+    const byte InitialChipSetting3_AdcVrm4096 = 0b_0_1_1_11_1_00; // ADC: VRM 4.096V
+    const byte InitialChipSetting3_AdcVrmOff = 0b_0_1_1_00_1_00; // ADC: VRM Off
 
-    yield return new object[] { "00-00-", "01-00-", "FF-03-", InitialChipSettings3_AdcVrm1024, 0.0d, 0.001d, 1.023d };
-    yield return new object[] { "01-00-", "FF-03-", "00-00-", InitialChipSettings3_AdcVrm2048, 0.002d, 2.046d, 0.0d };
-    yield return new object[] { "FF-03-", "00-00-", "01-00-", InitialChipSettings3_AdcVrm4096, 4.092d, 0.0d, 0.004d };
+    yield return new object[] { "00-00-", "01-00-", "FF-03-", InitialChipSetting3_AdcVrm1024, 0.0d, 0.001d, 1.023d };
+    yield return new object[] { "01-00-", "FF-03-", "00-00-", InitialChipSetting3_AdcVrm2048, 0.002d, 2.046d, 0.0d };
+    yield return new object[] { "FF-03-", "00-00-", "01-00-", InitialChipSetting3_AdcVrm4096, 4.092d, 0.0d, 0.004d };
 
-    yield return new object[] { "00-00-", "00-00-", "00-00-", InitialChipSettings3_AdcVrmOff, 0.0d, 0.0d, 0.0d };
-    yield return new object[] { "01-00-", "01-00-", "01-00-", InitialChipSettings3_AdcVrmOff, 0.0d, 0.0d, 0.0d };
-    yield return new object[] { "FF-03-", "FF-03-", "FF-03-", InitialChipSettings3_AdcVrmOff, 0.0d, 0.0d, 0.0d };
+    yield return new object[] { "00-00-", "00-00-", "00-00-", InitialChipSetting3_AdcVrmOff, 0.0d, 0.0d, 0.0d };
+    yield return new object[] { "01-00-", "01-00-", "01-00-", InitialChipSetting3_AdcVrmOff, 0.0d, 0.0d, 0.0d };
+    yield return new object[] { "FF-03-", "FF-03-", "FF-03-", InitialChipSetting3_AdcVrmOff, 0.0d, 0.0d, 0.0d };
   }
 
   [TestCaseSource(nameof(YieldTestCases_ReadAnalogVoltageSyncOrAsync))]
@@ -3235,7 +3235,7 @@ public class IGpControllerGroupExtensionsTests {
     string adcChannel0Response,
     string adcChannel1Response,
     string adcChannel2Response,
-    byte initialChipSettings3,
+    byte initialChipSetting3,
     double expectedAdc1Voltage,
     double expectedAdc2Voltage,
     double expectedAdc3Voltage
@@ -3244,7 +3244,7 @@ public class IGpControllerGroupExtensionsTests {
       adcChannel0Response: adcChannel0Response,
       adcChannel1Response: adcChannel1Response,
       adcChannel2Response: adcChannel2Response,
-      initialChipSettings3: initialChipSettings3,
+      initialChipSetting3: initialChipSetting3,
       expectedAdc1Voltage: expectedAdc1Voltage,
       expectedAdc2Voltage: expectedAdc2Voltage,
       expectedAdc3Voltage: expectedAdc3Voltage,
@@ -3256,7 +3256,7 @@ public class IGpControllerGroupExtensionsTests {
     string adcChannel0Response,
     string adcChannel1Response,
     string adcChannel2Response,
-    byte initialChipSettings3,
+    byte initialChipSetting3,
     double expectedAdc1Voltage,
     double expectedAdc2Voltage,
     double expectedAdc3Voltage
@@ -3265,7 +3265,7 @@ public class IGpControllerGroupExtensionsTests {
       adcChannel0Response: adcChannel0Response,
       adcChannel1Response: adcChannel1Response,
       adcChannel2Response: adcChannel2Response,
-      initialChipSettings3: initialChipSettings3,
+      initialChipSetting3: initialChipSetting3,
       expectedAdc1Voltage: expectedAdc1Voltage,
       expectedAdc2Voltage: expectedAdc2Voltage,
       expectedAdc3Voltage: expectedAdc3Voltage,
@@ -3276,7 +3276,7 @@ public class IGpControllerGroupExtensionsTests {
     string adcChannel0Response,
     string adcChannel1Response,
     string adcChannel2Response,
-    byte initialChipSettings3,
+    byte initialChipSetting3,
     double expectedAdc1Voltage,
     double expectedAdc2Voltage,
     double expectedAdc3Voltage,
@@ -3294,7 +3294,7 @@ public class IGpControllerGroupExtensionsTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings3: initialChipSettings3
+        chipSetting3: initialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -3481,7 +3481,7 @@ public class IGpControllerGroupExtensionsTests {
     const byte InitialGp1Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC1)
     const byte InitialGp2Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC2)
     const byte InitialGp3Settings = 0b_000_0_0_010; // Alternate Function 0 (ADC3)
-    const byte InitialChipSettings3 = 0b_0_1_1_00_0_00; // ADC: VDD
+    const byte InitialChipSetting3 = 0b_0_1_1_00_0_00; // ADC: VDD
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -3489,7 +3489,7 @@ public class IGpControllerGroupExtensionsTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings3: InitialChipSettings3
+        chipSetting3: InitialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -3580,11 +3580,11 @@ public class IGpControllerGroupExtensionsTests {
     Func<IGpControllerGroup, CancellationToken, ValueTask> writeAnalogVoltageAsyncFunc
   )
   {
-    const byte InitialChipSettings2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8
+    const byte InitialChipSetting2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
-        chipSettings2: InitialChipSettings2
+        chipSetting2: InitialChipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -3631,11 +3631,11 @@ public class IGpControllerGroupExtensionsTests {
     Func<IGpControllerGroup, ValueTask> writeAnalogVoltageAsyncFunc
   )
   {
-    const byte InitialChipSettings2 = 0b_00_0_11111; // DAC: VDD; Output = 31
+    const byte InitialChipSetting2 = 0b_00_0_11111; // DAC: VDD; Output = 31
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
-        chipSettings2: InitialChipSettings2
+        chipSetting2: InitialChipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -3662,43 +3662,43 @@ public class IGpControllerGroupExtensionsTests {
 
   private static System.Collections.IEnumerable YieldTestCases_WriteAnalogVoltageSyncOrAsync()
   {
-    const byte InitialChipSettings2_DacVrm1024 = 0b_01_1_00100; // DAC: VRM 1.024V; Output = 4
-    const byte InitialChipSettings2_DacVrm2048 = 0b_10_1_00001; // DAC: VRM 2.048V; Output = 1
-    const byte InitialChipSettings2_DacVrm4096 = 0b_11_1_00010; // DAC: VRM 4.096V; Output = 2
-    const byte InitialChipSettings2_DacVrmOff = 0b_00_1_01000; // DAC: VRM Off; Output = 8
+    const byte InitialChipSetting2_DacVrm1024 = 0b_01_1_00100; // DAC: VRM 1.024V; Output = 4
+    const byte InitialChipSetting2_DacVrm2048 = 0b_10_1_00001; // DAC: VRM 2.048V; Output = 1
+    const byte InitialChipSetting2_DacVrm4096 = 0b_11_1_00010; // DAC: VRM 4.096V; Output = 2
+    const byte InitialChipSetting2_DacVrmOff = 0b_00_1_01000; // DAC: VRM Off; Output = 8
 
-    yield return new object[] { InitialChipSettings2_DacVrm1024, 0.0, 0 };
-    yield return new object[] { InitialChipSettings2_DacVrm1024, 0.033, 1 };
-    yield return new object[] { InitialChipSettings2_DacVrm1024, 0.512, 16 };
-    yield return new object[] { InitialChipSettings2_DacVrm1024, 1.020, 31 };
-    yield return new object[] { InitialChipSettings2_DacVrm1024, 1.024, 31 };
+    yield return new object[] { InitialChipSetting2_DacVrm1024, 0.0, 0 };
+    yield return new object[] { InitialChipSetting2_DacVrm1024, 0.033, 1 };
+    yield return new object[] { InitialChipSetting2_DacVrm1024, 0.512, 16 };
+    yield return new object[] { InitialChipSetting2_DacVrm1024, 1.020, 31 };
+    yield return new object[] { InitialChipSetting2_DacVrm1024, 1.024, 31 };
 
-    yield return new object[] { InitialChipSettings2_DacVrm2048, 0.0, 0 };
-    yield return new object[] { InitialChipSettings2_DacVrm2048, 0.066, 1 };
-    yield return new object[] { InitialChipSettings2_DacVrm2048, 1.024, 16 };
-    yield return new object[] { InitialChipSettings2_DacVrm2048, 2.040, 31 };
-    yield return new object[] { InitialChipSettings2_DacVrm2048, 2.048, 31 };
+    yield return new object[] { InitialChipSetting2_DacVrm2048, 0.0, 0 };
+    yield return new object[] { InitialChipSetting2_DacVrm2048, 0.066, 1 };
+    yield return new object[] { InitialChipSetting2_DacVrm2048, 1.024, 16 };
+    yield return new object[] { InitialChipSetting2_DacVrm2048, 2.040, 31 };
+    yield return new object[] { InitialChipSetting2_DacVrm2048, 2.048, 31 };
 
-    yield return new object[] { InitialChipSettings2_DacVrm4096, 0.0, 0 };
-    yield return new object[] { InitialChipSettings2_DacVrm4096, 0.132, 1 };
-    yield return new object[] { InitialChipSettings2_DacVrm4096, 2.048, 16 };
-    yield return new object[] { InitialChipSettings2_DacVrm4096, 4.090, 31 };
-    yield return new object[] { InitialChipSettings2_DacVrm4096, 4.096, 31 };
+    yield return new object[] { InitialChipSetting2_DacVrm4096, 0.0, 0 };
+    yield return new object[] { InitialChipSetting2_DacVrm4096, 0.132, 1 };
+    yield return new object[] { InitialChipSetting2_DacVrm4096, 2.048, 16 };
+    yield return new object[] { InitialChipSetting2_DacVrm4096, 4.090, 31 };
+    yield return new object[] { InitialChipSetting2_DacVrm4096, 4.096, 31 };
 
-    yield return new object[] { InitialChipSettings2_DacVrmOff, 0.0, 0 };
-    yield return new object[] { InitialChipSettings2_DacVrmOff, 1.0, 0 };
-    yield return new object[] { InitialChipSettings2_DacVrmOff, 5.0, 0 };
-    yield return new object[] { InitialChipSettings2_DacVrmOff, 12.0, 0 };
+    yield return new object[] { InitialChipSetting2_DacVrmOff, 0.0, 0 };
+    yield return new object[] { InitialChipSetting2_DacVrmOff, 1.0, 0 };
+    yield return new object[] { InitialChipSetting2_DacVrmOff, 5.0, 0 };
+    yield return new object[] { InitialChipSetting2_DacVrmOff, 12.0, 0 };
   }
 
   [TestCaseSource(nameof(YieldTestCases_WriteAnalogVoltageSyncOrAsync))]
   public void WriteAnalogVoltageAsync(
-    byte chipSettings2,
+    byte chipSetting2,
     double voltage,
     int expectedAnalogRawValue
   )
     => WriteAnalogVoltageSyncOrAsync(
-      chipSettings2: chipSettings2,
+      chipSetting2: chipSetting2,
       voltage: voltage,
       expectedAnalogRawValue: expectedAnalogRawValue,
       static async (gpPins, voltage) => await gpPins.WriteAnalogVoltageAsync(voltage).ConfigureAwait(false)
@@ -3706,12 +3706,12 @@ public class IGpControllerGroupExtensionsTests {
 
   [TestCaseSource(nameof(YieldTestCases_WriteAnalogVoltageSyncOrAsync))]
   public void WriteAnalogVoltage(
-    byte chipSettings2,
+    byte chipSetting2,
     double voltage,
     int expectedAnalogRawValue
   )
     => WriteAnalogVoltageSyncOrAsync(
-      chipSettings2: chipSettings2,
+      chipSetting2: chipSetting2,
       voltage: voltage,
       expectedAnalogRawValue: expectedAnalogRawValue,
       static (gpPins, voltage) => {
@@ -3721,7 +3721,7 @@ public class IGpControllerGroupExtensionsTests {
     );
 
   private void WriteAnalogVoltageSyncOrAsync(
-    byte chipSettings2,
+    byte chipSetting2,
     double voltage,
     int expectedAnalogRawValue,
     Func<IGpControllerGroup, double, ValueTask> writeAnalogVoltageAsyncFunc
@@ -3738,7 +3738,7 @@ public class IGpControllerGroupExtensionsTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings2: chipSettings2
+        chipSetting2: chipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -3756,7 +3756,7 @@ public class IGpControllerGroupExtensionsTests {
 
     expectedSentCommand[0] = 0x60; // [0] SET SRAM SETTINGS
     // [1-2] don't care
-    expectedSentCommand[3] = (byte)(chipSettings2 >> 5); // [3] DAC Voltage Reference
+    expectedSentCommand[3] = (byte)(chipSetting2 >> 5); // [3] DAC Voltage Reference
     expectedSentCommand[4] = (byte)(0b_1_00_00000 | expectedAnalogRawValue); // [4] Set DAC Output Value
     // [5-6] don't care
     expectedSentCommand[7] = 0; // [7] Alter GPIO configuration = Do not alter the current GP designation (0)
@@ -3830,11 +3830,11 @@ public class IGpControllerGroupExtensionsTests {
     Func<IGpControllerGroup, CancellationToken, ValueTask> writeAnalogVoltageAsyncFunc
   )
   {
-    const byte InitialChipSettings2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8
+    const byte InitialChipSetting2 = 0b_01_1_01000; // DAC: VRM 1.024V; Output = 8
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
-        chipSettings2: InitialChipSettings2
+        chipSetting2: InitialChipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -3921,7 +3921,7 @@ public class IGpControllerGroupExtensionsTests {
     const byte InitialGp1Settings = 0b_000_0_0_000; // GPIO operation
     const byte InitialGp2Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC1)
     const byte InitialGp3Settings = 0b_000_0_0_011; // Alternate Function 1 (DAC2)
-    const byte InitialChipSettings2 = 0b_00_0_00000; // DAC: VDD; Output = 0
+    const byte InitialChipSetting2 = 0b_00_0_00000; // DAC: VDD; Output = 0
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -3929,7 +3929,7 @@ public class IGpControllerGroupExtensionsTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings2: InitialChipSettings2
+        chipSetting2: InitialChipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -3947,7 +3947,7 @@ public class IGpControllerGroupExtensionsTests {
 
     expectedSentCommand[0] = 0x60; // [0] SET SRAM SETTINGS
     // [1-2] don't care
-    expectedSentCommand[3] = InitialChipSettings2 >> 5; // [3] DAC Voltage Reference
+    expectedSentCommand[3] = InitialChipSetting2 >> 5; // [3] DAC Voltage Reference
     expectedSentCommand[4] = (byte)(0b_1_00_00000 | expectedAnalogRawValue); // [4] Set DAC Output Value
     // [5-6] don't care
     expectedSentCommand[7] = 0; // [7] Alter GPIO configuration = Do not alter the current GP designation (0)
@@ -4072,11 +4072,11 @@ public class IGpControllerGroupExtensionsTests {
     Func<IGpControllerGroup, double, double, ValueTask> writeAnalogVoltageAsyncFunc
   )
   {
-    const byte InitialChipSettings2 = 0b_00_0_00000; // DAC: VDD; Output = 0
+    const byte InitialChipSetting2 = 0b_00_0_00000; // DAC: VDD; Output = 0
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
-        chipSettings2: InitialChipSettings2
+        chipSetting2: InitialChipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );

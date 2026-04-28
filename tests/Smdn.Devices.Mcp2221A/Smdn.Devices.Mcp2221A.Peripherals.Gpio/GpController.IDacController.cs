@@ -18,35 +18,35 @@ partial class GpControllerTests {
 #pragma warning restore IDE0040
   private static System.Collections.IEnumerable YieldTestCases_ConfigureAsDacSyncOrAsync()
   {
-    const byte InitialChipSettings2_DacVrm = 0b_01_1_00111; // DAC: VRM 1.024V; Output = 7
-    const byte InitialChipSettings2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
+    const byte InitialChipSetting2_DacVrm = 0b_01_1_00111; // DAC: VRM 1.024V; Output = 7
+    const byte InitialChipSetting2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     for (var gpIndex = 2; gpIndex <= 3; gpIndex++) {
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vdd };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.VrmOff };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vrm1024 };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vrm2048 };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vrm4096 };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, null };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVrm, VoltageReferenceSource.Vdd };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVrm, VoltageReferenceSource.VrmOff };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVrm, VoltageReferenceSource.Vrm1024 };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVrm, VoltageReferenceSource.Vrm2048 };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVrm, VoltageReferenceSource.Vrm4096 };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVrm, null };
 
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vdd };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.VrmOff };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vrm1024 };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vrm2048 };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vrm4096 };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, null };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVdd, VoltageReferenceSource.Vdd };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVdd, VoltageReferenceSource.VrmOff };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVdd, VoltageReferenceSource.Vrm1024 };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVdd, VoltageReferenceSource.Vrm2048 };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVdd, VoltageReferenceSource.Vrm4096 };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVdd, null };
     }
   }
 
   [TestCaseSource(nameof(YieldTestCases_ConfigureAsDacSyncOrAsync))]
   public void ConfigureAsDacAsync(
     int gpIndex,
-    byte initialChipSettings2,
+    byte initialChipSetting2,
     VoltageReferenceSource? voltageReferenceSource
   )
     => ConfigureAsDacSyncOrAsync(
       gpIndex,
-      initialChipSettings2,
+      initialChipSetting2,
       voltageReferenceSource,
       static async (gp, vr) => await ((IDacController)gp).ConfigureAsDacAsync(voltageReferenceSource: vr).ConfigureAwait(false)
     );
@@ -54,12 +54,12 @@ partial class GpControllerTests {
   [TestCaseSource(nameof(YieldTestCases_ConfigureAsDacSyncOrAsync))]
   public void ConfigureAsDac(
     int gpIndex,
-    byte initialChipSettings2,
+    byte initialChipSetting2,
     VoltageReferenceSource? voltageReferenceSource
   )
     => ConfigureAsDacSyncOrAsync(
       gpIndex,
-      initialChipSettings2,
+      initialChipSetting2,
       voltageReferenceSource,
       static (gp, vr) => {
         ((IDacController)gp).ConfigureAsDac(voltageReferenceSource: vr);
@@ -69,7 +69,7 @@ partial class GpControllerTests {
 
   private void ConfigureAsDacSyncOrAsync(
     int gpIndex,
-    byte initialChipSettings2,
+    byte initialChipSetting2,
     VoltageReferenceSource? voltageReferenceSource,
     Func<GpController, VoltageReferenceSource?, ValueTask> configureAsDacAsyncFunc
   )
@@ -79,7 +79,7 @@ partial class GpControllerTests {
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
 
-    var initialDacRawValue = initialChipSettings2 & 0b_0_00_11111;
+    var initialDacRawValue = initialChipSetting2 & 0b_0_00_11111;
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -87,7 +87,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings2: initialChipSettings2
+        chipSetting2: initialChipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -128,7 +128,7 @@ partial class GpControllerTests {
       VoltageReferenceSource.Vrm1024 => 0b_0_0000_01_1,
       VoltageReferenceSource.Vrm2048 => 0b_0_0000_10_1,
       VoltageReferenceSource.Vrm4096 => 0b_0_0000_11_1,
-      null => (initialChipSettings2 & 0b_11_1_00000) >> 5,
+      null => (initialChipSetting2 & 0b_11_1_00000) >> 5,
       _ => throw new InvalidOperationException(),
     };
     const byte ExpectedDesignationBits = 0b_000_0_0_011; // DAC1/DAC2
@@ -204,34 +204,34 @@ partial class GpControllerTests {
 
   private static System.Collections.IEnumerable YieldTestCases_ConfigureAsDacSyncOrAsync_WithInitialOutputValue()
   {
-    const byte InitialChipSettings2_DacVrm = 0b_01_1_00111; // DAC: VRM 1.024V; Output = 7
-    const byte InitialChipSettings2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
+    const byte InitialChipSetting2_DacVrm = 0b_01_1_00111; // DAC: VRM 1.024V; Output = 7
+    const byte InitialChipSetting2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     for (var gpIndex = 2; gpIndex <= 3; gpIndex++) {
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vdd, 31 };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.VrmOff, 30 };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, VoltageReferenceSource.Vrm1024, 1 };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, null, 0 };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVrm, null, null };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVrm, VoltageReferenceSource.Vdd, 31 };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVrm, VoltageReferenceSource.VrmOff, 30 };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVrm, VoltageReferenceSource.Vrm1024, 1 };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVrm, null, 0 };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVrm, null, null };
 
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vdd, 0 };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.VrmOff, 31 };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, VoltageReferenceSource.Vrm4096, 30 };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, null, 1 };
-      yield return new object?[] { gpIndex, InitialChipSettings2_DacVdd, null, null };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVdd, VoltageReferenceSource.Vdd, 0 };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVdd, VoltageReferenceSource.VrmOff, 31 };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVdd, VoltageReferenceSource.Vrm4096, 30 };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVdd, null, 1 };
+      yield return new object?[] { gpIndex, InitialChipSetting2_DacVdd, null, null };
     }
   }
 
   [TestCaseSource(nameof(YieldTestCases_ConfigureAsDacSyncOrAsync_WithInitialOutputValue))]
   public void ConfigureAsDacAsync_WithInitialOutputValue(
     int gpIndex,
-    byte initialChipSettings2,
+    byte initialChipSetting2,
     VoltageReferenceSource? voltageReferenceSource,
     int? initialOutputValue
   )
     => ConfigureAsDacSyncOrAsync_WithInitialOutputValue(
       gpIndex,
-      initialChipSettings2,
+      initialChipSetting2,
       voltageReferenceSource,
       initialOutputValue,
       static async (gp, vr, val) => await ((IDacController)gp).ConfigureAsDacAsync(
@@ -243,13 +243,13 @@ partial class GpControllerTests {
   [TestCaseSource(nameof(YieldTestCases_ConfigureAsDacSyncOrAsync_WithInitialOutputValue))]
   public void ConfigureAsDac_WithInitialOutputValue(
     int gpIndex,
-    byte initialChipSettings2,
+    byte initialChipSetting2,
     VoltageReferenceSource? voltageReferenceSource,
     int? initialOutputValue
   )
     => ConfigureAsDacSyncOrAsync_WithInitialOutputValue(
       gpIndex,
-      initialChipSettings2,
+      initialChipSetting2,
       voltageReferenceSource,
       initialOutputValue,
       static (gp, vr, val) => {
@@ -263,7 +263,7 @@ partial class GpControllerTests {
 
   private void ConfigureAsDacSyncOrAsync_WithInitialOutputValue(
     int gpIndex,
-    byte initialChipSettings2,
+    byte initialChipSetting2,
     VoltageReferenceSource? voltageReferenceSource,
     int? initialOutputValue,
     Func<GpController, VoltageReferenceSource?, int?, ValueTask> configureAsDacAsyncFunc
@@ -280,7 +280,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings2: initialChipSettings2
+        chipSetting2: initialChipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -322,12 +322,12 @@ partial class GpControllerTests {
       VoltageReferenceSource.Vrm1024 => 0b_0_0000_01_1,
       VoltageReferenceSource.Vrm2048 => 0b_0_0000_10_1,
       VoltageReferenceSource.Vrm4096 => 0b_0_0000_11_1,
-      null => (initialChipSettings2 & 0b_11_1_00000) >> 5,
+      null => (initialChipSetting2 & 0b_11_1_00000) >> 5,
       _ => throw new InvalidOperationException(),
     };
     var expectedOutputValueBits = initialOutputValue.HasValue
       ? initialOutputValue.Value
-      : (initialChipSettings2 & 0b_00_0_11111);
+      : (initialChipSetting2 & 0b_00_0_11111);
     const byte ExpectedDesignationBits = 0b_000_0_0_011; // DAC1/DAC2
 
     currentGpSettings[gpIndex] = (byte)((currentGpSettings[gpIndex] & 0b_1_1111_00_0) | ExpectedDesignationBits);
@@ -435,7 +435,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings2 = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
+    const byte InitialChipSetting2 = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -443,7 +443,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings2: InitialChipSettings2
+        chipSetting2: InitialChipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -534,7 +534,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings2 = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
+    const byte InitialChipSetting2 = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -542,7 +542,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings2: InitialChipSettings2
+        chipSetting2: InitialChipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -685,7 +685,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings2 = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
+    const byte InitialChipSetting2 = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -693,7 +693,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings2: InitialChipSettings2
+        chipSetting2: InitialChipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -838,7 +838,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings2 = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
+    const byte InitialChipSetting2 = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -846,7 +846,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: gp2Settings ?? InitialGp2Settings,
         gp3Settings: gp3Settings ?? InitialGp3Settings,
-        chipSettings2: InitialChipSettings2
+        chipSetting2: InitialChipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -998,37 +998,37 @@ partial class GpControllerTests {
 
   private static System.Collections.IEnumerable YieldTestCases_WriteAnalogRawSyncOrAsync()
   {
-    const byte InitialChipSettings2_DacVrm = 0b_01_1_00111; // DAC: VRM 1.024V; Output = 7
-    const byte InitialChipSettings2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
+    const byte InitialChipSetting2_DacVrm = 0b_01_1_00111; // DAC: VRM 1.024V; Output = 7
+    const byte InitialChipSetting2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
 
-    yield return new object[] { InitialChipSettings2_DacVrm, 0 };
-    yield return new object[] { InitialChipSettings2_DacVdd, 0 };
+    yield return new object[] { InitialChipSetting2_DacVrm, 0 };
+    yield return new object[] { InitialChipSetting2_DacVdd, 0 };
 
-    yield return new object[] { InitialChipSettings2_DacVrm, 1 };
-    yield return new object[] { InitialChipSettings2_DacVdd, 30 };
+    yield return new object[] { InitialChipSetting2_DacVrm, 1 };
+    yield return new object[] { InitialChipSetting2_DacVdd, 30 };
 
-    yield return new object[] { InitialChipSettings2_DacVrm, 31 };
-    yield return new object[] { InitialChipSettings2_DacVdd, 31 };
+    yield return new object[] { InitialChipSetting2_DacVrm, 31 };
+    yield return new object[] { InitialChipSetting2_DacVdd, 31 };
   }
 
   [TestCaseSource(nameof(YieldTestCases_WriteAnalogRawSyncOrAsync))]
   public ValueTask WriteAnalogRawAsync_GP2(
-    byte chipSettings2,
+    byte chipSetting2,
     int value
   )
     => WriteAnalogRawSyncOrAsync(
-      chipSettings2: chipSettings2,
+      chipSetting2: chipSetting2,
       value: value,
       static async (mcp2221a, value) => await mcp2221a.GpPin2.WriteAnalogRawAsync(value).ConfigureAwait(false)
     );
 
   [TestCaseSource(nameof(YieldTestCases_WriteAnalogRawSyncOrAsync))]
   public ValueTask WriteAnalogRaw_GP2(
-    byte chipSettings2,
+    byte chipSetting2,
     int value
   )
     => WriteAnalogRawSyncOrAsync(
-      chipSettings2: chipSettings2,
+      chipSetting2: chipSetting2,
       value: value,
       static (mcp2221a, value) => {
         mcp2221a.GpPin2.WriteAnalogRaw(value);
@@ -1038,22 +1038,22 @@ partial class GpControllerTests {
 
   [TestCaseSource(nameof(YieldTestCases_WriteAnalogRawSyncOrAsync))]
   public ValueTask WriteAnalogRawAsync_GP3(
-    byte chipSettings2,
+    byte chipSetting2,
     int value
   )
     => WriteAnalogRawSyncOrAsync(
-      chipSettings2: chipSettings2,
+      chipSetting2: chipSetting2,
       value: value,
       static async (mcp2221a, value) => await mcp2221a.GpPin3.WriteAnalogRawAsync(value).ConfigureAwait(false)
     );
 
   [TestCaseSource(nameof(YieldTestCases_WriteAnalogRawSyncOrAsync))]
   public ValueTask WriteAnalogRaw_GP3(
-    byte chipSettings2,
+    byte chipSetting2,
     int value
   )
     => WriteAnalogRawSyncOrAsync(
-      chipSettings2: chipSettings2,
+      chipSetting2: chipSetting2,
       value: value,
       static (mcp2221a, value) => {
         mcp2221a.GpPin2.WriteAnalogRaw(value);
@@ -1062,12 +1062,12 @@ partial class GpControllerTests {
     );
 
   private async ValueTask WriteAnalogRawSyncOrAsync(
-    byte chipSettings2,
+    byte chipSetting2,
     int value,
     Func<Mcp2221AController, int, ValueTask> writeAnalogRawAsyncFunc
   )
   {
-    using var mcp2221A = CreateMcp2221AConfiguredAsDac(chipSettings2);
+    using var mcp2221A = CreateMcp2221AConfiguredAsDac(chipSetting2);
 
     Mcp2221AControllerTests.AppendPseudoResponse(
       mcp2221A,
@@ -1083,7 +1083,7 @@ partial class GpControllerTests {
 
     expectedSentCommand[0] = 0x60; // [0] SET SRAM SETTINGS
     // [1-2] don't care
-    expectedSentCommand[3] = (byte)(chipSettings2 >> 5); // [3] DAC Voltage Reference
+    expectedSentCommand[3] = (byte)(chipSetting2 >> 5); // [3] DAC Voltage Reference
     expectedSentCommand[4] = (byte)(0b_1_00_00000 | value); // [4] Set DAC Output Value
     // [5-6] don't care
     expectedSentCommand[7] = 0; // [7] Alter GPIO configuration = Do not alter the current GP designation (0)

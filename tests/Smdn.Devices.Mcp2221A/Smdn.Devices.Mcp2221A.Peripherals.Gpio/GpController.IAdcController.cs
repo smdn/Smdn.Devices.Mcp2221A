@@ -20,35 +20,35 @@ partial class GpControllerTests {
 #pragma warning restore IDE0040
   private static System.Collections.IEnumerable YieldTestCases_ConfigureAsAdcSyncOrAsync()
   {
-    const byte InitialChipSettings3_AdcVrm = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
-    const byte InitialChipSettings3_AdcVdd = 0b_0_0_0_00_0_00; // INTDETFEEN: 0, INTDETREEN: 0, ADCVRM: 00(Off), ADCREF: 0(Vdd)
+    const byte InitialChipSetting3_AdcVrm = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)
+    const byte InitialChipSetting3_AdcVdd = 0b_0_0_0_00_0_00; // INTDETFEEN: 0, INTDETREEN: 0, ADCVRM: 00(Off), ADCREF: 0(Vdd)
 
     for (var gpIndex = 1; gpIndex <= 3; gpIndex++) {
-      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.Vdd };
-      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.VrmOff };
-      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.Vrm1024 };
-      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.Vrm2048 };
-      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVrm, VoltageReferenceSource.Vrm4096 };
-      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVrm, null };
+      yield return new object?[] { gpIndex, InitialChipSetting3_AdcVrm, VoltageReferenceSource.Vdd };
+      yield return new object?[] { gpIndex, InitialChipSetting3_AdcVrm, VoltageReferenceSource.VrmOff };
+      yield return new object?[] { gpIndex, InitialChipSetting3_AdcVrm, VoltageReferenceSource.Vrm1024 };
+      yield return new object?[] { gpIndex, InitialChipSetting3_AdcVrm, VoltageReferenceSource.Vrm2048 };
+      yield return new object?[] { gpIndex, InitialChipSetting3_AdcVrm, VoltageReferenceSource.Vrm4096 };
+      yield return new object?[] { gpIndex, InitialChipSetting3_AdcVrm, null };
 
-      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVdd, VoltageReferenceSource.Vdd };
-      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVdd, VoltageReferenceSource.VrmOff };
-      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVdd, VoltageReferenceSource.Vrm1024 };
-      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVdd, VoltageReferenceSource.Vrm2048 };
-      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVdd, VoltageReferenceSource.Vrm4096 };
-      yield return new object?[] { gpIndex, InitialChipSettings3_AdcVdd, null };
+      yield return new object?[] { gpIndex, InitialChipSetting3_AdcVdd, VoltageReferenceSource.Vdd };
+      yield return new object?[] { gpIndex, InitialChipSetting3_AdcVdd, VoltageReferenceSource.VrmOff };
+      yield return new object?[] { gpIndex, InitialChipSetting3_AdcVdd, VoltageReferenceSource.Vrm1024 };
+      yield return new object?[] { gpIndex, InitialChipSetting3_AdcVdd, VoltageReferenceSource.Vrm2048 };
+      yield return new object?[] { gpIndex, InitialChipSetting3_AdcVdd, VoltageReferenceSource.Vrm4096 };
+      yield return new object?[] { gpIndex, InitialChipSetting3_AdcVdd, null };
     }
   }
 
   [TestCaseSource(nameof(YieldTestCases_ConfigureAsAdcSyncOrAsync))]
   public void ConfigureAsAdcAsync(
     int gpIndex,
-    byte initialChipSettings3,
+    byte initialChipSetting3,
     VoltageReferenceSource? voltageReferenceSource
   )
     => ConfigureAsAdcSyncOrAsync(
       gpIndex,
-      initialChipSettings3,
+      initialChipSetting3,
       voltageReferenceSource,
       static async (gp, vr) => await ((IAdcController)gp).ConfigureAsAdcAsync(voltageReferenceSource: vr).ConfigureAwait(false)
     );
@@ -56,12 +56,12 @@ partial class GpControllerTests {
   [TestCaseSource(nameof(YieldTestCases_ConfigureAsAdcSyncOrAsync))]
   public void ConfigureAsAdc(
     int gpIndex,
-    byte initialChipSettings3,
+    byte initialChipSetting3,
     VoltageReferenceSource? voltageReferenceSource
   )
     => ConfigureAsAdcSyncOrAsync(
       gpIndex,
-      initialChipSettings3,
+      initialChipSetting3,
       voltageReferenceSource,
       static (gp, vr) => {
         ((IAdcController)gp).ConfigureAsAdc(voltageReferenceSource: vr);
@@ -71,7 +71,7 @@ partial class GpControllerTests {
 
   private void ConfigureAsAdcSyncOrAsync(
     int gpIndex,
-    byte initialChipSettings3,
+    byte initialChipSetting3,
     VoltageReferenceSource? voltageReferenceSource,
     Func<GpController, VoltageReferenceSource?, ValueTask> configureAsAdcAsyncFunc
   )
@@ -87,14 +87,14 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings3: initialChipSettings3
+        chipSetting3: initialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
     var initialAdcReferenceSource = mcp2221A.CurrentAdcReferenceSource;
     var expectedInterruptOnChangeBits = (byte)(
-      ((initialChipSettings3 & 0b_0_0_1_00_0_00) == 0 ? 0 : 0b_0_00_0_1_0_0_0) | // positive edge
-      ((initialChipSettings3 & 0b_0_1_0_00_0_00) == 0 ? 0 : 0b_0_00_0_0_0_1_0) // negative edge
+      ((initialChipSetting3 & 0b_0_0_1_00_0_00) == 0 ? 0 : 0b_0_00_0_1_0_0_0) | // positive edge
+      ((initialChipSetting3 & 0b_0_1_0_00_0_00) == 0 ? 0 : 0b_0_00_0_0_0_1_0) // negative edge
     );
     var expectedAssignments = mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList();
     var currentGpSettings = new byte[4] { InitialGp0Settings, InitialGp1Settings, InitialGp2Settings, InitialGp3Settings };
@@ -132,7 +132,7 @@ partial class GpControllerTests {
       VoltageReferenceSource.Vrm1024 => 0b_0_0000_01_1,
       VoltageReferenceSource.Vrm2048 => 0b_0_0000_10_1,
       VoltageReferenceSource.Vrm4096 => 0b_0_0000_11_1,
-      null => (initialChipSettings3 & 0b_0_0_0_11_1_00) >> 2,
+      null => (initialChipSetting3 & 0b_0_0_0_11_1_00) >> 2,
       _ => throw new InvalidOperationException(),
     };
     const byte ExpectedDesignationBits = 0b_000_0_0_010; // ADC1/ADC2/ADC3
@@ -228,7 +228,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings3 = 0b_0_1_1_01_1_00; // ADC: VRM 1.024V (factory default)
+    const byte InitialChipSetting3 = 0b_0_1_1_01_1_00; // ADC: VRM 1.024V (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -236,7 +236,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings3: InitialChipSettings3
+        chipSetting3: InitialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -373,7 +373,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings3 = 0b_0_1_1_01_1_00; // ADC: VRM 1.024V (factory default)
+    const byte InitialChipSetting3 = 0b_0_1_1_01_1_00; // ADC: VRM 1.024V (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -381,7 +381,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings3: InitialChipSettings3
+        chipSetting3: InitialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -556,7 +556,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings3 = 0b_0_1_1_01_1_00; // ADC: VRM 1.024V (factory default)
+    const byte InitialChipSetting3 = 0b_0_1_1_01_1_00; // ADC: VRM 1.024V (factory default)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -564,7 +564,7 @@ partial class GpControllerTests {
         gp1Settings: gp1Settings ?? InitialGp1Settings,
         gp2Settings: gp2Settings ?? InitialGp2Settings,
         gp3Settings: gp3Settings ?? InitialGp3Settings,
-        chipSettings3: InitialChipSettings3
+        chipSetting3: InitialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );

@@ -53,7 +53,7 @@ public partial class GpControllerTests {
   }
 
   private static Mcp2221AController CreateMcp2221AConfiguredAsAdc(
-    byte chipSettings3 = 0b_0_1_1_01_1_00 // VRM 1.024V (factory default)
+    byte chipSetting3 = 0b_0_1_1_01_1_00 // VRM 1.024V (factory default)
   )
   {
     const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation
@@ -67,14 +67,14 @@ public partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings3: chipSettings3
+        chipSetting3: chipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
   }
 
   private static Mcp2221AController CreateMcp2221AConfiguredAsDac(
-    byte chipSettings2 = 0b_10_0_01000 // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
+    byte chipSetting2 = 0b_10_0_01000 // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
   )
   {
     const byte InitialGp0Settings = 0b_000_0_0_000; // GPIO operation
@@ -88,7 +88,7 @@ public partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings2: chipSettings2
+        chipSetting2: chipSetting2
       ),
       shouldDisposeUsbHidDevice: true
     );

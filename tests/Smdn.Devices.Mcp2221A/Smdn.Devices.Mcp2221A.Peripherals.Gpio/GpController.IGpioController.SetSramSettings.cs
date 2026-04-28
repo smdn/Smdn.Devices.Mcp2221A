@@ -57,7 +57,7 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_0_1_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_1_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSettings3 = 0b_0_1_1_00_0_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 00(Off), ADCREF: 0(Vdd)
+    const byte InitialChipSetting3 = 0b_0_1_1_00_0_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 00(Off), ADCREF: 0(Vdd)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -65,7 +65,7 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings3: InitialChipSettings3
+        chipSetting3: InitialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -138,16 +138,16 @@ partial class GpControllerTests {
 
   private static System.Collections.IEnumerable YieldTestCases_ConfigureAsGpioAsync_VmrMustBeReenabled()
   {
-    const byte ChipSettings2_DacVrm4096 = 0b_11_1_00010; // DAC: VRM 4.096V; Output = 2
-    const byte ChipSettings2_DacVrm2048 = 0b_10_1_00100; // DAC: VRM 2.048V; Output = 4
-    const byte ChipSettings2_DacVrm1024 = 0b_01_1_10000; // DAC: VRM 1.024V; Output = 16
-    const byte ChipSettings2_DacVrmOff = 0b_00_1_00001; // DAC: VRM Off; Output = 1
-    const byte ChipSettings2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
-    const byte ChipSettings3_AdcVrm4096 = 0b_0_0_0_11_1_00; // ADC: VRM 4.096V
-    const byte ChipSettings3_AdcVrm2048 = 0b_0_1_0_10_1_00; // ADC: VRM 2.048V
-    const byte ChipSettings3_AdcVrm1024 = 0b_0_1_1_01_1_00; // ADC: VRM 1.024V (factory default)
-    const byte ChipSettings3_AdcVrmOff = 0b_0_0_1_00_1_00; // ADC: VRM Off
-    const byte ChipSettings3_AdcVdd = 0b_0_1_1_00_0_00; // ADC: Vdd
+    const byte ChipSetting2_DacVrm4096 = 0b_11_1_00010; // DAC: VRM 4.096V; Output = 2
+    const byte ChipSetting2_DacVrm2048 = 0b_10_1_00100; // DAC: VRM 2.048V; Output = 4
+    const byte ChipSetting2_DacVrm1024 = 0b_01_1_10000; // DAC: VRM 1.024V; Output = 16
+    const byte ChipSetting2_DacVrmOff = 0b_00_1_00001; // DAC: VRM Off; Output = 1
+    const byte ChipSetting2_DacVdd = 0b_10_0_01000; // DAC: VDD(VRM 2.048V); Output = 8 (factory default)
+    const byte ChipSetting3_AdcVrm4096 = 0b_0_0_0_11_1_00; // ADC: VRM 4.096V
+    const byte ChipSetting3_AdcVrm2048 = 0b_0_1_0_10_1_00; // ADC: VRM 2.048V
+    const byte ChipSetting3_AdcVrm1024 = 0b_0_1_1_01_1_00; // ADC: VRM 1.024V (factory default)
+    const byte ChipSetting3_AdcVrmOff = 0b_0_0_1_00_1_00; // ADC: VRM Off
+    const byte ChipSetting3_AdcVdd = 0b_0_1_1_00_0_00; // ADC: Vdd
 
     const bool ShouldReenableDacVrm = true;
     const bool ShouldReenableAdcVrm = true;
@@ -155,28 +155,28 @@ partial class GpControllerTests {
 
     foreach (var mode in new PinMode?[] { PinMode.Output, PinMode.Input, null }) {
       foreach (var initialValue in new PinValue?[] { PinValue.High, PinValue.Low, null }) {
-        yield return new object?[] { ChipSettings2_DacVrm1024, ChipSettings3_AdcVrm4096, mode, initialValue, ShouldReenableDacVrm, ShouldReenableAdcVrm };
-        yield return new object?[] { ChipSettings2_DacVrm2048, ChipSettings3_AdcVrmOff, mode, initialValue, ShouldReenableDacVrm, ShouldReenableAdcVrm };
-        yield return new object?[] { ChipSettings2_DacVrmOff, ChipSettings3_AdcVrm2048, mode, initialValue, ShouldReenableDacVrm, ShouldReenableAdcVrm };
-        yield return new object?[] { ChipSettings2_DacVdd, ChipSettings3_AdcVrm1024, mode, initialValue, ShouldNotReenableVrm, ShouldReenableAdcVrm };
-        yield return new object?[] { ChipSettings2_DacVrm4096, ChipSettings3_AdcVdd, mode, initialValue, ShouldReenableDacVrm, ShouldNotReenableVrm };
-        yield return new object?[] { ChipSettings2_DacVdd, ChipSettings3_AdcVdd, mode, initialValue, ShouldNotReenableVrm, ShouldNotReenableVrm };
+        yield return new object?[] { ChipSetting2_DacVrm1024, ChipSetting3_AdcVrm4096, mode, initialValue, ShouldReenableDacVrm, ShouldReenableAdcVrm };
+        yield return new object?[] { ChipSetting2_DacVrm2048, ChipSetting3_AdcVrmOff, mode, initialValue, ShouldReenableDacVrm, ShouldReenableAdcVrm };
+        yield return new object?[] { ChipSetting2_DacVrmOff, ChipSetting3_AdcVrm2048, mode, initialValue, ShouldReenableDacVrm, ShouldReenableAdcVrm };
+        yield return new object?[] { ChipSetting2_DacVdd, ChipSetting3_AdcVrm1024, mode, initialValue, ShouldNotReenableVrm, ShouldReenableAdcVrm };
+        yield return new object?[] { ChipSetting2_DacVrm4096, ChipSetting3_AdcVdd, mode, initialValue, ShouldReenableDacVrm, ShouldNotReenableVrm };
+        yield return new object?[] { ChipSetting2_DacVdd, ChipSetting3_AdcVdd, mode, initialValue, ShouldNotReenableVrm, ShouldNotReenableVrm };
       }
     }
   }
 
   [TestCaseSource(nameof(YieldTestCases_ConfigureAsGpioAsync_VmrMustBeReenabled))]
   public void ConfigureAsGpioAsync_VmrMustBeReenabled(
-    byte chipSettings2,
-    byte chipSettings3,
+    byte chipSetting2,
+    byte chipSetting3,
     PinMode? mode,
     PinValue? initialValue,
     bool shouldReenableDacVrm,
     bool shouldReenableAdcVrm
   )
     => ConfigureAsGpioSyncOrAsync_VmrMustBeReenabled(
-      chipSettings2,
-      chipSettings3,
+      chipSetting2,
+      chipSetting3,
       mode,
       initialValue,
       shouldReenableDacVrm,
@@ -186,16 +186,16 @@ partial class GpControllerTests {
 
   [TestCaseSource(nameof(YieldTestCases_ConfigureAsGpioAsync_VmrMustBeReenabled))]
   public void ConfigureAsGpio_VmrMustBeReenabled(
-    byte chipSettings2,
-    byte chipSettings3,
+    byte chipSetting2,
+    byte chipSetting3,
     PinMode? mode,
     PinValue? initialValue,
     bool shouldReenableDacVrm,
     bool shouldReenableAdcVrm
   )
     => ConfigureAsGpioSyncOrAsync_VmrMustBeReenabled(
-      chipSettings2,
-      chipSettings3,
+      chipSetting2,
+      chipSetting3,
       mode,
       initialValue,
       shouldReenableDacVrm,
@@ -207,8 +207,8 @@ partial class GpControllerTests {
     );
 
   private void ConfigureAsGpioSyncOrAsync_VmrMustBeReenabled(
-    byte chipSettings2,
-    byte chipSettings3,
+    byte chipSetting2,
+    byte chipSetting3,
     PinMode? mode,
     PinValue? initialValue,
     bool shouldReenableDacVrm,
@@ -227,17 +227,17 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSettings2: chipSettings2,
-        chipSettings3: chipSettings3
+        chipSetting2: chipSetting2,
+        chipSetting3: chipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
-    var expectedDacVoltageReferenceBits = (byte)((chipSettings2 & 0b_11_1_00000) >> 5);
-    var expectedDacOutputValueBits = (byte)(chipSettings2 & 0b_00_0_11111);
-    var expectedAdcVoltageReferenceBits = (byte)((chipSettings3 & 0b_0_0_0_11_1_00) >> 2);
+    var expectedDacVoltageReferenceBits = (byte)((chipSetting2 & 0b_11_1_00000) >> 5);
+    var expectedDacOutputValueBits = (byte)(chipSetting2 & 0b_00_0_11111);
+    var expectedAdcVoltageReferenceBits = (byte)((chipSetting3 & 0b_0_0_0_11_1_00) >> 2);
     var expectedInterruptOnChangeBits = (byte)(
-      ((chipSettings3 & 0b_0_0_1_00_0_00) == 0 ? 0 : 0b_0_00_0_1_0_0_0) | // positive edge
-      ((chipSettings3 & 0b_0_1_0_00_0_00) == 0 ? 0 : 0b_0_00_0_0_0_1_0) // negative edge
+      ((chipSetting3 & 0b_0_0_1_00_0_00) == 0 ? 0 : 0b_0_00_0_1_0_0_0) | // positive edge
+      ((chipSetting3 & 0b_0_1_0_00_0_00) == 0 ? 0 : 0b_0_00_0_0_0_1_0) // negative edge
     );
 
     var expectedAssignments = mcp2221A.GpPins.Select(static gp => gp.CurrentFunction).ToList();

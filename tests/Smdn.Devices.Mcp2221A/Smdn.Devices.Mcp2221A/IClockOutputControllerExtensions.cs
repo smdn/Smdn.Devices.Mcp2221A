@@ -28,7 +28,7 @@ public class IClockOutputControllerExtensionsTests {
 
   [TestCaseSource(nameof(YieldTestCases_CurrentClockOutputFrequencyInHz))]
   public void CurrentClockOutputFrequencyInHz(
-    byte chipSettings1,
+    byte chipSetting1,
     int expectedClockOutputFrequencyInHz
   )
   {
@@ -37,7 +37,7 @@ public class IClockOutputControllerExtensionsTests {
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
         gp1Settings: InitialGp1Settings,
-        chipSettings1: chipSettings1
+        chipSetting1: chipSetting1
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -52,12 +52,12 @@ public class IClockOutputControllerExtensionsTests {
   public void CurrentClockOutputFrequencyInHz_Reserved()
   {
     const byte InitialGp1Settings = 0b_000_1_0_001; // Dedicated function operation (CLK OUT)
-    const byte InitialChipSettings1_50PercentReserved = 0b_000_10_000; // Duty cycle: 50%; Divider: reserved
+    const byte InitialChipSetting1_50PercentReserved = 0b_000_10_000; // Duty cycle: 50%; Divider: reserved
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
         gp1Settings: InitialGp1Settings,
-        chipSettings1: InitialChipSettings1_50PercentReserved
+        chipSetting1: InitialChipSetting1_50PercentReserved
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -82,7 +82,7 @@ public class IClockOutputControllerExtensionsTests {
 
   [TestCaseSource(nameof(YieldTestCases_CurrentClockOutputDutyCycleInPercent))]
   public void CurrentClockOutputDutyCycleInPercent(
-    byte chipSettings1,
+    byte chipSetting1,
     int expectedClockOutputDutyCycleInPercent
   )
   {
@@ -91,7 +91,7 @@ public class IClockOutputControllerExtensionsTests {
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
         gp1Settings: InitialGp1Settings,
-        chipSettings1: chipSettings1
+        chipSetting1: chipSetting1
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -112,7 +112,7 @@ public class IClockOutputControllerExtensionsTests {
 
   [TestCaseSource(nameof(YieldTestCases_CurrentClockOutputDutyRatio))]
   public void CurrentClockOutputDutyRatio(
-    byte chipSettings1,
+    byte chipSetting1,
     double expectedClockOutputDutyRatio
   )
   {
@@ -121,7 +121,7 @@ public class IClockOutputControllerExtensionsTests {
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
         gp1Settings: InitialGp1Settings,
-        chipSettings1: chipSettings1
+        chipSetting1: chipSetting1
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -267,12 +267,12 @@ public class IClockOutputControllerExtensionsTests {
 
   [TestCaseSource(nameof(YieldTestCases_ResumeClockOutputSyncOrAsync))]
   public void ResumeClockOutputAsync(
-    byte initialChipSettings1,
+    byte initialChipSetting1,
     ClockOutputFrequency expectedFrequencyOnResume,
     ClockOutputDutyCycle expectedDutyCycleOnResume
   )
     => ResumeClockOutputSyncOrAsync(
-      initialChipSettings1,
+      initialChipSetting1,
       expectedFrequencyOnResume,
       expectedDutyCycleOnResume,
       static async gp1 => await gp1.ResumeClockOutputAsync().ConfigureAwait(false)
@@ -280,12 +280,12 @@ public class IClockOutputControllerExtensionsTests {
 
   [TestCaseSource(nameof(YieldTestCases_ResumeClockOutputSyncOrAsync))]
   public void ResumeClockOutput(
-    byte initialChipSettings1,
+    byte initialChipSetting1,
     ClockOutputFrequency expectedFrequencyOnResume,
     ClockOutputDutyCycle expectedDutyCycleOnResume
   )
     => ResumeClockOutputSyncOrAsync(
-      initialChipSettings1,
+      initialChipSetting1,
       expectedFrequencyOnResume,
       expectedDutyCycleOnResume,
       static gp1 => {
@@ -295,7 +295,7 @@ public class IClockOutputControllerExtensionsTests {
     );
 
   private void ResumeClockOutputSyncOrAsync(
-    byte initialChipSettings1,
+    byte initialChipSetting1,
     ClockOutputFrequency expectedFrequencyOnResume,
     ClockOutputDutyCycle expectedDutyCycleOnResume,
     Func<Gp1Controller, ValueTask> resumeClockOutputAsyncFunc
@@ -309,7 +309,7 @@ public class IClockOutputControllerExtensionsTests {
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
         gp1Settings: InitialGp1Settings,
-        chipSettings1: initialChipSettings1
+        chipSetting1: initialChipSetting1
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -330,7 +330,7 @@ public class IClockOutputControllerExtensionsTests {
     expectedSentCommand[0] = 0x60; // [0] SET SRAM SETTINGS
     // [1] don't care
     // [2] Clock Output Divider Value
-    expectedSentCommand[2] = initialChipSettings1;
+    expectedSentCommand[2] = initialChipSetting1;
     // [3-6] don't care
     expectedSentCommand[7] = 0b10000000; // [7] Alter GPIO configuration = Alter the GP designation (1)
     expectedSentCommand[8] = InitialGp0Settings; // [8] GP0 settings
