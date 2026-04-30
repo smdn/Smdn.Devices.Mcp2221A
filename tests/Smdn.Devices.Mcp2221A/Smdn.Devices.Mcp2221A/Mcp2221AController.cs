@@ -42,9 +42,16 @@ public partial class Mcp2221AControllerTests {
     byte gp1Settings = 0b_000_1_0_011, // Output: HIGH, Alternate Function 1 (LED UART TX)
     byte gp2Settings = 0b_000_1_0_001, // Output: HIGH, Dedicated function operation (USBCFG)
     byte gp3Settings = 0b_000_1_0_001, // Output: HIGH, Dedicated function operation (LED I2C)
+    byte chipSetting0 = 0b_0_00000_00, // CDCSNEN(7): disabled(0), CHIPPROT(1-0): unprotected(00)
     byte chipSetting1 = 0b_000_00_000, // CLKDC(4-3): Duty cycle 0%, CLKDIV(2-0): Reserved
     byte chipSetting2 = 0b_00_0_00000, // DACVRM(7-6): VRM is OFF, DACREF(5): VDD, DACVAL(4-0): 0
     byte chipSetting3 = 0b_0_0_0_00_0_00, // INTDETFEEN(6): Disable, INTDETREEN(5): Disable, ADCVRM(4-3): VRM is off, ADCREF(2): VDD
+    byte usbVidLowerByte = 0xD8, // factory default
+    byte usbVidHigherByte = 0x04, // factory default
+    byte usbPidLowerByte = 0xDD, // factory default
+    byte usbPidHigherByte = 0x00, // factory default
+    byte usbPowerAttributes = 0b_1_0_0_00000, // SELFPWR(6): bus-powered(0), REMWKUP(5): disabled(0) / factory default
+    byte usbRequiredCurrent = 0b_00110010, // USBREQCRT: 50 in decimal / factory default
     bool interruptEdgeDetectorState = false
   )
     => new(
@@ -181,20 +188,15 @@ public partial class Mcp2221AControllerTests {
 #endif
         );
 
-        var vendorIdHigh = (byte)(vendorId >> 8);
-        var vendorIdLow = (byte)vendorId;
-        var productIdHigh = (byte)(productId >> 8);
-        var productIdLow = (byte)productId;
-
         readStream.Write(
           // [MCP2221A] 3.1.14 GET SRAM SETTINGS
           [
             ReportInput,
             0x61, 0x00,
             0x00, 0x00,
-            0x00, chipSetting1, chipSetting2, chipSetting3,
-            vendorIdHigh, vendorIdLow, productIdHigh, productIdLow,
-            0x00, 0x00,
+            chipSetting0, chipSetting1, chipSetting2, chipSetting3,
+            usbVidLowerByte, usbVidHigherByte, usbPidLowerByte, usbPidHigherByte,
+            usbPowerAttributes, usbRequiredCurrent,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             gp0Settings, gp1Settings, gp2Settings, gp3Settings,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00

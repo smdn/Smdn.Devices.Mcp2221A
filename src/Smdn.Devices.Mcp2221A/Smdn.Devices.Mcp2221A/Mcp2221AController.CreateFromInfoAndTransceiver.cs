@@ -26,7 +26,7 @@ partial class Mcp2221AController {
       cancellationToken: cancellationToken
     );
 
-    await ((Mcp2221AGpioDriver)mcp2221A.GpPins).FetchSramSettingsAsync(
+    mcp2221A.SramDeviceConfiguration = await ((Mcp2221AGpioDriver)mcp2221A.GpPins).FetchSramSettingsAsync(
       cancellationToken: cancellationToken
     ).ConfigureAwait(false);
 
@@ -47,7 +47,7 @@ partial class Mcp2221AController {
       cancellationToken: cancellationToken
     );
 
-    ((Mcp2221AGpioDriver)mcp2221A.GpPins).FetchSramSettings(
+    mcp2221A.SramDeviceConfiguration = ((Mcp2221AGpioDriver)mcp2221A.GpPins).FetchSramSettings(
       cancellationToken: cancellationToken
     );
 

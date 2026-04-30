@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 using System;
+using System.Buffers.Binary;
 using System.Device.Gpio;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,15 +34,13 @@ partial class Mcp2221AGpioDriver {
       comm[0] = 0x61; // Get SRAM Settings
     }
 
-    public static None ParseResponse(
+    public static SramDeviceConfiguration ParseResponse(
       ReadOnlySpan<byte> resp,
       SramSettings sramSettings
     )
     {
       if (resp[1] != 0x00) // Command completed successfully
         Mcp2221ACommandException.ThrowNoSuccessfulResponse("GET SRAM SETTINGS", resp[1]);
-
-      // TODO: update other SRAM settings
 
       // [5] Bit 7-5: Don't care
       // [5] Bit 4-0: Clock Output divider value
@@ -90,7 +89,17 @@ partial class Mcp2221AGpioDriver {
         gpSettingBytes: resp.Slice(22, SramSettings.SizeOfGpSettings) // [22-25] GP0-3 Settings
       );
 
-      return default;
+      return new(
+        chipSetting0: resp[4], // [4] Bit 7: CDC Serial Number Enumeration Enable; Bit 1-0: Chip Configuration security option
+        usbVendorId: BinaryPrimitives.ReadUInt16LittleEndian(
+          resp.Slice(8, 2) // [8-9] USB VID value (lower byte, higher byte)
+        ),
+        usbProductId: BinaryPrimitives.ReadUInt16LittleEndian(
+          resp.Slice(10, 2) // [10-11] USB PID value (lower byte, higher byte)
+        ),
+        usbPowerAttributes: resp[12], // [12] USB Power attributes
+        usbRequiredCurrent: resp[13] // [13] USB requested number of mA(s)
+      );
     }
   }
 
@@ -123,10 +132,10 @@ partial class Mcp2221AGpioDriver {
     }
   }
 
-  internal async ValueTask FetchSramSettingsAsync(CancellationToken cancellationToken)
+  internal async ValueTask<SramDeviceConfiguration> FetchSramSettingsAsync(CancellationToken cancellationToken)
   {
     using (await Transceiver.EnterCommandTransactionAsync(cancellationToken).ConfigureAwait(false)) {
-      _ = await Transceiver.CommandAsync(
+      var deviceConfiguration = await Transceiver.CommandAsync(
         arg: sramSettings,
         cancellationToken: cancellationToken,
         constructCommand: GetSramSettingsCommand.ConstructCommand,
@@ -134,13 +143,15 @@ partial class Mcp2221AGpioDriver {
       ).ConfigureAwait(false);
 
       SyncGpioStates(sramSettings);
+
+      return deviceConfiguration;
     }
   }
 
-  internal void FetchSramSettings(CancellationToken cancellationToken)
+  internal SramDeviceConfiguration FetchSramSettings(CancellationToken cancellationToken)
   {
     using (Transceiver.EnterCommandTransaction(cancellationToken)) {
-      _ = Transceiver.Command(
+      var deviceConfiguration = Transceiver.Command(
         arg: sramSettings,
         cancellationToken: cancellationToken,
         constructCommand: GetSramSettingsCommand.ConstructCommand,
@@ -148,6 +159,8 @@ partial class Mcp2221AGpioDriver {
       );
 
       SyncGpioStates(sramSettings);
+
+      return deviceConfiguration;
     }
   }
 
