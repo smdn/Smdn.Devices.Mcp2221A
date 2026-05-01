@@ -71,7 +71,7 @@ internal class I2cOperationStateMachine {
     lastEngineState = default;
 
   WRITE_INIT:
-    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cCommand, "WRITE_INIT");
+    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cCommand, "I2C WRITE_INIT");
 
     yield return (
       StatusConstructCommand,
@@ -85,7 +85,7 @@ internal class I2cOperationStateMachine {
 
 #pragma warning disable IDE0055
   WRITE_DO:
-    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cCommand, "WRITE_DO");
+    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cCommand, "I2C WRITE_DO");
 #pragma warning restore IDE0055
 
     yield return (
@@ -94,7 +94,7 @@ internal class I2cOperationStateMachine {
     );
 
   WRITE_STATUS:
-    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cCommand, "WRITE_STATUS");
+    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cCommand, "I2C WRITE_STATUS");
 
     yield return (
       StatusConstructCommand,
@@ -122,7 +122,7 @@ internal class I2cOperationStateMachine {
     ReadLength = -1;
 
   READ_INIT:
-    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cCommand, "READ_INIT");
+    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cCommand, "I2C READ_INIT");
 
     yield return (
       StatusConstructCommand,
@@ -136,7 +136,7 @@ internal class I2cOperationStateMachine {
 
 #pragma warning disable IDE0055
   READ_DO:
-    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cCommand, "READ_DO");
+    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cCommand, "I2C READ_DO");
 #pragma warning restore IDE0055
 
     yield return (
@@ -237,7 +237,7 @@ internal class I2cOperationStateMachine {
 
     lastEngineState = I2cEngineState.Parse(resp);
 
-    logger?.LogInformation(Mcp2221AI2cBus.EventIdI2cEngineState, $"STATUS/SET PARAMETERS: {lastEngineState}");
+    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cEngineState, $"I2C Engine state: {lastEngineState}");
 
     if (operationState == OperationState.Initial) {
       var isSpeedConsidered = resp[3] switch {
@@ -248,7 +248,7 @@ internal class I2cOperationStateMachine {
       };
 
       if (!isSpeedConsidered)
-        logger?.LogWarning(Mcp2221AI2cBus.EventIdI2cEngineState, $"STATUS/SET PARAMETERS: new I2C/SMBus communication speed is not considered");
+        logger?.LogWarning(Mcp2221AI2cBus.EventIdI2cEngineState, $"New I2C/SMBus communication speed is not considered.");
     }
 
     operationState = TransitStateOrThrowIfEngineStateInvalid(

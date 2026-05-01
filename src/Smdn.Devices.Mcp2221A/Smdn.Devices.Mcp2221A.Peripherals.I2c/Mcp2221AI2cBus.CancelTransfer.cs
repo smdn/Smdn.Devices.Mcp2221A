@@ -67,7 +67,7 @@ partial class Mcp2221AI2cBus {
         parseResponse: CancelTransferCommand.ParseResponse
       ).ConfigureAwait(false);
 
-      logger?.LogWarning(EventIdI2cEngineState, $"CANCEL TRANSFER: {engineState}");
+      logger?.LogWarning(EventIdI2cEngineState, $"I2C Cancel transfer (Engine state: {engineState})");
     }
   }
 
@@ -84,7 +84,7 @@ partial class Mcp2221AI2cBus {
         parseResponse: CancelTransferCommand.ParseResponse
       );
 
-      logger?.LogWarning(EventIdI2cEngineState, $"CANCEL TRANSFER: {engineState}");
+      logger?.LogWarning(EventIdI2cEngineState, $"I2C Cancel transfer (Engine state: {engineState})");
     }
   }
 }

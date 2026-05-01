@@ -53,5 +53,5 @@ public class I2cNackException : I2cCommandException {
   {
   }
 
-  private static string CreateDefaultMessage(I2cAddress address) => $"I2C device 0x{address} not respond.";
+  private static string CreateDefaultMessage(I2cAddress address) => $"I2C device {address} not respond.";
 }
