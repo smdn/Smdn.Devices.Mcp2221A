@@ -5,8 +5,8 @@ namespace Smdn.Devices.Mcp2221A;
 /// <summary>
 /// Acts as a formal placeholder for generic type arguments when no actual value is needed.
 /// </summary>
-/// <seealso cref="Smdn.Devices.Mcp2221A.Transport.Mcp2221ATransceiver.Command" />
-/// <seealso cref="Smdn.Devices.Mcp2221A.Transport.Mcp2221ATransceiver.CommandAsync" />
+/// <seealso cref="Smdn.Devices.Mcp2221A.Transport.Mcp2221ATransceiver.Command{TArg, TResponse}(System.ReadOnlySpan{byte}, System.Span{byte}, TArg, Smdn.Devices.Mcp2221A.Transport.Mcp2221AConstructCommandWithSpanAction{TArg}, Smdn.Devices.Mcp2221A.Transport.Mcp2221AParseResponseWithSpanFunc{TArg, TResponse}, System.Threading.CancellationToken)" />
+/// <seealso cref="Smdn.Devices.Mcp2221A.Transport.Mcp2221ATransceiver.CommandAsync{TArg, TResponse}(System.ReadOnlyMemory{byte}, System.Memory{byte}, TArg, Smdn.Devices.Mcp2221A.Transport.Mcp2221AConstructCommandWithSpanAction{TArg}, Smdn.Devices.Mcp2221A.Transport.Mcp2221AParseResponseWithSpanFunc{TArg, TResponse}, System.Threading.CancellationToken)" />
 /// <seealso cref="Smdn.Devices.Mcp2221A.Transport.Mcp2221AConstructCommandAction{TArg}" />
 /// <seealso cref="Smdn.Devices.Mcp2221A.Transport.Mcp2221AParseResponseFunc{TArg, TResponse}" />
 internal readonly struct None { }

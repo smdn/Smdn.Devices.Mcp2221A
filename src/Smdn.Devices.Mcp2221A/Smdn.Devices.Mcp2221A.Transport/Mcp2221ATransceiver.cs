@@ -17,7 +17,7 @@ using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A.Transport;
 
-internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
+internal sealed partial class Mcp2221ATransceiver : IDisposable {
   private const int LengthOfReportId = 1;
 
   private const int CommandLength = 64;
@@ -384,8 +384,7 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
     var transaction = await EnterCommandTransactionAsync(cancellationToken).ConfigureAwait(false);
 
     try {
-      await IMcp2221ATransceiverExtensions.CommandAsync(
-        transceiver: this,
+      await CommandAsync(
         arg: this,
         cancellationToken: cancellationToken,
         constructCommand: ResetChipCommand.ConstructCommand,
@@ -416,8 +415,7 @@ internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
     var transaction = EnterCommandTransaction(cancellationToken);
 
     try {
-      IMcp2221ATransceiverExtensions.Command(
-        transceiver: this,
+      Command(
         arg: this,
         cancellationToken: cancellationToken,
         constructCommand: ResetChipCommand.ConstructCommand,
