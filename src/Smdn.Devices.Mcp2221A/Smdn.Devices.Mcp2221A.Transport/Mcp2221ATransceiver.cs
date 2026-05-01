@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 
 using Smdn.IO.UsbHid;
 
-namespace Smdn.Devices.Mcp2221A;
+namespace Smdn.Devices.Mcp2221A.Transport;
 
 internal sealed class Mcp2221ATransceiver : IMcp2221ATransceiver, IDisposable {
   private const int LengthOfReportId = 1;

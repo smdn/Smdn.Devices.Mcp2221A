@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 #endif
 
+using Smdn.Devices.Mcp2221A.Transport;
+
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 internal sealed partial class Mcp2221AGpioDriver : IGpControllerGroup {

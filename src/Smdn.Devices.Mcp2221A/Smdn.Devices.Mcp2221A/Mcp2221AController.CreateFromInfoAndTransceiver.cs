@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
+using Smdn.Devices.Mcp2221A.Transport;
 
 namespace Smdn.Devices.Mcp2221A;
 

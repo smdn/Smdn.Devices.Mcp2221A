@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Smdn.Devices.Mcp2221A;
+namespace Smdn.Devices.Mcp2221A.Transport;
 
 internal interface IMcp2221ATransceiver {
   ValueTask<TResponse> CommandAsync<TArg, TResponse>(

@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 
 using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 using Smdn.Devices.Mcp2221A.Peripherals.I2c;
+using Smdn.Devices.Mcp2221A.Transport;
 using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;

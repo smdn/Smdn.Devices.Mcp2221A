@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 using System;
 
-namespace Smdn.Devices.Mcp2221A;
+namespace Smdn.Devices.Mcp2221A.Transport;
 
 internal delegate void Mcp2221AConstructCommandWithSpanAction<TArg>(
   Span<byte> command,

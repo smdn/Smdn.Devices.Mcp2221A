@@ -11,6 +11,8 @@ using System.Diagnostics.CodeAnalysis;
 
 using Microsoft.Extensions.Logging;
 
+using Smdn.Devices.Mcp2221A.Transport;
+
 namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
 internal class I2cOperationStateMachine {

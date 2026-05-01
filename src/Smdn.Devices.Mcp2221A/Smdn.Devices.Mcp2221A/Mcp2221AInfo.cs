@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Smdn.Devices.Mcp2221A.Transport;
+
 namespace Smdn.Devices.Mcp2221A;
 
 /// <summary>

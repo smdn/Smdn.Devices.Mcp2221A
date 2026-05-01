@@ -3,6 +3,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using Smdn.Devices.Mcp2221A.Transport;
+
 namespace Smdn.Devices.Mcp2221A;
 
 internal static class IMcp2221ATransceiverExtensions {

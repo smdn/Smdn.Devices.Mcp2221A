@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Smdn.Devices.Mcp2221A.Transport;
 using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
