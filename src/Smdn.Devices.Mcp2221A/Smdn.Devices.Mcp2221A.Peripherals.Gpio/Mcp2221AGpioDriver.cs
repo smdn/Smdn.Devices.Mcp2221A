@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 #endif
 
+using Microsoft.Extensions.Logging;
+
 using Smdn.Devices.Mcp2221A.Transport;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
@@ -52,10 +54,12 @@ internal sealed partial class Mcp2221AGpioDriver : IGpControllerGroup {
 
   public int Count => NumberOfGpPins;
 
+  private readonly ILogger? logger;
   private readonly SramSettings sramSettings;
 
   internal Mcp2221AGpioDriver(
-    Mcp2221ATransceiver transceiver
+    Mcp2221ATransceiver transceiver,
+    ILogger? logger
   )
   {
     Transceiver = transceiver ?? throw new ArgumentNullException(nameof(transceiver));
@@ -64,6 +68,8 @@ internal sealed partial class Mcp2221AGpioDriver : IGpControllerGroup {
     Gp1 = new(this);
     Gp2 = new(this);
     Gp3 = new(this);
+
+    this.logger = logger;
 
     sramSettings = new();
   }

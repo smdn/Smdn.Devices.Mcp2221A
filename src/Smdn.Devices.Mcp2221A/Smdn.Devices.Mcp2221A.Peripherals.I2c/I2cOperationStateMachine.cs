@@ -1,7 +1,5 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
-#pragma warning disable CA1848, CA1873, CA2254
-
 using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
@@ -15,7 +13,7 @@ using Smdn.Devices.Mcp2221A.Transport;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
-internal class I2cOperationStateMachine {
+internal partial class I2cOperationStateMachine {
 #if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
   [DoesNotReturn]
 #endif
@@ -54,13 +52,41 @@ internal class I2cOperationStateMachine {
     this.busSpeedDivider = busSpeedDivider;
   }
 
+  [LoggerMessage(
+    EventId = 220,
+    EventName = "I2C Communication Speed",
+    Level = LogLevel.Warning,
+    Message = "New I2C/SMBus communication speed might not be considered. (Code: {Response}, Speed divider: {BusSpeedDivider})"
+  )]
+  private static partial void LogWarningI2cCommunicationSpeedMightNotBeConsidered(
+    ILogger logger,
+    byte busSpeedDivider,
+    string response
+  );
+
+  [LoggerMessage(
+    EventId = 221,
+    EventName = "I2C Engine State",
+    Level = LogLevel.Debug,
+    Message = "Engine state: {EngineState}"
+  )]
+  private static partial void LogDebugI2cEngineState(ILogger logger, I2cEngineState engineState);
+
+  [LoggerMessage(
+    EventId = 222,
+    EventName = "I2C Operation State Machine",
+    Level = LogLevel.Debug,
+    Message = "{NewState}"
+  )]
+  private static partial void LogDebugTransitState(ILogger logger, string newState);
+
   private readonly ILogger? logger;
   private readonly byte busSpeedDivider;
   private OperationState operationState;
   private I2cEngineState lastEngineState;
   public int ReadLength { get; private set; } = -1;
 
-#pragma warning disable CS0164
+#pragma warning disable CS0164, CA1508
   public IEnumerable<(
     Mcp2221AConstructCommandWithSpanAction<I2cAddress> ConstructCommand,
     Mcp2221AParseResponseWithSpanFunc<I2cAddress, bool> ParseResponse
@@ -71,21 +97,21 @@ internal class I2cOperationStateMachine {
     lastEngineState = default;
 
   WRITE_INIT:
-    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cCommand, "I2C WRITE_INIT");
+    if (logger is { } logWriteInit && logWriteInit.IsEnabled(LogLevel.Debug))
+      LogDebugTransitState(logWriteInit, "WRITE_INIT");
 
     yield return (
       StatusConstructCommand,
       StatusParseResponse
     );
 
-#pragma warning disable CA1508
     if (operationState == OperationState.CancelAndRetry)
       goto WRITE_INIT;
-#pragma warning restore CA1508
 
 #pragma warning disable IDE0055
   WRITE_DO:
-    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cCommand, "I2C WRITE_DO");
+    if (logger is { } logWriteDo && logWriteDo.IsEnabled(LogLevel.Debug))
+      LogDebugTransitState(logWriteDo, "WRITE_DO");
 #pragma warning restore IDE0055
 
     yield return (
@@ -94,23 +120,22 @@ internal class I2cOperationStateMachine {
     );
 
   WRITE_STATUS:
-    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cCommand, "I2C WRITE_STATUS");
+    if (logger is { } logWriteStatus && logWriteStatus.IsEnabled(LogLevel.Debug))
+      LogDebugTransitState(logWriteStatus, "WRITE_STATUS");
 
     yield return (
       StatusConstructCommand,
       StatusParseResponse
     );
 
-#pragma warning disable CA1508
     if (operationState == OperationState.Continue)
       goto WRITE_STATUS;
-#pragma warning restore CA1508
     if (lastEngineState.RequestedTransferLength == 0)
       yield break;
   }
-#pragma warning restore CS0164
+#pragma warning restore CS0164, CA1508
 
-#pragma warning disable CS0164
+#pragma warning disable CS0164, CA1508
   public IEnumerable<(
     Mcp2221AConstructCommandWithSpanAction<I2cAddress> ConstructCommand,
     Mcp2221AParseResponseWithSpanFunc<I2cAddress, bool> ParseResponse
@@ -122,21 +147,21 @@ internal class I2cOperationStateMachine {
     ReadLength = -1;
 
   READ_INIT:
-    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cCommand, "I2C READ_INIT");
+    if (logger is { } logReadInit && logReadInit.IsEnabled(LogLevel.Debug))
+      LogDebugTransitState(logReadInit, "READ_INIT");
 
     yield return (
       StatusConstructCommand,
       StatusParseResponse
     );
 
-#pragma warning disable CA1508
     if (operationState == OperationState.CancelAndRetry)
       goto READ_INIT;
-#pragma warning restore CA1508
 
 #pragma warning disable IDE0055
   READ_DO:
-    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cCommand, "I2C READ_DO");
+    if (logger is { } logReadDo && logReadDo.IsEnabled(LogLevel.Debug))
+      LogDebugTransitState(logReadDo, "READ_DO");
 #pragma warning restore IDE0055
 
     yield return (
@@ -157,14 +182,12 @@ internal class I2cOperationStateMachine {
       GetParseResponse
     );
 
-#pragma warning disable CA1508
     if (operationState == OperationState.Continue)
       goto READ_GET;
-#pragma warning restore CA1508
 
     yield break;
   }
-#pragma warning disable CS0164
+#pragma warning disable CS0164, CA1508
 
   private static OperationState TransitStateOrThrowIfEngineStateInvalid(OperationState currentState, I2cAddress address, I2cEngineState engineState)
   {
@@ -237,18 +260,21 @@ internal class I2cOperationStateMachine {
 
     lastEngineState = I2cEngineState.Parse(resp);
 
-    logger?.LogDebug(Mcp2221AI2cBus.EventIdI2cEngineState, $"I2C Engine state: {lastEngineState}");
+    if (logger is { } l) {
+      if (l.IsEnabled(LogLevel.Debug))
+        LogDebugI2cEngineState(l, lastEngineState);
 
-    if (operationState == OperationState.Initial) {
-      var isSpeedConsidered = resp[3] switch {
-        0x00 => false, // No Set I2C/SMBus communication speed was issued
-        0x20 => true, // The new I2C/SMBus communication speed is now considered
-        // 0x21 => throw; // I2C transfer in progress
-        _ => false, // throw
-      };
+      if (operationState == OperationState.Initial && l.IsEnabled(LogLevel.Warning)) {
+        var warnIfSpeedMightNotBeConsidered = resp[3] switch {
+          0x00 => false, // No Set I2C/SMBus communication speed was issued
+          0x20 => false, // The new I2C/SMBus communication speed is now considered
+          0x21 => false, // The I2C/SMBus communication speed was not set (e.g., I2C transfer in progress)
+          _ => true, // throw
+        };
 
-      if (!isSpeedConsidered)
-        logger?.LogWarning(Mcp2221AI2cBus.EventIdI2cEngineState, $"New I2C/SMBus communication speed is not considered.");
+        if (warnIfSpeedMightNotBeConsidered)
+          LogWarningI2cCommunicationSpeedMightNotBeConsidered(l, busSpeedDivider, $"0x{resp[3]:X2}");
+      }
     }
 
     operationState = TransitStateOrThrowIfEngineStateInvalid(

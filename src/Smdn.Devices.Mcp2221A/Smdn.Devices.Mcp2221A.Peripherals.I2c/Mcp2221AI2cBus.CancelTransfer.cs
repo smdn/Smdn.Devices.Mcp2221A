@@ -1,7 +1,5 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
-#pragma warning disable CA1848, CA1873, CA2254
-
 using System;
 using System.Threading.Tasks;
 
@@ -54,6 +52,14 @@ partial class Mcp2221AI2cBus {
     }
   }
 
+  [LoggerMessage(
+    EventId = 210,
+    EventName = "I2C Cancel",
+    Level = LogLevel.Warning,
+    Message = "Cancel transfer (Engine state: {EngineState})"
+  )]
+  private static partial void LogWarningI2cCancelTransfer(ILogger logger, I2cEngineState engineState);
+
   ValueTask II2cController.CancelTransferAsync(I2cAddress address)
     => CancelTransferAsync(address, exceptionCauseOfCancellation: null);
 
@@ -67,7 +73,8 @@ partial class Mcp2221AI2cBus {
         parseResponse: CancelTransferCommand.ParseResponse
       ).ConfigureAwait(false);
 
-      logger?.LogWarning(EventIdI2cEngineState, $"I2C Cancel transfer (Engine state: {engineState})");
+      if (logger is { } l && l.IsEnabled(LogLevel.Warning))
+        LogWarningI2cCancelTransfer(l, engineState);
     }
   }
 
@@ -84,7 +91,8 @@ partial class Mcp2221AI2cBus {
         parseResponse: CancelTransferCommand.ParseResponse
       );
 
-      logger?.LogWarning(EventIdI2cEngineState, $"I2C Cancel transfer (Engine state: {engineState})");
+      if (logger is { } l && l.IsEnabled(LogLevel.Warning))
+        LogWarningI2cCancelTransfer(l, engineState);
     }
   }
 }

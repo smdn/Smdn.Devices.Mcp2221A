@@ -64,6 +64,24 @@ partial class Mcp2221AController {
   {
     cancellationToken.ThrowIfCancellationRequested();
 
+    if (logger is { } l && l.IsEnabled(LogLevel.Information)) {
+      using var scope = l.BeginScope("Device Information");
+
+      if (transceiver.EndPoint is { } usbHidEndPoint) {
+        LogInformationDeviceInfo(l, "HID End Point", usbHidEndPoint);
+
+        if (usbHidEndPoint.Device.TryGetDeviceIdentifier(out var deviceIdentifier))
+          LogInformationDeviceInfo(l, "HID Device", deviceIdentifier);
+      }
+
+      LogInformationDeviceInfo(l, nameof(info.HardwareRevision), info.HardwareRevision);
+      LogInformationDeviceInfo(l, nameof(info.FirmwareRevision), info.FirmwareRevision);
+      LogInformationDeviceInfo(l, nameof(info.Manufacturer), info.Manufacturer);
+      LogInformationDeviceInfo(l, nameof(info.Product), info.Product);
+      LogInformationDeviceInfo(l, nameof(info.SerialNumber), info.SerialNumber);
+      LogInformationDeviceInfo(l, nameof(info.ChipFactorySerialNumber), info.ChipFactorySerialNumber);
+    }
+
     ValidateHardwareRevision(info.HardwareRevision);
     ValidateFirmwareRevision(info.FirmwareRevision);
 
@@ -73,4 +91,12 @@ partial class Mcp2221AController {
       logger: logger
     );
   }
+
+  [LoggerMessage(
+    EventId = 10,
+    EventName = "Device Information",
+    Level = LogLevel.Information,
+    Message = "{Name}: {Value}"
+  )]
+  private static partial void LogInformationDeviceInfo(ILogger logger, string name, object value);
 }

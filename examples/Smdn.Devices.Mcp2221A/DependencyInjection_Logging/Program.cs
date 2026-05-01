@@ -34,7 +34,10 @@ services.AddLibUsbDotNetV3UsbHid(
 
 services.AddLogging(
   builder => builder
-    .AddSimpleConsole(static options => options.SingleLine = true)
+    .AddSimpleConsole(static options => {
+      options.SingleLine = true;
+      options.IncludeScopes = true;
+    })
     .AddFilter(static level => LogLevel.Trace <= level)
 );
 

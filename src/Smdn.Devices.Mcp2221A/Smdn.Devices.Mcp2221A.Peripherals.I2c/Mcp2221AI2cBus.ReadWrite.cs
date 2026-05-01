@@ -1,8 +1,5 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
-
-#pragma warning disable CA1848, CA1873, CA2254
-
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +13,38 @@ partial class Mcp2221AI2cBus {
 #pragma warning restore IDE0040
   public const int MaxBlockLength = 0xFFFF;
   private const int MaxTransferLengthPerCommand = 64 - 4;
+
+  [LoggerMessage(
+    EventId = 200,
+    EventName = "I2C Write Error",
+    Level = LogLevel.Error,
+    Message = "Write failed ({Address}, {Reason})"
+  )]
+  private static partial void LogErrorI2cWriteFailed(ILogger logger, I2cAddress address, string reason);
+
+  [LoggerMessage(
+    EventId = 201,
+    EventName = "I2C Read Error",
+    Level = LogLevel.Error,
+    Message = "Read failed ({Address}, {Reason})"
+  )]
+  private static partial void LogErrorI2cReadFailed(ILogger logger, I2cAddress address, string reason);
+
+  [LoggerMessage(
+    EventId = 202,
+    EventName = "I2C Write Error",
+    Level = LogLevel.Debug,
+    Message = "Write {RequestedLength} bytes"
+  )]
+  private static partial void LogDebugI2cBeginWrite(ILogger logger, int requestedLength);
+
+  [LoggerMessage(
+    EventId = 203,
+    EventName = "I2C Read Error",
+    Level = LogLevel.Debug,
+    Message = "Read {RequestedLength} bytes"
+  )]
+  private static partial void LogDebugI2cBeginRead(ILogger logger, int requestedLength);
 
   /// <remarks>
   ///   <include
@@ -47,8 +76,11 @@ partial class Mcp2221AI2cBus {
 
     cancellationToken.ThrowIfCancellationRequested();
 
+    using var scope = logger?.BeginScope($"I2C Write to {address}");
+
     try {
-      logger?.LogDebug(EventIdI2cCommand, $"I2C Write {buffer.Length} bytes to {address}");
+      if (logger is { } l && l.IsEnabled(LogLevel.Debug))
+        LogDebugI2cBeginWrite(l, buffer.Length);
 
       for (; ; ) {
         var lengthToTransfer = Math.Min(buffer.Length, MaxTransferLengthPerCommand);
@@ -74,9 +106,12 @@ partial class Mcp2221AI2cBus {
       }
     }
     catch (Exception ex) {
-      logger?.LogError(EventIdI2cCommand, $"I2C Write to {address} failed: {ex.Message}");
+      if (logger is { } l && l.IsEnabled(LogLevel.Error))
+        LogErrorI2cWriteFailed(l, address, ex.Message);
+
       if (ex is not I2cNackException)
         await CancelTransferAsync(address, ex).ConfigureAwait(false);
+
       throw;
     }
   }
@@ -111,8 +146,11 @@ partial class Mcp2221AI2cBus {
 
     cancellationToken.ThrowIfCancellationRequested();
 
+    using var scope = logger?.BeginScope($"I2C Write to {address}");
+
     try {
-      logger?.LogDebug(EventIdI2cCommand, $"I2C Write {buffer.Length} bytes to {address}");
+      if (logger is { } l && l.IsEnabled(LogLevel.Debug))
+        LogDebugI2cBeginWrite(l, buffer.Length);
 
       for (; ; ) {
         var lengthToTransfer = Math.Min(buffer.Length, MaxTransferLengthPerCommand);
@@ -138,9 +176,12 @@ partial class Mcp2221AI2cBus {
       }
     }
     catch (Exception ex) {
-      logger?.LogError(EventIdI2cCommand, $"I2C Write to {address} failed: {ex.Message}");
+      if (logger is { } l && l.IsEnabled(LogLevel.Error))
+        LogErrorI2cWriteFailed(l, address, ex.Message);
+
       if (ex is not I2cNackException)
         CancelTransfer(address, ex);
+
       throw;
     }
   }
@@ -175,8 +216,11 @@ partial class Mcp2221AI2cBus {
 
     cancellationToken.ThrowIfCancellationRequested();
 
+    using var scope = logger?.BeginScope($"I2C Read from {address}");
+
     try {
-      logger?.LogDebug(EventIdI2cCommand, $"I2C Read {buffer.Length} bytes from {address}");
+      if (logger is { } l && l.IsEnabled(LogLevel.Debug))
+        LogDebugI2cBeginRead(l, buffer.Length);
 
       var totalReadLength = 0;
 
@@ -213,9 +257,12 @@ partial class Mcp2221AI2cBus {
       return totalReadLength;
     }
     catch (Exception ex) {
-      logger?.LogError(EventIdI2cCommand, $"I2C Read from {address} failed: {ex.Message}");
+      if (logger is { } l && l.IsEnabled(LogLevel.Error))
+        LogErrorI2cReadFailed(l, address, ex.Message);
+
       if (ex is not I2cReadException)
         await CancelTransferAsync(address, ex).ConfigureAwait(false);
+
       throw;
     }
   }
@@ -250,8 +297,11 @@ partial class Mcp2221AI2cBus {
 
     cancellationToken.ThrowIfCancellationRequested();
 
+    using var scope = logger?.BeginScope($"I2C Read from {address}");
+
     try {
-      logger?.LogDebug(EventIdI2cCommand, $"I2C Read {buffer.Length} bytes from {address}");
+      if (logger is { } l && l.IsEnabled(LogLevel.Debug))
+        LogDebugI2cBeginRead(l, buffer.Length);
 
       var totalReadLength = 0;
 
@@ -288,9 +338,12 @@ partial class Mcp2221AI2cBus {
       return totalReadLength;
     }
     catch (Exception ex) {
-      logger?.LogError(EventIdI2cCommand, $"I2C Read from {address} failed: {ex.Message}");
+      if (logger is { } l && l.IsEnabled(LogLevel.Error))
+        LogErrorI2cReadFailed(l, address, ex.Message);
+
       if (ex is not I2cReadException)
         CancelTransfer(address, ex);
+
       throw;
     }
   }

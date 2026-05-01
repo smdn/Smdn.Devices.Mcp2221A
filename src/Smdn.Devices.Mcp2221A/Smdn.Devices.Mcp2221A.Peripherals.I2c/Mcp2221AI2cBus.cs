@@ -11,9 +11,6 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 /// <inheritdoc/>
 [CLSCompliant(false)]
 public sealed partial class Mcp2221AI2cBus : I2cBus, II2cController {
-  internal static readonly EventId EventIdI2cCommand = new(10, "I2C command");
-  internal static readonly EventId EventIdI2cEngineState = new(11, "I2C engine state");
-
   internal const int DefaultTransmissionSpeedInKbps = 100;
 
   internal Mcp2221AController Device { get; }

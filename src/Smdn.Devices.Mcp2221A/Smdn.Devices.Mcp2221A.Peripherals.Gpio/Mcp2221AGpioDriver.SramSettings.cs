@@ -6,6 +6,8 @@ using System.Device.Gpio;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Logging;
+
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 #pragma warning disable IDE0040
@@ -104,26 +106,31 @@ partial class Mcp2221AGpioDriver {
   }
 
   private static class SetSramSettingsCommand {
+#pragma warning disable SA1414
     public static void ConstructCommand(
       Span<byte> comm,
-      SramSettings sramSettings
+      (SramSettings, ILogger?) args
     )
+#pragma warning restore SA1414
     {
+      var (sramSettings, logger) = args;
+
       // [MCP2221A] 3.1.13 SET SRAM SETTINGS
       comm[0] = 0x60; // Set SRAM settings
       comm[1] = 0x00; // Don't care
 
       sramSettings.WriteAsSetSramSettingsCommand(
-        comm.Slice(2, SramSettings.SizeOfSelf) // [2-11] SRAM settings
+        comm.Slice(2, SramSettings.SizeOfSelf), // [2-11] SRAM settings
+        logger
       );
     }
 
-#pragma warning disable IDE0060, SA1313
+#pragma warning disable IDE0060, SA1313, SA1414
     public static None ParseResponse(
       ReadOnlySpan<byte> resp,
-      SramSettings sramSettings
+      (SramSettings, ILogger?) args
     )
-#pragma warning restore IDE0060, SA1313
+#pragma warning restore IDE0060, SA1313, SA1414
     {
       if (resp[1] != 0x00) // Command completed successfully
         Mcp2221ACommandException.ThrowNoSuccessfulResponse("SET SRAM SETTINGS", resp[1]);
@@ -388,7 +395,7 @@ partial class Mcp2221AGpioDriver {
       try {
         // attempt to set new SRAM settings
         _ = await Transceiver.CommandAsync(
-          arg: sramSettings,
+          arg: (sramSettings, logger),
           cancellationToken: cancellationToken,
           constructCommand: SetSramSettingsCommand.ConstructCommand,
           parseResponse: SetSramSettingsCommand.ParseResponse
@@ -396,7 +403,7 @@ partial class Mcp2221AGpioDriver {
 
         if (sramSettings.ShouldReenableVrm()) {
           _ = await Transceiver.CommandAsync(
-            arg: sramSettings,
+            arg: (sramSettings, logger),
             cancellationToken: cancellationToken,
             constructCommand: SetSramSettingsCommand.ConstructCommand,
             parseResponse: SetSramSettingsCommand.ParseResponse
@@ -404,7 +411,7 @@ partial class Mcp2221AGpioDriver {
         }
       }
       catch {
-        sramSettings.Restore();
+        sramSettings.Restore(logger);
         throw;
       }
 
@@ -412,7 +419,7 @@ partial class Mcp2221AGpioDriver {
         LastFetchedInterruptDetectionFlag = default;
 
       // save the successfully configured settings as the current state
-      sramSettings.Store();
+      sramSettings.Store(logger);
 
       SyncGpioStates(sramSettings);
     } // end of using
@@ -433,7 +440,7 @@ partial class Mcp2221AGpioDriver {
       try {
         // attempt to set new SRAM settings
         _ = Transceiver.Command(
-          arg: sramSettings,
+          arg: (sramSettings, logger),
           cancellationToken: cancellationToken,
           constructCommand: SetSramSettingsCommand.ConstructCommand,
           parseResponse: SetSramSettingsCommand.ParseResponse
@@ -441,7 +448,7 @@ partial class Mcp2221AGpioDriver {
 
         if (sramSettings.ShouldReenableVrm()) {
           _ = Transceiver.Command(
-            arg: sramSettings,
+            arg: (sramSettings, logger),
             cancellationToken: cancellationToken,
             constructCommand: SetSramSettingsCommand.ConstructCommand,
             parseResponse: SetSramSettingsCommand.ParseResponse
@@ -449,7 +456,7 @@ partial class Mcp2221AGpioDriver {
         }
       }
       catch {
-        sramSettings.Restore();
+        sramSettings.Restore(logger);
         throw;
       }
 
@@ -457,7 +464,7 @@ partial class Mcp2221AGpioDriver {
         LastFetchedInterruptDetectionFlag = default;
 
       // save the successfully configured settings as the current state
-      sramSettings.Store();
+      sramSettings.Store(logger);
 
       SyncGpioStates(sramSettings);
     } // end of using

@@ -5,6 +5,8 @@ using System.Device.Gpio;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Smdn.Formats.Binary;
+
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 #pragma warning disable IDE0040
@@ -15,16 +17,13 @@ public abstract partial class GpController {
     GpDesignation designation
   )
   {
-    var formattedDesignation = IsBinaryFormatSpecifierSupported()
+    var formattedDesignation = BinaryFormat.IsBinaryFormatSpecifierSupported
       ? ((int)designation).ToString("B3", provider: null)
       : Convert.ToString((int)designation, 2).PadLeft(3, '0');
 
     return new(
       message: $"The value '0b{formattedDesignation}' of the GP{gpIndex} designation bits designates a function that is not supported or defined for GP{gpIndex}."
     );
-
-    static bool IsBinaryFormatSpecifierSupported()
-      => Enum.IsDefined(typeof(System.Globalization.NumberStyles), 1024 /* = NumberStyles.AllowBinarySpecifier */);
   }
 
   private protected Mcp2221AGpioDriver GpioDriver { get; }

@@ -1,7 +1,5 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
-#pragma warning disable CA1848
-
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -446,11 +444,12 @@ partial class Mcp2221AController {
         }
 #pragma warning disable CA1031
         catch (Exception ex) {
+          // If chip information cannot be acquire, attempt the next USB HID device.
           if (transceiver is not null)
             await transceiver.DisposeAsync().ConfigureAwait(false);
 
-          // If chip information cannot be acquire, attempt the next USB HID device.
-          logger?.LogWarning(ex, "Unable to access the USB HID device or acquire chip information. ({Device})", mcp2221AUsbHidDevice);
+          if (logger is { } l && l.IsEnabled(LogLevel.Warning))
+            LogWarningAcquiringChipInformationFailed(l, ex, mcp2221AUsbHidDevice);
 
           continue;
         }
@@ -534,10 +533,11 @@ partial class Mcp2221AController {
         }
 #pragma warning disable CA1031
         catch (Exception ex) {
+          // If chip information cannot be acquire, attempt the next USB HID device.
           transceiver?.Dispose();
 
-          // If chip information cannot be acquire, attempt the next USB HID device.
-          logger?.LogWarning(ex, "Unable to access the USB HID device or acquire chip information. ({Device})", mcp2221AUsbHidDevice);
+          if (logger is { } l && l.IsEnabled(LogLevel.Warning))
+            LogWarningAcquiringChipInformationFailed(l, ex, mcp2221AUsbHidDevice);
 
           continue;
         }
@@ -554,4 +554,12 @@ partial class Mcp2221AController {
     }
   }
 #pragma warning restore IDE0060
+
+  [LoggerMessage(
+    EventId = 5,
+    EventName = "Device Creation",
+    Level = LogLevel.Warning,
+    Message = "Unable to access the USB HID device or acquire chip information. ({Device})"
+  )]
+  private static partial void LogWarningAcquiringChipInformationFailed(ILogger logger, Exception ex, IUsbHidDevice device);
 }

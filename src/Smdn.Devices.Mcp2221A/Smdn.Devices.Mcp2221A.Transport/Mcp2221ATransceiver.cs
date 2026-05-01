@@ -1,8 +1,5 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
-
-#pragma warning disable CA1848, CA1873, CA2254
-
 using System;
 using System.Buffers;
 #if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
@@ -24,9 +21,6 @@ internal sealed partial class Mcp2221ATransceiver : IDisposable {
   private const int ResponseLength = 64;
   private const int CommandReportLength = LengthOfReportId + CommandLength;
   private const int ResponseReportLength = LengthOfReportId + ResponseLength;
-
-  private static readonly EventId EventIdCommand = new(1, "sent command");
-  private static readonly EventId EventIdResponse = new(2, "received response");
 
   private static void VerifyResponseReport(
     ReadOnlySpan<byte> command,
@@ -100,30 +94,6 @@ internal sealed partial class Mcp2221ATransceiver : IDisposable {
     transactionSemaphore = null;
   }
 
-  private static string ConvertByteSequenceToString(
-    ReadOnlySpan<byte> sequence,
-    int? actualLength = default
-  )
-  {
-    if (actualLength is int actualSequenceLength) {
-      if (actualSequenceLength <= 0)
-        return string.Empty;
-
-      sequence = sequence.Slice(0, actualSequenceLength);
-    }
-
-    var buffer = ArrayPool<byte>.Shared.Rent(sequence.Length);
-
-    try {
-      sequence.CopyTo(buffer);
-
-      return BitConverter.ToString(buffer, 0, sequence.Length);
-    }
-    finally {
-      ArrayPool<byte>.Shared.Return(buffer);
-    }
-  }
-
   public async ValueTask<CommandTransaction> EnterCommandTransactionAsync(
     CancellationToken cancellationToken
   )
@@ -191,7 +161,11 @@ internal sealed partial class Mcp2221ATransceiver : IDisposable {
         arg: arg
       );
 
-      logger?.LogTrace(EventIdCommand, "> " + ConvertByteSequenceToString(commandSpan));
+      if (logger is { } lc && lc.IsEnabled(LogLevel.Trace)) {
+#pragma warning disable CA1873
+        LogTraceCommand(lc, ConvertByteSequenceToString(commandSpan));
+#pragma warning restore CA1873
+      }
 
       try {
         await
@@ -240,10 +214,11 @@ internal sealed partial class Mcp2221ATransceiver : IDisposable {
 
       var responseSpan = responseReportMemory.Slice(LengthOfReportId, ResponseLength).Span; // span except first byte (report OUT)
 
-      logger?.LogTrace(
-        EventIdResponse,
-        "< " + ConvertByteSequenceToString(responseSpan, readReportLength - LengthOfReportId)
-      );
+      if (logger is { } lr && lr.IsEnabled(LogLevel.Trace)) {
+#pragma warning disable CA1873
+        LogTraceResponse(lr, ConvertByteSequenceToString(responseSpan, readReportLength - LengthOfReportId));
+#pragma warning restore CA1873
+      }
 
       VerifyResponseReport(commandSpan, responseSpan, readReportLength);
 
@@ -292,7 +267,11 @@ internal sealed partial class Mcp2221ATransceiver : IDisposable {
       arg: arg
     );
 
-    logger?.LogTrace(EventIdCommand, "> " + ConvertByteSequenceToString(commandSpan));
+    if (logger is { } lc && lc.IsEnabled(LogLevel.Trace)) {
+#pragma warning disable CA1873
+      LogTraceCommand(lc, ConvertByteSequenceToString(commandSpan));
+#pragma warning restore CA1873
+    }
 
     try {
 #if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
@@ -335,10 +314,11 @@ internal sealed partial class Mcp2221ATransceiver : IDisposable {
       throw new Mcp2221ACommandException("Failed to receive a USB HID response report from MCP2221/MCP2221A.", ex);
     }
 
-    logger?.LogTrace(
-      EventIdResponse,
-      "< " + ConvertByteSequenceToString(responseSpan, readReportLength - LengthOfReportId)
-    );
+    if (logger is { } lr && lr.IsEnabled(LogLevel.Trace)) {
+#pragma warning disable CA1873
+      LogTraceResponse(lr, ConvertByteSequenceToString(responseSpan, readReportLength - LengthOfReportId));
+#pragma warning restore CA1873
+    }
 
     VerifyResponseReport(commandSpan, responseSpan, readReportLength);
 

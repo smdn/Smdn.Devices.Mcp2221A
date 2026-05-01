@@ -200,7 +200,10 @@ public sealed partial class Mcp2221AController :
     this.transceiver = transceiver ?? throw new ArgumentNullException(nameof(transceiver));
     this.info = info ?? throw new ArgumentNullException(nameof(info));
 
-    gpioDriver = new(transceiver: transceiver);
+    gpioDriver = new(
+      transceiver: transceiver,
+      logger: logger
+    );
     I2cBus = new(this, logger);
     GpioController = new Mcp2221AGpioController(driver: gpioDriver);
   }

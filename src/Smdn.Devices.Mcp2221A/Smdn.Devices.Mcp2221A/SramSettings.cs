@@ -4,11 +4,13 @@ using System;
 using System.ComponentModel;
 using System.Device.Gpio;
 
+using Microsoft.Extensions.Logging;
+
 using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 namespace Smdn.Devices.Mcp2221A;
 
-internal sealed class SramSettings {
+internal sealed partial class SramSettings {
   public const int SizeOfSelf = 10;
   public const int SizeOfGpSettings = 4;
 
@@ -62,7 +64,7 @@ internal sealed class SramSettings {
   public bool IsDirty
     => !currentSettings.SequenceEqual(unsentSettings);
 
-  public void Store()
+  public void Store(ILogger? logger)
   {
     unsentSettings.CopyTo(currentSettings);
 
@@ -83,13 +85,35 @@ internal sealed class SramSettings {
     //   [5] Alter GPIO configuration
     currentSettings[OffsetOfAlterGpioConfiguration] = MaintainGpioConfiguration;
     unsentSettings[OffsetOfAlterGpioConfiguration] = MaintainGpioConfiguration;
+
+    if (logger is { } l && l.IsEnabled(LogLevel.Debug)) {
+#pragma warning disable CA1873
+      LogDebugStoredSramSettings(l, currentSettings: FormatSettingsInBinary(currentSettings));
+#pragma warning restore CA1873
+    }
   }
 
-  public void Restore()
-    => currentSettings.CopyTo(unsentSettings);
+  public void Restore(ILogger? logger)
+  {
+    currentSettings.CopyTo(unsentSettings);
 
-  public void WriteAsSetSramSettingsCommand(Span<byte> destination)
-    => unsentSettings.CopyTo(destination);
+    if (logger is { } l && l.IsEnabled(LogLevel.Debug)) {
+#pragma warning disable CA1873
+      LogDebugRestoredSramSettings(l, currentSettings: FormatSettingsInBinary(currentSettings));
+#pragma warning restore CA1873
+    }
+  }
+
+  public void WriteAsSetSramSettingsCommand(Span<byte> destination, ILogger? logger)
+  {
+    unsentSettings.CopyTo(destination);
+
+    if (logger is { } l && l.IsEnabled(LogLevel.Debug)) {
+#pragma warning disable CA1873
+      LogDebugModifiedSramSettings(l, unsentSettings: FormatSettingsInBinary(unsentSettings));
+#pragma warning restore CA1873
+    }
+  }
 
   public void StoreClockOutputDividerValueByte(byte clockOutputDividerValue)
   {
