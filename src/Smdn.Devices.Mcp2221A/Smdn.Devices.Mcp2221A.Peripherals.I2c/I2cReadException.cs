@@ -24,6 +24,9 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 public class I2cReadException : I2cCommandException {
   private const string DefaultMessage = "The requested I2C read operation failed.";
 
+  private static string CreateDefaultMessage(I2cAddress address)
+    => $"Failed to read data from the I2C target. (Address={address})";
+
   public I2cReadException()
     : base(DefaultMessage)
   {
@@ -39,13 +42,8 @@ public class I2cReadException : I2cCommandException {
   {
   }
 
-  public I2cReadException(I2cAddress address, string? message)
-    : base(address, message ?? DefaultMessage)
-  {
-  }
-
-  public I2cReadException(I2cAddress address, string? message, Exception? innerException)
-    : base(address, message ?? DefaultMessage, innerException)
+  public I2cReadException(I2cAddress address, string? message = null, Exception? innerException = null)
+    : base(address, message ?? CreateDefaultMessage(address), innerException)
   {
   }
 }

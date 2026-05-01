@@ -28,6 +28,9 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 public class I2cNackException : I2cCommandException {
   private const string DefaultMessage = "A NACK response was returned for the requested I2C command.";
 
+  private static string CreateDefaultMessage(I2cAddress address)
+    => $"The I2C target did not respond. (Address={address})";
+
   public I2cNackException()
     : base(DefaultMessage)
   {
@@ -43,15 +46,8 @@ public class I2cNackException : I2cCommandException {
   {
   }
 
-  public I2cNackException(I2cAddress address)
-    : base(address, CreateDefaultMessage(address))
+  public I2cNackException(I2cAddress address, string? message = null, Exception? innerException = null)
+    : base(address, message ?? CreateDefaultMessage(address), innerException)
   {
   }
-
-  public I2cNackException(I2cAddress address, Exception? innerException)
-    : base(address, CreateDefaultMessage(address), innerException)
-  {
-  }
-
-  private static string CreateDefaultMessage(I2cAddress address) => $"I2C device {address} not respond.";
 }

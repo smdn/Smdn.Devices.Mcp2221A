@@ -341,7 +341,7 @@ internal class I2cOperationStateMachine {
     operationState = resp[1] switch {
       0x00 => OperationState.AdvanceToNextStep, // Command completed successfully
       0x01 => OperationState.Continue, // Command not completed (I2C engine is busy)
-      0x41 => throw new I2cReadException(address, "can not read data from I2C target"),
+      0x41 => throw new I2cReadException(address),
       _ => ThrowUnexpectedResponseException("I2C READ DATA - GET I2C DATA", address, resp[1]),
     };
 
