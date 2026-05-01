@@ -70,8 +70,12 @@ partial class Mcp2221AController {
       if (transceiver.EndPoint is { } usbHidEndPoint) {
         LogInformationDeviceInfo(l, "HID End Point", usbHidEndPoint);
 
+#if !NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
+#pragma warning disable CS8604
+#endif
         if (usbHidEndPoint.Device.TryGetDeviceIdentifier(out var deviceIdentifier))
           LogInformationDeviceInfo(l, "HID Device", deviceIdentifier);
+#pragma warning restore CS8604
       }
 
       LogInformationDeviceInfo(l, nameof(info.HardwareRevision), info.HardwareRevision);
