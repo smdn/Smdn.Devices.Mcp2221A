@@ -28,21 +28,25 @@ namespace Smdn.Devices.Mcp2221A;
 public class Mcp2221AUnavailableException : UnauthorizedAccessException {
   private const string DefaultMessage = "The requested MCP2221/MCP2221A is unavailable due to reasons such as unprivileged access, being disconnected, or being blocked by another driver.";
 
+  /// <inheritdoc/>
   public Mcp2221AUnavailableException()
     : base(DefaultMessage)
   {
   }
 
+  /// <inheritdoc/>
   public Mcp2221AUnavailableException(string? message)
     : base(message ?? DefaultMessage)
   {
   }
 
+  /// <inheritdoc/>
   public Mcp2221AUnavailableException(string? message, Exception? innerException)
     : base(message ?? DefaultMessage, innerException)
   {
   }
 
+  /// <inheritdoc cref="Mcp2221AUnavailableException(string?, Exception?)"/>
   public Mcp2221AUnavailableException(Exception innerException, IUsbHidDevice? device = null)
     : base(
       message: $"{DefaultMessage} (device='{device?.ToIdentificationString() ?? "?"}')",

@@ -6,6 +6,18 @@ using System.Threading.Tasks;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
+/// <summary>
+/// Provides control over the GP2 pin of the MCP2221/MCP2221A.
+/// </summary>
+/// <remarks>
+/// <para>The GP2 pin supports the following functions:</para>
+/// <list type="bullet">
+/// <item><description><b>GPIO:</b> General purpose input/output (GPIO2).</description></item>
+/// <item><description><b>USBCFG:</b> USB configured indicator.</description></item>
+/// <item><description><b>ADC:</b> Analog-to-Digital Converter input (ADC2).</description></item>
+/// <item><description><b>DAC:</b> Digital-to-Analog Converter output (DAC1).</description></item>
+/// </list>
+/// </remarks>
 #pragma warning disable IDE0055
 public sealed class Gp2Controller :
   GpController,

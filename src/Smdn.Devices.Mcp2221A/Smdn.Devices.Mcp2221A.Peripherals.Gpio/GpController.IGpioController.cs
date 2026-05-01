@@ -15,7 +15,7 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 #pragma warning disable IDE0040
 partial class GpController : IGpioController {
 #pragma warning restore IDE0040
-  protected void ThrowIfInvalidConfiguration(GpFunction requiredFunction)
+  private protected void ThrowIfInvalidConfiguration(GpFunction requiredFunction)
   {
     if (CurrentFunction != requiredFunction) {
       throw new Mcp2221AConfigurationException(

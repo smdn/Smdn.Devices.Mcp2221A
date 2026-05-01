@@ -40,16 +40,19 @@ namespace Smdn.Devices.Mcp2221A;
 public class Mcp2221ANotFoundException : InvalidOperationException {
   private const string DefaultMessage = "The MCP2221/MCP2221A was not found on the current system.";
 
+  /// <inheritdoc/>
   public Mcp2221ANotFoundException()
     : base(DefaultMessage)
   {
   }
 
+  /// <inheritdoc/>
   public Mcp2221ANotFoundException(string? message)
     : base(message ?? DefaultMessage)
   {
   }
 
+  /// <inheritdoc/>
   public Mcp2221ANotFoundException(string? message, Exception? innerException)
     : base(message ?? DefaultMessage, innerException)
   {

@@ -27,21 +27,25 @@ public class I2cReadException : I2cCommandException {
   private static string CreateDefaultMessage(I2cAddress address)
     => $"Failed to read data from the I2C target. (Address={address})";
 
+  /// <inheritdoc/>
   public I2cReadException()
     : base(DefaultMessage)
   {
   }
 
+  /// <inheritdoc/>
   public I2cReadException(string? message)
     : base(message ?? DefaultMessage)
   {
   }
 
+  /// <inheritdoc/>
   public I2cReadException(string? message, Exception? innerException)
     : base(message ?? DefaultMessage, innerException)
   {
   }
 
+  /// <inheritdoc/>
   public I2cReadException(I2cAddress address, string? message = null, Exception? innerException = null)
     : base(address, message ?? CreateDefaultMessage(address), innerException)
   {

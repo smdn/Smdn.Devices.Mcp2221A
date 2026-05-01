@@ -24,8 +24,22 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 /// <seealso cref="II2cControllerExtensions"/>
 /// <seealso cref="Mcp2221AI2cBus"/>
 public interface II2cController {
+  /// <summary>
+  /// Cancels the current transfer operation and releases the I2C bus.
+  /// </summary>
+  /// <param name="address">
+  /// The <see cref="I2cAddress"/> of the target I2C device for which the
+  /// transfer operation is to be canceled.
+  /// </param>
   void CancelTransfer(I2cAddress address);
 
+  /// <inheritdoc cref="CancelTransfer(I2cAddress)"/>
+  /// <summary>
+  /// Asynchronously cancels the current transfer operation and releases the I2C bus.
+  /// </summary>
+  /// <returns>
+  /// A <see cref="ValueTask"/> representing the asynchronous operation.
+  /// </returns>
   ValueTask CancelTransferAsync(I2cAddress address);
 
   /// <remarks>

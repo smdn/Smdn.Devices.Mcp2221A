@@ -59,16 +59,19 @@ public class Mcp2221AConfigurationException : InvalidOperationException {
   /// <seealso cref="GpFunction"/>
   public GpFunction? CurrentFunction { get; }
 
+  /// <inheritdoc/>
   public Mcp2221AConfigurationException()
     : base(DefaultMessage)
   {
   }
 
+  /// <inheritdoc/>
   public Mcp2221AConfigurationException(string? message)
     : base(message ?? DefaultMessage)
   {
   }
 
+  /// <inheritdoc/>
   public Mcp2221AConfigurationException(string? message, Exception? innerException)
     : base(message ?? DefaultMessage, innerException)
   {

@@ -16,6 +16,43 @@ using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
 
+/// <summary>
+/// Provides an interface to access the features of the MCP2221/MCP2221A
+/// controllable via USB HID commands.
+/// </summary>
+/// <remarks>
+/// <para>
+/// This class serves as the primary entry point for managing the device's
+/// I/O functions over the HID interface, excluding UART communication.
+/// It organizes the controllable capabilities into the following specialized
+/// properties:
+/// </para>
+/// <list type="bullet">
+/// <item>
+/// <term><b>GP Pins</b></term>
+/// <description>
+/// Access to the four General Purpose pins (GP0–GP3) is provided via the
+/// <see cref="GpPins"/> collection and individual properties <see cref="GpPin0"/>
+/// through <see cref="GpPin3"/>. These properties allow you to configure I/O
+/// modes and access pin-specific functions  such as ADC, DAC, and specialized
+/// clock or LED outputs.
+/// </description>
+/// </item>
+/// <item>
+/// <term><b>I2C Bus</b></term>
+/// <description>
+/// Access to the I2C master controller is provided through the <see cref="I2cBus"/>
+/// property, enabling communication with I2C peripheral devices, bus speed
+/// configuration, and data transfer operations.
+/// </description>
+/// </item>
+/// </list>
+/// <para>
+/// For overall device management, such as resetting the chip or accessing
+/// low-level transceiver details, use the methods and properties provided directly
+/// by this class.
+/// </para>
+/// </remarks>
 #pragma warning disable IDE0055
 public sealed partial class Mcp2221AController :
   IDisposable,

@@ -41,16 +41,19 @@ namespace Smdn.Devices.Mcp2221A;
 public class Mcp2221ACommandException : InvalidOperationException {
   private const string DefaultMessage = "The command to the MCP2221/MCP2221A failed.";
 
+  /// <inheritdoc/>
   public Mcp2221ACommandException()
     : base(DefaultMessage)
   {
   }
 
+  /// <inheritdoc/>
   public Mcp2221ACommandException(string? message)
     : base(message ?? DefaultMessage)
   {
   }
 
+  /// <inheritdoc/>
   public Mcp2221ACommandException(string? message, Exception? innerException)
     : base(message ?? DefaultMessage, innerException)
   {

@@ -13,16 +13,19 @@ namespace Smdn.Devices.Mcp2221A;
 public class Mcp2221ANotSupportedException : NotSupportedException {
   private const string DefaultMessage = "The requested MCP2221/MCP2221A is a device with an unsupported hardware revision and/or firmware revision.";
 
+  /// <inheritdoc/>
   public Mcp2221ANotSupportedException()
     : base(DefaultMessage)
   {
   }
 
+  /// <inheritdoc/>
   public Mcp2221ANotSupportedException(string? message)
     : base(message ?? DefaultMessage)
   {
   }
 
+  /// <inheritdoc/>
   public Mcp2221ANotSupportedException(string? message, Exception? innerException)
     : base(message ?? DefaultMessage, innerException)
   {

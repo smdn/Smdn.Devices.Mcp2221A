@@ -4,6 +4,9 @@ using System;
 
 namespace Smdn.Devices.Mcp2221A;
 
+/// <summary>
+/// Provides extension methods for <see cref="IMcp2221AInfo"/>.
+/// </summary>
 public static class IMcp2221AInfoExtensions {
 #pragma warning disable IDE0051
   private static IMcp2221AInfo ThrowIfReceiverIsNull(IMcp2221AInfo info, string paramName)

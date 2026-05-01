@@ -9,7 +9,6 @@ SPDX-License-Identifier: MIT
     <VersionSuffix>preview4</VersionSuffix>
     <!-- <PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion> -->
     <IsAotCompatible>false</IsAotCompatible>
-    <NoWarn>CS1591;$(NoWarn)</NoWarn> <!-- CS1591: Missing XML comment for publicly visible type or member 'Type_or_Member' -->
   </PropertyGroup>
 
   <!--

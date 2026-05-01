@@ -9,6 +9,48 @@ using Smdn.Formats.Binary;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
+/// <summary>
+/// Provides a base class for controlling a General Purpose (GP) pin of the MCP2221A.
+/// </summary>
+/// <remarks>
+/// <para>
+/// The MCP2221A has four GP pins, each represented by a specific subclass providing
+/// access to its unique hardware functions:
+/// </para>
+/// <list type="table">
+/// <listheader>
+/// <term>Pin</term>
+/// <description>Controller Class and Primary Special Functions</description>
+/// </listheader>
+/// <item>
+/// <term>GP0</term>
+/// <description>
+/// <see cref="Gp0Controller"/>: UART RX LED, USB suspend indicator.
+/// </description>
+/// </item>
+/// <item>
+/// <term>GP1</term>
+/// <description>
+/// <see cref="Gp1Controller"/>: ADC1, UART TX LED, Reference clock output, Interrupt-on-Change.
+/// </description>
+/// </item>
+/// <item>
+/// <term>GP2</term>
+/// <description>
+/// <see cref="Gp2Controller"/>: ADC2, DAC1, USB configured indicator.
+/// </description>
+/// </item>
+/// <item>
+/// <term>GP3</term>
+/// <description>
+/// <see cref="Gp3Controller"/>: ADC3, DAC2, I2C Traffic LED, Clock Output.
+/// </description>
+/// </item>
+/// </list>
+/// <para>
+/// All GP pins support standard GPIO (General Purpose Input/Output) functionality.
+/// </para>
+/// </remarks>
 #pragma warning disable IDE0040
 public abstract partial class GpController {
 #pragma warning restore IDE0040

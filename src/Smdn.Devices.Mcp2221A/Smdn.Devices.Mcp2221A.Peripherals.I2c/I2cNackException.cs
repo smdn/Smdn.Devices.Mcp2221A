@@ -31,21 +31,25 @@ public class I2cNackException : I2cCommandException {
   private static string CreateDefaultMessage(I2cAddress address)
     => $"The I2C target did not respond. (Address={address})";
 
+  /// <inheritdoc/>
   public I2cNackException()
     : base(DefaultMessage)
   {
   }
 
+  /// <inheritdoc/>
   public I2cNackException(string? message)
     : base(message ?? DefaultMessage)
   {
   }
 
+  /// <inheritdoc/>
   public I2cNackException(string? message, Exception? innerException)
     : base(message ?? DefaultMessage, innerException)
   {
   }
 
+  /// <inheritdoc/>
   public I2cNackException(I2cAddress address, string? message = null, Exception? innerException = null)
     : base(address, message ?? CreateDefaultMessage(address), innerException)
   {
