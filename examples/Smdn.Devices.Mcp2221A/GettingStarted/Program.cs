@@ -7,7 +7,10 @@ using Smdn.IO.UsbHid.DependencyInjection;
 var services = new ServiceCollection();
 
 // To operate the MCP2221/MCP2221A, you need to select one of
-// the following as the USB HID backend:
+// the following as the USB HID backend.
+// For information on selecting and configuring the backend,
+// please refer to this document:
+// https://github.com/smdn/Smdn.Devices.Mcp2221A/tree/main/examples/Smdn.Devices.Mcp2221A/UsbHidBackendSamples.md
 
 // Use HidSharp (Apache License 2.0)
 // (Add `Smdn.IO.UsbHid.Providers.HidSharp` to PackageReference)
@@ -15,20 +18,13 @@ services.AddHidSharpUsbHid();
 
 // Use LibUsbDotNet version 3 (LGPL-3.0, alpha release)
 // (Add `Smdn.IO.UsbHid.Providers.LibUsbDotNetV3` to PackageReference)
-/*
-services.AddLibUsbDotNetV3UsbHid(
-  configure: static (builder, options) => {
-    options.DebugLevel = LogLevel.None;
-  }
-);
-*/
+// services.AddLibUsbDotNetV3UsbHid();
 
 // Use LibUsbDotNet version 2 (LGPL-3.0, stable release)
 // (Add `Smdn.IO.UsbHid.Providers.LibUsbDotNet` to PackageReference)
 /*
 services.AddLibUsbDotNetUsbHid(
   configure: static (builder, options) => {
-    options.DebugLevel = LogLevel.None;
     // Specify the filename of the libusb-1.0 library installed on your
     // system or placed in the output directory.
     options.LibUsbLibraryPath = "libusb-1.0.so.0"; // Linux

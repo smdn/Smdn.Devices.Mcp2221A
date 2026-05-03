@@ -82,6 +82,7 @@ var services = new ServiceCollection();
 services.AddHidSharpUsbHid();
 ```
 
+________
 **LibUsbDotNet version 3 (LGPL-3.0, alpha release)** [![NuGet Smdn.IO.UsbHid.Providers.LibUsbDotNetV3](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3/):
 
 <details>
@@ -98,6 +99,7 @@ services.AddLibUsbDotNetV3UsbHid(
 ```
 </details>
 
+________
 **LibUsbDotNet version 2 (LGPL-3.0, stable release)** [![NuGet Smdn.IO.UsbHid.Providers.LibUsbDotNet](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.LibUsbDotNet.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNet/):
 
 <details>
@@ -119,6 +121,9 @@ services.AddLibUsbDotNetUsbHid(
 );
 ```
 </details>
+
+________
+For working examples that show how to add `PackageReference`s in a project file (`*.csproj`), register the backend providers with a `ServiceCollection`, and configure options for each provider, see [UsbHidBackendSamples.md](examples/Smdn.Devices.Mcp2221A/UsbHidBackendSamples.md).
 
 ## Linux setup
 To use the MCP2221/MCP2221A with this library, two configuration steps may be required depending on your Linux distribution.
