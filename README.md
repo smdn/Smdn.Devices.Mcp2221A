@@ -282,11 +282,9 @@ When using LibUsbDotNet, you need to unbind the devices that are bound to the us
 
 If you got the exception like below, configure the MCP2221/MCP2221A to unbind, and reconnect it again. See [udev rule file](misc/udev/90-MCP2221-LibUsbDotNet.rules) for detail.
 
-```
-Unhandled exception. Smdn.Devices.MCP2221.DeviceUnavailableException: MCP2221/MCP2221A is not available, not privileged or disconnected.
-  ---> LibUsbDotNet.LibUsb.UsbException: Resource busy
-    at LibUsbDotNet.LibUsb.ErrorExtensions.ThrowOnError(Error error)
-    at LibUsbDotNet.LibUsb.UsbDevice.ClaimInterface(Int32 interfaceID)
+```txt
+Unhandled exception. Smdn.Devices.Mcp2221A.Mcp2221AUnavailableException: The requested MCP2221/MCP2221A is unavailable due to reasons such as unprivileged access, being disconnected, or being blocked by another driver. (device='3-1.2')
+ ---> LibUsbDotNet.LibUsb.UsbException: Resource busy
 ```
 
 ### Permitting device access
@@ -295,25 +293,15 @@ If you got the exception like below, you need to run as the root user, the comma
 LibUsbDotNet:
 
 ```
-Unhandled exception. Smdn.Devices.MCP2221.DeviceUnavailableException: MCP2221/MCP2221A is not available, not privileged or disconnected.
+Unhandled exception. Smdn.Devices.Mcp2221A.Mcp2221AUnavailableException: The requested MCP2221/MCP2221A is unavailable due to reasons such as unprivileged access, being disconnected, or being blocked by another driver. (device='3-1.2')
  ---> LibUsbDotNet.LibUsb.UsbException: Access denied (insufficient permissions)
-   at LibUsbDotNet.LibUsb.ErrorExtensions.ThrowOnError(Error error)
-   at LibUsbDotNet.LibUsb.UsbDevice.Open()
 ```
 
 HIDSharp:
 
 ```
-Unhandled exception. Smdn.Devices.MCP2221.DeviceUnavailableException: MCP2221/MCP2221A is not available, not privileged or disconnected.
- ---> HidSharp.Exceptions.DeviceIOException: Unable to open HID class device (OK).
-   at HidSharp.Platform.Linux.LinuxHidStream.DeviceHandleFromPath(String path, HidDevice hidDevice, oflag oflag)
-   at HidSharp.Platform.Linux.LinuxHidDevice.TryParseReportDescriptor(ReportDescriptor& parser, Byte[]& reportDescriptor)
-   at HidSharp.Platform.Linux.LinuxHidDevice.RequiresGetInfo()
-   at HidSharp.Platform.Linux.LinuxHidDevice.OpenDeviceDirectly(OpenConfiguration openConfig)
-   at HidSharp.Device.OpenDeviceAndRestrictAccess(OpenConfiguration openConfig)
-   at HidSharp.Device.Open(OpenConfiguration openConfig)
-   at HidSharp.Device.Open()
-   at HidSharp.HidDevice.Open()
+Unhandled exception. Smdn.Devices.Mcp2221A.Mcp2221AUnavailableException: The requested MCP2221/MCP2221A is unavailable due to reasons such as unprivileged access, being disconnected, or being blocked by another driver. (device='/sys/devices/pci0000:00/0000:00:14.0/usb3/3-1/3-1.1/3-1.1:1.2/0003:04D8:00DD.001F/hidraw/hidraw0')
+ ---> HidSharp.Exceptions.DeviceUnauthorizedAccessException: Not permitted to open HID class device at /dev/hidraw0.
 ```
 
 If you want to give access privileges to a non-root user instead, you can use udev rule file. See [udev rule files](misc/udev/).
