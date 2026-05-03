@@ -48,7 +48,7 @@ This library also provides the MCP2221/MCP2221A adapter interface for [System.De
 - Soft reset via command.
 
 > [!NOTE]
-> Note: Actual MCP2221 operation has not been tested, but compatibility is expected to be the same as MCP2221A.
+> Actual MCP2221 operation has not been tested, but compatibility is expected to be the same as MCP2221A.
 
 ### Library features
 - Request/response operations for MCP2221/MCP2221A use USB HID reports and support:
@@ -56,13 +56,13 @@ This library also provides the MCP2221/MCP2221A adapter interface for [System.De
   - cancellation via `CancellationToken`
   - internal thread safety using synchronous primitives
 - Provides adapters and integration for [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio/), enabling [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings/) compatibility.
-  - `Mcp2221AController.GpioController` exposes MCP2221A GPIO control via [System.Device.Gpio.GpioController](https://learn.microsoft.com/dotnet/api/system.device.gpio.gpiocontroller). ([example](examples/Smdn.Devices.Mcp2221A/GpioControllerSamples.md))
-  - `Mcp2221AController.I2cBus` exposes I<sup>2</sup>C access via [System.Device.I2c.I2cBus](https://learn.microsoft.com/dotnet/api/system.device.i2c.i2cbus). ([example](examples/Smdn.Devices.Mcp2221A/I2cDeviceSamples.md))
+  - `Mcp2221AController.GpioController` exposes MCP2221A GPIO control via [System.Device.Gpio.GpioController](https://learn.microsoft.com/dotnet/api/system.device.gpio.gpiocontroller). ([docs and examples](examples/Smdn.Devices.Mcp2221A/GpioControllerSamples.md))
+  - `Mcp2221AController.I2cBus` exposes I<sup>2</sup>C access via [System.Device.I2c.I2cBus](https://learn.microsoft.com/dotnet/api/system.device.i2c.i2cbus). ([docs and examples](examples/Smdn.Devices.Mcp2221A/I2cDeviceSamples.md))
 - Supports logging with `ILogger` and [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging/). ([example](examples/Smdn.Devices.Mcp2221A/DependencyInjection_Logging/))
 - Can find and work with multiple MCP2221/MCP2221A devices using `Predicate<IUsbHidDevice>` and/or `Predicate<IMcp2221AInfo>`. ([example](examples/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/))
 - Supports MCP2221/MCP2221A devices with custom VID/PID values written in the chip settings. ([example](examples/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/))
 - Provides I<sup>2</sup>C bus scanning APIs. ([example](examples/Smdn.Devices.Mcp2221A/I2C_ScanBus/))
-- Uses the USB HID abstraction layer ([Smdn.IO.UsbHid.Abstractions](https://github.com/smdn/Smdn.IO.UsbHid)) to support HIDSharp, LibUsbDotNet, and other backends.
+- Uses the USB HID abstraction layer ([Smdn.IO.UsbHid.Abstractions](https://github.com/smdn/Smdn.IO.UsbHid)) to support HIDSharp, LibUsbDotNet, and other backends. ([docs and examples](examples/Smdn.Devices.Mcp2221A/UsbHidBackendSamples.md))
 - Allows selecting the USB HID backend per device using dependency injection (`IServiceProvider`) and service keys.
 
 # Getting started
