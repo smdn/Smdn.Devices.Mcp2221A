@@ -1,4 +1,4 @@
-<!--
+﻿<!--
 SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 SPDX-License-Identifier: MIT
 -->
@@ -9,6 +9,9 @@ SPDX-License-Identifier: MIT
   </Folder>
   <Folder Name="/Smdn.Devices.Mcp2221A/ADC_ReadVoltage/">
     <Project Path="Smdn.Devices.Mcp2221A/ADC_ReadVoltage/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/ClockOutput/">
+    <Project Path="Smdn.Devices.Mcp2221A/ClockOutput/Program.csproj" />
   </Folder>
   <Folder Name="/Smdn.Devices.Mcp2221A/DAC_Write/">
     <Project Path="Smdn.Devices.Mcp2221A/DAC_Write/Program.csproj" />
@@ -54,6 +57,24 @@ SPDX-License-Identifier: MIT
   </Folder>
   <Folder Name="/Smdn.Devices.Mcp2221A/I2C_ScanBus/">
     <Project Path="Smdn.Devices.Mcp2221A/I2C_ScanBus/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/InterruptOnChange/">
+    <Project Path="Smdn.Devices.Mcp2221A/InterruptOnChange/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/InterruptOnChange_Polling/">
+    <Project Path="Smdn.Devices.Mcp2221A/InterruptOnChange_Polling/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/SramDeviceConfiguration/">
+    <Project Path="Smdn.Devices.Mcp2221A/SramDeviceConfiguration/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/USBHID_Backend_HidSharp/">
+    <Project Path="Smdn.Devices.Mcp2221A/USBHID_Backend_HidSharp/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/USBHID_Backend_LibUsbDotNet/">
+    <Project Path="Smdn.Devices.Mcp2221A/USBHID_Backend_LibUsbDotNet/Program.csproj" />
+  </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/USBHID_Backend_LibUsbDotNetV3/">
+    <Project Path="Smdn.Devices.Mcp2221A/USBHID_Backend_LibUsbDotNetV3/Program.csproj" />
   </Folder>
   <Folder Name="/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/">
     <Project Path="Smdn.Devices.Mcp2221A/USBHID_SelectDevice/Program.csproj" />
