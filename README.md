@@ -22,78 +22,59 @@ With this library, you can interface with I<sup>2</sup>C devices and control GPI
 
 This library also provides the MCP2221/MCP2221A adapter interface for [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio/). This library enables you to use the many device bindings provided by [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings/).
 
-See [Smdn.Devices.Mcp2221A examples](examples/Smdn.Devices.Mcp2221A/).
+## Library and API features
+### Frameworks / Platforms
+- Supports .NET, .NET Framework, and Mono via .NET Standard 2.0.
+- Runs on Windows, Linux, macOS, and any platform supported by the underlying USB HID backend provider[§](#usb_hid_backend_providers).
 
-# Supported MCP2221/MCP2221A features
-- [x] GP functionalities
-  - [x] GPIO
-    - [x] GPIO read/write value
-    - [x] GPIO get/set direction
-  - [x] ADC inputs
-  - [x] DAC outputs
-  - [x] Clock output
-  - [x] Interrupt detection
-  - [x] Other functionalities
-    - [x] Configure GP0 as SSPND
-    - [x] Configure GP0 as LED_URx
-    - [x] Configure GP1 as LED_UTx
-    - [x] Configure GP2 as USBCFG
-    - [x] Configure GP3 as LED_I2C
-    - [ ] Set initial value (Negating logic level)
-- [x] I2C functionalities
-  - [x] I2C read/write (7-bit address)
-    - ⚠ Transferring larger than 60 bytes have not been tested with actual device
-  - [ ] I2C read/write (10-bit address)
-  - [x] Standard mode (100kbps)
-  - [x] Fast mode (400kbps)
-  - [x] Non-standard custom speed
-    - [x] 50kbps, 200kbps, 1Mbps, etc.
-    - ⚠ MCP2221A can be configured up to approximately 4Mbps, but operation above 400kbps is not guaranteed.
-- [ ] Flash/SRAM functionalities
-  - [ ] SRAM read/write
-    - [x] GP settings
-    - [ ] Chip settings
-      - [ ] Pin options
-      - [x] Clock output
-      - [x] DAC outputs
-      - [x] ADC inputs
-      - [x] Interrupt detection
-  - [ ] Flash read/write
-    - [ ] GP Settings
-    - [ ] Chip Settings
-    - [x] USB Manufacturer Descriptor String (read only)
-    - [x] USB Product Descriptor String (read only)
-    - [x] USB Serial Number Descriptor String (read only)
-    - [x] Chip Factory Serial Number (read only, [always returns `01234567` (issue #8)](../../issues/8))
-    - [x] Hardware/Firmware revision (read only)
-    - [ ] Passwords and chip setting protection
-- [x] Reset
+### Supported MCP2221/MCP2221A features
+- All GPIO pin functions for GP0–GP3:
+  - GPIO input/output
+  - 10-bit ADC input and ADC reference voltage
+  - 5-bit DAC output and DAC reference voltage
+  - Reference clock output (375 kHz–24 MHz)
+  - Interrupt detection on rising, falling, and both edges
+  - UART and I<sup>2</sup>C traffic indicator LEDs: `LED_URx`, `LED_UTx`, `LED_I2C`
+  - USB status output: `SSPND`, `USBCFG`
+- I<sup>2</sup>C functions:
+  - Standard mode (100 kbps), Fast mode (400 kbps), and custom speeds such as 50 kbps, 200 kbps, 1 Mbps, etc.
+  - ⚠Note: MCP2221A can be configured up to approximately 4 Mbps, but operation above 400 kbps is not guaranteed.
+  - 💭Planned: support for data transfers larger than 60 bytes is not yet fully implemented.
+- Fetch and modify all SRAM settings (runtime configuration).
+- Fetch Flash settings (default power-on configuration):
+  - USB descriptor strings: Manufacturer, Product, Serial Number, Chip Factory Serial Number
+  - ⚠Note: Chip Factory Serial Number currently always returns `01234567` ([issue #8](../../issues/8)).
+  - 💭Planned: writing settings to Flash.
+- Soft reset via command.
 
-Haven't tested with the actual MCP2221, but it is expected that works as same as MCP2221A.
+> [!NOTE]
+> Note: Actual MCP2221 operation has not been tested, but compatibility is expected to be the same as MCP2221A.
 
-# Library API features
-- Frameworks/Platforms
-  - .NET Standard 2.1/.NET 5
-  - Windows/Linux/MacOS and any other platforms which USB HID driver supports
-- `Smdn.Devices.Mcp2221A`
-  - `Read`/`Write` and other command methods
-    - Supports `Span<byte>`/`Memory<byte>`
-    - Supports `async`, `CancellationToken`
-    - Supports logging with `ILogger`, [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging/) ([example](examples/Smdn.Devices.Mcp2221A/DependencyInjection_Logging/))
-  - All command requests to the MCP2221/MCP2221A (sending and receiving USB HID reports) are internally thread-safe by utilizing synchronous primitives.
-  - Can handle multiple MCP2221/MCP2221A by finding target with `Predicate<IUsbHidDevice>` and/or `Predicate<IMcp2221AInfo>`. ([example](examples/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/))
-  - Can handle MCP2221/MCP2221A with custom VID/PID values written in the chip settings. ([example](examples/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/))
-  - I2C bus scanning ([example](examples/Smdn.Devices.Mcp2221A/I2C_ScanBus/))
-  - Using [HIDSharp](https://www.zer7.com/software/hidsharp) as default USB HID driver, [LibUsbDotNet](https://www.nuget.org/packages/LibUsbDotNet/) also supported.
-  - Provides an adapter for [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio/)
-  - Can handle I2C devices using with [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings/)
+### Library features
+- Request/response operations for MCP2221/MCP2221A use USB HID reports and support:
+  - both synchronous and asynchronous APIs
+  - cancellation via `CancellationToken`
+  - internal thread safety using synchronous primitives
+- Provides adapters and integration for [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio/), enabling [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings/) compatibility.
+  - `Mcp2221AController.GpioController` exposes MCP2221A GPIO control via [System.Device.Gpio.GpioController](https://learn.microsoft.com/dotnet/api/system.device.gpio.gpiocontroller). ([example](examples/Smdn.Devices.Mcp2221A/GpioControllerSamples.md))
+  - `Mcp2221AController.I2cBus` exposes I<sup>2</sup>C access via [System.Device.I2c.I2cBus](https://learn.microsoft.com/dotnet/api/system.device.i2c.i2cbus). ([example](examples/Smdn.Devices.Mcp2221A/I2cDeviceSamples.md))
+- Supports logging with `ILogger` and [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging/). ([example](examples/Smdn.Devices.Mcp2221A/DependencyInjection_Logging/))
+- Can find and work with multiple MCP2221/MCP2221A devices using `Predicate<IUsbHidDevice>` and/or `Predicate<IMcp2221AInfo>`. ([example](examples/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/))
+- Supports MCP2221/MCP2221A devices with custom VID/PID values written in the chip settings. ([example](examples/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/))
+- Provides I<sup>2</sup>C bus scanning APIs. ([example](examples/Smdn.Devices.Mcp2221A/I2C_ScanBus/))
+- Uses the USB HID abstraction layer ([Smdn.IO.UsbHid.Abstractions](https://github.com/smdn/Smdn.IO.UsbHid)) to support HIDSharp, LibUsbDotNet, and other backends.
+- Allows selecting the USB HID backend per device using dependency injection (`IServiceProvider`) and service keys.
 
-# Getting started and usage examples
+# Getting started
 
-## Select USB HID backend provider
-This library communicates with the MCP2221/MCP2221A device using the **USB HID** interface. To do this, you must add a `PackageReference` for one of the following USB HID backend provider packages (`Smdn.IO.UsbHid.Providers.*`). This design, integrated with standard .NET dependency injection, gives you the flexibility to choose a provider based on your specific requirements, such as licensing.
+## Select USB HID backend provider <a name="usb_hid_backend_providers">§</a>
+This library communicates with the MCP2221/MCP2221A device using the **USB HID** interface. To do this, you must add a `PackageReference` for one of the following USB HID backend provider packages (`Smdn.IO.UsbHid.Providers.*`).
 
-**HidSharp (Apache License 2.0)** [![NuGet Smdn.IO.UsbHid.Providers.HidSharp](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.HidSharp.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp/): To use HidSharp, add a `PackageReference` for [Smdn.IO.UsbHid.Providers.HidSharp](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp) to your project file. Then, register the backend provider with the `ServiceCollection` using the `AddHidSharpUsbHid()` extension method.
+This design, integrated with standard .NET dependency injection, gives you the flexibility to choose a provider based on your specific requirements, such as licensing.
+
+**HidSharp (Apache License 2.0)** [![NuGet Smdn.IO.UsbHid.Providers.HidSharp](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.HidSharp.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp/):
+
+To use HidSharp, add a `PackageReference` for [Smdn.IO.UsbHid.Providers.HidSharp](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp) to your project file. Then, register the backend provider with the `ServiceCollection` using the `AddHidSharpUsbHid()` extension method.
 
 ```cs
 var services = new ServiceCollection();
@@ -101,7 +82,12 @@ var services = new ServiceCollection();
 services.AddHidSharpUsbHid();
 ```
 
-**LibUsbDotNet version 3 (LGPL-3.0, alpha release)** [![NuGet Smdn.IO.UsbHid.Providers.LibUsbDotNetV3](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3/): Add a `PackageReference` for [Smdn.IO.UsbHid.Providers.LibUsbDotNetV3](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3), and then register the provider using the `AddLibUsbDotNetV3UsbHid()` method.
+**LibUsbDotNet version 3 (LGPL-3.0, alpha release)** [![NuGet Smdn.IO.UsbHid.Providers.LibUsbDotNetV3](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3/):
+
+<details>
+<summary>Read More</summary>
+
+Add a `PackageReference` for [Smdn.IO.UsbHid.Providers.LibUsbDotNetV3](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3), and then register the provider using the `AddLibUsbDotNetV3UsbHid()` method.
 
 ```cs
 services.AddLibUsbDotNetV3UsbHid(
@@ -110,8 +96,14 @@ services.AddLibUsbDotNetV3UsbHid(
   }
 );
 ```
+</details>
 
-**LibUsbDotNet version 2 (LGPL-3.0, stable release)** [![NuGet Smdn.IO.UsbHid.Providers.LibUsbDotNet](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.LibUsbDotNet.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNet/): Add a `PackageReference` for [Smdn.IO.UsbHid.Providers.LibUsbDotNet](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNet), and then register the provider using the `AddLibUsbDotNetUsbHid()` method.
+**LibUsbDotNet version 2 (LGPL-3.0, stable release)** [![NuGet Smdn.IO.UsbHid.Providers.LibUsbDotNet](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.LibUsbDotNet.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNet/):
+
+<details>
+<summary>Read More</summary>
+
+Add a `PackageReference` for [Smdn.IO.UsbHid.Providers.LibUsbDotNet](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNet), and then register the provider using the `AddLibUsbDotNetUsbHid()` method.
 
 If the `libusb-1.0` library fails to load automatically, you can either explicitly specify its filename via the `LibUsbLibraryPath` option, or provide a custom library resolving callback to `LibUsbDllImportResolver`.
 
@@ -126,18 +118,28 @@ services.AddLibUsbDotNetUsbHid(
   }
 );
 ```
+</details>
 
 ## Linux setup
 To use the MCP2221/MCP2221A with this library, two configuration steps may be required depending on your Linux distribution.
 
 ### Device permissions (udev) <a name="mcp2221_udev_device_permissions">§</a>
-To access the MCP2221/MCP2221A via this library, some system configuration may be required. Generally, a **udev rule** is necessary on most distributions to grant non-root users access to the device (see [udev rule files](misc/udev/) for setup instructions).
+<details>
+<summary>Read More</summary>
 
-### Driver conflict (Ubuntu 24.04 / Kernel 6.8+) <a name="mcp2221_modprobe_blacklist">§</a>
+To access the MCP2221/MCP2221A via this library, some system configuration may be required. Generally, a **udev rule** is necessary on most distributions to grant non-root users access to the device (see [udev rule files](misc/udev/) for setup instructions).
+</details>
+
+### Driver conflict (hid_mcp2221, Ubuntu 24.04 / Kernel 6.8+) <a name="mcp2221_modprobe_blacklist">§</a>
+<details>
+<summary>Read More</summary>
+
 On Ubuntu 24.04 (Kernel 6.8+) and newer systems, you may also encounter a driver conflict where the native `hid_mcp2221` driver claims the device, preventing the `/dev/hidraw*` node from being created. In this case, you must **blacklist** the dedicated driver to force the system to use the generic `usbhid` driver. Detailed steps for this process can be found in [modprobe blacklist file](misc/modprobe/blacklist-MCP2221.conf).
+</details>
+
 
 ## Write code
-Add package [Smdn.Devices.Mcp2221A](https://www.nuget.org/packages/Smdn.Devices.Mcp2221A/) [![NuGet Smdn.Devices.Mcp2221A](https://img.shields.io/nuget/v/Smdn.Devices.MCP2Mcp2221A21.svg)](https://www.nuget.org/packages/Smdn.Devices.Mcp2221A/) to your project.
+Add package [Smdn.Devices.Mcp2221A](https://www.nuget.org/packages/Smdn.Devices.Mcp2221A/) to your project.
 
 ```
 dotnet add package Smdn.Devices.Mcp2221A
@@ -183,15 +185,15 @@ foreach (var gp in device.GpPins) {
 }
 ```
 
+[![See the actual action in the video](https://img.youtube.com/vi/MnIunESm71E/mqdefault.jpg)](https://www.youtube.com/watch?v=MnIunESm71E)
+
 [See the actual action in the video](https://www.youtube.com/watch?v=MnIunESm71E)
 
-[![See the actual action in the video](https://img.youtube.com/vi/MnIunESm71E/mqdefault.jpg)](https://www.youtube.com/watch?v=MnIunESm71E)
+![Wiring up MCP2221A and LEDs](examples/Smdn.Devices.Mcp2221A/GettingStarted_CSharp/wiring.svg)
 
 For detailed instructions, including wiring of the devices and parts, see [GettingStarted_CSharp](examples/Smdn.Devices.Mcp2221A/GettingStarted_CSharp) page.
 
-More examples can be found in following examples directory.
-
-- [Smdn.Devices.Mcp2221A examples](examples/Smdn.Devices.Mcp2221A/): Small examples using MCP2221/MCP2221A functionalities.
+More sample codes can be found in [examples directory](examples/Smdn.Devices.Mcp2221A/).
 
 # Troubleshooting
 ## Linux
