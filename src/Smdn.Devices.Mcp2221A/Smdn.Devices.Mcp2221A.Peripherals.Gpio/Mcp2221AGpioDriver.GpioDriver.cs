@@ -50,7 +50,7 @@ partial class Mcp2221AGpioDriver : GpioDriver {
       GetCurrentGpDesignation(pinNumber) != GpDesignation.GpioOperation
     ) {
       ConfigureGpDesignation(
-        gp: pinNumber,
+        gpIndex: pinNumber,
         gpDesignation: GpDesignation.GpioOperation,
         gpioDirection: null,
         gpioValue: null,

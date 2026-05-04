@@ -172,7 +172,7 @@ partial class Mcp2221AGpioDriver {
   }
 
   private void ConfigureGpDesignation(
-    int gp,
+    int gpIndex,
     GpDesignation gpDesignation,
     PinMode? gpioDirection,
     PinValue? gpioValue,
@@ -181,11 +181,11 @@ partial class Mcp2221AGpioDriver {
   )
   {
     if (shouldThrowIfUsedByGpioController)
-      ThrowIfUsedByGpioController(gp);
+      ThrowIfUsedByGpioController(gpIndex);
 
     SetSramSettings(
       argSramSettings: (
-        GpIndex: gp,
+        GpIndex: ThrowIfInvalidGpIndex(gpIndex),
         GpSettings: new GpSettings(gpDesignation, gpioDirection, gpioValue)
       ),
       modifySramSettings: static (sramSettings, arg) => sramSettings.ModifyGpSettings(

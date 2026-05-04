@@ -12,10 +12,12 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 partial class Mcp2221AGpioDriver {
 #pragma warning restore IDE0040
-  internal static void ThrowIfInvalidGpIndex(int gp)
+  internal static int ThrowIfInvalidGpIndex(int gpIndex)
   {
-    if (gp is < 0 or >= NumberOfGpPins)
-      throw new InvalidOperationException($"The index of GP pin must be in range of 0 to {NumberOfGpPins - 1} (Specified pin index: {gp}).");
+    if (gpIndex is < 0 or >= NumberOfGpPins)
+      throw new InvalidOperationException($"The index of GP pin must be in range of 0 to {NumberOfGpPins - 1} (Specified pin index: {gpIndex}).");
+
+    return gpIndex;
   }
 
   // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
@@ -304,10 +306,8 @@ partial class Mcp2221AGpioDriver {
     for (var i = 0; i < pinValuePairs.Length; i++) {
       ref var p = ref pinValuePairs[i];
 
-      ThrowIfInvalidGpIndex(p.PinNumber);
-
       p = new(
-        p.PinNumber,
+        ThrowIfInvalidGpIndex(p.PinNumber),
         GetLastUpdatedValueOrThrow(p.PinNumber)
       );
     }
@@ -318,10 +318,8 @@ partial class Mcp2221AGpioDriver {
     for (var i = 0; i < pinModePairs.Length; i++) {
       ref var p = ref pinModePairs[i];
 
-      ThrowIfInvalidGpIndex(p.PinNumber);
-
       p = new(
-        p.PinNumber,
+        ThrowIfInvalidGpIndex(p.PinNumber),
         GetLastUpdatedDirectionOrThrow(p.PinNumber)
       );
     }
