@@ -23,10 +23,10 @@ var initialCursorPosition = (left: Console.CursorLeft, top: Console.CursorTop);
 var scanBusProgress = new Progress<I2cScanBusProgress>(progress => {
   Console.SetCursorPosition(initialCursorPosition.left, initialCursorPosition.top);
   Console.Write(
-    "Scanning 0x{0}: Min=0x{1} {3}{4} Max=0x{2}",
-    progress.ScanningAddress,
-    progress.AddressRangeMin,
-    progress.AddressRangeMax,
+    "Scanning {0}: From={1} {3}{4} To={2}",
+    progress.CurrentAddress,
+    progress.FromAddress,
+    progress.ToAddress,
     new string('|', progress.ProgressInPercent),
     new string('-', 100 - progress.ProgressInPercent)
   );
@@ -35,15 +35,15 @@ var scanBusProgress = new Progress<I2cScanBusProgress>(progress => {
     Console.WriteLine();
 });
 
-I2cAddress addressRangeMin = I2cAddress.DeviceMinValue;
-I2cAddress addressRangeMax = I2cAddress.DeviceMaxValue;
-// I2cAddress addressRangeMin = 0x20;
-// I2cAddress addressRangeMax = 0x27;
+I2cAddress addressFrom = I2cAddress.DeviceMinValue;
+I2cAddress addressTo = I2cAddress.DeviceMaxValue;
+// I2cAddress addressFrom = 0x20;
+// I2cAddress addressTo = 0x27;
 const int TransmissionSpeedInKbps = 100;
 
 var (writeAddressSet, readAddressSet) = await device.I2cBus.ScanBusAsync(
-  addressRangeMin,
-  addressRangeMax,
+  addressFrom,
+  addressTo,
   TransmissionSpeedInKbps,
   scanBusProgress
 );

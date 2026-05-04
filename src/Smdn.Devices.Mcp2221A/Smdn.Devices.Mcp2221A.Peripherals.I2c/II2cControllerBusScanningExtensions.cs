@@ -26,17 +26,17 @@ public static class II2cControllerBusScanningExtensions {
     => controller ?? throw new ArgumentNullException(paramName: paramName);
 
   private static void ValidateAddressRange(
-    ref I2cAddress addressRangeMin,
-    ref I2cAddress addressRangeMax
+    ref I2cAddress fromAddress,
+    ref I2cAddress toAddress
   )
   {
-    if (addressRangeMax < addressRangeMin)
-      throw new ArgumentException($"{nameof(addressRangeMax)}({addressRangeMax}) must be greater than or equals to {nameof(addressRangeMin)}({addressRangeMin})", nameof(addressRangeMax));
+    if (toAddress < fromAddress)
+      throw new ArgumentException($"{nameof(toAddress)}({toAddress}) must be greater than or equals to {nameof(fromAddress)}({fromAddress})", nameof(toAddress));
 
-    if (addressRangeMin.Equals(I2cAddress.Zero))
-      addressRangeMin = I2cAddress.DeviceMinValue;
-    if (addressRangeMax.Equals(I2cAddress.Zero))
-      addressRangeMax = I2cAddress.DeviceMaxValue;
+    if (fromAddress.Equals(I2cAddress.Zero))
+      fromAddress = I2cAddress.DeviceMinValue;
+    if (toAddress.Equals(I2cAddress.Zero))
+      toAddress = I2cAddress.DeviceMaxValue;
   }
 #pragma warning restore IDE0051
 
@@ -59,9 +59,9 @@ public static class II2cControllerBusScanningExtensions {
     ///   />
     /// </remarks>
     public async ValueTask<(IReadOnlyI2cAddressSet WriteAddressSet, IReadOnlyI2cAddressSet ReadAddressSet)> ScanBusAsync(
-      I2cAddress addressRangeMin = default,
-      I2cAddress addressRangeMax = default,
-      int i2cBusTransmissionSpeedInKbps = Mcp2221AI2cBus.DefaultTransmissionSpeedInKbps,
+      I2cAddress fromAddress = default,
+      I2cAddress toAddress = default,
+      int transmissionSpeedInKbps = Mcp2221AI2cBus.DefaultTransmissionSpeedInKbps,
       IProgress<I2cScanBusProgress>? progress = null,
       CancellationToken cancellationToken = default
     )
@@ -69,22 +69,22 @@ public static class II2cControllerBusScanningExtensions {
       ThrowIfReceiverIsNull(controller, nameof(controller));
 
       ValidateAddressRange(
-        addressRangeMin: ref addressRangeMin,
-        addressRangeMax: ref addressRangeMax
+        fromAddress: ref fromAddress,
+        toAddress: ref toAddress
       );
 
       var writeAddressSet = new SortedSet<I2cAddress>();
       var readAddressSet = new SortedSet<I2cAddress>();
 
-      for (var addr = (int)addressRangeMin; addr <= (int)addressRangeMax; addr++) {
+      for (var addr = (int)fromAddress; addr <= (int)toAddress; addr++) {
         var address = new I2cAddress(addr);
 
-        progress?.Report(new I2cScanBusProgress(address, addressRangeMin, addressRangeMax));
+        progress?.Report(new I2cScanBusProgress(address, fromAddress, toAddress));
 
         try {
           await controller.WriteAsync(
             address,
-            i2cBusTransmissionSpeedInKbps,
+            transmissionSpeedInKbps,
             default,
             cancellationToken
           ).ConfigureAwait(false);
@@ -98,7 +98,7 @@ public static class II2cControllerBusScanningExtensions {
         try {
           _ = await controller.ReadByteAsync(
             address,
-            i2cBusTransmissionSpeedInKbps,
+            transmissionSpeedInKbps,
             cancellationToken
           ).ConfigureAwait(false);
 
@@ -116,15 +116,15 @@ public static class II2cControllerBusScanningExtensions {
     /// Scans the I2C bus for responding devices by attempting
     /// Write and Read operations across a specified range of addresses.
     /// </summary>
-    /// <param name="addressRangeMin">
-    /// The inclusive lower bound of the address range to scan.
+    /// <param name="fromAddress">
+    /// The starting I2C address of the scan range (inclusive).
     /// If set to <see langword="default"/>, <see cref="I2cAddress.DeviceMinValue"/> (0x08) is used.
     /// </param>
-    /// <param name="addressRangeMax">
-    /// The inclusive upper bound of the address range to scan.
+    /// <param name="toAddress">
+    /// The ending I2C address of the scan range (inclusive).
     /// If set to <see langword="default"/>, <see cref="I2cAddress.DeviceMaxValue"/> (0x77) is used.
     /// </param>
-    /// <param name="i2cBusTransmissionSpeedInKbps">
+    /// <param name="transmissionSpeedInKbps">
     /// The I2C transmission speed in kbps used during the scan.
     /// Defaults to <see cref="Mcp2221AI2cBus.DefaultTransmissionSpeedInKbps"/> (100 kbps).
     /// </param>
@@ -141,7 +141,7 @@ public static class II2cControllerBusScanningExtensions {
     /// responded to a Read operation).
     /// </returns>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="addressRangeMax"/> is less than <paramref name="addressRangeMin"/>.
+    /// Thrown when <paramref name="fromAddress"/> is less than <paramref name="toAddress"/>.
     /// </exception>
     /// <remarks>
     ///   <include
@@ -150,9 +150,9 @@ public static class II2cControllerBusScanningExtensions {
     ///   />
     /// </remarks>
     public (IReadOnlyI2cAddressSet WriteAddressSet, IReadOnlyI2cAddressSet ReadAddressSet) ScanBus(
-      I2cAddress addressRangeMin = default,
-      I2cAddress addressRangeMax = default,
-      int i2cBusTransmissionSpeedInKbps = Mcp2221AI2cBus.DefaultTransmissionSpeedInKbps,
+      I2cAddress fromAddress = default,
+      I2cAddress toAddress = default,
+      int transmissionSpeedInKbps = Mcp2221AI2cBus.DefaultTransmissionSpeedInKbps,
       IProgress<I2cScanBusProgress>? progress = null,
       CancellationToken cancellationToken = default
     )
@@ -160,22 +160,22 @@ public static class II2cControllerBusScanningExtensions {
       ThrowIfReceiverIsNull(controller, nameof(controller));
 
       ValidateAddressRange(
-        addressRangeMin: ref addressRangeMin,
-        addressRangeMax: ref addressRangeMax
+        fromAddress: ref fromAddress,
+        toAddress: ref toAddress
       );
 
       var writeAddressSet = new SortedSet<I2cAddress>();
       var readAddressSet = new SortedSet<I2cAddress>();
 
-      for (var addr = (int)addressRangeMin; addr <= (int)addressRangeMax; addr++) {
+      for (var addr = (int)fromAddress; addr <= (int)toAddress; addr++) {
         var address = new I2cAddress(addr);
 
-        progress?.Report(new I2cScanBusProgress(address, addressRangeMin, addressRangeMax));
+        progress?.Report(new I2cScanBusProgress(address, fromAddress, toAddress));
 
         try {
           controller.Write(
             address,
-            i2cBusTransmissionSpeedInKbps,
+            transmissionSpeedInKbps,
             default,
             cancellationToken
           );
@@ -189,7 +189,7 @@ public static class II2cControllerBusScanningExtensions {
         try {
           _ = controller.ReadByte(
             address,
-            i2cBusTransmissionSpeedInKbps,
+            transmissionSpeedInKbps,
             cancellationToken
           );
 

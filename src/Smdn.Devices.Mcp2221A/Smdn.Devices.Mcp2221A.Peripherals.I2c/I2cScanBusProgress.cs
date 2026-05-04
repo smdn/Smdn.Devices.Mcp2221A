@@ -18,31 +18,34 @@ public readonly struct I2cScanBusProgress {
   /// <summary>
   /// Gets the I2C address currently being scanned.
   /// </summary>
-  public I2cAddress ScanningAddress { get; }
+  public I2cAddress CurrentAddress { get; }
 
   /// <summary>
-  /// Gets the minimum address of the scan range.
+  /// Gets the starting I2C address of the scan range (inclusive).
   /// </summary>
-  public I2cAddress AddressRangeMin { get; }
+  public I2cAddress FromAddress { get; }
 
   /// <summary>
-  /// Gets the maximum address of the scan range.
+  /// Gets the ending I2C address of the scan range (inclusive).
   /// </summary>
-  public I2cAddress AddressRangeMax { get; }
+  public I2cAddress ToAddress { get; }
 
   /// <summary>
   /// Gets the scan progress as a percentage value from 0 to 100.
   /// </summary>
-  public int ProgressInPercent => 100 * ((int)ScanningAddress - (int)AddressRangeMin) / ((int)AddressRangeMax - (int)AddressRangeMin);
+  public int ProgressInPercent
+    => ToAddress == FromAddress
+      ? 100
+      : 100 * ((int)CurrentAddress - (int)FromAddress) / ((int)ToAddress - (int)FromAddress);
 
   internal I2cScanBusProgress(
-    I2cAddress scanningAddress,
-    I2cAddress addressRangeMin,
-    I2cAddress addressRangeMax
+    I2cAddress currentAddress,
+    I2cAddress fromAddress,
+    I2cAddress toAddress
   )
   {
-    ScanningAddress = scanningAddress;
-    AddressRangeMin = addressRangeMin;
-    AddressRangeMax = addressRangeMax;
+    CurrentAddress = currentAddress;
+    FromAddress = fromAddress;
+    ToAddress = toAddress;
   }
 }
