@@ -304,6 +304,7 @@ partial class GpControllerTests {
       ]
     );
     var gp = selectGpPin(mcp2221A);
+    var configuredMode = gp.ConfiguredMode;
 
     // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
     var setGpioOutputValuesResponse = string.Concat(
@@ -342,6 +343,7 @@ partial class GpControllerTests {
       Throws.Nothing
     );
     Assert.That(gp.CurrentMode, Is.EqualTo(mode));
+    Assert.That(gp.ConfiguredMode, Is.EqualTo(configuredMode), "should not be affected by this operation");
     Assert.That(
       Mcp2221AControllerTests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand),
@@ -456,6 +458,7 @@ partial class GpControllerTests {
       ]
     );
     var gp = selectGpPin(mcp2221A);
+    var configuredOutputValue = gp.ConfiguredOutputValue;
 
     // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
     var setGpioOutputValuesResponse = string.Concat(
@@ -494,6 +497,7 @@ partial class GpControllerTests {
       Throws.Nothing
     );
     Assert.That(gp.LastUpdatedValue, Is.EqualTo(value));
+    Assert.That(gp.ConfiguredOutputValue, Is.EqualTo(configuredOutputValue), "should not be affected by this operation");
     Assert.That(
       Mcp2221AControllerTests.GetSentCommand(mcp2221A),
       SequenceIs.EqualTo(expectedSentCommand),

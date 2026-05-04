@@ -205,16 +205,20 @@ partial class GpControllerTests {
     Func<GpController, ValueTask<PinMode>> getModeAsyncFunc
   )
   {
+    var initialModes = new PinModePair[] {
+      new(0, PinMode.Output),
+      new(1, PinMode.Input),
+      new(2, PinMode.Input),
+      new(3, PinMode.Output),
+    };
+
     using var mcp2221A = CreateMcp2221AConfiguredAsGpio(
-      initialModes: [
-        new(0, PinMode.Output),
-        new(1, PinMode.Output),
-        new(2, PinMode.Output),
-        new(3, PinMode.Output),
-      ]
+      initialModes: initialModes
     );
 
     var gp = selectGpPin(mcp2221A);
+    var configuredMode = gp.ConfiguredMode;
+    var configuredOutputValue = gp.ConfiguredOutputValue;
 
     // [MCP2221A] 3.1.12 GET GPIO VALUES
     var getGpioValuesResponse = string.Concat(
@@ -235,7 +239,7 @@ partial class GpControllerTests {
 
     Assert.That(
       gp.CurrentMode,
-      Is.EqualTo(PinMode.Output),
+      Is.EqualTo(initialModes[gp.Index].PinMode),
       "initial mode"
     );
 
@@ -250,6 +254,16 @@ partial class GpControllerTests {
     Assert.That(
       gp.LastUpdatedValue,
       Is.EqualTo(expectedValue)
+    );
+    Assert.That(
+      gp.ConfiguredMode,
+      Is.EqualTo(configuredMode),
+      "should not be affected by this operation"
+    );
+    Assert.That(
+      gp.ConfiguredOutputValue,
+      Is.EqualTo(configuredOutputValue),
+      "should not be affected by this operation"
     );
     Assert.That(
       Mcp2221AControllerTests.GetSentCommand(mcp2221A),
@@ -429,22 +443,27 @@ partial class GpControllerTests {
     Func<GpController, ValueTask<PinValue>> readAsyncFunc
   )
   {
+    var initialModes = new PinModePair[] {
+      new(0, PinMode.Output),
+      new(1, PinMode.Input),
+      new(2, PinMode.Input),
+      new(3, PinMode.Output),
+    };
+    var initialValues = new PinValuePair[] {
+      new(0, PinValue.High),
+      new(1, PinValue.Low),
+      new(2, PinValue.High),
+      new(3, PinValue.Low),
+    };
+
     using var mcp2221A = CreateMcp2221AConfiguredAsGpio(
-      initialModes: [
-        new(0, PinMode.Input),
-        new(1, PinMode.Input),
-        new(2, PinMode.Input),
-        new(3, PinMode.Input),
-      ],
-      initialValues: [
-        new(0, PinValue.Low),
-        new(1, PinValue.Low),
-        new(2, PinValue.Low),
-        new(3, PinValue.Low),
-      ]
+      initialModes: initialModes,
+      initialValues: initialValues
     );
 
     var gp = selectGpPin(mcp2221A);
+    var configuredMode = gp.ConfiguredMode;
+    var configuredOutputValue = gp.ConfiguredOutputValue;
 
     // [MCP2221A] 3.1.12 GET GPIO VALUES
     var getGpioValuesResponse = string.Concat(
@@ -465,7 +484,7 @@ partial class GpControllerTests {
 
     Assert.That(
       gp.LastUpdatedValue,
-      Is.EqualTo(PinValue.Low),
+      Is.EqualTo(initialValues[gp.Index].PinValue),
       "initial value"
     );
 
@@ -480,6 +499,16 @@ partial class GpControllerTests {
     Assert.That(
       gp.CurrentMode,
       Is.EqualTo(expectedMode)
+    );
+    Assert.That(
+      gp.ConfiguredMode,
+      Is.EqualTo(configuredMode),
+      "should not be affected by this operation"
+    );
+    Assert.That(
+      gp.ConfiguredOutputValue,
+      Is.EqualTo(configuredOutputValue),
+      "should not be affected by this operation"
     );
     Assert.That(
       Mcp2221AControllerTests.GetSentCommand(mcp2221A),

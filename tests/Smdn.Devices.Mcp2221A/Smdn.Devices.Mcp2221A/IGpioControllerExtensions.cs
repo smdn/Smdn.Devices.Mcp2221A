@@ -129,6 +129,8 @@ public class IGpioControllerExtensionsTests {
     var currentGpSettings = new byte[4] { InitialGp0Settings, InitialGp1Settings, InitialGp2Settings, InitialGp3Settings };
 
     var gp = mcp2221A.GpPins[gpIndex];
+    var configuredMode = gp.ConfiguredMode;
+    var configuredOutputValue = gp.ConfiguredOutputValue;
     var initialOutputValue = ((currentGpSettings[gp.Index] & 0b_000_1_0_000) == 0)
       ? PinValue.Low
       : PinValue.High;
@@ -149,6 +151,8 @@ public class IGpioControllerExtensionsTests {
     Assert.That(gp.CurrentFunction, Is.EqualTo(GpFunction.Gpio));
     Assert.That(gp.CurrentMode, Is.EqualTo(PinMode.Output));
     Assert.That(gp.LastUpdatedValue, Is.EqualTo(initialValue ?? initialOutputValue));
+    Assert.That(gp.ConfiguredMode, Is.EqualTo(PinMode.Output));
+    Assert.That(gp.ConfiguredOutputValue, Is.EqualTo(initialValue ?? configuredOutputValue));
   }
 
   [Test]
@@ -196,6 +200,8 @@ public class IGpioControllerExtensionsTests {
     var currentGpSettings = new byte[4] { InitialGp0Settings, InitialGp1Settings, InitialGp2Settings, InitialGp3Settings };
 
     var gp = mcp2221A.GpPins[gpIndex];
+    var configuredMode = gp.ConfiguredMode;
+    var configuredOutputValue = gp.ConfiguredOutputValue;
     var initialOutputValue = ((currentGpSettings[gp.Index] & 0b_000_1_0_000) == 0)
       ? PinValue.Low
       : PinValue.High;
@@ -216,6 +222,8 @@ public class IGpioControllerExtensionsTests {
     Assert.That(gp.CurrentFunction, Is.EqualTo(GpFunction.Gpio));
     Assert.That(gp.CurrentMode, Is.EqualTo(PinMode.Input));
     Assert.That(gp.LastUpdatedValue, Is.EqualTo(initialOutputValue), "GPIO output value must not be configured");
+    Assert.That(gp.ConfiguredMode, Is.EqualTo(PinMode.Input));
+    Assert.That(gp.ConfiguredOutputValue, Is.EqualTo(configuredOutputValue));
   }
 
   [Test]

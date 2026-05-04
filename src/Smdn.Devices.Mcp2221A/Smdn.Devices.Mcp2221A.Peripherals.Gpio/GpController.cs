@@ -225,6 +225,77 @@ public abstract partial class GpController {
   public PinMode CurrentMode => GpioDriver.GetLastUpdatedDirectionOrThrow(gp: Index);
 
   /// <summary>
+  /// Gets the logic level for the GP pin as defined in the device's
+  /// SRAM configuration, regardless of the current pin function.
+  /// </summary>
+  /// <value>
+  /// The output value that is intended to be applied when the pin is
+  /// in output mode.
+  /// </value>
+  /// <remarks>
+  /// <para>
+  /// This property represents the "desired" or "configured" state held
+  /// in the device's SRAM. It is initialized from the Flash default
+  /// settings upon power-up and is updated whenever configuration
+  /// methods (such as <see cref="ConfigureAsGpio"/>) are called.
+  /// </para>
+  /// <para>
+  /// Unlike <see cref="LastUpdatedValue"/>, which reflects the actual
+  /// logic level captured during the most recent I/O operation,
+  /// <see cref="ConfiguredOutputValue"/> remains unchanged by GPIO read/write
+  /// commands. It serves as the baseline configuration for the pin.
+  /// </para>
+  /// <para>
+  /// This property can be accessed even if the pin is currently assigned to
+  /// a dedicated function (non-GPIO). Unlike <see cref="LastUpdatedValue"/>,
+  /// it does not throw an <see cref="Mcp2221AConfigurationException"/> in
+  /// such cases.
+  /// </para>
+  /// </remarks>
+  /// <seealso cref="ConfigureAsGpio"/>
+  /// <seealso cref="ConfigureAsGpioAsync"/>
+  [CLSCompliant(false)]
+  public PinValue ConfiguredOutputValue
+    => GpioDriver.GetConfiguredOutputValue(Index);
+
+  /// <summary>
+  /// Gets the functional mode for the GP pin as defined in the device's
+  /// SRAM configuration, regardless of the current pin function.
+  /// </summary>
+  /// <value>
+  /// The <see cref="PinMode"/> that is intended to be applied.
+  /// </value>
+  /// <remarks>
+  /// <para>
+  /// This property indicates whether the pin is logically defined as
+  /// <see cref="PinMode.Input"/> or <see cref="PinMode.Output"/>. Similar to
+  /// <see cref="ConfiguredOutputValue"/>, this value is loaded from Flash
+  /// at startup and updated via explicit configuration commands.
+  /// </para>
+  /// <para>
+  /// Note that this property represents the intended GPIO direction stored
+  /// in SRAM, even if the pin is currently functioning as a dedicated
+  /// peripheral (non-GPIO).
+  /// </para>
+  /// <para>
+  /// While <see cref="CurrentMode"/> provides the mode status as reported by
+  /// the device during runtime communication, <see cref="ConfiguredMode"/>
+  /// represents the persistent setting that defines the pin's intended role.
+  /// </para>
+  /// <para>
+  /// This property can be accessed even if the pin is currently assigned to
+  /// a dedicated function (non-GPIO). Unlike <see cref="LastUpdatedValue"/>,
+  /// it does not throw an <see cref="Mcp2221AConfigurationException"/> in
+  /// such cases.
+  /// </para>
+  /// </remarks>
+  /// <seealso cref="ConfigureAsGpio"/>
+  /// <seealso cref="ConfigureAsGpioAsync"/>
+  [CLSCompliant(false)]
+  public PinMode ConfiguredMode
+    => GpioDriver.GetConfiguredMode(Index);
+
+  /// <summary>
   /// Gets a value indicating whether the GP pin is currently being
   /// used by <see cref="Mcp2221AController.GpioController"/>.
   /// </summary>

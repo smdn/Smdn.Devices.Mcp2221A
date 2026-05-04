@@ -24,6 +24,12 @@ partial class Mcp2221AGpioDriver {
   internal GpDesignation GetCurrentGpDesignation(int gp)
     => (GpDesignation)sramSettings.ReadGpSettingsByte(gp) & GpDesignation.BitMask;
 
+  internal PinValue GetConfiguredOutputValue(int gp)
+    => (sramSettings.ReadGpSettingsByte(gp) & 0b_000_1_0_000) == 0 ? PinValue.Low : PinValue.High;
+
+  internal PinMode GetConfiguredMode(int gp)
+    => (sramSettings.ReadGpSettingsByte(gp) & 0b_000_0_1_000) == 0 ? PinMode.Output : PinMode.Input;
+
   private static class GetSramSettingsCommand {
 #pragma warning disable IDE0060 // [IDE0060] Remove unused parameter
     public static void ConstructCommand(

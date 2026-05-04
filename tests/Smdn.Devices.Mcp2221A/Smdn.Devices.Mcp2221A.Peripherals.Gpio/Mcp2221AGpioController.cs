@@ -108,6 +108,8 @@ public class Mcp2221AGpioControllerTests {
     Assert.That(mcp2221A.GpPins[pinNumber].CurrentFunction, Is.EqualTo(GpFunction.Gpio));
     Assert.That(mcp2221A.GpPins[pinNumber].LastUpdatedValue, Is.EqualTo(initialGpValues[pinNumber]));
     Assert.That(mcp2221A.GpPins[pinNumber].CurrentMode, Is.EqualTo(initialGpModes[pinNumber]));
+    Assert.That(mcp2221A.GpPins[pinNumber].ConfiguredOutputValue, Is.EqualTo(initialGpValues[pinNumber]));
+    Assert.That(mcp2221A.GpPins[pinNumber].ConfiguredMode, Is.EqualTo(initialGpModes[pinNumber]));
     Assert.That(mcp2221A.GpPins[pinNumber].IsUsedByGpioController, Is.True);
 
     Assert.That(mcp2221A.GpioController.IsPinOpen(pinNumber), Is.True);
@@ -211,6 +213,8 @@ public class Mcp2221AGpioControllerTests {
     Assert.That(mcp2221A.GpPins[pinNumber].CurrentFunction, Is.EqualTo(GpFunction.Gpio));
     Assert.That(mcp2221A.GpPins[pinNumber].LastUpdatedValue, Is.EqualTo(initialGpValues[pinNumber]));
     Assert.That(mcp2221A.GpPins[pinNumber].CurrentMode, Is.EqualTo(initialGpModes[pinNumber]));
+    Assert.That(mcp2221A.GpPins[pinNumber].ConfiguredOutputValue, Is.EqualTo(initialGpValues[pinNumber]));
+    Assert.That(mcp2221A.GpPins[pinNumber].ConfiguredMode, Is.EqualTo(initialGpModes[pinNumber]));
     Assert.That(mcp2221A.GpPins[pinNumber].IsUsedByGpioController, Is.True);
 
     Assert.That(mcp2221A.GpioController.IsPinOpen(pinNumber), Is.True);
@@ -300,6 +304,8 @@ public class Mcp2221AGpioControllerTests {
     Assert.That(mcp2221A.GpPins[pinNumber].CurrentFunction, Is.EqualTo(GpFunction.Gpio));
     Assert.That(mcp2221A.GpPins[pinNumber].LastUpdatedValue, Is.EqualTo(initialGpValues[pinNumber]));
     Assert.That(mcp2221A.GpPins[pinNumber].CurrentMode, Is.EqualTo(initialGpModes[pinNumber]));
+    Assert.That(mcp2221A.GpPins[pinNumber].ConfiguredOutputValue, Is.EqualTo(initialGpValues[pinNumber]));
+    Assert.That(mcp2221A.GpPins[pinNumber].ConfiguredMode, Is.EqualTo(initialGpModes[pinNumber]));
     Assert.That(mcp2221A.GpPins[pinNumber].IsUsedByGpioController, Is.True);
 
 #if SYSTEM_DEVICE_GPIO_4_1_0_OR_GREATER
@@ -416,6 +422,7 @@ public class Mcp2221AGpioControllerTests {
       ),
       shouldDisposeUsbHidDevice: true
     );
+    var configuredMode = mcp2221A.GpPins[pinNumber].ConfiguredMode;
 
     Assert.That(
       () =>
@@ -461,6 +468,11 @@ public class Mcp2221AGpioControllerTests {
     Assert.That(
       () => mcp2221A.GpioController.SetPinMode(pinNumber, mode),
       Throws.Nothing
+    );
+    Assert.That(
+      mcp2221A.GpPins[pinNumber].ConfiguredMode,
+      Is.EqualTo(configuredMode),
+      "should not be affected by this operation"
     );
     Assert.That(
       Mcp2221AControllerTests.GetSentCommand(mcp2221A),
@@ -581,6 +593,7 @@ public class Mcp2221AGpioControllerTests {
       ),
       shouldDisposeUsbHidDevice: true
     );
+    var configuredMode = mcp2221A.GpPins[pinNumber].ConfiguredMode;
 
     Assert.That(
       () =>
@@ -626,6 +639,11 @@ public class Mcp2221AGpioControllerTests {
     Assert.That(
       mcp2221A.GpPins[pinNumber].CurrentMode,
       Is.EqualTo(expectedMode)
+    );
+    Assert.That(
+      mcp2221A.GpPins[pinNumber].ConfiguredMode,
+      Is.EqualTo(configuredMode),
+      "should not be affected by this operation"
     );
   }
 
@@ -702,6 +720,7 @@ public class Mcp2221AGpioControllerTests {
       ),
       shouldDisposeUsbHidDevice: true
     );
+    var configuredOutputValue = mcp2221A.GpPins[pinNumber].ConfiguredOutputValue;
 
     Assert.That(
       () =>
@@ -755,6 +774,11 @@ public class Mcp2221AGpioControllerTests {
     Assert.That(
       mcp2221A.GpPins[pinNumber].LastUpdatedValue,
       Is.EqualTo(value)
+    );
+    Assert.That(
+      mcp2221A.GpPins[pinNumber].ConfiguredOutputValue,
+      Is.EqualTo(configuredOutputValue),
+      "should not be affected by this operation"
     );
   }
 
@@ -1024,6 +1048,7 @@ public class Mcp2221AGpioControllerTests {
       ),
       shouldDisposeUsbHidDevice: true
     );
+    var configuredOutputValue = mcp2221A.GpPins[pinNumber].ConfiguredOutputValue;
 
     Assert.That(
       () =>
@@ -1069,6 +1094,11 @@ public class Mcp2221AGpioControllerTests {
     Assert.That(
       mcp2221A.GpPins[pinNumber].LastUpdatedValue,
       Is.EqualTo(expectedValue)
+    );
+    Assert.That(
+      mcp2221A.GpPins[pinNumber].ConfiguredOutputValue,
+      Is.EqualTo(configuredOutputValue),
+      "should not be affected by this operation"
     );
   }
 
@@ -1262,6 +1292,7 @@ public class Mcp2221AGpioControllerTests {
       ),
       shouldDisposeUsbHidDevice: true
     );
+    var configuredOutputValue = mcp2221A.GpPins[pinNumber].ConfiguredOutputValue;
 
     Assert.That(
       () =>
@@ -1321,6 +1352,11 @@ public class Mcp2221AGpioControllerTests {
     Assert.That(
       mcp2221A.GpPins[pinNumber].LastUpdatedValue,
       Is.EqualTo(expectedValue)
+    );
+    Assert.That(
+      mcp2221A.GpPins[pinNumber].ConfiguredOutputValue,
+      Is.EqualTo(configuredOutputValue),
+      "should not be affected by this operation"
     );
   }
 #endif

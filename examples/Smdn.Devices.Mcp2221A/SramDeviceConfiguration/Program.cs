@@ -62,23 +62,40 @@ const string GpPinConfigurationTableFormat = "|{0,-15}|{1,-20}|{2,-20}|{3,-20}|{
 Console.WriteLine(
   GpPinConfigurationTableFormat,
   string.Empty,
-  device.GpPin0.PinName, device.GpPin1.PinName, device.GpPin2.PinName, device.GpPin3.PinName
+  device.GpPin0.PinName,
+  device.GpPin1.PinName,
+  device.GpPin2.PinName,
+  device.GpPin3.PinName
 );
 Console.WriteLine(
   GpPinConfigurationTableFormat,
   "Function",
-  device.GpPin0.CurrentFunction, device.GpPin1.CurrentFunction, device.GpPin2.CurrentFunction, device.GpPin3.CurrentFunction
+  device.GpPin0.CurrentFunction,
+  device.GpPin1.CurrentFunction,
+  device.GpPin2.CurrentFunction,
+  device.GpPin3.CurrentFunction
 );
 Console.WriteLine(
   GpPinConfigurationTableFormat,
   "Designation",
-  device.GpPin0.CurrentDesignation, device.GpPin1.CurrentDesignation, device.GpPin2.CurrentDesignation, device.GpPin3.CurrentDesignation
+  device.GpPin0.CurrentDesignation,
+  device.GpPin1.CurrentDesignation,
+  device.GpPin2.CurrentDesignation,
+  device.GpPin3.CurrentDesignation
 );
 Console.WriteLine(
   GpPinConfigurationTableFormat,
   "GPIO Direction",
-  device.GpPin0.CurrentFunction == GpFunction.Gpio ? device.GpPin0.CurrentMode : null,
-  device.GpPin1.CurrentFunction == GpFunction.Gpio ? device.GpPin1.CurrentMode : null,
-  device.GpPin2.CurrentFunction == GpFunction.Gpio ? device.GpPin2.CurrentMode : null,
-  device.GpPin3.CurrentFunction == GpFunction.Gpio ? device.GpPin3.CurrentMode : null
+  device.GpPin0.ConfiguredMode,
+  device.GpPin1.ConfiguredMode,
+  device.GpPin2.ConfiguredMode,
+  device.GpPin3.ConfiguredMode
+);
+Console.WriteLine(
+  GpPinConfigurationTableFormat,
+  "GPIO Output",
+  device.GpPin0.ConfiguredOutputValue,
+  device.GpPin1.ConfiguredOutputValue,
+  device.GpPin2.ConfiguredOutputValue,
+  device.GpPin3.ConfiguredOutputValue
 );
