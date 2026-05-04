@@ -17,15 +17,8 @@ internal partial class I2cOperationStateMachine {
 #if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
   [DoesNotReturn]
 #endif
-  private static OperationState ThrowUnexpectedResponseException(string command, I2cAddress? address, byte response)
-  {
-    if (address.HasValue)
-      throw new I2cCommandException(address.Value, $"The '{command}' command returned no successful response. (Code: 0x{response:X2})");
-    else
-      Mcp2221ACommandException.ThrowNoSuccessfulResponse(command, response);
-
-    return default;
-  }
+  private static OperationState ThrowUnexpectedResponseException(string command, I2cAddress address, byte response)
+    => throw new I2cCommandException(address, $"The '{command}' command returned no successful response. (Code: 0x{response:X2})");
 
 #if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
   [DoesNotReturn]
@@ -36,8 +29,8 @@ internal partial class I2cOperationStateMachine {
 #if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
   [DoesNotReturn]
 #endif
-  private static OperationState ThrowUnknownEngineStateException(I2cAddress address, byte? stateValue, string? i2cEngineState = null)
-    => throw new I2cCommandException(address, $"unknown I2C engine state (0x{stateValue?.ToString("X2", provider: null) ?? "??"}, {i2cEngineState ?? "(details not available)"})");
+  private static OperationState ThrowUnknownI2cEngineStateException(I2cAddress address, byte? stateValue, string? i2cEngineState = null)
+    => throw new I2cCommandException(address, $"The I2C engine of the MCP2221/MCP2221A is in an unknown state. (0x{stateValue?.ToString("X2", provider: null) ?? "??"}, {i2cEngineState ?? "(details not available)"})");
 
   private enum OperationState {
     Initial,
@@ -192,10 +185,10 @@ internal partial class I2cOperationStateMachine {
   private static OperationState TransitStateOrThrowIfEngineStateInvalid(OperationState currentState, I2cAddress address, I2cEngineState engineState)
   {
     if (currentState == OperationState.Initial && (engineState.LineValueScl.IsLow || engineState.LineValueSda.IsLow))
-      ThrowI2cErrorException(address, engineState.StateMachineStateValue, "The line level of SDA and/or SCL is invalid. Try pull-up the bus lines. It may need to be reset or powered off.", engineState.ToString());
+      ThrowI2cErrorException(address, engineState.StateMachineStateValue, "The SDA and/or SCL line level is invalid; try pulling up the bus lines. Or the I2C engine of the MCP2221/MCP2221A may have entered an unexpected state, in which case it may be necessary to reset the device.", engineState.ToString());
 
     if (engineState.BusStatus == I2cEngineTransferStatus.MarkedForCancellation)
-      ThrowI2cErrorException(address, engineState.StateMachineStateValue, "I2C engine has been marked for cancellation unexpectedly. It may need to be reset or powered off.", engineState.ToString());
+      ThrowI2cErrorException(address, engineState.StateMachineStateValue, "The I2C engine of the MCP2221/MCP2221A has unexpectedly been marked for cancellation. It may be necessary to reset the device.", engineState.ToString());
 
     return engineState.StateMachineStateValue switch {
       /*
@@ -219,12 +212,12 @@ internal partial class I2cOperationStateMachine {
       // 0x61 when (currentState == OperationState.Initial) => OperationState.CancelAndRetry, // issuing cancellation in this state will transit state to 0x62, and will be in state which cannot reset with command
       0x61 when 0 < engineState.TimeoutValue => OperationState.Continue, // current operation in progress
       // 0x62: has been marked for cancellation?
-      0x62 => ThrowI2cErrorException(address, engineState.StateMachineStateValue, "I2C engine has been in invalid state. It may need to be reset or powered off.", engineState.ToString()),
+      0x62 => ThrowI2cErrorException(address, engineState.StateMachineStateValue, "The I2C engine of the MCP2221/MCP2221A may have entered an unexpected state. It may be necessary to reset the device.", engineState.ToString()),
 
       /*
         * exceptional / unknown states
         */
-      _ => ThrowUnknownEngineStateException(address, engineState.StateMachineStateValue, engineState.ToString()),
+      _ => ThrowUnknownI2cEngineStateException(address, engineState.StateMachineStateValue, engineState.ToString()),
     };
   }
 
