@@ -422,6 +422,9 @@ partial class Mcp2221AController {
             cancellationToken
           ).ConfigureAwait(false);
 
+          if (logger is { } log && log.IsEnabled(LogLevel.Debug))
+            LogDebugEvaluateMcp2221AInfo(log, info);
+
           if (mcp2221AFilter(info)) {
             selectedUsbHidDevice = mcp2221AUsbHidDevice;
 
@@ -431,6 +434,9 @@ partial class Mcp2221AController {
               logger: logger,
               cancellationToken: cancellationToken
             ).ConfigureAwait(false);
+          }
+          else if (logger is { } l && l.IsEnabled(LogLevel.Debug)) {
+            LogDebugMcp2221AInfoNotMatched(l, info);
           }
 
           if (transceiver is not null)
@@ -513,6 +519,9 @@ partial class Mcp2221AController {
             cancellationToken
           );
 
+          if (logger is { } log && log.IsEnabled(LogLevel.Debug))
+            LogDebugEvaluateMcp2221AInfo(log, info);
+
           if (mcp2221AFilter(info)) {
             selectedUsbHidDevice = mcp2221AUsbHidDevice;
 
@@ -522,6 +531,9 @@ partial class Mcp2221AController {
               logger: logger,
               cancellationToken: cancellationToken
             );
+          }
+          else if (logger is { } l && l.IsEnabled(LogLevel.Debug)) {
+            LogDebugMcp2221AInfoNotMatched(l, info);
           }
 
           transceiver?.Dispose();
@@ -562,4 +574,20 @@ partial class Mcp2221AController {
     Message = "Unable to access the USB HID device or acquire chip information. ({Device})"
   )]
   private static partial void LogWarningAcquiringChipInformationFailed(ILogger logger, Exception ex, IUsbHidDevice device);
+
+  [LoggerMessage(
+    EventId = 6,
+    EventName = "Device Creation",
+    Level = LogLevel.Debug,
+    Message = "Evaluating filter criteria: ({Mcp2221AInfo})"
+  )]
+  private static partial void LogDebugEvaluateMcp2221AInfo(ILogger logger, Mcp2221AInfo mcp2221AInfo);
+
+  [LoggerMessage(
+    EventId = 7,
+    EventName = "Device Creation",
+    Level = LogLevel.Debug,
+    Message = "Filter criteria dit not match: ({Mcp2221AInfo})"
+  )]
+  private static partial void LogDebugMcp2221AInfoNotMatched(ILogger logger, Mcp2221AInfo mcp2221AInfo);
 }

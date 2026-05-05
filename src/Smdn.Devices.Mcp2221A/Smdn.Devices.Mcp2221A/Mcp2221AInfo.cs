@@ -254,4 +254,7 @@ internal sealed class Mcp2221AInfo : IMcp2221AInfo {
     SerialNumber = serialNumber;
     ChipFactorySerialNumber = chipFactorySerialNumber;
   }
+
+  public override string? ToString()
+    => $"{{{nameof(HardwareRevision)}='{HardwareRevision}', {nameof(FirmwareRevision)}='{FirmwareRevision}', {nameof(Manufacturer)}='{Manufacturer}', {nameof(Product)}='{Product}', {nameof(SerialNumber)}='{SerialNumber}', {nameof(ChipFactorySerialNumber)}='{ChipFactorySerialNumber}'}}";
 }
