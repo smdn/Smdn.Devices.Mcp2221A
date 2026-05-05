@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Smdn.Devices.Mcp2221A.DependencyInjection;
 using Smdn.Devices.Mcp2221A.Transport;
 using Smdn.IO.UsbHid;
 
@@ -396,7 +396,7 @@ partial class Mcp2221AController {
     try {
       cancellationToken.ThrowIfCancellationRequested();
 
-      var logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221AController>();
+      var logger = serviceProvider.GetKeyedLoggerOrCreate<Mcp2221AController>(serviceKey);
 
       foreach (var mcp2221AUsbHidDevice in mcp2221AUsbHidDevices) {
         cancellationToken.ThrowIfCancellationRequested();
@@ -493,7 +493,7 @@ partial class Mcp2221AController {
     try {
       cancellationToken.ThrowIfCancellationRequested();
 
-      var logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221AController>();
+      var logger = serviceProvider.GetKeyedLoggerOrCreate<Mcp2221AController>(serviceKey);
 
       foreach (var mcp2221AUsbHidDevice in mcp2221AUsbHidDevices) {
         cancellationToken.ThrowIfCancellationRequested();

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Smdn.Devices.Mcp2221A.DependencyInjection;
 using Smdn.Devices.Mcp2221A.Transport;
 using Smdn.IO.UsbHid;
 
@@ -53,8 +54,9 @@ partial class Mcp2221AController {
   /// </exception>
   /// <remarks>
   /// <para>
-  /// If an <see cref="ILoggerFactory"/> is registered in the <paramref name="serviceProvider"/>,
-  /// the communication process will be logged.
+  /// If an <see cref="ILoggerFactory"/> or <see cref="ILogger"/> is registered
+  /// in the <paramref name="serviceProvider"/>, the communication process will
+  /// be logged.
   /// </para>
   /// <para>
   /// If <paramref name="shouldDisposeUsbHidDevice"/> is set to <see langword="true"/>,
@@ -114,8 +116,9 @@ partial class Mcp2221AController {
   /// </exception>
   /// <remarks>
   /// <para>
-  /// If an <see cref="ILoggerFactory"/> is registered in the <paramref name="serviceProvider"/>,
-  /// the communication process will be logged.
+  /// If an <see cref="ILoggerFactory"/> or <see cref="ILogger"/> is registered
+  /// in the <paramref name="serviceProvider"/>, the communication process will
+  /// be logged.
   /// </para>
   /// <para>
   /// If <paramref name="shouldDisposeUsbHidDevice"/> is set to <see langword="true"/>,
@@ -182,8 +185,9 @@ partial class Mcp2221AController {
   /// </exception>
   /// <remarks>
   /// <para>
-  /// If an <see cref="ILoggerFactory"/> is registered in the <paramref name="serviceProvider"/>,
-  /// the communication process will be logged.
+  /// If an <see cref="ILoggerFactory"/> or <see cref="ILogger"/> is registered
+  /// in the <paramref name="serviceProvider"/>, the communication process will
+  /// be logged.
   /// </para>
   /// <para>
   /// If <paramref name="shouldDisposeUsbHidDevice"/> is set to <see langword="true"/>,
@@ -250,8 +254,9 @@ partial class Mcp2221AController {
   /// </exception>
   /// <remarks>
   /// <para>
-  /// If an <see cref="ILoggerFactory"/> is registered in the <paramref name="serviceProvider"/>,
-  /// the communication process will be logged.
+  /// If an <see cref="ILoggerFactory"/> or <see cref="ILogger"/> is registered
+  /// in the <paramref name="serviceProvider"/>, the communication process will
+  /// be logged.
   /// </para>
   /// <para>
   /// If <paramref name="shouldDisposeUsbHidDevice"/> is set to <see langword="true"/>,
@@ -356,9 +361,7 @@ partial class Mcp2221AController {
   private static async ValueTask<Mcp2221AController> CreateFromUsbHidDeviceAsyncCore<TServiceKey>(
     IUsbHidDevice usbHidDevice,
     IServiceProvider? serviceProvider,
-#pragma warning disable IDE0060
-    TServiceKey? serviceKey, // for future extension
-#pragma warning restore IDE0060
+    TServiceKey? serviceKey,
     bool shouldDisposeUsbHidDevice,
     CancellationToken cancellationToken
   )
@@ -377,7 +380,7 @@ partial class Mcp2221AController {
         throw new Mcp2221AUnavailableException(ex, usbHidDevice);
       }
 
-      var logger = serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221AController>();
+      var logger = serviceProvider.GetKeyedLoggerOrCreate<Mcp2221AController>(serviceKey);
 #pragma warning disable CA2000
       var transceiver = new Mcp2221ATransceiver(
         endPoint: usbHidEndPoint,
@@ -410,9 +413,7 @@ partial class Mcp2221AController {
     IUsbHidDevice usbHidDevice,
     bool shouldDisposeUsbHidDevice,
     IServiceProvider? serviceProvider,
-#pragma warning disable IDE0060
-    TServiceKey? serviceKey, // for future extension
-#pragma warning restore IDE0060
+    TServiceKey? serviceKey,
     CancellationToken cancellationToken
   )
   {
@@ -430,7 +431,7 @@ partial class Mcp2221AController {
         throw new Mcp2221AUnavailableException(ex, usbHidDevice);
       }
 
-      var logger = serviceProvider?.GetService<ILoggerFactory>()?.CreateLogger<Mcp2221AController>();
+      var logger = serviceProvider.GetKeyedLoggerOrCreate<Mcp2221AController>(serviceKey);
 #pragma warning disable CA2000
       var transceiver = new Mcp2221ATransceiver(
         endPoint: usbHidEndPoint,
