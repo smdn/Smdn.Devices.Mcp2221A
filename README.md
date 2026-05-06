@@ -63,7 +63,7 @@ This library also provides the MCP2221/MCP2221A adapter interface for [System.De
 - Supports MCP2221/MCP2221A devices with custom VID/PID values written in the chip settings. ([example](examples/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/))
 - Provides I<sup>2</sup>C bus scanning APIs. ([example](examples/Smdn.Devices.Mcp2221A/I2C_ScanBus/))
 - Uses the USB HID abstraction layer ([Smdn.IO.UsbHid.Abstractions](https://github.com/smdn/Smdn.IO.UsbHid)) to support HIDSharp, LibUsbDotNet, and other backends. ([docs and examples](examples/Smdn.Devices.Mcp2221A/UsbHidBackendSamples.md))
-- Allows selecting the USB HID backend per device using dependency injection (`IServiceProvider`) and service keys.
+- Allows selecting the USB HID backend per device using dependency injection (`IServiceProvider`) and service keys. ([example](examples/Smdn.Devices.Mcp2221A/DependencyInjection_KeyedService))
 
 # Getting started
 

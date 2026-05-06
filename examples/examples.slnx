@@ -16,11 +16,11 @@ SPDX-License-Identifier: MIT
   <Folder Name="/Smdn.Devices.Mcp2221A/DAC_Write/">
     <Project Path="Smdn.Devices.Mcp2221A/DAC_Write/Program.csproj" />
   </Folder>
+  <Folder Name="/Smdn.Devices.Mcp2221A/DependencyInjection_KeyedService/">
+    <Project Path="Smdn.Devices.Mcp2221A/DependencyInjection_KeyedService/Program.csproj" />
+  </Folder>
   <Folder Name="/Smdn.Devices.Mcp2221A/DependencyInjection_Logging/">
     <Project Path="Smdn.Devices.Mcp2221A/DependencyInjection_Logging/Program.csproj" />
-  </Folder>
-  <Folder Name="/Smdn.Devices.Mcp2221A/DependencyInjection_ServiceKey/">
-    <Project Path="Smdn.Devices.Mcp2221A/DependencyInjection_ServiceKey/Program.csproj" />
   </Folder>
   <Folder Name="/Smdn.Devices.Mcp2221A/GettingStarted/">
     <Project Path="Smdn.Devices.Mcp2221A/GettingStarted/Program.csproj" />
