@@ -60,19 +60,23 @@ This library provides APIs that enable .NET applications to access the functions
       <PackageReadmeFileContent><![CDATA[# $(PackageId) $(PackageVersion)
 $(Description)
 
-This library enables you to select any USB HID implementation using dependency injection.
-Depending on licensing and other requirements, you can choose any of the following implementation providers.
+- Provides a .NET interface for MCP2221/MCP2221A devices over USB HID.
+- Supports GPIO, ADC, DAC, clock output, interrupts, and I2C bus access.
+- Includes [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio/) adapters for seamless integration with [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings/).
+
+This library enables you to select any USB HID backend using dependency injection.
+Depending on licensing and other requirements, you can choose any of the following backend providers.
 
 - [Smdn.IO.UsbHid.Providers.HidSharp](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp)
 - [Smdn.IO.UsbHid.Providers.LibUsbDotNet](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNet)
 - [Smdn.IO.UsbHid.Providers.LibUsbDotNetV3](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3)
 
-Please add one of the implementation providers to the project's package references.
+Please add one of the backend providers to the project's package references.
 
 ## Usage
-This is an example of switching the output of each pin on GP0-GP3 of the MCP2221 at specific intervals to make the connected LED blink.
+This is an example of switching the output of each pin on GP0-GP3 of the MCP2221A at specific intervals to make the connected LED blink.
 
-以下のコードは、MCP2221のGP0-GP3の各ピンの出力を一定間隔で切り替え、接続されているLEDを点滅させる例です。
+以下のコードは、MCP2221AのGP0-GP3の各ピンの出力を一定間隔で切り替え、接続されているLEDを点滅させる例です。
 
 ```cs
 $([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\..\examples\$(PackageId)\GettingStarted\Program.cs').TrimEnd())
