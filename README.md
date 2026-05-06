@@ -3,17 +3,16 @@
 [![CodeQL](https://github.com/smdn/Smdn.Devices.Mcp2221A/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/smdn/Smdn.Devices.Mcp2221A/actions/workflows/codeql-analysis.yml)
 
 > [!IMPORTANT]
-> **Project Renaming Notice**
+> **Project Renamed to Smdn.Devices.Mcp2221A**
 >
 > This project has been renamed from **Smdn.Devices.MCP2221** to **Smdn.Devices.Mcp2221A**.
 >
-> - **NuGet Package:** The current stable package is still published under the old name `Smdn.Devices.MCP2221`. A new package `Smdn.Devices.Mcp2221A` will be released soon.
-> - **Source Code for the Current Package:** As the `main` branch now reflects the renamed project structure, please refer to the **[release tags](https://github.com/smdn/Smdn.Devices.Mcp2221A/tags)** for the source code and examples for the currently released version.
-> - **Code Change Required:** The next major version will include breaking changes, including the renaming of namespaces and assemblies. Users migrating to the new package will need to update their code (e.g., `using Smdn.Devices.Mcp2221A;`).
-> - **Upcoming API Changes:** An API refactoring is planned for the next release to improve usability and support for MCP2221A features.
+> - **New NuGet Package:** The successor package **[Smdn.Devices.Mcp2221A v1.0.0](https://www.nuget.org/packages/Smdn.Devices.Mcp2221A/)** has been released. The old package `Smdn.Devices.MCP2221` is now deprecated.
+> - **Migration and Breaking Changes:** This version includes significant API refactoring and renaming of namespaces/assemblies. Users migrating from the old package will need to update their code (e.g., `using Smdn.Devices.Mcp2221A;`).
+> - **Migration Guide:** While formal migration documentation is currently unavailable, please refer to the updated examples in the **[`examples/Smdn.Devices.Mcp2221A`](./examples/Smdn.Devices.Mcp2221A/)** directory for usage and code transition.
+>
 
 # Smdn.Devices.Mcp2221A
-[![NuGet Smdn.Devices.MCP2221](https://img.shields.io/nuget/v/Smdn.Devices.MCP2221.svg)](https://www.nuget.org/packages/Smdn.Devices.MCP2221/)
 [![NuGet Smdn.Devices.Mcp2221A](https://img.shields.io/nuget/v/Smdn.Devices.Mcp2221A.svg)](https://www.nuget.org/packages/Smdn.Devices.Mcp2221A/)
 
 [Smdn.Devices.Mcp2221A](src/Smdn.Devices.Mcp2221A/) is a .NET library for the **Microchip Technology [MCP2221](https://www.microchip.com/wwwproducts/en/MCP2221) and [MCP2221A](https://www.microchip.com/wwwproducts/en/MCP2221A), a USB2.0 to I<sup>2</sup>C/UART Protocol Converter with GPIO**. This library provides APIs that enable .NET applications to access the functions of the MCP2221/MCP2221A via the USB HID interface.
