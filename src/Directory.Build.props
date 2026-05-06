@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
   <PropertyGroup Label="package properties">
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://smdn.jp/electronics/libs/Smdn.Devices.MCP2221/</PackageProjectUrl>
+    <PackageProjectUrl>https://smdn.jp/electronics/libs/Smdn.Devices.Mcp2221A/</PackageProjectUrl>
   </PropertyGroup>
 
   <PropertyGroup Label="repository properties" Condition="'$(GITHUB_ACTIONS)' != 'true'">
