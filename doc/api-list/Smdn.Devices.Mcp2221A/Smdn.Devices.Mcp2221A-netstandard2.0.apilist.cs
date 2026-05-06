@@ -1,16 +1,16 @@
-// Smdn.Devices.Mcp2221A.dll (Smdn.Devices.Mcp2221A-1.0.0-preview4)
+// Smdn.Devices.Mcp2221A.dll (Smdn.Devices.Mcp2221A-1.0.0)
 //   Name: Smdn.Devices.Mcp2221A
 //   AssemblyVersion: 1.0.0.0
-//   InformationalVersion: 1.0.0-preview4+a24148124a7d6bbdc25f3748eb0d77bcf6a78f49
+//   InformationalVersion: 1.0.0+0bf9c954cff7b4ca33c418cbc5e863d9862124f3
 //   TargetFramework: .NETStandard,Version=v2.0
 //   Configuration: Release
 //   Metadata: RepositoryUrl=https://github.com/smdn/Smdn.Devices.Mcp2221A
 //   Metadata: RepositoryBranch=main
-//   Metadata: RepositoryCommit=a24148124a7d6bbdc25f3748eb0d77bcf6a78f49
+//   Metadata: RepositoryCommit=0bf9c954cff7b4ca33c418cbc5e863d9862124f3
 //   Referenced assemblies:
 //     Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51
 //     Microsoft.Extensions.DependencyInjection.Abstractions, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
-//     Microsoft.Extensions.Logging.Abstractions, Version=5.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
+//     Microsoft.Extensions.Logging.Abstractions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
 //     Smdn.IO.UsbHid.Abstractions, Version=1.0.0.0, Culture=neutral
 //     System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51
 //     System.Device.Gpio, Version=1.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35
@@ -58,6 +58,13 @@ namespace Smdn.Devices.Mcp2221A {
     Reserved = 0,
   }
 
+  public enum DeviceConfigurationProtectionLevel : int {
+    None = 0,
+    PasswordProtected = 1,
+    PermanentlyLocked = 2,
+    Reserved = 3,
+  }
+
   public enum GpFunction : int {
     Adc = 1,
     ClockOutput = 5,
@@ -74,6 +81,11 @@ namespace Smdn.Devices.Mcp2221A {
     Falling = 2,
     None = 0,
     Rising = 1,
+  }
+
+  public enum UsbPowerMode : int {
+    BusPowered = 0,
+    SelfPowered = 1,
   }
 
   public enum VoltageReferenceSource : int {
@@ -212,6 +224,7 @@ namespace Smdn.Devices.Mcp2221A {
     public VoltageReferenceSource CurrentAdcReferenceSource { get; }
     public VoltageReferenceSource CurrentDacReferenceSource { get; }
     public string FirmwareRevision { get; }
+    public DeviceConfigurationProtectionLevel FlashWriteProtection { get; }
     public Gp0Controller GpPin0 { get; }
     public Gp1Controller GpPin1 { get; }
     public Gp2Controller GpPin2 { get; }
@@ -225,6 +238,12 @@ namespace Smdn.Devices.Mcp2221A {
     public string Manufacturer { get; }
     public string Product { get; }
     public string SerialNumber { get; }
+    public bool UsbCdcSerialNumberEnabled { get; }
+    public UsbPowerMode UsbPowerMode { get; }
+    public int UsbProductId { get; }
+    public bool UsbRemoteWakeUpEnabled { get; }
+    public int UsbRequestedCurrentAmount { get; }
+    public int UsbVendorId { get; }
 
     public void Dispose() {}
     public async ValueTask DisposeAsync() {}
@@ -351,6 +370,9 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio {
   }
 
   public interface IGpioController {
+    PinMode CurrentMode { get; }
+    PinValue LastUpdatedValue { get; }
+
     void ConfigureAsGpio(PinMode? mode, PinValue? initialValue, CancellationToken cancellationToken = default);
     ValueTask ConfigureAsGpioAsync(PinMode? mode, PinValue? initialValue, CancellationToken cancellationToken = default);
     PinMode GetMode(CancellationToken cancellationToken = default);
@@ -475,6 +497,8 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio {
   }
 
   public abstract class GpController : IGpioController {
+    public PinMode ConfiguredMode { get; }
+    public PinValue ConfiguredOutputValue { get; }
     public abstract string CurrentDesignation { get; }
     public abstract GpFunction CurrentFunction { get; }
     public PinMode CurrentMode { get; }
@@ -492,7 +516,6 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio {
     public async ValueTask<PinValue> ReadAsync(CancellationToken cancellationToken = default) {}
     public void SetMode(PinMode mode, CancellationToken cancellationToken = default) {}
     public async ValueTask SetModeAsync(PinMode mode, CancellationToken cancellationToken = default) {}
-    protected void ThrowIfInvalidConfiguration(GpFunction requiredFunction) {}
     public void Write(PinValue @value, CancellationToken cancellationToken = default) {}
     public async ValueTask WriteAsync(PinValue @value, CancellationToken cancellationToken = default) {}
   }
@@ -540,24 +563,22 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.I2c {
 
   public class I2cNackException : I2cCommandException {
     public I2cNackException() {}
-    public I2cNackException(I2cAddress address) {}
-    public I2cNackException(I2cAddress address, Exception? innerException) {}
+    public I2cNackException(I2cAddress address, string? message = null, Exception? innerException = null) {}
     public I2cNackException(string? message) {}
     public I2cNackException(string? message, Exception? innerException) {}
   }
 
   public class I2cReadException : I2cCommandException {
     public I2cReadException() {}
-    public I2cReadException(I2cAddress address, string? message) {}
-    public I2cReadException(I2cAddress address, string? message, Exception? innerException) {}
+    public I2cReadException(I2cAddress address, string? message = null, Exception? innerException = null) {}
     public I2cReadException(string? message) {}
     public I2cReadException(string? message, Exception? innerException) {}
   }
 
   public static class II2cControllerBusScanningExtensions {
     extension(II2cController controller) {
-      public (IReadOnlyCollection<I2cAddress> WriteAddressSet, IReadOnlyCollection<I2cAddress> ReadAddressSet) ScanBus(I2cAddress addressRangeMin = default, I2cAddress addressRangeMax = default, int i2cBusTransmissionSpeedInKbps = 100, IProgress<I2cScanBusProgress>? progress = null, CancellationToken cancellationToken = default) {}
-      public ValueTask<(IReadOnlyCollection<I2cAddress> WriteAddressSet, IReadOnlyCollection<I2cAddress> ReadAddressSet)> ScanBusAsync(I2cAddress addressRangeMin = default, I2cAddress addressRangeMax = default, int i2cBusTransmissionSpeedInKbps = 100, IProgress<I2cScanBusProgress>? progress = null, CancellationToken cancellationToken = default) {}
+      public (IReadOnlyCollection<I2cAddress> WriteAddressSet, IReadOnlyCollection<I2cAddress> ReadAddressSet) ScanBus(I2cAddress fromAddress = default, I2cAddress toAddress = default, int transmissionSpeedInKbps = 100, IProgress<I2cScanBusProgress>? progress = null, CancellationToken cancellationToken = default) {}
+      public ValueTask<(IReadOnlyCollection<I2cAddress> WriteAddressSet, IReadOnlyCollection<I2cAddress> ReadAddressSet)> ScanBusAsync(I2cAddress fromAddress = default, I2cAddress toAddress = default, int transmissionSpeedInKbps = 100, IProgress<I2cScanBusProgress>? progress = null, CancellationToken cancellationToken = default) {}
     }
   }
 
@@ -600,10 +621,10 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.I2c {
   }
 
   public readonly struct I2cScanBusProgress {
-    public I2cAddress AddressRangeMax { get; }
-    public I2cAddress AddressRangeMin { get; }
+    public I2cAddress CurrentAddress { get; }
+    public I2cAddress FromAddress { get; }
     public int ProgressInPercent { get; }
-    public I2cAddress ScanningAddress { get; }
+    public I2cAddress ToAddress { get; }
   }
 }
 // API list generated by Smdn.Reflection.ReverseGenerating.ListApi.MSBuild.Tasks v1.8.2.0.
