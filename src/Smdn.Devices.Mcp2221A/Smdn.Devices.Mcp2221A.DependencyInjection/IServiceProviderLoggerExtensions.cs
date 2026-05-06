@@ -10,7 +10,7 @@ namespace Smdn.Devices.Mcp2221A.DependencyInjection;
 /// <summary>
 /// Provides extension members for the <see cref="IServiceProvider"/> interface.
 /// </summary>
-public static class IServiceProviderLoggerExtensions {
+internal static class IServiceProviderLoggerExtensions {
 #pragma warning disable IDE0051
   private static IServiceProvider ThrowIfReceiverIsNull(IServiceProvider serviceProvider, string paramName)
     => serviceProvider ?? throw new ArgumentNullException(paramName: paramName);
