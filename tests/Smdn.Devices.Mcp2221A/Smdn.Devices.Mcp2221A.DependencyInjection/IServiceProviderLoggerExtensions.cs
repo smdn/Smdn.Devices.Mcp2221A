@@ -14,13 +14,13 @@ namespace Smdn.Devices.Mcp2221A.DependencyInjection;
 public class IServiceProviderLoggerExtensionsTests {
   [TestCase("key")]
   [TestCase(null)]
-  public void GetKeyedLoggerOrCreate_ReturnsNullIfServiceProviderIsNull(string? serviceKey)
+  public void GetKeyedLoggerOrCreate_ArgumentNull(string? serviceKey)
   {
-    IServiceProvider? serviceProvider = null;
+    IServiceProvider serviceProvider = null!;
 
     Assert.That(
-      serviceProvider.GetKeyedLoggerOrCreate<Mcp2221AController>(serviceKey),
-      Is.Null
+      () => serviceProvider.GetKeyedLoggerOrCreate<Mcp2221AController>(serviceKey),
+      Throws.ArgumentNullException
     );
   }
 

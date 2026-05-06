@@ -380,7 +380,7 @@ partial class Mcp2221AController {
         throw new Mcp2221AUnavailableException(ex, usbHidDevice);
       }
 
-      var logger = serviceProvider.GetKeyedLoggerOrCreate<Mcp2221AController>(serviceKey);
+      var logger = serviceProvider?.GetKeyedLoggerOrCreate<Mcp2221AController>(serviceKey);
 #pragma warning disable CA2000
       var transceiver = new Mcp2221ATransceiver(
         endPoint: usbHidEndPoint,
@@ -431,7 +431,7 @@ partial class Mcp2221AController {
         throw new Mcp2221AUnavailableException(ex, usbHidDevice);
       }
 
-      var logger = serviceProvider.GetKeyedLoggerOrCreate<Mcp2221AController>(serviceKey);
+      var logger = serviceProvider?.GetKeyedLoggerOrCreate<Mcp2221AController>(serviceKey);
 #pragma warning disable CA2000
       var transceiver = new Mcp2221ATransceiver(
         endPoint: usbHidEndPoint,

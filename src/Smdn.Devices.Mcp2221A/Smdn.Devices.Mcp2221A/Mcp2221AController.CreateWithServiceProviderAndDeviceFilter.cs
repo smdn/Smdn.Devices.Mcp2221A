@@ -396,7 +396,7 @@ partial class Mcp2221AController {
     try {
       cancellationToken.ThrowIfCancellationRequested();
 
-      var logger = serviceProvider.GetKeyedLoggerOrCreate<Mcp2221AController>(serviceKey);
+      var logger = serviceProvider?.GetKeyedLoggerOrCreate<Mcp2221AController>(serviceKey);
 
       foreach (var mcp2221AUsbHidDevice in mcp2221AUsbHidDevices) {
         cancellationToken.ThrowIfCancellationRequested();
@@ -493,7 +493,7 @@ partial class Mcp2221AController {
     try {
       cancellationToken.ThrowIfCancellationRequested();
 
-      var logger = serviceProvider.GetKeyedLoggerOrCreate<Mcp2221AController>(serviceKey);
+      var logger = serviceProvider?.GetKeyedLoggerOrCreate<Mcp2221AController>(serviceKey);
 
       foreach (var mcp2221AUsbHidDevice in mcp2221AUsbHidDevices) {
         cancellationToken.ThrowIfCancellationRequested();
