@@ -19,7 +19,8 @@ partial class Mcp2221ATransceiver {
       if (actualSequenceLength <= 0)
         return string.Empty;
 
-      sequence = sequence.Slice(0, actualSequenceLength);
+      if (actualSequenceLength < sequence.Length)
+        sequence = sequence.Slice(0, actualSequenceLength);
     }
 
     var buffer = ArrayPool<byte>.Shared.Rent(sequence.Length);

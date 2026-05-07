@@ -29,7 +29,7 @@ internal sealed partial class Mcp2221ATransceiver : IDisposable {
   )
   {
     if (actualResponseReportLength != ResponseReportLength)
-      throw new Mcp2221ACommandException($"The length of the received response report does not reach the expected length; expected {ResponseReportLength} bytes, but was actually {actualResponseReportLength} bytes.");
+      throw new Mcp2221ACommandException($"The length of the response report received exceeds or does not reach the expected length; expected {ResponseReportLength} bytes, but was actually {actualResponseReportLength} bytes.");
 
     var commandCode = command[0];
     var commandCodeEcho = response[0];
