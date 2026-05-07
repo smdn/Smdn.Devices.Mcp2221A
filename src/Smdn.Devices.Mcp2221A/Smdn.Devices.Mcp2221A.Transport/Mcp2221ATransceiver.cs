@@ -148,8 +148,8 @@ internal sealed partial class Mcp2221ATransceiver : IDisposable {
       var commandReportMemory = commandReport.AsMemory(0, CommandReportLength);
       var responseReportMemory = responseReport.AsMemory(0, ResponseReportLength);
 
-      // commandReportMemory[0] = 0x00; // report
       commandReportMemory.Span.Clear();
+      // commandReportMemory.Span[0] = 0x00; // Report ID
 
       cancellationToken.ThrowIfCancellationRequested();
 
@@ -253,8 +253,8 @@ internal sealed partial class Mcp2221ATransceiver : IDisposable {
     Span<byte> commandReport = stackalloc byte[CommandReportLength];
     Span<byte> responseReport = stackalloc byte[ResponseReportLength];
 
-    // commandReport[0] = 0x00; // report
     commandReport.Clear();
+    // commandReport[0] = 0x00; // Report ID
 
     cancellationToken.ThrowIfCancellationRequested();
 
