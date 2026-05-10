@@ -119,11 +119,12 @@ services.AddLibUsbDotNetUsbHid(
   }
 );
 ```
-</details>
 
 > [!TIP]
 > On Windows, you may need to change drivers, so using **LibUsbDotNet version 3** is recommended over version 2.
 > For more details, please see [issue #44](../../issues/44).
+
+</details>
 
 ________
 For working examples that show how to add `PackageReference`s in a project file (`*.csproj`), register the backend providers with a `ServiceCollection`, and configure options for each provider, see [UsbHidBackendSamples.md](examples/Smdn.Devices.Mcp2221A/UsbHidBackendSamples.md).
