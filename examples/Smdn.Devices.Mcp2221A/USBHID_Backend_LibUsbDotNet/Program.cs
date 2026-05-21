@@ -10,7 +10,7 @@ using Smdn.IO.UsbHid.DependencyInjection;
 
 var services = new ServiceCollection();
 
-// Use LibUsbDotNet version 2 (LGPL-3.0, stable release)
+// Use LibUsbDotNet version 2 (LGPL-3.0)
 // (Add `Smdn.IO.UsbHid.Providers.LibUsbDotNet` to PackageReference)
 services.AddLibUsbDotNetUsbHid(
   configure: static (builder, options) => {
