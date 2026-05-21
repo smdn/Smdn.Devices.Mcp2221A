@@ -82,7 +82,7 @@ services.AddHidSharpUsbHid();
 ```
 
 ________
-**LibUsbDotNet version 3 (LGPL-3.0, alpha release)** [![NuGet Smdn.IO.UsbHid.Providers.LibUsbDotNetV3](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3/):
+**LibUsbDotNet version 3 (LGPL-3.0)** [![NuGet Smdn.IO.UsbHid.Providers.LibUsbDotNetV3](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3/):
 
 <details>
 <summary>Read More</summary>
@@ -98,8 +98,11 @@ services.AddLibUsbDotNetV3UsbHid(
 ```
 </details>
 
+> [!TIP]
+> To use LibUsbDotNet, you need to either install `libusb-1.0` on your system or manually copy it to the output directory of the executable. For more details, please refer to the [LibUsbDotNet documentation](https://github.com/LibUsbDotNet/LibUsbDotNet/wiki#how-to-use-libusbdotnet).
+
 ________
-**LibUsbDotNet version 2 (LGPL-3.0, stable release)** [![NuGet Smdn.IO.UsbHid.Providers.LibUsbDotNet](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.LibUsbDotNet.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNet/):
+**LibUsbDotNet version 2 (LGPL-3.0)** [![NuGet Smdn.IO.UsbHid.Providers.LibUsbDotNet](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.LibUsbDotNet.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNet/):
 
 <details>
 <summary>Read More</summary>
@@ -119,12 +122,11 @@ services.AddLibUsbDotNetUsbHid(
   }
 );
 ```
+</details>
 
 > [!TIP]
 > On Windows, you may need to change drivers, so using **LibUsbDotNet version 3** is recommended over version 2.
 > For more details, please see [issue #44](../../issues/44).
-
-</details>
 
 ________
 For working examples that show how to add `PackageReference`s in a project file (`*.csproj`), register the backend providers with a `ServiceCollection`, and configure options for each provider, see [UsbHidBackendSamples.md](examples/Smdn.Devices.Mcp2221A/UsbHidBackendSamples.md).
