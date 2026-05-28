@@ -1,4 +1,4 @@
-<!--
+﻿<!--
 SPDX-FileCopyrightText: 2023 smdn <smdn@smdn.jp>
 SPDX-License-Identifier: MIT
 -->
@@ -26,7 +26,7 @@ SPDX-License-Identifier: MIT
       <ReadmeFileNoticeSectionContent>$([System.Text.RegularExpressions.Regex]::Replace(
         '$(ReadmeFileNoticeSectionContent)',
         '\(\./([^\)]+)\)',
-        '($(RepositoryUrl)/tree/main/$1)'
+        '($(RepositoryUrl)/tree/$(SmdnWorkflowsDotNetExpectedReleaseTag)/$1)'
       ).Trim())</ReadmeFileNoticeSectionContent>
     </PropertyGroup>
   </Target>
