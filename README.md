@@ -2,16 +2,6 @@
 [![tests/main](https://img.shields.io/github/actions/workflow/status/smdn/Smdn.Devices.Mcp2221A/test.yml?branch=main&label=tests%2Fmain)](https://github.com/smdn/Smdn.Devices.Mcp2221A/actions/workflows/test.yml)
 [![CodeQL](https://github.com/smdn/Smdn.Devices.Mcp2221A/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/smdn/Smdn.Devices.Mcp2221A/actions/workflows/codeql-analysis.yml)
 
-> [!IMPORTANT]
-> **Project Renamed to Smdn.Devices.Mcp2221A**
->
-> This project has been renamed from **Smdn.Devices.MCP2221** to **Smdn.Devices.Mcp2221A**.
->
-> - **New NuGet Package:** The successor package **[Smdn.Devices.Mcp2221A v1.0.0](https://www.nuget.org/packages/Smdn.Devices.Mcp2221A/)** has been released. The old package `Smdn.Devices.MCP2221` is now deprecated.
-> - **Migration and Breaking Changes:** This version includes significant API refactoring and renaming of namespaces/assemblies. Users migrating from the old package will need to update their code (e.g., `using Smdn.Devices.Mcp2221A;`).
-> - **Migration Guide:** While formal migration documentation is currently unavailable, please refer to the updated examples in the **[`examples/Smdn.Devices.Mcp2221A`](./examples/Smdn.Devices.Mcp2221A/)** directory for usage and code transition.
->
-
 # Smdn.Devices.Mcp2221A
 [![NuGet Smdn.Devices.Mcp2221A](https://img.shields.io/nuget/v/Smdn.Devices.Mcp2221A.svg)](https://www.nuget.org/packages/Smdn.Devices.Mcp2221A/)
 
@@ -20,6 +10,9 @@
 With this library, you can interface with I<sup>2</sup>C devices and control GPIO pins from any PC that has a USB port. It can be used without intermediate microcontrollers like Raspberry Pi or Arduino and does not require any special kernel drivers, offering an alternative for hardware control and prototyping.
 
 This library also provides the MCP2221/MCP2221A adapter interface for [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio/). This library enables you to use the many device bindings provided by [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings/).
+
+> [!NOTE]
+> This project and its NuGet package were previously published under the name **Smdn.Devices.MCP2221**. For detailed information regarding the renaming and migration, please refer to [issue #18](../../issues/18).
 
 ## Library and API features
 ### Frameworks / Platforms
