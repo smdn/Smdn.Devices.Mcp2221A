@@ -69,7 +69,7 @@ jobs:
 
     - name: Autobuild
       if: ${{ (matrix.build-mode == 'autobuild') || (matrix.build-mode == '') }}
-      uses: github/codeql-action/autobuild@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0
+      uses: github/codeql-action/autobuild@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
 
     - name: Prepare .NET SDK ${{ env.MINIMAL_DOTNET_SDK_VERSION }}
       uses: smdn/workflows-dotnet/actions/prepare-dotnet-sdk@e294de483afffc1d3a366fbba853efe23c7b7d4c # actions/prepare-dotnet-sdk/v1.2.0
