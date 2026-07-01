@@ -3,6 +3,8 @@
 
 name: Run tests
 
+permissions: {}
+
 on:
   push:
     branches: [ main ]
@@ -73,10 +75,12 @@ on:
 jobs:
   run-test:
     name: Run tests
-    uses: smdn/workflows-dotnet/.github/workflows/test.yml@7144c60e15cd292c33d720ea0ef963abfda49dab # test/v1.10.1
+    uses: smdn/workflows-dotnet/.github/workflows/test.yml@88a108da0f1b2d3fcc0fd7d73b2df430e325a5f5 # test/v1.10.3
+    permissions:
+      contents: read
     with:
       project:                                ${{ inputs.project }}
-      os:                                     ${{ inputs.os == '' && 'ubuntu-24.04, ubuntu-22.04, windows-latest, macos-latest' || inputs.os }}
+      os:                                     ${{ inputs.os == '' && 'ubuntu-26.04, ubuntu-24.04, ubuntu-22.04, windows-latest, macos-latest' || inputs.os }}
       verbose:                                ${{ inputs.verbose == true }}
       dotnet_sdk_version:                     ${{ inputs.dotnet_sdk_version == '' && '10.0.100' || inputs.dotnet_sdk_version }}
       timeout_minutes_test_job:               10

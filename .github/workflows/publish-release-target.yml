@@ -4,10 +4,7 @@
 name: Publish release target
 run-name: Publish release target ${{ github.head_ref }}
 
-permissions:
-  contents: write
-  packages: write
-  pull-requests: read
+permissions: {}
 
 on:
   pull_request:
@@ -15,7 +12,11 @@ on:
 
 jobs:
   run-publish-release-target:
-    uses: smdn/workflows-dotnet/.github/workflows/publish-release-target.yml@17112594cdc2a6dd9bf2417fe103174ded21863f # release-target/v1.16.1
+    uses: smdn/workflows-dotnet/.github/workflows/publish-release-target.yml@071d93f091033126d1fac91fb8a63936233754c1 # release-target/v1.16.2
+    permissions:
+      contents: write
+      packages: write
+      pull-requests: read
     if: |
       (github.event.pull_request.merged == true && startsWith(github.head_ref, 'releases/')) &&
       (contains(github.event.pull_request.labels.*.name, 'release-target'))
