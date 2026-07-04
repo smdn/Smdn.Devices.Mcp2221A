@@ -73,9 +73,9 @@ on:
         default: ''
 
 jobs:
-  run-test:
-    name: Run tests
-    uses: smdn/workflows-dotnet/.github/workflows/test.yml@88a108da0f1b2d3fcc0fd7d73b2df430e325a5f5 # test/v1.10.3
+  run-tests-dotnet:
+    name: Run .NET tests
+    uses: smdn/workflows-dotnet/.github/workflows/test.yml@9ec9f2dc7d5b039bbc9e22aae98cb00c84d806df # test/v1.10.4
     permissions:
       contents: read
     with:
@@ -92,3 +92,14 @@ jobs:
       dotnet_test_options_output_verbosity_level: ${{ inputs.dotnet_test_options_output_verbosity_level }}
     secrets:
       token_repo: ${{ secrets.GITHUB_TOKEN }}
+
+  post-tests-dotnet:
+    # This job is intended to be referenced by the branch protection rules (Status Checks).
+    # Do not change the 'name' or job ID, as doing so will break the status check validation.
+    # Avoid adding 'if: always()', otherwise this job will report success even if previous tests fail.
+    name: .NET test status
+    needs: run-tests-dotnet
+    runs-on: ubuntu-slim
+    steps:
+      - name: .NET test status
+        run: echo "All .NET tests completed successfully."
