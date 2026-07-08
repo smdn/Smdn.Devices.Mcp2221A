@@ -12,7 +12,7 @@ on:
 
 jobs:
   run-publish-release-target:
-    uses: smdn/workflows-dotnet/.github/workflows/publish-release-target.yml@071d93f091033126d1fac91fb8a63936233754c1 # release-target/v1.16.2
+    uses: smdn/workflows-dotnet/.github/workflows/publish-release-target.yml@6b1c9e567396e1e2e1e70d11a5a54cbe87d0eec6 # release-target/v1.16.4
     permissions:
       contents: write
       packages: write
