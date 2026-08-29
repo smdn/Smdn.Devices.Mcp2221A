@@ -75,7 +75,7 @@ on:
 jobs:
   run-tests-dotnet:
     name: Run .NET tests
-    uses: smdn/workflows-dotnet/.github/workflows/test.yml@9ec9f2dc7d5b039bbc9e22aae98cb00c84d806df # test/v1.10.4
+    uses: smdn/workflows-dotnet/.github/workflows/test.yml@4b2f5a61ef7f1b02a37cf8c34a3440aaf15eb8e8 # test/v1.10.5
     permissions:
       contents: read
     with:

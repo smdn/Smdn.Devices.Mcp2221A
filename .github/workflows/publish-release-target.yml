@@ -12,7 +12,7 @@ on:
 
 jobs:
   run-publish-release-target:
-    uses: smdn/workflows-dotnet/.github/workflows/publish-release-target.yml@6b1c9e567396e1e2e1e70d11a5a54cbe87d0eec6 # release-target/v1.16.4
+    uses: smdn/workflows-dotnet/.github/workflows/publish-release-target.yml@54ed60a959628b294c84f64c7d21f4774b671002 # release-target/v1.17.0
     permissions:
       contents: write
       packages: write
@@ -23,7 +23,7 @@ jobs:
     with:
       pr_number_request_for_release: ${{ github.event.pull_request.number }}
       pr_label_request_for_release:  'release-target'
-      workflow_runs_on:              'ubuntu-24.04'
+      workflow_runs_on:              'ubuntu-26.04'
       dotnet_sdk_version:            '10.0.100'
     secrets:
       token_repo:                 ${{ secrets.PUBLISH_NEW_RELEASE }}

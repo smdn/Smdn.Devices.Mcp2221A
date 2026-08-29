@@ -59,7 +59,7 @@ jobs:
         exit 1
 
   run-generate-release-target:
-    uses: smdn/workflows-dotnet/.github/workflows/generate-release-target.yml@6b1c9e567396e1e2e1e70d11a5a54cbe87d0eec6 # release-target/v1.16.4
+    uses: smdn/workflows-dotnet/.github/workflows/generate-release-target.yml@54ed60a959628b294c84f64c7d21f4774b671002 # release-target/v1.17.0
     permissions:
       contents: write
       pull-requests: write
@@ -70,7 +70,7 @@ jobs:
       release_target_tag_prefix: 'new-release/'
       release_target_pr_label: 'release-target'
       release_tag_prefix: 'releases/'
-      workflow_runs_on: 'ubuntu-24.04'
+      workflow_runs_on: 'ubuntu-26.04'
       dotnet_sdk_version: '10.0.100'
       dry_run: ${{ needs.determine-release-target.outputs.dry_run == 'true' }}
     secrets:

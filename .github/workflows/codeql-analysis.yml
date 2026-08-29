@@ -60,7 +60,9 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
@@ -78,7 +80,7 @@ jobs:
       uses: github/codeql-action/autobuild@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
 
     - name: Prepare .NET SDK ${{ env.MINIMAL_DOTNET_SDK_VERSION }}
-      uses: smdn/workflows-dotnet/actions/prepare-dotnet-sdk@e294de483afffc1d3a366fbba853efe23c7b7d4c # actions/prepare-dotnet-sdk/v1.2.0
+      uses: smdn/workflows-dotnet/actions/prepare-dotnet-sdk@949cc1db4b8c1ed5e7beea5d96faf9a72718a956 # actions/prepare-dotnet-sdk/v1.2.1
       if: ${{ (matrix.build-mode == 'manual') && (matrix.language == 'csharp') }}
       with:
         minimal_dotnet_sdk_version: '${{ env.MINIMAL_DOTNET_SDK_VERSION }}'
