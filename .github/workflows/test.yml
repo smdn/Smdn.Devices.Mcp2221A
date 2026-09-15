@@ -34,11 +34,6 @@ on:
         required: false
         type: string
 
-      dotnet_sdk_version:
-        description: "The minimum .NET SDK version which is used to run tests."
-        required: false
-        type: string
-
       verbose:
         description: "If true, enables verbose output."
         required: false
@@ -75,14 +70,13 @@ on:
 jobs:
   run-tests-dotnet:
     name: Run .NET tests
-    uses: smdn/workflows-dotnet/.github/workflows/test.yml@4b2f5a61ef7f1b02a37cf8c34a3440aaf15eb8e8 # test/v1.10.5
+    uses: smdn/workflows-dotnet/.github/workflows/test.yml@99535f4de918d69d51a15f5af1d449b7813192bc # test/v1.11.0
     permissions:
       contents: read
     with:
       project:                                ${{ inputs.project }}
       os:                                     ${{ inputs.os == '' && 'ubuntu-26.04, ubuntu-24.04, ubuntu-22.04, windows-latest, macos-latest' || inputs.os }}
       verbose:                                ${{ inputs.verbose == true }}
-      dotnet_sdk_version:                     ${{ inputs.dotnet_sdk_version == '' && '10.0.100' || inputs.dotnet_sdk_version }}
       timeout_minutes_test_job:               10
       timeout_hang:                           "[ {'OS':'windows','Timeout':'6min'}, {'OS':'macos','Timeout':'3min'}, {'OS':'','Timeout':'1min'} ]"
       extra_options_common:                   ${{ inputs.extra_options_common }}
