@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
-namespace Smdn.Devices.Mcp2221A;
+namespace Smdn.Devices.Mcp2221A.Configurations;
 
 internal sealed partial class SramSettings {
   public const int SizeOfSelf = 10;

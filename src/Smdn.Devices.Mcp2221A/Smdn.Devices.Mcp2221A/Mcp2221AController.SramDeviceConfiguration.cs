@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
+using Smdn.Devices.Mcp2221A.Configurations;
+
 namespace Smdn.Devices.Mcp2221A;
 
 #pragma warning disable IDE0040

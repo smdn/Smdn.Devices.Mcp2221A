@@ -9,6 +9,7 @@ using System.Diagnostics;
 
 using Microsoft.Extensions.Logging;
 
+using Smdn.Devices.Mcp2221A.Configurations;
 using Smdn.Devices.Mcp2221A.Transport;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;

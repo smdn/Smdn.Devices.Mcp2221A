@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 using Smdn.Formats.Binary;
 
-namespace Smdn.Devices.Mcp2221A;
+namespace Smdn.Devices.Mcp2221A.Configurations;
 
 #pragma warning disable IDE0040
 partial class SramSettings {

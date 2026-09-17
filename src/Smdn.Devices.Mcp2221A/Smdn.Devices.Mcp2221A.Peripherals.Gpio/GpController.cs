@@ -5,6 +5,7 @@ using System.Device.Gpio;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Smdn.Devices.Mcp2221A.Configurations;
 using Smdn.Formats.Binary;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
