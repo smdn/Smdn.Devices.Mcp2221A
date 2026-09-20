@@ -390,6 +390,7 @@ partial class Mcp2221AController {
       usbHidDeviceFilter: usbHidDeviceFilter,
       cancellationToken: cancellationToken
     );
+    var flashMemoryFactory = GetFlashMemoryFactory(serviceProvider, serviceKey);
 
     IUsbHidDevice? selectedUsbHidDevice = null;
 
@@ -428,9 +429,13 @@ partial class Mcp2221AController {
           if (mcp2221AFilter(info)) {
             selectedUsbHidDevice = mcp2221AUsbHidDevice;
 
+            // TODO: merge implementation of Mcp2221AInfo
+            var flashMemory = flashMemoryFactory.Create();
+
             return await CreateFromInfoAndTransceiverAsync(
               transceiver: transceiver,
               info: info,
+              flashSettings: new(flashMemory, flashMemoryFactory, transceiver),
               logger: logger,
               cancellationToken: cancellationToken
             ).ConfigureAwait(false);
@@ -487,6 +492,7 @@ partial class Mcp2221AController {
       usbHidDeviceFilter: usbHidDeviceFilter,
       cancellationToken: cancellationToken
     );
+    var flashMemoryFactory = GetFlashMemoryFactory(serviceProvider, serviceKey);
 
     IUsbHidDevice? selectedUsbHidDevice = null;
 
@@ -525,9 +531,13 @@ partial class Mcp2221AController {
           if (mcp2221AFilter(info)) {
             selectedUsbHidDevice = mcp2221AUsbHidDevice;
 
+            // TODO: merge implementation of Mcp2221AInfo
+            var flashMemory = flashMemoryFactory.Create();
+
             return CreateFromInfoAndTransceiver(
               transceiver: transceiver,
               info: info,
+              flashSettings: new(flashMemory, flashMemoryFactory, transceiver),
               logger: logger,
               cancellationToken: cancellationToken
             );

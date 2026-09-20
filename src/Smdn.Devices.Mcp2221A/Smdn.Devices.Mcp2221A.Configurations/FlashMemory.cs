@@ -5,6 +5,12 @@ using System;
 namespace Smdn.Devices.Mcp2221A.Configurations;
 
 internal sealed class FlashMemory : IFlashMemory {
+  internal static IFlashMemoryFactory DefaultFactory { get; } = new DefaultFlashMemoryFactory();
+
+  private sealed class DefaultFlashMemoryFactory : IFlashMemoryFactory {
+    public IFlashMemory Create() => new FlashMemory();
+  }
+
   public const int SizeOfChipSettings = 10;
   public const int SizeOfChipSettingsWithPassword = SizeOfChipSettings + LengthOfPassword;
   public const int SizeOfGpSettings = 4;

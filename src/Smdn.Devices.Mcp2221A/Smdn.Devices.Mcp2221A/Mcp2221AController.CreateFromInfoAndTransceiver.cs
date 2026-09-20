@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using Smdn.Devices.Mcp2221A.Configurations;
 using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 using Smdn.Devices.Mcp2221A.Transport;
 
@@ -16,6 +17,7 @@ partial class Mcp2221AController {
   private static async ValueTask<Mcp2221AController> CreateFromInfoAndTransceiverAsync(
     Mcp2221ATransceiver transceiver,
     Mcp2221AInfo info,
+    FlashSettings flashSettings,
     ILogger? logger,
     CancellationToken cancellationToken
   )
@@ -23,6 +25,7 @@ partial class Mcp2221AController {
     var mcp2221A = CreateFromInfoAndTransceiverCore(
       transceiver: transceiver,
       info: info,
+      flashSettings: flashSettings,
       logger: logger,
       cancellationToken: cancellationToken
     );
@@ -37,6 +40,7 @@ partial class Mcp2221AController {
   private static Mcp2221AController CreateFromInfoAndTransceiver(
     Mcp2221ATransceiver transceiver,
     Mcp2221AInfo info,
+    FlashSettings flashSettings,
     ILogger? logger,
     CancellationToken cancellationToken
   )
@@ -44,6 +48,7 @@ partial class Mcp2221AController {
     var mcp2221A = CreateFromInfoAndTransceiverCore(
       transceiver: transceiver,
       info: info,
+      flashSettings: flashSettings,
       logger: logger,
       cancellationToken: cancellationToken
     );
@@ -58,6 +63,7 @@ partial class Mcp2221AController {
   private static Mcp2221AController CreateFromInfoAndTransceiverCore(
     Mcp2221ATransceiver transceiver,
     Mcp2221AInfo info,
+    FlashSettings flashSettings,
     ILogger? logger,
     CancellationToken cancellationToken
   )
@@ -92,6 +98,7 @@ partial class Mcp2221AController {
     return new(
       transceiver: transceiver,
       info: info,
+      flashSettings: flashSettings,
       logger: logger
     );
   }
