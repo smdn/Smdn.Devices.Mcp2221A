@@ -16,7 +16,6 @@ partial class Mcp2221AController {
 #pragma warning restore IDE0040
   private static async ValueTask<Mcp2221AController> CreateFromInfoAndTransceiverAsync(
     Mcp2221ATransceiver transceiver,
-    Mcp2221AInfo info,
     FlashSettings flashSettings,
     ILogger? logger,
     CancellationToken cancellationToken
@@ -24,7 +23,6 @@ partial class Mcp2221AController {
   {
     var mcp2221A = CreateFromInfoAndTransceiverCore(
       transceiver: transceiver,
-      info: info,
       flashSettings: flashSettings,
       logger: logger,
       cancellationToken: cancellationToken
@@ -39,7 +37,6 @@ partial class Mcp2221AController {
 
   private static Mcp2221AController CreateFromInfoAndTransceiver(
     Mcp2221ATransceiver transceiver,
-    Mcp2221AInfo info,
     FlashSettings flashSettings,
     ILogger? logger,
     CancellationToken cancellationToken
@@ -47,7 +44,6 @@ partial class Mcp2221AController {
   {
     var mcp2221A = CreateFromInfoAndTransceiverCore(
       transceiver: transceiver,
-      info: info,
       flashSettings: flashSettings,
       logger: logger,
       cancellationToken: cancellationToken
@@ -62,13 +58,14 @@ partial class Mcp2221AController {
 
   private static Mcp2221AController CreateFromInfoAndTransceiverCore(
     Mcp2221ATransceiver transceiver,
-    Mcp2221AInfo info,
     FlashSettings flashSettings,
     ILogger? logger,
     CancellationToken cancellationToken
   )
   {
     cancellationToken.ThrowIfCancellationRequested();
+
+    IMcp2221AInfo info = flashSettings;
 
     if (logger is { } l && l.IsEnabled(LogLevel.Information)) {
       using var scope = l.BeginScope("Device Information");
@@ -97,7 +94,6 @@ partial class Mcp2221AController {
 
     return new(
       transceiver: transceiver,
-      info: info,
       flashSettings: flashSettings,
       logger: logger
     );

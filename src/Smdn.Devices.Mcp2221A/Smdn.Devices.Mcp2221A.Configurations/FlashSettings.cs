@@ -38,7 +38,7 @@ namespace Smdn.Devices.Mcp2221A.Configurations;
 /// <seealso cref="WriteAsync"/>
 /// <seealso cref="Restore"/>
 [CLSCompliant(false)]
-public sealed partial class FlashSettings {
+public sealed partial class FlashSettings : IMcp2221AInfo {
   private const int OffsetOfUsbVendorId = 4; // USBVIDL/USBVIDH
   private const int OffsetOfUsbProductId = 6; // USBPIDL/USBPIDH
 
@@ -111,15 +111,19 @@ public sealed partial class FlashSettings {
       initialSettings.DiffersFrom(stagedSettings)
     );
 
-  internal FlashSettings(
+  private FlashSettings(
     IFlashMemory initialSettings,
     IFlashMemoryFactory flashMemoryFactory,
-    Mcp2221ATransceiver transceiver
+    Mcp2221ATransceiver transceiver,
+    string hardwareRevision,
+    string firmwareRevision
   )
   {
     this.initialSettings = initialSettings ?? throw new ArgumentNullException(nameof(initialSettings));
     this.flashMemoryFactory = flashMemoryFactory ?? throw new ArgumentNullException(nameof(flashMemoryFactory));
     this.transceiver = transceiver ?? throw new ArgumentNullException(nameof(transceiver));
+    this.hardwareRevision = hardwareRevision ?? throw new ArgumentNullException(nameof(hardwareRevision));
+    this.firmwareRevision = firmwareRevision ?? throw new ArgumentNullException(nameof(firmwareRevision));
   }
 
   /// <summary>

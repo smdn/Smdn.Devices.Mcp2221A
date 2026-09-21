@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using Smdn.Devices.Mcp2221A.Configurations;
 using Smdn.Devices.Mcp2221A.DependencyInjection;
 using Smdn.Devices.Mcp2221A.Transport;
 using Smdn.IO.UsbHid;
@@ -418,30 +419,32 @@ partial class Mcp2221AController {
           );
 #pragma warning restore CA2000
 
-          var info = await Mcp2221AInfo.ReadFromAsync(
-            transceiver,
-            cancellationToken
+          var flashSettings = await FlashSettings.ReadFromAsync(
+            transceiver: transceiver,
+            flashMemoryFactory: GetFlashMemoryFactory(serviceProvider, serviceKey),
+            cancellationToken: cancellationToken
           ).ConfigureAwait(false);
 
-          if (logger is { } log && log.IsEnabled(LogLevel.Debug))
-            LogDebugEvaluateMcp2221AInfo(log, info);
+          if (logger is { } log && log.IsEnabled(LogLevel.Debug)) {
+#pragma warning disable CA1873
+            LogDebugEvaluateMcp2221AInfo(log, flashSettings.ToMcp2221AInfoString());
+#pragma warning restore CA1873
+          }
 
-          if (mcp2221AFilter(info)) {
+          if (mcp2221AFilter(flashSettings)) {
             selectedUsbHidDevice = mcp2221AUsbHidDevice;
-
-            // TODO: merge implementation of Mcp2221AInfo
-            var flashMemory = flashMemoryFactory.Create();
 
             return await CreateFromInfoAndTransceiverAsync(
               transceiver: transceiver,
-              info: info,
-              flashSettings: new(flashMemory, flashMemoryFactory, transceiver),
+              flashSettings: flashSettings,
               logger: logger,
               cancellationToken: cancellationToken
             ).ConfigureAwait(false);
           }
           else if (logger is { } l && l.IsEnabled(LogLevel.Debug)) {
-            LogDebugMcp2221AInfoNotMatched(l, info);
+#pragma warning disable CA1873
+            LogDebugMcp2221AInfoNotMatched(l, flashSettings.ToMcp2221AInfoString());
+#pragma warning restore CA1873
           }
 
           if (transceiver is not null)
@@ -520,30 +523,32 @@ partial class Mcp2221AController {
           );
 #pragma warning restore CA2000
 
-          var info = Mcp2221AInfo.ReadFrom(
-            transceiver,
-            cancellationToken
+          var flashSettings = FlashSettings.ReadFrom(
+            transceiver: transceiver,
+            flashMemoryFactory: GetFlashMemoryFactory(serviceProvider, serviceKey),
+            cancellationToken: cancellationToken
           );
 
-          if (logger is { } log && log.IsEnabled(LogLevel.Debug))
-            LogDebugEvaluateMcp2221AInfo(log, info);
+          if (logger is { } log && log.IsEnabled(LogLevel.Debug)) {
+#pragma warning disable CA1873
+            LogDebugEvaluateMcp2221AInfo(log, flashSettings.ToMcp2221AInfoString());
+#pragma warning restore CA1873
+          }
 
-          if (mcp2221AFilter(info)) {
+          if (mcp2221AFilter(flashSettings)) {
             selectedUsbHidDevice = mcp2221AUsbHidDevice;
-
-            // TODO: merge implementation of Mcp2221AInfo
-            var flashMemory = flashMemoryFactory.Create();
 
             return CreateFromInfoAndTransceiver(
               transceiver: transceiver,
-              info: info,
-              flashSettings: new(flashMemory, flashMemoryFactory, transceiver),
+              flashSettings: flashSettings,
               logger: logger,
               cancellationToken: cancellationToken
             );
           }
           else if (logger is { } l && l.IsEnabled(LogLevel.Debug)) {
-            LogDebugMcp2221AInfoNotMatched(l, info);
+#pragma warning disable CA1873
+            LogDebugMcp2221AInfoNotMatched(l, flashSettings.ToMcp2221AInfoString());
+#pragma warning restore CA1873
           }
 
           transceiver?.Dispose();
@@ -591,7 +596,7 @@ partial class Mcp2221AController {
     Level = LogLevel.Debug,
     Message = "Evaluating filter criteria: ({Mcp2221AInfo})"
   )]
-  private static partial void LogDebugEvaluateMcp2221AInfo(ILogger logger, Mcp2221AInfo mcp2221AInfo);
+  private static partial void LogDebugEvaluateMcp2221AInfo(ILogger logger, string mcp2221AInfo);
 
   [LoggerMessage(
     EventId = 7,
@@ -599,5 +604,5 @@ partial class Mcp2221AController {
     Level = LogLevel.Debug,
     Message = "Filter criteria dit not match: ({Mcp2221AInfo})"
   )]
-  private static partial void LogDebugMcp2221AInfoNotMatched(ILogger logger, Mcp2221AInfo mcp2221AInfo);
+  private static partial void LogDebugMcp2221AInfoNotMatched(ILogger logger, string mcp2221AInfo);
 }

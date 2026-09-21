@@ -397,19 +397,15 @@ partial class Mcp2221AController {
         logger: logger
       );
 #pragma warning restore CA2000
-      var info = await Mcp2221AInfo.ReadFromAsync(
+      var flashSettings = await FlashSettings.ReadFromAsync(
         transceiver: transceiver,
+        flashMemoryFactory: GetFlashMemoryFactory(serviceProvider, serviceKey),
         cancellationToken: cancellationToken
       ).ConfigureAwait(false);
 
-      // TODO: merge implementation of Mcp2221AInfo
-      var flashMemoryFactory = GetFlashMemoryFactory(serviceProvider, serviceKey);
-      var flashMemory = flashMemoryFactory.Create();
-
       return await CreateFromInfoAndTransceiverAsync(
         transceiver: transceiver,
-        info: info,
-        flashSettings: new(flashMemory, flashMemoryFactory, transceiver),
+        flashSettings: flashSettings,
         logger: logger,
         cancellationToken: cancellationToken
       ).ConfigureAwait(false);
@@ -453,19 +449,15 @@ partial class Mcp2221AController {
         logger: logger
       );
 #pragma warning restore CA2000
-      var info = Mcp2221AInfo.ReadFrom(
+      var flashSettings = FlashSettings.ReadFrom(
         transceiver: transceiver,
+        flashMemoryFactory: GetFlashMemoryFactory(serviceProvider, serviceKey),
         cancellationToken: cancellationToken
       );
 
-      // TODO: merge implementation of Mcp2221AInfo
-      var flashMemoryFactory = GetFlashMemoryFactory(serviceProvider, serviceKey);
-      var flashMemory = flashMemoryFactory.Create();
-
       return CreateFromInfoAndTransceiver(
         transceiver: transceiver,
-        info: info,
-        flashSettings: new(flashMemory, flashMemoryFactory, transceiver),
+        flashSettings: flashSettings,
         logger: logger,
         cancellationToken: cancellationToken
       );

@@ -1,19 +1,16 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 using System;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Smdn.Devices.Mcp2221A.Transport;
 
-namespace Smdn.Devices.Mcp2221A;
+namespace Smdn.Devices.Mcp2221A.Configurations;
 
-/// <summary>
-/// Represents the information set on the MCP2221/MCP2221A or
-/// stored in its flash memory.
-/// </summary>
-internal sealed class Mcp2221AInfo : IMcp2221AInfo {
+#pragma warning disable IDE0040
+partial class FlashSettings {
+#pragma warning restore IDE0040
   private static class RetrieveRevisionCommand {
 #pragma warning disable SA1313 // [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
     public static void ConstructCommand(Span<byte> comm, None _)
@@ -45,7 +42,10 @@ internal sealed class Mcp2221AInfo : IMcp2221AInfo {
   }
 
   private static class RetrieveFlashStringCommand {
-    public static void ConstructCommand(Span<byte> comm, ReadFlashDataSubCode subCode)
+    public static void ConstructCommand(
+      Span<byte> comm,
+      (IFlashMemory Memory, ReadFlashDataSubCode SubCode) arg
+    )
     {
       // [MCP2221A] 3.1.2 READ FLASH DATA
       comm[0] = 0xB0; // Read Flash Data
@@ -55,46 +55,24 @@ internal sealed class Mcp2221AInfo : IMcp2221AInfo {
       // 0x03: Read USB Product Descriptor String
       // 0x04: Read USB Serial Number Descriptor String
       // 0x05: Read Chip Factory Serial Number
-      comm[1] = (byte)subCode;
+      comm[1] = (byte)arg.SubCode;
     }
 
-    public static string ParseResponse(ReadOnlySpan<byte> resp, ReadFlashDataSubCode subCode)
+    public static bool ParseResponse(
+      ReadOnlySpan<byte> resp,
+      (IFlashMemory Memory, ReadFlashDataSubCode SubCode) arg
+    )
     {
+      var (memory, subCode) = arg;
+
       if (subCode == ReadFlashDataSubCode.ChipFactorySerialNumber) {
-        var lengthInBytes = (int)resp[2];
-        // If lengthInBytes is invalid, an ArgumentException is thrown, so
+        memory.ChipFactorySerialNumberLength = resp[2];
+
+        // If length is invalid, an ArgumentException is thrown, so
         // an out-of-bounds reference does not occur.
-        var bytes = resp.Slice(4, lengthInBytes);
-
-#if SYSTEM_STRING_CREATE_OF_TSTATE_ALLOWS_REF_STRUCT
-        return string.Create(
-          bytes.Length,
-          bytes,
-          static (s, by) => {
-            for (var i = 0; i < s.Length; i++) {
-              s[i] = (char)by[i];
-            }
-          }
-        );
-#else
-        Span<char> serialNumberChars = stackalloc char[bytes.Length];
-
-        for (var i = 0; i < bytes.Length; i++) {
-          serialNumberChars[i] = (char)bytes[i];
-        }
-
-#pragma warning disable SA1114
-        return new string(
-#if SYSTEM_STRING_CTOR_READONLYSPAN_OF_CHAR
-          serialNumberChars
-#else
-          serialNumberChars.ToArray(),
-          0,
-          serialNumberChars.Length
-#endif
-        );
-#pragma warning restore SA1114
-#endif
+        resp
+          .Slice(4, memory.ChipFactorySerialNumberLength)
+          .CopyTo(memory.ChipFactorySerialNumber);
       }
       else {
         // 0x02: The number of bytes + 2 in the provided USB Manufacturer/Product/Serial Number Descriptor String.
@@ -103,23 +81,36 @@ internal sealed class Mcp2221AInfo : IMcp2221AInfo {
         // an out-of-bounds reference does not occur.
         var bytes = resp.Slice(4, lengthInBytes);
 
-#pragma warning disable SA1114
-        return Encoding.Unicode.GetString(
-#if SYSTEM_TEXT_ENCODING_GETSTRING_READONLYSPAN_OF_BYTE
-          bytes
-#else
-          bytes.ToArray(),
-          0,
-          bytes.Length
-#endif
-        );
-#pragma warning restore SA1114
+        switch (subCode) {
+          case ReadFlashDataSubCode.UsbDescriptorStringManufacturer:
+            memory.UsbManufacturerDescriptorStringLength = lengthInBytes;
+            bytes.CopyTo(memory.UsbManufacturerDescriptorString);
+            break;
+
+          case ReadFlashDataSubCode.UsbDescriptorStringProduct:
+            memory.UsbProductDescriptorStringLength = lengthInBytes;
+            bytes.CopyTo(memory.UsbProductDescriptorString);
+            break;
+
+          case ReadFlashDataSubCode.UsbDescriptorStringSerialNumber:
+            memory.UsbSerialNumberDescriptorStringLength = lengthInBytes;
+            bytes.CopyTo(memory.UsbSerialNumberDescriptorString);
+            break;
+
+          default:
+            throw new InvalidOperationException(); // this should not happen
+        }
       }
+
+      // [MCP2221A] 3.1.2 READ FLASH DATA
+      // Command responses other than 0x00 are not defined.
+      return resp[1] == 0x00;
     }
   }
 
-  internal static async ValueTask<Mcp2221AInfo> ReadFromAsync(
+  internal static async ValueTask<FlashSettings> ReadFromAsync(
     Mcp2221ATransceiver transceiver,
+    IFlashMemoryFactory flashMemoryFactory,
     CancellationToken cancellationToken
   )
   {
@@ -129,46 +120,48 @@ internal sealed class Mcp2221AInfo : IMcp2221AInfo {
       parseResponse: RetrieveRevisionCommand.ParseResponse
     ).ConfigureAwait(false);
 
-    var manufacturerDescriptor = await transceiver.CommandAsync(
-      arg: ReadFlashDataSubCode.UsbDescriptorStringManufacturer,
+    var memory = flashMemoryFactory.Create();
+
+    _ = await transceiver.CommandAsync(
+      arg: (memory, ReadFlashDataSubCode.UsbDescriptorStringManufacturer),
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     ).ConfigureAwait(false);
 
-    var productDescriptor = await transceiver.CommandAsync(
-      arg: ReadFlashDataSubCode.UsbDescriptorStringProduct,
+    _ = await transceiver.CommandAsync(
+      arg: (memory, ReadFlashDataSubCode.UsbDescriptorStringProduct),
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     ).ConfigureAwait(false);
 
-    var serialNumberDescriptor = await transceiver.CommandAsync(
-      arg: ReadFlashDataSubCode.UsbDescriptorStringSerialNumber,
+    _ = await transceiver.CommandAsync(
+      arg: (memory, ReadFlashDataSubCode.UsbDescriptorStringSerialNumber),
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     ).ConfigureAwait(false);
 
-    var chipFactorySerialNumber = await transceiver.CommandAsync(
-      arg: ReadFlashDataSubCode.ChipFactorySerialNumber,
+    _ = await transceiver.CommandAsync(
+      arg: (memory, ReadFlashDataSubCode.ChipFactorySerialNumber),
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     ).ConfigureAwait(false);
 
     return new(
+      initialSettings: memory,
+      flashMemoryFactory: flashMemoryFactory,
+      transceiver: transceiver,
       hardwareRevision: hardwareRevision,
-      firmwareRevision: firmwareRevision,
-      manufacturer: manufacturerDescriptor,
-      product: productDescriptor,
-      serialNumber: serialNumberDescriptor,
-      chipFactorySerialNumber: chipFactorySerialNumber
+      firmwareRevision: firmwareRevision
     );
   }
 
-  internal static Mcp2221AInfo ReadFrom(
+  internal static FlashSettings ReadFrom(
     Mcp2221ATransceiver transceiver,
+    IFlashMemoryFactory flashMemoryFactory,
     CancellationToken cancellationToken
   )
   {
@@ -178,83 +171,42 @@ internal sealed class Mcp2221AInfo : IMcp2221AInfo {
       parseResponse: RetrieveRevisionCommand.ParseResponse
     );
 
-    var manufacturerDescriptor = transceiver.Command(
-      arg: ReadFlashDataSubCode.UsbDescriptorStringManufacturer,
+    var memory = flashMemoryFactory.Create();
+
+    _ = transceiver.Command(
+      arg: (memory, ReadFlashDataSubCode.UsbDescriptorStringManufacturer),
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     );
 
-    var productDescriptor = transceiver.Command(
-      arg: ReadFlashDataSubCode.UsbDescriptorStringProduct,
+    _ = transceiver.Command(
+      arg: (memory, ReadFlashDataSubCode.UsbDescriptorStringProduct),
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     );
 
-    var serialNumberDescriptor = transceiver.Command(
-      arg: ReadFlashDataSubCode.UsbDescriptorStringSerialNumber,
+    _ = transceiver.Command(
+      arg: (memory, ReadFlashDataSubCode.UsbDescriptorStringSerialNumber),
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     );
 
-    var chipFactorySerialNumber = transceiver.Command(
-      arg: ReadFlashDataSubCode.ChipFactorySerialNumber,
+    _ = transceiver.Command(
+      arg: (memory, ReadFlashDataSubCode.ChipFactorySerialNumber),
       cancellationToken: cancellationToken,
       constructCommand: RetrieveFlashStringCommand.ConstructCommand,
       parseResponse: RetrieveFlashStringCommand.ParseResponse
     );
 
     return new(
+      initialSettings: memory,
+      flashMemoryFactory: flashMemoryFactory,
+      transceiver: transceiver,
       hardwareRevision: hardwareRevision,
-      firmwareRevision: firmwareRevision,
-      manufacturer: manufacturerDescriptor,
-      product: productDescriptor,
-      serialNumber: serialNumberDescriptor,
-      chipFactorySerialNumber: chipFactorySerialNumber
+      firmwareRevision: firmwareRevision
     );
   }
-
-  /*
-   * instance members
-   */
-
-  /// <inheritdoc/>
-  public string HardwareRevision { get; init; }
-
-  /// <inheritdoc/>
-  public string FirmwareRevision { get; init; }
-
-  /// <inheritdoc/>
-  public string Manufacturer { get; init; }
-
-  /// <inheritdoc/>
-  public string Product { get; init; }
-
-  /// <inheritdoc/>
-  public string SerialNumber { get; init; }
-
-  /// <inheritdoc/>
-  public string ChipFactorySerialNumber { get; init; }
-
-  private Mcp2221AInfo(
-    string hardwareRevision,
-    string firmwareRevision,
-    string manufacturer,
-    string product,
-    string serialNumber,
-    string chipFactorySerialNumber
-  )
-  {
-    HardwareRevision = hardwareRevision;
-    FirmwareRevision = firmwareRevision;
-    Manufacturer = manufacturer;
-    Product = product;
-    SerialNumber = serialNumber;
-    ChipFactorySerialNumber = chipFactorySerialNumber;
-  }
-
-  public override string? ToString()
-    => $"{{{nameof(HardwareRevision)}='{HardwareRevision}', {nameof(FirmwareRevision)}='{FirmwareRevision}', {nameof(Manufacturer)}='{Manufacturer}', {nameof(Product)}='{Product}', {nameof(SerialNumber)}='{SerialNumber}', {nameof(ChipFactorySerialNumber)}='{ChipFactorySerialNumber}'}}";
 }

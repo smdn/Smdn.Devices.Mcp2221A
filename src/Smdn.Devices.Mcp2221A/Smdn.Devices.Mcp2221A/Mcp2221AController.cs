@@ -313,14 +313,13 @@ public sealed partial class Mcp2221AController :
 
   private Mcp2221AController(
     Mcp2221ATransceiver transceiver,
-    IMcp2221AInfo info,
     FlashSettings flashSettings,
     ILogger? logger
   )
   {
     this.transceiver = transceiver ?? throw new ArgumentNullException(nameof(transceiver));
-    this.info = info ?? throw new ArgumentNullException(nameof(info));
     Flash = flashSettings ?? throw new ArgumentNullException(nameof(flashSettings));
+    info = flashSettings;
 
     gpioDriver = new(
       transceiver: transceiver,
