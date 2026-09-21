@@ -28,6 +28,10 @@ partial class Mcp2221AController {
       cancellationToken: cancellationToken
     );
 
+    await mcp2221A.Flash.ReadChipAndGpSettingsAsync(
+      cancellationToken: cancellationToken
+    ).ConfigureAwait(false);
+
     mcp2221A.SramDeviceConfiguration = await ((Mcp2221AGpioDriver)mcp2221A.GpPins).FetchSramSettingsAsync(
       cancellationToken: cancellationToken
     ).ConfigureAwait(false);
@@ -46,6 +50,10 @@ partial class Mcp2221AController {
       transceiver: transceiver,
       flashSettings: flashSettings,
       logger: logger,
+      cancellationToken: cancellationToken
+    );
+
+    mcp2221A.Flash.ReadChipAndGpSettings(
       cancellationToken: cancellationToken
     );
 

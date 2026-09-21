@@ -18,6 +18,16 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 /// </list>
 /// </remarks>
 public sealed class Gp0Controller : GpController {
+  internal static GpFunction TranslateDesignation(GpDesignation designation, bool throwIfUnsupported)
+    => designation switch {
+      GpDesignation.GpioOperation => GpFunction.Gpio, // GPIO
+      GpDesignation.DedicatedFunctionOperation => GpFunction.UsbSuspendStatus, // SSPND
+      GpDesignation.AlternateFunction0 => GpFunction.LedOutput, // LED_URX
+      var unsupported => throwIfUnsupported
+        ? throw CreateUnsupportedGpDesignationException(gpIndex: 0, unsupported)
+        : GpFunction.LedOutput, // LED_URX (factory default)
+    };
+
   /// <inheritdoc/>
   /// <value>
   /// Always <c>0</c>.
@@ -31,12 +41,8 @@ public sealed class Gp0Controller : GpController {
   public override string PinName { get; } = "GP0";
 
   /// <inheritdoc/>
-  public override GpFunction CurrentFunction => CurrentGpDesignation switch {
-    GpDesignation.GpioOperation => GpFunction.Gpio, // GPIO
-    GpDesignation.DedicatedFunctionOperation => GpFunction.UsbSuspendStatus, // SSPND
-    GpDesignation.AlternateFunction0 => GpFunction.LedOutput, // LED_URX
-    var unsupported => throw CreateUnsupportedGpDesignationException(Index, unsupported),
-  };
+  public override GpFunction CurrentFunction
+    => TranslateDesignation(CurrentGpDesignation, throwIfUnsupported: true);
 
   /// <inheritdoc/>
   public override string CurrentDesignation => CurrentGpDesignation switch {

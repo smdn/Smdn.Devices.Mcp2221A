@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
+using Smdn.Devices.Mcp2221A.Configurations;
+
 namespace Smdn.Devices.Mcp2221A;
 
 /// <summary>
@@ -30,32 +32,30 @@ internal readonly struct SramDeviceConfiguration(
   /// Gets a value indicating whether the CDC serial number enumeration is enabled.
   /// </summary>
   public bool UsbCdcSerialNumberEnabled
-    => (chipSetting0 & 0b_1_00000_00) != 0;
+    => RegisterUtils.ReadUsbCdcSerialNumberEnabled(chipSetting0);
 
   /// <summary>
   /// Gets the protection level applied to the Flash memory configuration areas.
   /// </summary>
   public DeviceConfigurationProtectionLevel FlashWriteProtection
-    => (DeviceConfigurationProtectionLevel)(chipSetting0 & 0b_0_00000_11);
+    => RegisterUtils.ReadFlashWriteProtection(chipSetting0);
 
   /// <summary>
   /// Gets the USB power configuration mode (Bus-powered or Self-powered).
   /// </summary>
   public UsbPowerMode UsbPowerMode
-    => (usbPowerAttributes & 0b_0_1_0_00000) == 0
-      ? UsbPowerMode.BusPowered
-      : UsbPowerMode.SelfPowered;
+    => RegisterUtils.ReadUsbPowerMode(usbPowerAttributes);
 
   /// <summary>
   /// Gets a value indicating whether the Remote Wake-Up capability is enabled.
   /// </summary>
   public bool UsbRemoteWakeUpEnabled
-    => (usbPowerAttributes & 0b_0_0_1_00000) != 0;
+    => RegisterUtils.ReadUsbRemoteWakeUpEnabled(usbPowerAttributes);
 
   /// <summary>
   /// Gets the maximum amount of current requested from the USB bus,
   /// expressed in milliamperes (mA).
   /// </summary>
   public int UsbRequestedCurrentAmount
-    => usbRequiredCurrent << 1;
+    => RegisterUtils.ReadUsbRequestedCurrentAmount(usbRequiredCurrent);
 }

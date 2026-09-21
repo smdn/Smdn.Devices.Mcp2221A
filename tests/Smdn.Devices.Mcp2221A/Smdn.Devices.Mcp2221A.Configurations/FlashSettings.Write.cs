@@ -13,9 +13,13 @@ partial class FlashSettingsTests {
   public void ModifyUsbVendorId(int vendorId)
   {
     var stagedFlashMemory = new FlashMemory();
+    var initialProductId = ~vendorId;
 
     using var mcp2221A = CreateWithAllocatedFlashMemory(
-      Mcp2221AControllerTests.CreatePseudoDevice(),
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        usbVidHigherByte: (byte)((initialProductId & 0xFF00) >> 8),
+        usbVidLowerByte: (byte)(initialProductId & 0xFF)
+      ),
       new FlashMemory(),
       stagedFlashMemory
     );
@@ -43,9 +47,13 @@ partial class FlashSettingsTests {
   public void ModifyUsbProductId(int productId)
   {
     var stagedFlashMemory = new FlashMemory();
+    var initialProductId = ~productId;
 
     using var mcp2221A = CreateWithAllocatedFlashMemory(
-      Mcp2221AControllerTests.CreatePseudoDevice(),
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        usbPidHigherByte: (byte)((initialProductId & 0xFF00) >> 8),
+        usbPidLowerByte: (byte)(initialProductId & 0xFF)
+      ),
       new FlashMemory(),
       stagedFlashMemory
     );

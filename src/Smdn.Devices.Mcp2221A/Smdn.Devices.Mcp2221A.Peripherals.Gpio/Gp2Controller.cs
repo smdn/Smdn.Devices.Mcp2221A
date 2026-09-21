@@ -25,6 +25,17 @@ public sealed class Gp2Controller :
   IDacController
 {
 #pragma warning restore IDE0055
+  internal static GpFunction TranslateDesignation(GpDesignation designation, bool throwIfUnsupported)
+    => designation switch {
+      GpDesignation.GpioOperation => GpFunction.Gpio, // GPIO
+      GpDesignation.DedicatedFunctionOperation => GpFunction.UsbConfigureStatus, // USBCFG
+      GpDesignation.AlternateFunction0 => GpFunction.Adc, // ADC2
+      GpDesignation.AlternateFunction1 => GpFunction.Dac, // DAC1
+      var unsupported => throwIfUnsupported
+        ? throw CreateUnsupportedGpDesignationException(gpIndex: 2, unsupported)
+        : GpFunction.UsbConfigureStatus, // USBCFG (factory default)
+    };
+
   /// <inheritdoc/>
   /// <value>
   /// Always <c>2</c>.
@@ -37,13 +48,8 @@ public sealed class Gp2Controller :
   public override string PinName { get; } = "GP2";
 
   /// <inheritdoc/>
-  public override GpFunction CurrentFunction => CurrentGpDesignation switch {
-    GpDesignation.GpioOperation => GpFunction.Gpio, // GPIO
-    GpDesignation.DedicatedFunctionOperation => GpFunction.UsbConfigureStatus, // USBCFG
-    GpDesignation.AlternateFunction0 => GpFunction.Adc, // ADC2
-    GpDesignation.AlternateFunction1 => GpFunction.Dac, // DAC1
-    var unsupported => throw CreateUnsupportedGpDesignationException(Index, unsupported),
-  };
+  public override GpFunction CurrentFunction
+    => TranslateDesignation(CurrentGpDesignation, throwIfUnsupported: true);
 
   /// <inheritdoc/>
   public override string CurrentDesignation => CurrentGpDesignation switch {

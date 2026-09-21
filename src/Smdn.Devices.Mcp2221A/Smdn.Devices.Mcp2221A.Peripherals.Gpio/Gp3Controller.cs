@@ -25,6 +25,17 @@ public sealed class Gp3Controller :
   IDacController
 {
 #pragma warning restore IDE0055
+  internal static GpFunction TranslateDesignation(GpDesignation designation, bool throwIfUnsupported)
+    => designation switch {
+      GpDesignation.GpioOperation => GpFunction.Gpio, // GPIO
+      GpDesignation.DedicatedFunctionOperation => GpFunction.LedOutput, // LED_I2C
+      GpDesignation.AlternateFunction0 => GpFunction.Adc, // ADC3
+      GpDesignation.AlternateFunction1 => GpFunction.Dac, // DAC2
+      var unsupported => throwIfUnsupported
+        ? throw CreateUnsupportedGpDesignationException(gpIndex: 3, unsupported)
+        : GpFunction.LedOutput, // LED_I2C (factory default)
+    };
+
   /// <inheritdoc/>
   /// <value>
   /// Always <c>3</c>.
@@ -37,13 +48,8 @@ public sealed class Gp3Controller :
   public override string PinName { get; } = "GP3";
 
   /// <inheritdoc/>
-  public override GpFunction CurrentFunction => CurrentGpDesignation switch {
-    GpDesignation.GpioOperation => GpFunction.Gpio, // GPIO
-    GpDesignation.DedicatedFunctionOperation => GpFunction.LedOutput, // LED_I2C
-    GpDesignation.AlternateFunction0 => GpFunction.Adc, // ADC3
-    GpDesignation.AlternateFunction1 => GpFunction.Dac, // DAC2
-    var unsupported => throw CreateUnsupportedGpDesignationException(Index, unsupported),
-  };
+  public override GpFunction CurrentFunction
+    => TranslateDesignation(CurrentGpDesignation, throwIfUnsupported: true);
 
   /// <inheritdoc/>
   public override string CurrentDesignation => CurrentGpDesignation switch {

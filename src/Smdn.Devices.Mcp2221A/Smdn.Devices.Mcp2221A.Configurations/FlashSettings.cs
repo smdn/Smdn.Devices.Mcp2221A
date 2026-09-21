@@ -39,8 +39,15 @@ namespace Smdn.Devices.Mcp2221A.Configurations;
 /// <seealso cref="Restore"/>
 [CLSCompliant(false)]
 public sealed partial class FlashSettings : IMcp2221AInfo {
+  private const int OffsetOfChipSetting0 = 0; // CHIPSETTING0
+  private const int OffsetOfChipSetting1 = 1; // CHIPSETTING1
+  private const int OffsetOfChipSetting2 = 2; // CHIPSETTING2
+  private const int OffsetOfChipSetting3 = 3; // CHIPSETTING3
+
   private const int OffsetOfUsbVendorId = 4; // USBVIDL/USBVIDH
   private const int OffsetOfUsbProductId = 6; // USBPIDL/USBPIDH
+  private const int OffsetOfUsbPowerAttributes = 8; // USBPWRATTR
+  private const int OffsetOfUsbRequiredCurrent = 9; // USBREQCRT
 
   private readonly IFlashMemory initialSettings;
   private readonly IFlashMemoryFactory flashMemoryFactory;

@@ -33,6 +33,58 @@ partial class FlashSettings {
       );
   }
 
+  private static class RetrieveFlashChipSettingsCommand {
+#pragma warning disable SA1313 // [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
+    public static void ConstructCommand(Span<byte> comm, IFlashMemory _)
+#pragma warning restore SA1313 // [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
+    {
+      // [MCP2221A] 3.1.2 READ FLASH DATA
+      comm[0] = 0xB0; // Read Flash Data
+
+      // Read Flash Data Sub Code
+      // 0x00: Read Chip Settings
+      comm[1] = 0x00;
+    }
+
+    public static bool ParseResponse(ReadOnlySpan<byte> resp, IFlashMemory memory)
+    {
+      // [4-13]: Chip Settings
+      resp
+        .Slice(4, FlashMemory.SizeOfChipSettings)
+        .CopyTo(memory.ChipSettings);
+
+      // [MCP2221A] 3.1.2 READ FLASH DATA
+      // Command responses other than 0x00 are not defined.
+      return resp[1] == 0x00;
+    }
+  }
+
+  private static class RetrieveFlashGpSettingsCommand {
+#pragma warning disable SA1313 // [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
+    public static void ConstructCommand(Span<byte> comm, IFlashMemory _)
+#pragma warning restore SA1313 // [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
+    {
+      // [MCP2221A] 3.1.2 READ FLASH DATA
+      comm[0] = 0xB0; // Read Flash Data
+
+      // Read Flash Data Sub Code
+      // 0x01: Read GP Settings
+      comm[1] = 0x01;
+    }
+
+    public static bool ParseResponse(ReadOnlySpan<byte> resp, IFlashMemory memory)
+    {
+      // [4-7]: GP0-3 Power-Up Settings
+      resp
+        .Slice(4, FlashMemory.SizeOfGpSettings)
+        .CopyTo(memory.GpSettings);
+
+      // [MCP2221A] 3.1.2 READ FLASH DATA
+      // Command responses other than 0x00 are not defined.
+      return resp[1] == 0x00;
+    }
+  }
+
   // [MCP2221A] 3.1.2 READ FLASH DATA
   private enum ReadFlashDataUsbDescriptorStringSubCode : byte {
     Manufacturer = 0x02,
@@ -223,6 +275,44 @@ partial class FlashSettings {
       transceiver: transceiver,
       hardwareRevision: hardwareRevision,
       firmwareRevision: firmwareRevision
+    );
+  }
+
+  internal async ValueTask ReadChipAndGpSettingsAsync(
+    CancellationToken cancellationToken
+  )
+  {
+    _ = await transceiver.CommandAsync(
+      arg: initialSettings,
+      cancellationToken: cancellationToken,
+      constructCommand: RetrieveFlashChipSettingsCommand.ConstructCommand,
+      parseResponse: RetrieveFlashChipSettingsCommand.ParseResponse
+    ).ConfigureAwait(false);
+
+    _ = await transceiver.CommandAsync(
+      arg: initialSettings,
+      cancellationToken: cancellationToken,
+      constructCommand: RetrieveFlashGpSettingsCommand.ConstructCommand,
+      parseResponse: RetrieveFlashGpSettingsCommand.ParseResponse
+    ).ConfigureAwait(false);
+  }
+
+  internal void ReadChipAndGpSettings(
+    CancellationToken cancellationToken
+  )
+  {
+    _ = transceiver.Command(
+      arg: initialSettings,
+      cancellationToken: cancellationToken,
+      constructCommand: RetrieveFlashChipSettingsCommand.ConstructCommand,
+      parseResponse: RetrieveFlashChipSettingsCommand.ParseResponse
+    );
+
+    _ = transceiver.Command(
+      arg: initialSettings,
+      cancellationToken: cancellationToken,
+      constructCommand: RetrieveFlashGpSettingsCommand.ConstructCommand,
+      parseResponse: RetrieveFlashGpSettingsCommand.ParseResponse
     );
   }
 }
