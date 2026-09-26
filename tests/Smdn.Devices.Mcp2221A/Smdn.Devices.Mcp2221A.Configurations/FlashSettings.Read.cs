@@ -618,7 +618,7 @@ partial class FlashSettingsTests {
       Is.True
     );
     Assert.That(charsWritten, Is.EqualTo(manufacturer.Length));
-    Assert.That(new string(buffer.AsSpan(0, charsWritten)), Is.EqualTo(manufacturer));
+    Assert.That(new string(buffer, 0, charsWritten), Is.EqualTo(manufacturer));
   }
 
   [TestCase("Microchip Technology Inc.")] // factory default
@@ -671,7 +671,7 @@ partial class FlashSettingsTests {
       Is.True
     );
     Assert.That(charsWritten, Is.EqualTo(product.Length));
-    Assert.That(new string(buffer.AsSpan(0, charsWritten)), Is.EqualTo(product));
+    Assert.That(new string(buffer, 0, charsWritten), Is.EqualTo(product));
   }
 
   [TestCase("MCP2221 USB-I2C/UART Combo")] // factory default
@@ -723,7 +723,7 @@ partial class FlashSettingsTests {
       Is.True
     );
     Assert.That(charsWritten, Is.EqualTo(serialNumber.Length));
-    Assert.That(new string(buffer.AsSpan(0, charsWritten)), Is.EqualTo(serialNumber));
+    Assert.That(new string(buffer, 0, charsWritten), Is.EqualTo(serialNumber));
   }
 
   [TestCase("Serial Number")]
@@ -774,7 +774,7 @@ partial class FlashSettingsTests {
       Is.True
     );
     Assert.That(charsWritten, Is.EqualTo(chipFactorySerialNumber.Length));
-    Assert.That(new string(buffer.AsSpan(0, charsWritten)), Is.EqualTo(chipFactorySerialNumber));
+    Assert.That(new string(buffer, 0, charsWritten), Is.EqualTo(chipFactorySerialNumber));
   }
 
   [TestCase("01234567")] // factory default
