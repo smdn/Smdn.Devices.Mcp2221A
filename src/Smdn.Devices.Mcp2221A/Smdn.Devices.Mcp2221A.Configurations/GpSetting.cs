@@ -16,6 +16,16 @@ namespace Smdn.Devices.Mcp2221A.Configurations;
 /// </summary>
 [CLSCompliant(false)]
 public readonly struct GpSetting : IEquatable<GpSetting> {
+  private const byte DesignationMask = (byte)GpDesignation.BitMask;
+
+  internal const byte GpioOutputValueBitMask = 0b_000_1_0_000;
+  internal const byte GpioOutputValueBitLow = 0b_000_0_0_000;
+  internal const byte GpioOutputValueBitHigh = GpioOutputValueBitMask;
+
+  internal const byte GpioDirectionBitMask = 0b_000_0_1_000;
+  internal const byte GpioDirectionBitOutput = 0b_000_0_0_000;
+  internal const byte GpioDirectionBitInput = GpioDirectionBitMask;
+
   private readonly byte index;
   private readonly byte registerValue;
 
@@ -42,7 +52,7 @@ public readonly struct GpSetting : IEquatable<GpSetting> {
   /// inspecting the raw value actually written.
   /// </remarks>
   /// <seealso cref="Function"/>
-  public byte Designation => (byte)(registerValue & 0b_000_0_0_111);
+  public byte Designation => (byte)(registerValue & DesignationMask);
 
   /// <summary>
   /// Gets the function assigned to the GP pin.
@@ -101,7 +111,9 @@ public readonly struct GpSetting : IEquatable<GpSetting> {
   /// <seealso cref="Function"/>
   /// <seealso cref="GpioOutputValue"/>
   public PinMode GpioMode
-    => (registerValue & 0b_000_0_1_000) != 0 ? PinMode.Input : PinMode.Output;
+    => (registerValue & GpioDirectionBitMask) == GpioDirectionBitInput
+      ? PinMode.Input
+      : PinMode.Output;
 
   /// <summary>
   /// Gets the initial GPIO output level (HIGH or LOW).
@@ -120,7 +132,9 @@ public readonly struct GpSetting : IEquatable<GpSetting> {
   /// <seealso cref="Function"/>
   /// <seealso cref="GpioMode"/>
   public PinValue GpioOutputValue
-    => (registerValue & 0b_000_1_0_000) != 0 ? PinValue.High : PinValue.Low;
+    => (registerValue & GpioOutputValueBitMask) == GpioOutputValueBitHigh
+      ? PinValue.High
+      : PinValue.Low;
 
   /// <summary>
   /// Deconstructs the GP pin settings (excluding the pin index).
