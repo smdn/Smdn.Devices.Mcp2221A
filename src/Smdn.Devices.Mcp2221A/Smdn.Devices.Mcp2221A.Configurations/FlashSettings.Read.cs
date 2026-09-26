@@ -327,7 +327,7 @@ partial class FlashSettings {
     if (destination.Length < length)
       return false;
 
-    _ = Encoding.Unicode.GetChars(descriptor, destination);
+    charsWritten = Encoding.Unicode.GetChars(descriptor, destination);
 
     return true;
 #else
@@ -337,6 +337,8 @@ partial class FlashSettings {
       return false;
 
     chars.CopyTo(destination);
+
+    charsWritten = chars.Length;
 
     return true;
 #endif
