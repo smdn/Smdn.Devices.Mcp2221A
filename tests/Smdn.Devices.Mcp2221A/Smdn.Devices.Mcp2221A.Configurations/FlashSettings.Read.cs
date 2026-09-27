@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 using System;
 using System.Device.Gpio;
+using System.Linq;
 
 using NUnit.Framework;
 
@@ -595,6 +596,86 @@ partial class FlashSettingsTests {
     // FlashSettings.ModifyGpSetting(index: 3, ...)
   }
 #endif
+
+  [Test]
+  public void GpPins_IReadOnlyList_Count()
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice()
+    );
+
+    Assert.That(
+      mcp2221A.Flash.GpPins.Count,
+      Is.EqualTo(4)
+    );
+  }
+
+  [TestCase(int.MinValue)]
+  [TestCase(-1)]
+  [TestCase(4)]
+  [TestCase(int.MaxValue)]
+  public void GpPins_IReadOnlyList_IndexOutOfRange(int index)
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice()
+    );
+
+    Assert.That(
+      () => _ = mcp2221A.Flash.GpPins[index],
+      Throws
+        .TypeOf<ArgumentOutOfRangeException>()
+        .With
+        .Property(nameof(ArgumentOutOfRangeException.ParamName))
+        .EqualTo("index")
+        .And
+        .Property(nameof(ArgumentOutOfRangeException.ActualValue))
+        .EqualTo(index)
+    );
+  }
+
+  [Test]
+  public void GpPins_IReadOnlyList_GetGenericEnumerator()
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice()
+    );
+
+    Assert.That(
+      mcp2221A.Flash.GpPins.Count(),
+      Is.EqualTo(4)
+    );
+    Assert.That(
+      mcp2221A.Flash.GpPins.ToArray(),
+      Is
+        .EqualTo([mcp2221A.Flash.GpPin0, mcp2221A.Flash.GpPin1, mcp2221A.Flash.GpPin2, mcp2221A.Flash.GpPin3])
+        .AsCollection
+    );
+  }
+
+  [Test]
+  public void GpPins_IReadOnlyList_GetNonGenericEnumerator()
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice()
+    );
+
+    System.Collections.IEnumerable enumerable = mcp2221A.Flash.GpPins;
+
+    Assert.That(
+      enumerable.GetEnumerator(),
+      Is.Not.Null
+    );
+    Assert.That(
+      enumerable,
+      Is.Not.Empty
+    );
+    Assert.That(
+      enumerable.Cast<GpSetting>().ToArray(),
+      Is
+        .EqualTo([mcp2221A.Flash.GpPin0, mcp2221A.Flash.GpPin1, mcp2221A.Flash.GpPin2, mcp2221A.Flash.GpPin3])
+        .AsCollection
+    );
+  }
 
   [TestCase("Microchip Technology Inc.")] // factory default
   [TestCase("")]

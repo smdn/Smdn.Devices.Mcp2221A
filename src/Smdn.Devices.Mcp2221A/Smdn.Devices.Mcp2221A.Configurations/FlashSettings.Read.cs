@@ -7,7 +7,12 @@
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
+#if SYSTEM_DIAGNOSTICS_UNREACHABLEEXCEPTION
+using System.Diagnostics;
+#endif
 using System.Text;
+
+using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 namespace Smdn.Devices.Mcp2221A.Configurations;
 
@@ -173,13 +178,21 @@ partial class FlashSettings {
 
     public int Count => 4; // GpPin[0-3]
 
-    public GpSetting this[int index] => index switch {
-      0 => owner.GpPin0,
-      1 => owner.GpPin1,
-      2 => owner.GpPin2,
-      3 => owner.GpPin3,
-      _ => throw new ArgumentOutOfRangeException(nameof(index)),
-    };
+    public GpSetting this[int index]
+      => Mcp2221AGpioDriver.ThrowIfIndexOfGpPinIsOutOfRange(index, nameof(index)) switch {
+        0 => owner.GpPin0,
+        1 => owner.GpPin1,
+        2 => owner.GpPin2,
+        3 => owner.GpPin3,
+
+        // never happen
+        _ => throw new
+#if SYSTEM_DIAGNOSTICS_UNREACHABLEEXCEPTION
+          UnreachableException(),
+#else
+          NotImplementedException(),
+#endif
+      };
 
     public IEnumerator<GpSetting> GetEnumerator()
     {
