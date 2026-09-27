@@ -1,0 +1,30 @@
+﻿<!--
+SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
+SPDX-License-Identifier: MIT
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Smdn.Devices.Mcp2221A" Version="[1.0.0,2.0.0)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+
+    <!-- Add HidSharp (Apache License 2.0) as the USB HID backend provider. -->
+    <PackageReference Include="Smdn.IO.UsbHid.Providers.HidSharp" Version="1.0.0" />
+    <!--
+      By changing the PackageReference, you can use libraries such as LibUsbDotNet
+      as a backend instead of HidSharp. For more details, refer to this documentation:
+
+      https://github.com/smdn/Smdn.Devices.Mcp2221A/tree/main/examples/Smdn.Devices.Mcp2221A/UsbHidBackendSamples.md
+    -->
+    <!--
+    <PackageReference Include="Smdn.IO.UsbHid.Providers.LibUsbDotNet" Version="1.0.1" />
+    <PackageReference Include="Smdn.IO.UsbHid.Providers.LibUsbDotNetV3" Version="1.0.0" />
+    -->
+  </ItemGroup>
+
+</Project>

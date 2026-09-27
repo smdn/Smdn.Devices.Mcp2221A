@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
-namespace Smdn.Devices.Mcp2221A;
+namespace Smdn.Devices.Mcp2221A.Configurations;
 
 internal sealed partial class SramSettings {
   public const int SizeOfSelf = 10;
@@ -166,8 +166,8 @@ internal sealed partial class SramSettings {
   public byte ReadInterruptDetectionModuleSetupByte()
     => currentSettings[OffsetOfInterruptDetectionModuleSetup];
 
-  public byte ReadGpSettingsByte(int gp)
-    => currentSettings[OffsetOfGpSettings + gp];
+  public GpSetting ReadGpSetting(int gp)
+    => new(index: gp, registerValue: currentSettings[OffsetOfGpSettings + gp]);
 
   public SramSettings ModifyClockOutputSettings(
     ClockOutputFrequency? frequency,
@@ -406,17 +406,19 @@ internal sealed partial class SramSettings {
 
     // Bit 3: GPIO Direction
     gpSettings |= direction switch {
-      null => (byte)(currentGpSettings & 0b_000_0_1_000), // maintain the current settings
-      PinMode.Input => 0b_000_0_1_000,
-      PinMode.Output => 0b_000_0_0_000,
+      null => (byte)(currentGpSettings & GpSetting.GpioDirectionBitMask), // maintain the current settings
+      PinMode.Input => GpSetting.GpioDirectionBitInput,
+      PinMode.Output => GpSetting.GpioDirectionBitOutput,
 
       _ => (byte)GpController.ThrowDirectionNotSupportedOrInvalidException(direction.Value, nameof(direction)),
     };
 
     // Bit 4: GPIO Output value
     gpSettings |= outputValue switch {
-      null => (byte)(currentGpSettings & 0b_000_1_0_000), // maintain the current settings
-      PinValue val => (byte)(val.IsHigh ? 0b_000_1_0_000 : 0b_000_0_0_000),
+      null => (byte)(currentGpSettings & GpSetting.GpioOutputValueBitMask), // maintain the current settings
+      PinValue val => val.IsHigh
+        ? GpSetting.GpioOutputValueBitHigh
+        : GpSetting.GpioOutputValueBitLow,
     };
 
     // Bit 7-5: Don't care

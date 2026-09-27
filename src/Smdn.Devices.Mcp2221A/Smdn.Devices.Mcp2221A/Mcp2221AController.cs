@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using Smdn.Devices.Mcp2221A.Configurations;
 using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 using Smdn.Devices.Mcp2221A.Peripherals.I2c;
 using Smdn.Devices.Mcp2221A.Transport;
@@ -228,14 +229,97 @@ public sealed partial class Mcp2221AController :
     }
   }
 
+  /// <summary>
+  /// Gets a <see cref="FlashSettings"/> instance that holds both the initial
+  /// configuration and staged modifications,/ and provides functionality to
+  /// persist changes to the Flash memory of the MCP2221/MCP2221A.
+  /// </summary>
+  /// <value>
+  /// A <see cref="FlashSettings"/> instance used to inspect, stage, and
+  /// write Flash memory configurations.
+  /// </value>
+  /// <remarks>
+  /// <para>
+  /// Properties and read operations accessed through this instance reflect
+  /// the current staged (modified) values rather than the initial state captured
+  /// when the <see cref="Mcp2221AController"/> was created.
+  /// </para>
+  /// <para>
+  /// Staged modifications can be inspected via <see cref="FlashSettings.IsDirty"/>
+  /// and reverted to the initial state using <see cref="FlashSettings.Restore"/>.
+  /// Note that pending password modifications made via <see cref="FlashSettings.ModifyPassword"/>
+  /// are maintained even after calling <see cref="FlashSettings.Restore"/>
+  /// to prevent accidental password overwrites with indeterminate initial data.
+  /// </para>
+  /// <para>
+  /// <b>Important Cautions for Flash Memory Operations:</b>
+  /// <list type="bullet">
+  ///   <item>
+  ///     <description>
+  ///       <b>Power-on/Reset Requirement:</b> Settings written to Flash memory
+  ///       do not immediately alter active SRAM settings; they are loaded into SRAM
+  ///       as the initial operating configuration upon the next power cycle or
+  ///       device reset.
+  ///     </description>
+  ///   </item>
+  ///   <item>
+  ///     <description>
+  ///       <b>Endurance Limits:</b> Flash memory has a limited number of
+  ///       write/erase cycles. Ensure that calls to <see cref="FlashSettings.Write"/>
+  ///       and <see cref="FlashSettings.WriteAsync"/> are kept to a minimum to
+  ///       prevent premature hardware degradation.
+  ///     </description>
+  ///   </item>
+  ///   <item>
+  ///     <description>
+  ///       <b>Password Protection Risk:</b> Configuring a password enables write
+  ///       protection for Flash settings. However, if the password is lost or forgotten,
+  ///       subsequent Flash write operations will become permanently impossible.
+  ///     </description>
+  ///   </item>
+  ///   <item>
+  ///     <description>
+  ///       <b>Datasheet &amp; Tool Verification:</b> Thoroughly review the official
+  ///       datasheet specifications before performing write operations. For critical
+  ///       device provisioning, consider using Microchip's official configuration
+  ///       utilities.
+  ///     </description>
+  ///   </item>
+  /// </list>
+  /// </para>
+  /// </remarks>
+  /// <seealso cref="FlashSettings"/>
+  /// <seealso cref="FlashSettings.Write"/>
+  /// <seealso cref="FlashSettings.WriteAsync"/>
+  /// <seealso cref="FlashSettings.IsDirty"/>
+  /// <seealso cref="FlashSettings.Restore"/>
+  /// <seealso cref="FlashSettings.ModifyPassword"/>
+  /// <seealso href="https://www.microchip.com/en-us/product/mcp2221a">
+  /// [MCP2221A] 1.4 Device Configuration
+  /// </seealso>
+  /// <seealso href="https://www.microchip.com/en-us/product/mcp2221a">
+  /// [MCP2221A] 3.1.2 READ FLASH DATA
+  /// </seealso>
+  /// <seealso href="https://www.microchip.com/en-us/product/mcp2221a">
+  /// [MCP2221A] 3.1.3 WRITE FLASH DATA
+  /// </seealso>
+  [CLSCompliant(false)]
+  public FlashSettings Flash {
+    get {
+      ThrowIfDisposed();
+      return field;
+    }
+  }
+
   private Mcp2221AController(
     Mcp2221ATransceiver transceiver,
-    IMcp2221AInfo info,
+    FlashSettings flashSettings,
     ILogger? logger
   )
   {
     this.transceiver = transceiver ?? throw new ArgumentNullException(nameof(transceiver));
-    this.info = info ?? throw new ArgumentNullException(nameof(info));
+    Flash = flashSettings ?? throw new ArgumentNullException(nameof(flashSettings));
+    info = flashSettings;
 
     gpioDriver = new(
       transceiver: transceiver,

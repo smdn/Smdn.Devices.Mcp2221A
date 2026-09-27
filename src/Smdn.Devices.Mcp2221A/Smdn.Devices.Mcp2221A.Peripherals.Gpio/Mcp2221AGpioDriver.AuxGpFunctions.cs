@@ -5,6 +5,8 @@ using System.Buffers.Binary;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Smdn.Devices.Mcp2221A.Configurations;
+
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 #pragma warning disable IDE0040

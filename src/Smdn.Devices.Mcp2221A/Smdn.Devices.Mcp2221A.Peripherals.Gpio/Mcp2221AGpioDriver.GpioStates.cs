@@ -6,6 +6,8 @@ using System.Device.Gpio;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Smdn.Devices.Mcp2221A.Configurations;
+
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 #pragma warning disable IDE0040
@@ -432,21 +434,17 @@ partial class Mcp2221AGpioDriver {
   /// </remarks>
   private void SyncGpioStates(SramSettings sramSettings)
   {
-    const byte GpSettingsGpioOutputValueMask = 0b_000_1_0_000;
-    const byte GpSettingsGpioDirectionMask = 0b_000_0_1_000;
-
     for (int gp = 0, i = 0; gp < NumberOfGpPins; gp++) {
-      var gpSettings = sramSettings.ReadGpSettingsByte(gp);
-      var isGpio = (GpDesignation)(gpSettings & (byte)GpDesignation.BitMask) == GpDesignation.GpioOperation;
+      var gpSettings = sramSettings.ReadGpSetting(gp);
 
       // 0 + 2n: GP<n> pin value
-      gpioStateBytes.Span[i++] = isGpio
-        ? ((gpSettings & GpSettingsGpioOutputValueMask) == 0) ? GpioValueLow : GpioValueHigh
+      gpioStateBytes.Span[i++] = gpSettings.IsGpio
+        ? gpSettings.GpioOutputValue.IsLow ? GpioValueLow : GpioValueHigh
         : GpioValueInvalid;
 
       // 1 + 2n: GP<n> direction value
-      gpioStateBytes.Span[i++] = isGpio
-        ? ((gpSettings & GpSettingsGpioDirectionMask) == 0) ? GpioDirectionOutput : GpioDirectionInput
+      gpioStateBytes.Span[i++] = gpSettings.IsGpio
+        ? gpSettings.GpioMode == PinMode.Output ? GpioDirectionOutput : GpioDirectionInput
         : GpioDirectionInvalid;
     }
   }

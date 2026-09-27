@@ -189,6 +189,46 @@ public partial class Mcp2221AControllerTests {
         );
 
         readStream.Write(
+          // [MCP2221A] 3.1.2 READ FLASH DATA - TABLE 3-5 RESPONSE STRUCTURE - READ CHIP SETTINGS SUB-COMMAND
+          [
+            ReportInput,
+            0xB0, 0x00,
+            0x00, 0x00,
+            chipSetting0, chipSetting1, chipSetting2, chipSetting3,
+            usbVidLowerByte, usbVidHigherByte, usbPidLowerByte, usbPidHigherByte,
+            usbPowerAttributes, usbRequiredCurrent,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00
+          ]
+#if !SYSTEM_IO_STREAM_WRITE_READONLYSPAN_OF_BYTE
+          ,
+          0,
+          ReportLength
+#endif
+        );
+
+        readStream.Write(
+          // [MCP2221A] 3.1.2 READ FLASH DATA - TABLE 3-5 RESPONSE STRUCTURE - READ GP SETTINGS SUB-COMMAND
+          [
+            ReportInput,
+            0xB0, 0x00,
+            0x00, 0x00,
+            gp0Settings, gp1Settings, gp2Settings, gp3Settings,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+          ]
+#if !SYSTEM_IO_STREAM_WRITE_READONLYSPAN_OF_BYTE
+          ,
+          0,
+          ReportLength
+#endif
+        );
+
+        readStream.Write(
           // [MCP2221A] 3.1.14 GET SRAM SETTINGS
           [
             ReportInput,
@@ -391,6 +431,7 @@ public partial class Mcp2221AControllerTests {
     Assert.That(() => _ = device.CurrentAdcReferenceSource, Throws.Nothing);
     Assert.That(() => _ = device.CurrentDacReferenceSource, Throws.Nothing);
     Assert.That(() => _ = device.LastWriteAnalogRawValue, Throws.Nothing);
+    Assert.That(() => _ = device.Flash, Throws.Nothing);
 
     var i2cBus = device.I2cBus;
     var gp0 = device.GpPin0;
@@ -398,6 +439,7 @@ public partial class Mcp2221AControllerTests {
     var gp2 = device.GpPin2;
     var gp3 = device.GpPin3;
     var gpioController = device.GpioController;
+    var flash = device.Flash;
 
     // To test the GetMode/SetMode and Read/Write method calls on the GpioController,
     // ensure the pin is open.
@@ -419,6 +461,7 @@ public partial class Mcp2221AControllerTests {
     Assert.That(() => _ = device.CurrentAdcReferenceSource, Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => _ = device.CurrentDacReferenceSource, Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => _ = device.LastWriteAnalogRawValue, Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => _ = device.Flash, Throws.TypeOf<ObjectDisposedException>());
 
     Assert.That(() => _ = device.HardwareRevision, Throws.Nothing);
     Assert.That(() => _ = device.FirmwareRevision, Throws.Nothing);
@@ -452,6 +495,12 @@ public partial class Mcp2221AControllerTests {
     Assert.That(() => gpioController.GetPinMode(0), Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => gpioController.Write(0, PinValue.High), Throws.TypeOf<ObjectDisposedException>());
     Assert.That(() => gpioController.Read(0), Throws.TypeOf<ObjectDisposedException>());
+
+    flash.ModifyPassword("password"u8); // set to the 'dirty' state to trigger a write to Flash
+
+    Assert.That(flash.IsDirty, Is.True);
+    Assert.That(() => flash.WriteAsync(), Throws.TypeOf<ObjectDisposedException>());
+    Assert.That(() => flash.Write(), Throws.TypeOf<ObjectDisposedException>());
 
     Assert.That(baseDevice.IsDisposed, Is.EqualTo(shouldDisposeUsbHidDevice), "USB HID device disposed");
 

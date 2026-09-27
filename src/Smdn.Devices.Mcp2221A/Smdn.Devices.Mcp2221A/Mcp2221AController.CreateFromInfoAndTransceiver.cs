@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using Smdn.Devices.Mcp2221A.Configurations;
 using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 using Smdn.Devices.Mcp2221A.Transport;
 
@@ -15,17 +16,21 @@ partial class Mcp2221AController {
 #pragma warning restore IDE0040
   private static async ValueTask<Mcp2221AController> CreateFromInfoAndTransceiverAsync(
     Mcp2221ATransceiver transceiver,
-    Mcp2221AInfo info,
+    FlashSettings flashSettings,
     ILogger? logger,
     CancellationToken cancellationToken
   )
   {
     var mcp2221A = CreateFromInfoAndTransceiverCore(
       transceiver: transceiver,
-      info: info,
+      flashSettings: flashSettings,
       logger: logger,
       cancellationToken: cancellationToken
     );
+
+    await mcp2221A.Flash.ReadChipAndGpSettingsAsync(
+      cancellationToken: cancellationToken
+    ).ConfigureAwait(false);
 
     mcp2221A.SramDeviceConfiguration = await ((Mcp2221AGpioDriver)mcp2221A.GpPins).FetchSramSettingsAsync(
       cancellationToken: cancellationToken
@@ -36,15 +41,19 @@ partial class Mcp2221AController {
 
   private static Mcp2221AController CreateFromInfoAndTransceiver(
     Mcp2221ATransceiver transceiver,
-    Mcp2221AInfo info,
+    FlashSettings flashSettings,
     ILogger? logger,
     CancellationToken cancellationToken
   )
   {
     var mcp2221A = CreateFromInfoAndTransceiverCore(
       transceiver: transceiver,
-      info: info,
+      flashSettings: flashSettings,
       logger: logger,
+      cancellationToken: cancellationToken
+    );
+
+    mcp2221A.Flash.ReadChipAndGpSettings(
       cancellationToken: cancellationToken
     );
 
@@ -57,12 +66,14 @@ partial class Mcp2221AController {
 
   private static Mcp2221AController CreateFromInfoAndTransceiverCore(
     Mcp2221ATransceiver transceiver,
-    Mcp2221AInfo info,
+    FlashSettings flashSettings,
     ILogger? logger,
     CancellationToken cancellationToken
   )
   {
     cancellationToken.ThrowIfCancellationRequested();
+
+    IMcp2221AInfo info = flashSettings;
 
     if (logger is { } l && l.IsEnabled(LogLevel.Information)) {
       using var scope = l.BeginScope("Device Information");
@@ -91,7 +102,7 @@ partial class Mcp2221AController {
 
     return new(
       transceiver: transceiver,
-      info: info,
+      flashSettings: flashSettings,
       logger: logger
     );
   }

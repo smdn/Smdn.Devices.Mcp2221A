@@ -5,6 +5,8 @@ using System.Device.Gpio;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Smdn.Devices.Mcp2221A.Configurations;
+
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 /// <summary>
@@ -28,6 +30,18 @@ public sealed class Gp1Controller :
   IClockOutputController
 {
 #pragma warning restore IDE0055
+  internal static GpFunction TranslateDesignation(GpDesignation designation, bool throwIfUnsupported)
+    => designation switch {
+      GpDesignation.GpioOperation => GpFunction.Gpio, // GPIO
+      GpDesignation.DedicatedFunctionOperation => GpFunction.ClockOutput, // CLK OUT
+      GpDesignation.AlternateFunction0 => GpFunction.Adc, // ADC1
+      GpDesignation.AlternateFunction1 => GpFunction.LedOutput, // LED_UTX
+      GpDesignation.AlternateFunction2 => GpFunction.InterruptOnChange, // IOC
+      var unsupported => throwIfUnsupported
+        ? throw CreateUnsupportedGpDesignationException(gpIndex: 1, unsupported)
+        : GpFunction.LedOutput, // LED_UTX (factory default)
+    };
+
   /// <inheritdoc/>
   /// <value>
   /// Always <c>1</c>.
@@ -41,14 +55,8 @@ public sealed class Gp1Controller :
   public override string PinName { get; } = "GP1";
 
   /// <inheritdoc/>
-  public override GpFunction CurrentFunction => CurrentGpDesignation switch {
-    GpDesignation.GpioOperation => GpFunction.Gpio, // GPIO
-    GpDesignation.DedicatedFunctionOperation => GpFunction.ClockOutput, // CLK OUT
-    GpDesignation.AlternateFunction0 => GpFunction.Adc, // ADC1
-    GpDesignation.AlternateFunction1 => GpFunction.LedOutput, // LED_UTX
-    GpDesignation.AlternateFunction2 => GpFunction.InterruptOnChange, // IOC
-    var unsupported => throw CreateUnsupportedGpDesignationException(Index, unsupported),
-  };
+  public override GpFunction CurrentFunction
+    => TranslateDesignation(CurrentGpDesignation, throwIfUnsupported: true);
 
   /// <inheritdoc/>
   public override string CurrentDesignation => CurrentGpDesignation switch {

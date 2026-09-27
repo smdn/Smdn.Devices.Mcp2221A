@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Smdn.Devices.Mcp2221A.Configurations;
 using Smdn.Devices.Mcp2221A.DependencyInjection;
 using Smdn.Devices.Mcp2221A.Transport;
 using Smdn.IO.UsbHid;
@@ -320,6 +321,15 @@ partial class Mcp2221AController {
     return usbHidDevice ?? throw new Mcp2221ANotFoundException(usbHidService, usbHidDeviceFilter);
   }
 
+  private static IFlashMemoryFactory GetFlashMemoryFactory(
+    IServiceProvider? serviceProvider,
+    object? serviceKey
+  )
+    =>
+      serviceProvider?.GetKeyedService<IFlashMemoryFactory>(serviceKey) ??
+      serviceProvider?.GetService<IFlashMemoryFactory>() ??
+      FlashMemory.DefaultFactory;
+
   private static ValueTask<Mcp2221AController> CreateFromFirstUsbHidDeviceAsyncCore<TServiceKey>(
     IServiceProvider serviceProvider,
     TServiceKey? serviceKey,
@@ -387,14 +397,15 @@ partial class Mcp2221AController {
         logger: logger
       );
 #pragma warning restore CA2000
-      var info = await Mcp2221AInfo.ReadFromAsync(
+      var flashSettings = await FlashSettings.ReadFromAsync(
         transceiver: transceiver,
+        flashMemoryFactory: GetFlashMemoryFactory(serviceProvider, serviceKey),
         cancellationToken: cancellationToken
       ).ConfigureAwait(false);
 
       return await CreateFromInfoAndTransceiverAsync(
         transceiver: transceiver,
-        info: info,
+        flashSettings: flashSettings,
         logger: logger,
         cancellationToken: cancellationToken
       ).ConfigureAwait(false);
@@ -438,14 +449,15 @@ partial class Mcp2221AController {
         logger: logger
       );
 #pragma warning restore CA2000
-      var info = Mcp2221AInfo.ReadFrom(
+      var flashSettings = FlashSettings.ReadFrom(
         transceiver: transceiver,
+        flashMemoryFactory: GetFlashMemoryFactory(serviceProvider, serviceKey),
         cancellationToken: cancellationToken
       );
 
       return CreateFromInfoAndTransceiver(
         transceiver: transceiver,
-        info: info,
+        flashSettings: flashSettings,
         logger: logger,
         cancellationToken: cancellationToken
       );
