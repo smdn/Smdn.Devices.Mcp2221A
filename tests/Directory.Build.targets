@@ -7,8 +7,8 @@ SPDX-License-Identifier: MIT
 
   <ItemGroup>
     <!-- <PackageReference Update="NUnit.Analyzers" Version="4.15.0"/> -->
-    <PackageReference Update="Smdn.Test.NUnit.Constraints" Version="4.1.0" />
-    <!-- <PackageReference Update="Smdn.Test.NUnit.Utils" Version="4.1.0" /> -->
+    <PackageReference Update="Smdn.Test.NUnit.Constraints" Version="4.2.0" />
+    <!-- <PackageReference Update="Smdn.Test.NUnit.Utils" Version="5.0.0" /> -->
   </ItemGroup>
 
   <Import Project="Sdk.targets" Sdk="Smdn.MSBuild.ProjectAssets.Library" />
