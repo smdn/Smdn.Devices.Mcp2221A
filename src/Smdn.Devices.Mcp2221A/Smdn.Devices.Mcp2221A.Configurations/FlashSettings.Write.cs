@@ -49,6 +49,7 @@ partial class FlashSettings {
     if (!password.TryCopyTo(SettingsForWrite.Password))
       throw new InvalidOperationException("The destination password buffer is too short to store the password.");
 
+    hasPasswordProvided = true;
     hasPasswordModified = true;
     hasWritten = false;
 
@@ -96,9 +97,23 @@ partial class FlashSettings {
   /// or an invalid <see cref="DeviceConfigurationProtectionLevel"/> value.
   /// </exception>
   /// <remarks>
+  /// <para>
   /// Reflects <c>CHIPSETTING0</c>; Bit 1-0 <c>CHIPPROT</c>.
+  /// </para>
+  /// <para>
+  /// When setting <paramref name="protectionLevel"/> to
+  /// <see cref="DeviceConfigurationProtectionLevel.PasswordProtected"/>,
+  /// <see cref="ModifyPassword"/> must be called to explicitly specify
+  /// an 8-byte password. Calling <see cref="Write"/> or <see cref="WriteAsync"/>
+  /// while write protection is set to <see cref="DeviceConfigurationProtectionLevel.PasswordProtected"/>
+  /// without first setting a password will result in an <see cref="InvalidOperationException"/>
+  /// to prevent unintended lockout.
+  /// </para>
   /// </remarks>
   /// <seealso cref="WriteProtectionLevel"/>
+  /// <seealso cref="ModifyPassword"/>
+  /// <seealso cref="Write"/>
+  /// <seealso cref="WriteAsync"/>
   public FlashSettings ModifyWriteProtection(
     DeviceConfigurationProtectionLevel protectionLevel
   )
