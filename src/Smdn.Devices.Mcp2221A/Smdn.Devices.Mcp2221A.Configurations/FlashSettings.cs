@@ -172,6 +172,10 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
   /// <param name="cancellationToken">
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// </param>
+  /// <exception cref="FlashWriteAccessException">
+  /// Thrown when the device rejects the write operation because Flash write
+  /// protection is active or write access is not permitted.
+  /// </exception>
   /// <remarks>
   /// <para>
   /// This method issues the command to persist all staged configuration changes
@@ -193,6 +197,7 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
   /// <seealso cref="WriteAsync"/>
   /// <seealso cref="Restore"/>
   /// <seealso cref="IsDirty"/>
+  /// <seealso cref="FlashWriteAccessException"/>
   public void Write(CancellationToken cancellationToken = default)
   {
     if (!IsDirty)
@@ -217,7 +222,7 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
   /// Asynchronously writes the current staged settings and any pending password
   /// modifications to the Flash memory of the MCP2221A device.
   /// </summary>
-  /// <inheritdoc cref="Write(CancellationToken)" path="/param|/remarks|/seealso"/>
+  /// <inheritdoc cref="Write(CancellationToken)" path="/param|/exception|/remarks|/seealso"/>
   /// <returns>
   /// A <see cref="ValueTask"/> representing the asynchronous write operation.
   /// </returns>
