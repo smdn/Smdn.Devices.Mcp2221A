@@ -49,6 +49,15 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
   private const int OffsetOfUsbPowerAttributes = 8; // USBPWRATTR
   private const int OffsetOfUsbRequiredCurrent = 9; // USBREQCRT
 
+  private static void ThrowIfPasswordLengthNotValid(ReadOnlySpan<byte> password, string paramName)
+  {
+    if (password.Length != FlashMemory.LengthOfPassword)
+      throw new ArgumentException($"The password length must be exactly {FlashMemory.LengthOfPassword} bytes.", paramName);
+  }
+
+  /*
+   * instance members
+   */
   private readonly IFlashMemory initialSettings;
   private readonly IFlashMemoryFactory flashMemoryFactory;
   private readonly Mcp2221ATransceiver transceiver;
@@ -194,6 +203,7 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
   /// load the updated Flash settings into SRAM.
   /// </para>
   /// </remarks>
+  /// <seealso cref="SendAccessPassword"/>
   /// <seealso cref="WriteAsync"/>
   /// <seealso cref="Restore"/>
   /// <seealso cref="IsDirty"/>
