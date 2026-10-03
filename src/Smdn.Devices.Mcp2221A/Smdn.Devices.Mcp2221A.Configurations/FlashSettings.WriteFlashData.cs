@@ -257,16 +257,18 @@ partial class FlashSettings {
 #else
         settingsToWrite!,
 #endif
+      writeForcibly: false,
       cancellationToken: cancellationToken
     );
   }
 
   private void WriteCore(
     IFlashMemory settingsToWrite,
+    bool writeForcibly,
     CancellationToken cancellationToken
   )
   {
-    foreach (var constructCommand in IterateWriteFlashDataCommands(settingsToWrite)) {
+    foreach (var constructCommand in IterateWriteFlashDataCommands(settingsToWrite, writeForcibly: writeForcibly)) {
       using (transceiver.EnterCommandTransaction(cancellationToken)) {
         _ = transceiver.Command(
           arg: settingsToWrite,
@@ -303,16 +305,18 @@ partial class FlashSettings {
 #else
         settingsToWrite!,
 #endif
+      writeForcibly: false,
       cancellationToken: cancellationToken
     );
   }
 
   private async ValueTask WriteAsyncCore(
     IFlashMemory settingsToWrite,
+    bool writeForcibly,
     CancellationToken cancellationToken
   )
   {
-    foreach (var constructCommand in IterateWriteFlashDataCommands(settingsToWrite)) {
+    foreach (var constructCommand in IterateWriteFlashDataCommands(settingsToWrite, writeForcibly: writeForcibly)) {
       using (await transceiver.EnterCommandTransactionAsync(cancellationToken).ConfigureAwait(false)) {
         _ = await transceiver.CommandAsync(
           arg: settingsToWrite,
@@ -358,6 +362,97 @@ partial class FlashSettings {
   }
 
   /// <summary>
+  /// Reverts all staged changes to the initial state and forcibly writes
+  /// those initial settings to the Flash memory of the MCP2221A device.
+  /// </summary>
+  /// <param name="cancellationToken">
+  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
+  /// The default is <see cref="CancellationToken.None"/>.
+  /// </param>
+  /// <exception cref="FlashWriteAccessException">
+  /// Thrown when the device rejects the write operation because Flash write
+  /// protection is active or write access is not permitted.
+  /// </exception>
+  /// <exception cref="OperationCanceledException">
+  /// Thrown when the operation is canceled via <paramref name="cancellationToken"/>.
+  /// </exception>
+  /// <remarks>
+  /// <para>
+  /// This method performs an operation equivalent to calling <see cref="Restore"/>
+  /// followed by a write operation. It discards any currently staged modifications,
+  /// reverts the internal buffer to the initial state captured when the
+  /// <see cref="Mcp2221AController"/> instance was created, and writes those
+  /// initial settings to the physical Flash memory.
+  /// </para>
+  /// <para>
+  /// Unlike <see cref="Write"/>, this method bypasses the <see cref="IsDirty"/>
+  /// check and always issues write commands to the device, even if
+  /// <see cref="IsDirty"/> is <see langword="false"/>.
+  /// </para>
+  /// <para>
+  /// Upon completion, all staged changes are reset to the initial state, causing
+  /// <see cref="IsDirty"/> to return <see langword="false"/> until subsequent
+  /// modifications are made.
+  /// Note that writing to Flash memory does not immediately alter the current
+  /// SRAM operating parameters or active write-protection state; a device reset
+  /// or power cycle is required to load the updated Flash settings into SRAM
+  /// and enforce any newly written protection levels.
+  /// </para>
+  /// </remarks>
+  /// <seealso cref="Write"/>
+  /// <seealso cref="WriteAsync"/>
+  /// <seealso cref="Restore"/>
+  /// <seealso cref="IsDirty"/>
+  public void WriteInitialSettings(
+    CancellationToken cancellationToken = default
+  )
+  {
+    EnsureWritePreconditions(cancellationToken);
+
+    // By ensuring that `stagedSettings` has been created, guarantees that
+    // the contents of `initialSettings` are copied to `stagedSettings` by
+    // the `Restore` method, and that if a password is provided by
+    // the `ModifyPassword` method, that password is stored in `stagedSettings`.
+    var settingsToWrite = EnsureStagedSettingsCreated();
+
+    Restore();
+
+    WriteCore(
+      settingsToWrite: settingsToWrite,
+      writeForcibly: true,
+      cancellationToken: cancellationToken
+    );
+  }
+
+  /// <summary>
+  /// Asynchronously reverts all staged changes to the initial state and
+  /// forcibly writes those initial settings to the Flash memory of the
+  /// MCP2221A device.
+  /// </summary>
+  /// <inheritdoc cref="WriteInitialSettings(CancellationToken)" path="/param|/exception|/remarks|/seealso"/>
+  /// <returns>
+  /// A <see cref="ValueTask"/> representing the asynchronous write operation.
+  /// </returns>
+  public ValueTask WriteInitialSettingsAsync(CancellationToken cancellationToken = default)
+  {
+    EnsureWritePreconditions(cancellationToken);
+
+    // By ensuring that `stagedSettings` has been created, guarantees that
+    // the contents of `initialSettings` are copied to `stagedSettings` by
+    // the `Restore` method, and that if a password is provided by
+    // the `ModifyPassword` method, that password is stored in `stagedSettings`.
+    var settingsToWrite = EnsureStagedSettingsCreated();
+
+    Restore();
+
+    return WriteAsyncCore(
+      settingsToWrite: settingsToWrite,
+      writeForcibly: true,
+      cancellationToken: cancellationToken
+    );
+  }
+
+  /// <summary>
   /// Validates that a password has been explicitly provided if Flash write
   /// protection is set to <see cref="DeviceConfigurationProtectionLevel.PasswordProtected"/>.
   /// </summary>
@@ -400,7 +495,8 @@ partial class FlashSettings {
   private
   IEnumerable<Mcp2221AConstructCommandAction<IFlashMemory>>
   IterateWriteFlashDataCommands(
-    IFlashMemory settingsToWrite
+    IFlashMemory settingsToWrite,
+    bool writeForcibly
   )
   {
     if (stagedSettings is null)
@@ -408,6 +504,7 @@ partial class FlashSettings {
 
     // Write Flash Data - 0x00 Write Chip Settings
     if (
+      writeForcibly ||
       hasPasswordModified ||
       !settingsToWrite.ChipSettings.SequenceEqual(initialSettings.ChipSettings)
     ) {
@@ -416,6 +513,7 @@ partial class FlashSettings {
 
     // Write Flash Data - 0x01 Write GP Settings
     if (
+      writeForcibly ||
       !settingsToWrite.GpSettings.SequenceEqual(initialSettings.GpSettings)
     ) {
       yield return WriteFlashDataCommand.ConstructWriteGpSettingsCommand;
@@ -423,6 +521,7 @@ partial class FlashSettings {
 
     // Write Flash Data - 0x02 Write USB Manufacturer Descriptor String
     if (
+      writeForcibly ||
       !settingsToWrite.StoredUsbManufacturerDescriptorStringSpan.SequenceEqual(
         initialSettings.StoredUsbManufacturerDescriptorStringSpan
       )
@@ -432,6 +531,7 @@ partial class FlashSettings {
 
     // Write Flash Data - 0x03 Write USB Product Descriptor String
     if (
+      writeForcibly ||
       !settingsToWrite.StoredUsbProductDescriptorStringSpan.SequenceEqual(
         initialSettings.StoredUsbProductDescriptorStringSpan
       )
@@ -441,6 +541,7 @@ partial class FlashSettings {
 
     // Write Flash Data - 0x04 Write USB Serial Number Descriptor String
     if (
+      writeForcibly ||
       !settingsToWrite.StoredUsbSerialNumberDescriptorStringSpan.SequenceEqual(
         initialSettings.StoredUsbSerialNumberDescriptorStringSpan
       )

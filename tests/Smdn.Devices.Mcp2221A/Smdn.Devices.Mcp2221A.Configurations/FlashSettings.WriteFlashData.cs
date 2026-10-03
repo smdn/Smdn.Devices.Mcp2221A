@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 using System;
 using System.Collections.Generic;
+using System.Device.Gpio;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -2169,6 +2170,756 @@ public partial class FlashSettingsTests {
           .. Enumerable.Repeat<byte>(0x00, 64 - 20) // [20-63]: don't care
         ]
       )
+    );
+  }
+
+  private static ValueTask WriteInitialSettings(FlashSettings flash, CancellationToken cancellationToken)
+  {
+    flash.WriteInitialSettings(cancellationToken);
+
+    return default;
+  }
+
+  private static ValueTask WriteInitialSettingsAsync(FlashSettings flash, CancellationToken cancellationToken)
+    => flash.WriteInitialSettingsAsync(cancellationToken);
+
+  // 設定変更を行っていない初期状態（IsDirty が false）であっても、
+  // IsDirty チェックをバイパスして物理デバイスへ書き込みコマンドが必ず送信されることを検証する。
+  /// <summary>
+  /// Tests that <see cref="FlashSettings.WriteInitialSettings"/> bypasses the <see cref="FlashSettings.IsDirty"/> check
+  /// and forcibly transmits write commands to the device even when no settings have been modified.
+  /// </summary>
+  /// <remarks>
+  /// <para>
+  /// <b>Preconditions:</b>
+  /// <list type="bullet">
+  ///   <item><description>No modifications have been made to <see cref="FlashSettings"/> (<see cref="FlashSettings.IsDirty"/> is <see langword="false"/>).</description></item>
+  /// </list>
+  /// </para>
+  /// <para>
+  /// <b>Expected Results:</b>
+  /// <list type="bullet">
+  ///   <item><description>The method completes successfully without throwing an exception.</description></item>
+  ///   <item><description>Flash write commands are actually transmitted to the underlying transceiver stream.</description></item>
+  ///   <item><description><see cref="FlashSettings.IsDirty"/> remains <see langword="false"/> after execution.</description></item>
+  /// </list>
+  /// </para>
+  /// </remarks>
+  [Test]
+  public void WriteInitialSettings_IsNotDirty()
+    => WriteInitialSettingsSyncOrAsync_IsNotDirty(WriteInitialSettings);
+
+  /// <inheritdoc cref="WriteInitialSettings_IsNotDirty">
+  [Test]
+  public void WriteInitialSettingsAsync_IsNotDirty()
+    => WriteInitialSettingsSyncOrAsync_IsNotDirty(WriteInitialSettingsAsync);
+
+  private void WriteInitialSettingsSyncOrAsync_IsNotDirty(
+    Func<FlashSettings, CancellationToken, ValueTask> writeInitialSettingsSyncOrAsync
+  )
+  {
+    var initialFlashMemory = new FlashMemory();
+    var stagedFlashMemory = new FlashMemory();
+
+    using var mcp2221A = CreateWithAllocatedFlashMemory(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        chipSetting0: 0b_0_11111_00 // CHIPPROT(1-0): 00(Unsecured)
+      ),
+      initialFlashMemory,
+      stagedFlashMemory
+    );
+
+    Mcp2221AControllerTests.AppendPseudoResponse(
+      mcp2221A,
+      // [MCP2221A] 3.1.3 WRITE FLASH DATA
+      // [1] 0x00: Command completed successfully
+      // [2-63] Don't care
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write Chip Settings
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write GP Settings
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write USB Manufacturer Descriptor String
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write USB Product Descriptor String
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)) // Write USB Serial Number Descriptor String
+    );
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(mcp2221A.Flash.IsDirty, Is.False, "before write");
+
+    Assert.That(
+      async () => await writeInitialSettingsSyncOrAsync(mcp2221A.Flash, default),
+      Throws.Nothing
+    );
+
+    Assert.That(mcp2221A.Flash.IsDirty, Is.False, "after write");
+
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, commandNumber: 0),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x00, // [1] Write Chip Settings
+          .. initialFlashMemory.ChipSettings, // [2-11] CHIPSETTING0-USBREQCRT
+          .. initialFlashMemory.Password, // [12-19] PASS0-PASS8
+          .. Enumerable.Repeat<byte>(0x00, 64 - 20) // [20-63]: don't care
+        ]
+      )
+    );
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, commandNumber: 1),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x01, // [1] Write GP Settings
+          .. initialFlashMemory.GpSettings, // [2-5] GP0-GP3 Power-Up Settings
+          .. Enumerable.Repeat<byte>(0x00, 64 - 6) // [6-63]: don't care
+        ]
+      )
+    );
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, commandNumber: 2),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x02, // [1] Write USB Manufacturer Descriptor String
+          (byte)(initialFlashMemory.UsbManufacturerDescriptorStringLength + 2), // [2] Number of bytes + 2
+          0x03, // [3] must always be 0x03
+          .. initialFlashMemory.UsbManufacturerDescriptorString, // [4-63] 16-bit Unicode chars
+        ]
+      )
+    );
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, commandNumber: 3),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x03, // [1] Write USB Product Descriptor String
+          (byte)(initialFlashMemory.UsbProductDescriptorStringLength + 2), // [2] Number of bytes + 2
+          0x03, // [3] must always be 0x03
+          .. initialFlashMemory.UsbProductDescriptorString, // [4-63] 16-bit Unicode chars
+        ]
+      )
+    );
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, commandNumber: 4),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x04, // [1] Write USB Serial Number Descriptor String
+          (byte)(initialFlashMemory.UsbSerialNumberDescriptorStringLength + 2), // [2] Number of bytes + 2
+          0x03, // [3] must always be 0x03
+          .. initialFlashMemory.UsbSerialNumberDescriptorString, // [4-63] 16-bit Unicode chars
+        ]
+      )
+    );
+  }
+
+  // 設定に変更を加えた状態（IsDirty が true）で WriteInitialSettings を呼び出した際、
+  // ステージングされていた変更が破棄されてセッション開始時の初期設定値が書き込まれ、実行後に IsDirty が false になることを検証する。
+  /// <summary>
+  /// Tests that calling <see cref="FlashSettings.WriteInitialSettings"/> when staged changes exist
+  /// discards those staged changes, forcibly writes the initial settings to the device, and sets <see cref="FlashSettings.IsDirty"/> to <see langword="false"/>.
+  /// </summary>
+  /// <remarks>
+  /// <para>
+  /// <b>Preconditions:</b>
+  /// <list type="bullet">
+  ///   <item><description>One or more properties (e.g., USB Product ID) have been modified in <see cref="FlashSettings"/> (<see cref="FlashSettings.IsDirty"/> is <see langword="true"/>).</description></item>
+  /// </list>
+  /// </para>
+  /// <para>
+  /// <b>Expected Results:</b>
+  /// <list type="bullet">
+  ///   <item><description>Staged modifications are discarded, and property values revert to their initial values.</description></item>
+  ///   <item><description>The command payload sent to the device contains the initial settings rather than the staged modifications.</description></item>
+  ///   <item><description><see cref="FlashSettings.IsDirty"/> becomes <see langword="false"/> after completion.</description></item>
+  /// </list>
+  /// </para>
+  /// </remarks>
+  [Test]
+  public void WriteInitialSettings_IsDirty([Values] bool enablePasswordProtected)
+    => WriteInitialSettingsSyncOrAsync_IsDirty(enablePasswordProtected, WriteInitialSettings);
+
+  /// <inheritdoc cref="WriteInitialSettings_IsDirty"/>
+  [Test]
+  public void WriteInitialSettingsAsync_IsDirty([Values] bool enablePasswordProtected)
+    => WriteInitialSettingsSyncOrAsync_IsDirty(enablePasswordProtected, WriteInitialSettingsAsync);
+
+  private void WriteInitialSettingsSyncOrAsync_IsDirty(
+    bool enablePasswordProtected,
+    Func<FlashSettings, CancellationToken, ValueTask> writeInitialSettingsSyncOrAsync
+  )
+  {
+    var initialFlashMemory = new FlashMemory();
+    var stagedFlashMemory = new FlashMemory();
+    var hasPasswordProvided = enablePasswordProtected;
+    var password = "password"u8;
+
+    using var mcp2221A = CreateWithAllocatedFlashMemory(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        chipSetting0: 0b_0_11111_00 // CHIPPROT(1-0): 00(Unsecured)
+      ),
+      initialFlashMemory,
+      stagedFlashMemory
+    );
+
+    // set IsDirty to true
+    mcp2221A
+      .Flash
+      .ModifyUsbVendorId((~mcp2221A.Flash.UsbVendorId) & 0xFFFF) // Chip Settings area
+      .ModifyUsbProductId((~mcp2221A.Flash.UsbProductId) & 0xFFFF) // Chip Settings area
+      .ModifyGpSetting(0, GpFunction.Gpio, PinMode.Output, !mcp2221A.Flash.GpPin0.GpioOutputValue) // GP Settings area
+      .ModifyGpSetting(1, GpFunction.Gpio, PinMode.Output, !mcp2221A.Flash.GpPin1.GpioOutputValue) // GP Settings area
+      .ModifyGpSetting(2, GpFunction.Gpio, PinMode.Input, !mcp2221A.Flash.GpPin2.GpioOutputValue) // GP Settings area
+      .ModifyGpSetting(3, GpFunction.Gpio, PinMode.Input, !mcp2221A.Flash.GpPin3.GpioOutputValue) // GP Settings area
+      .ModifyUsbManufacturerString("Vendor") // USB Manufacturer Descriptor String area
+      .ModifyUsbProductString("Product") // USB Product Descriptor String area
+      .ModifyUsbSerialNumberString("Serial Number"); // USB Serial Number Descriptor String area
+
+    if (enablePasswordProtected) {
+      mcp2221A
+        .Flash
+        .ModifyWriteProtection(DeviceConfigurationProtectionLevel.PasswordProtected) // Chip Settings area
+        .ModifyPassword(password); // Chip Settings area
+    }
+
+    Mcp2221AControllerTests.AppendPseudoResponse(
+      mcp2221A,
+      // [MCP2221A] 3.1.3 WRITE FLASH DATA
+      // [1] 0x00: Command completed successfully
+      // [2-63] Don't care
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write Chip Settings
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write GP Settings
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write USB Manufacturer Descriptor String
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write USB Product Descriptor String
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)) // Write USB Serial Number Descriptor String
+    );
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(mcp2221A.Flash.IsDirty, Is.True, "before write");
+
+    Assert.That(
+      async () => await writeInitialSettingsSyncOrAsync(mcp2221A.Flash, default),
+      Throws.Nothing
+    );
+
+    Assert.That(mcp2221A.Flash.IsDirty, Is.False, "after write");
+
+    Assert.That(
+      stagedFlashMemory.DiffersFrom(initialFlashMemory),
+      Is.False
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, commandNumber: 0),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x00, // [1] Write Chip Settings
+          .. initialFlashMemory.ChipSettings, // [2-11] CHIPSETTING0-USBREQCRT
+          .. hasPasswordProvided // [12-19] PASS0-PASS8
+            ? password
+            : initialFlashMemory.Password,
+          .. Enumerable.Repeat<byte>(0x00, 64 - 20) // [20-63]: don't care
+        ]
+      )
+    );
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, commandNumber: 1),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x01, // [1] Write GP Settings
+          .. initialFlashMemory.GpSettings, // [2-5] GP0-GP3 Power-Up Settings
+          .. Enumerable.Repeat<byte>(0x00, 64 - 6) // [6-63]: don't care
+        ]
+      )
+    );
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, commandNumber: 2),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x02, // [1] Write USB Manufacturer Descriptor String
+          (byte)(initialFlashMemory.UsbManufacturerDescriptorStringLength + 2), // [2] Number of bytes + 2
+          0x03, // [3] must always be 0x03
+          .. initialFlashMemory.UsbManufacturerDescriptorString, // [4-63] 16-bit Unicode chars
+        ]
+      )
+    );
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, commandNumber: 3),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x03, // [1] Write USB Product Descriptor String
+          (byte)(initialFlashMemory.UsbProductDescriptorStringLength + 2), // [2] Number of bytes + 2
+          0x03, // [3] must always be 0x03
+          .. initialFlashMemory.UsbProductDescriptorString, // [4-63] 16-bit Unicode chars
+        ]
+      )
+    );
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, commandNumber: 4),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x04, // [1] Write USB Serial Number Descriptor String
+          (byte)(initialFlashMemory.UsbSerialNumberDescriptorStringLength + 2), // [2] Number of bytes + 2
+          0x03, // [3] must always be 0x03
+          .. initialFlashMemory.UsbSerialNumberDescriptorString, // [4-63] 16-bit Unicode chars
+        ]
+      )
+    );
+  }
+
+  // キャンセル要求済みの CancellationToken を指定して WriteInitialSettings を呼び出した場合、
+  // OperationCanceledException がスローされコマンド送信が行われないことを検証する。
+  /// <summary>
+  /// Tests that <see cref="FlashSettings.WriteInitialSettings"/> throws an <see cref="OperationCanceledException"/>
+  /// when passed an already-canceled <see cref="CancellationToken"/>.
+  /// </summary>
+  /// <remarks>
+  /// <para>
+  /// <b>Preconditions:</b>
+  /// <list type="bullet">
+  ///   <item><description>A <see cref="CancellationToken"/> in a canceled state is passed to <see cref="FlashSettings.WriteInitialSettings"/>.</description></item>
+  /// </list>
+  /// </para>
+  /// <para>
+  /// <b>Expected Results:</b>
+  /// <list type="bullet">
+  ///   <item><description>An <see cref="OperationCanceledException"/> (or <see cref="TaskCanceledException"/>) is thrown.</description></item>
+  ///   <item><description>No write commands are transmitted to the transceiver.</description></item>
+  /// </list>
+  /// </para>
+  /// </remarks>
+  [Test]
+  public void WriteInitialSettings_CancellationRequested()
+    => WriteInitialSettingsSyncOrAsync_CancellationRequested(WriteInitialSettings);
+
+  /// <inheritdoc cref="WriteInitialSettings_CancellationRequested"/>
+  [Test]
+  public void WriteInitialSettingsAsync_CancellationRequested()
+    => WriteInitialSettingsSyncOrAsync_CancellationRequested(WriteInitialSettingsAsync);
+
+  private void WriteInitialSettingsSyncOrAsync_CancellationRequested(
+    Func<FlashSettings, CancellationToken, ValueTask> writeInitialSettingsSyncOrAsync
+  )
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice()
+    );
+    using var cts = new CancellationTokenSource();
+
+    cts.Cancel();
+
+    mcp2221A.Flash.ModifyPassword("password"u8);
+
+    Assert.That(mcp2221A.Flash.IsDirty, Is.True, "before write");
+
+    // command should not be sent
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await writeInitialSettingsSyncOrAsync(mcp2221A.Flash, cts.Token),
+      Throws
+        .InstanceOf<OperationCanceledException>()
+        .With
+        .Property(nameof(OperationCanceledException.CancellationToken))
+        .EqualTo(cts.Token)
+    );
+
+    Assert.That(mcp2221A.Flash.IsDirty, Is.True, "after write");
+
+    Assert.That(
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
+    );
+  }
+
+  [Test]
+  public void WriteInitialSettings_ControllerDisposed()
+    => WriteInitialSettingsSyncOrAsync_ControllerDisposed(WriteInitialSettings);
+
+  [Test]
+  public void WriteInitialSettingsAsync_ControllerDisposed()
+    => WriteInitialSettingsSyncOrAsync_ControllerDisposed(WriteInitialSettings);
+
+  private void WriteInitialSettingsSyncOrAsync_ControllerDisposed(
+    Func<FlashSettings, CancellationToken, ValueTask> writeInitialSettingsSyncOrAsync
+  )
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice()
+    );
+
+    mcp2221A.Flash.ModifyPassword("password"u8);
+
+    var flash = mcp2221A.Flash;
+
+    Assert.That(flash.IsDirty, Is.True, "before write");
+
+    // command should not be sent
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    mcp2221A.Dispose();
+
+    Assert.That(
+      async () => await writeInitialSettingsSyncOrAsync(flash, default),
+      Throws.TypeOf<ObjectDisposedException>()
+    );
+
+    Assert.That(
+      flash.IsDirty,
+      Is.True,
+      $"{nameof(flash.IsDirty)} must remain true if the write operation fails"
+    );
+
+    // This throws ObjectDisposedException : Cannot access a disposed object.
+    // Assert.That(
+    //   Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+    //   Is.Zero,
+    //   "command should not be sent"
+    // );
+  }
+
+  [Test]
+  public void WriteInitialSettings_WriteFlashDataCommand_CommandNotAllowedResponse()
+    => WriteInitialSettingsSyncOrAsync_WriteFlashDataCommand_CommandNotAllowedResponse(WriteInitialSettings);
+
+  [Test]
+  public void WriteInitialSettingsAsync_WriteFlashDataCommand_CommandNotAllowedResponse()
+    => WriteInitialSettingsSyncOrAsync_WriteFlashDataCommand_CommandNotAllowedResponse(WriteInitialSettingsAsync);
+
+  private void WriteInitialSettingsSyncOrAsync_WriteFlashDataCommand_CommandNotAllowedResponse(
+    Func<FlashSettings, CancellationToken, ValueTask> writeInitialSettingsSyncOrAsync
+  )
+  {
+    var initialFlashMemory = new FlashMemory();
+    var stagedFlashMemory = new FlashMemory();
+
+    using var mcp2221A = CreateWithAllocatedFlashMemory(
+      Mcp2221AControllerTests.CreatePseudoDevice(),
+      initialFlashMemory,
+      stagedFlashMemory
+    );
+
+    Mcp2221AControllerTests.AppendPseudoResponse(
+      mcp2221A,
+      // [MCP2221A] 3.1.3 WRITE FLASH DATA
+      // [1] 0x03: Command not allowed
+      // [2-63] Don't care
+      "B1-03-" + string.Join("-", Enumerable.Repeat("00", 62))
+    );
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      async () => await writeInitialSettingsSyncOrAsync(mcp2221A.Flash, default),
+      Throws.TypeOf<FlashWriteAccessException>()
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x00, // [1] Write Chip Settings
+          .. initialFlashMemory.ChipSettings, // [2-11] CHIPSETTING0-USBREQCRT
+          .. stagedFlashMemory.Password, // [12-19] PASS0-PASS8
+          .. Enumerable.Repeat<byte>(0x00, 64 - 20) // [20-63]: don't care
+        ]
+      )
+    );
+  }
+
+  // 1回目の Write で一度物理 Flash メモリへ変更を更新した後に再変更を行った際、
+  // WriteInitialSettings を実行すると 1 回目の更新内容ではなくインスタンス生成時のセッション初期値が書き戻されることを検証する。
+  /// <summary>
+  /// Tests that calling <see cref="FlashSettings.WriteInitialSettings"/> after a prior <see cref="FlashSettings.Write"/>
+  /// correctly restores and writes the initial settings captured at instance creation, rather than retaining the written state.
+  /// </summary>
+  /// <remarks>
+  /// <para>
+  /// <b>Preconditions:</b>
+  /// <list type="bullet">
+  ///   <item><description>A first call to <see cref="FlashSettings.Write"/> successfully persisted modified settings to the physical Flash.</description></item>
+  ///   <item><description>Subsequent modifications are made to <see cref="FlashSettings"/>.</description></item>
+  /// </list>
+  /// </para>
+  /// <para>
+  /// <b>Expected Results:</b>
+  /// <list type="bullet">
+  ///   <item><description>The generated command packet contains the initial settings from controller creation time.</description></item>
+  ///   <item><description>Local property values revert to the initial settings.</description></item>
+  ///   <item><description><see cref="FlashSettings.IsDirty"/> becomes <see langword="false"/>.</description></item>
+  /// </list>
+  /// </para>
+  /// </remarks>
+  [Test]
+  public void WriteInitialSettings_AfterPreviousWrite_WritesInitialSettings(
+    [Values] bool enablePasswordProtected
+  )
+    => WriteInitialSettingsSyncOrAsync_AfterPreviousWrite_WritesInitialSettings(
+      enablePasswordProtected,
+      Write,
+      WriteInitialSettings
+    );
+
+  /// <inheritdoc cref="WriteInitialSettings_AfterPreviousWrite_WritesInitialSettings">
+  [Test]
+  public void WriteInitialSettingsAsync_AfterPreviousWrite_WritesInitialSettings(
+    [Values] bool enablePasswordProtected
+  )
+    => WriteInitialSettingsSyncOrAsync_AfterPreviousWrite_WritesInitialSettings(
+      enablePasswordProtected,
+      WriteAsync,
+      WriteInitialSettingsAsync
+    );
+
+  private void WriteInitialSettingsSyncOrAsync_AfterPreviousWrite_WritesInitialSettings(
+    bool enablePasswordProtected,
+    Func<FlashSettings, CancellationToken, ValueTask> writeSyncOrAsync,
+    Func<FlashSettings, CancellationToken, ValueTask> writeInitialSettingsSyncOrAsync
+  )
+  {
+    var initialFlashMemory = new FlashMemory();
+    var stagedFlashMemory = new FlashMemory();
+    var hasPasswordProvided = enablePasswordProtected;
+    var password = "password"u8;
+
+    using var mcp2221A = CreateWithAllocatedFlashMemory(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        chipSetting0: 0b_0_11111_00 // CHIPPROT(1-0): 00(Unsecured)
+      ),
+      initialFlashMemory,
+      stagedFlashMemory
+    );
+
+    /*
+     * write #1
+     */
+
+    // set IsDirty to true
+    mcp2221A
+      .Flash
+      .ModifyUsbVendorId((~mcp2221A.Flash.UsbVendorId) & 0xFFFF) // Chip Settings area
+      .ModifyUsbProductId((~mcp2221A.Flash.UsbProductId) & 0xFFFF) // Chip Settings area
+      .ModifyGpSetting(0, GpFunction.Gpio, PinMode.Output, !mcp2221A.Flash.GpPin0.GpioOutputValue) // GP Settings area
+      .ModifyGpSetting(1, GpFunction.Gpio, PinMode.Output, !mcp2221A.Flash.GpPin1.GpioOutputValue) // GP Settings area
+      .ModifyGpSetting(2, GpFunction.Gpio, PinMode.Input, !mcp2221A.Flash.GpPin2.GpioOutputValue) // GP Settings area
+      .ModifyGpSetting(3, GpFunction.Gpio, PinMode.Input, !mcp2221A.Flash.GpPin3.GpioOutputValue) // GP Settings area
+      .ModifyUsbManufacturerString("Vendor #1") // USB Manufacturer Descriptor String area
+      .ModifyUsbProductString("Product #1") // USB Product Descriptor String area
+      .ModifyUsbSerialNumberString("Serial Number #1"); // USB Serial Number Descriptor String area
+
+    if (enablePasswordProtected) {
+      mcp2221A
+        .Flash
+        .ModifyWriteProtection(DeviceConfigurationProtectionLevel.PasswordProtected) // Chip Settings area
+        .ModifyPassword(password); // Chip Settings area
+    }
+
+    Mcp2221AControllerTests.AppendPseudoResponse(
+      mcp2221A,
+      // [MCP2221A] 3.1.3 WRITE FLASH DATA
+      // [1] 0x00: Command completed successfully
+      // [2-63] Don't care
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write Chip Settings
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write GP Settings
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write USB Manufacturer Descriptor String
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write USB Product Descriptor String
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)) // Write USB Serial Number Descriptor String
+    );
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(mcp2221A.Flash.IsDirty, Is.True, "before write");
+
+    Assert.That(
+      async () => await writeSyncOrAsync(mcp2221A.Flash, default),
+      Throws.Nothing
+    );
+
+    Assert.That(mcp2221A.Flash.IsDirty, Is.False, "after write");
+
+    /*
+     * write #2 (initial settings)
+     */
+    mcp2221A
+      .Flash
+      .ModifyUsbVendorId(0xFFFF) // Chip Settings area
+      .ModifyUsbProductId(0xFFFF) // Chip Settings area
+      .ModifyGpSetting(0, GpFunction.LedOutput, PinMode.Input) // GP Settings area
+      .ModifyGpSetting(1, GpFunction.LedOutput, PinMode.Input) // GP Settings area
+      .ModifyGpSetting(2, GpFunction.Dac, PinMode.Output) // GP Settings area
+      .ModifyGpSetting(3, GpFunction.Dac, PinMode.Output) // GP Settings area
+      .ModifyUsbManufacturerString("Vendor #2") // USB Manufacturer Descriptor String area
+      .ModifyUsbProductString("Product #2") // USB Product Descriptor String area
+      .ModifyUsbSerialNumberString("Serial Number #2"); // USB Serial Number Descriptor String area
+
+    Mcp2221AControllerTests.AppendPseudoResponse(
+      mcp2221A,
+      // [MCP2221A] 3.1.3 WRITE FLASH DATA
+      // [1] 0x00: Command completed successfully
+      // [2-63] Don't care
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write Chip Settings
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write GP Settings
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write USB Manufacturer Descriptor String
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)), // Write USB Product Descriptor String
+      "B1-00-" + string.Join("-", Enumerable.Repeat("00", 62)) // Write USB Serial Number Descriptor String
+    );
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(mcp2221A.Flash.IsDirty, Is.True, "before write");
+
+    Assert.That(
+      async () => await writeInitialSettingsSyncOrAsync(mcp2221A.Flash, default),
+      Throws.Nothing
+    );
+
+    Assert.That(mcp2221A.Flash.IsDirty, Is.False, "after write");
+
+    Assert.That(
+      stagedFlashMemory.DiffersFrom(initialFlashMemory),
+      Is.False
+    );
+
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, commandNumber: 0),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x00, // [1] Write Chip Settings
+          .. initialFlashMemory.ChipSettings, // [2-11] CHIPSETTING0-USBREQCRT
+          .. hasPasswordProvided // [12-19] PASS0-PASS8
+            ? password
+            : initialFlashMemory.Password,
+          .. Enumerable.Repeat<byte>(0x00, 64 - 20) // [20-63]: don't care
+        ]
+      )
+    );
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, commandNumber: 1),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x01, // [1] Write GP Settings
+          .. initialFlashMemory.GpSettings, // [2-5] GP0-GP3 Power-Up Settings
+          .. Enumerable.Repeat<byte>(0x00, 64 - 6) // [6-63]: don't care
+        ]
+      )
+    );
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, commandNumber: 2),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x02, // [1] Write USB Manufacturer Descriptor String
+          (byte)(initialFlashMemory.UsbManufacturerDescriptorStringLength + 2), // [2] Number of bytes + 2
+          0x03, // [3] must always be 0x03
+          .. initialFlashMemory.UsbManufacturerDescriptorString, // [4-63] 16-bit Unicode chars
+        ]
+      )
+    );
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, commandNumber: 3),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x03, // [1] Write USB Product Descriptor String
+          (byte)(initialFlashMemory.UsbProductDescriptorStringLength + 2), // [2] Number of bytes + 2
+          0x03, // [3] must always be 0x03
+          .. initialFlashMemory.UsbProductDescriptorString, // [4-63] 16-bit Unicode chars
+        ]
+      )
+    );
+    Assert.That(
+      Mcp2221AControllerTests.GetSentCommand(mcp2221A, commandNumber: 4),
+      SequenceIs.EqualTo<byte>(
+        [
+          0xB1, // [0] WRITE FLASH DATA
+          0x04, // [1] Write USB Serial Number Descriptor String
+          (byte)(initialFlashMemory.UsbSerialNumberDescriptorStringLength + 2), // [2] Number of bytes + 2
+          0x03, // [3] must always be 0x03
+          .. initialFlashMemory.UsbSerialNumberDescriptorString, // [4-63] 16-bit Unicode chars
+        ]
+      )
+    );
+  }
+
+  // 書き込み保護が PasswordProtected に設定されており、かつパスワードが未設定の状態で
+  // WriteInitialSettings を呼び出した場合、InvalidOperationException がスローされコマンド送信が防止されることを検証する。
+  /// <summary>
+  /// Tests that <see cref="FlashSettings.WriteInitialSettings"/> throws an <see cref="InvalidOperationException"/>
+  /// when write protection is set to <see cref="DeviceConfigurationProtectionLevel.PasswordProtected"/> but no password has been provided.
+  /// </summary>
+  /// <remarks>
+  /// <para>
+  /// <b>Preconditions:</b>
+  /// <list type="bullet">
+  ///   <item><description>The initial device protection level is <see cref="DeviceConfigurationProtectionLevel.PasswordProtected"/>.</description></item>
+  ///   <item><description>No password has been set via <see cref="FlashSettings.ModifyPassword"/>.</description></item>
+  /// </list>
+  /// </para>
+  /// <para>
+  /// <b>Expected Results:</b>
+  /// <list type="bullet">
+  ///   <item><description>An <see cref="InvalidOperationException"/> is thrown.</description></item>
+  ///   <item><description>No write commands are transmitted to the transceiver.</description></item>
+  /// </list>
+  /// </para>
+  /// </remarks>
+  [Test]
+  public void WriteInitialSettings_PasswordProtectionEnabledAndPasswordNotProvided_ThrowsException()
+    => WriteInitialSettingsSyncOrAsync_PasswordProtectionEnabledAndPasswordNotProvided_ThrowsException(WriteInitialSettings);
+
+  /// <inheritdoc cref="WriteInitialSettings_PasswordProtectionEnabledAndPasswordNotProvided_ThrowsException">
+  [Test]
+  public void WriteInitialSettingsAsync_PasswordProtectionEnabledAndPasswordNotProvided_ThrowsException()
+    => WriteInitialSettingsSyncOrAsync_PasswordProtectionEnabledAndPasswordNotProvided_ThrowsException(WriteInitialSettingsAsync);
+
+  private void WriteInitialSettingsSyncOrAsync_PasswordProtectionEnabledAndPasswordNotProvided_ThrowsException(
+    Func<FlashSettings, CancellationToken, ValueTask> writeInitialSettingsSyncOrAsync
+  )
+  {
+    using var mcp2221A = Mcp2221AController.Create(
+      Mcp2221AControllerTests.CreatePseudoDevice(
+        chipSetting0: 0b_0_11111_01 // CHIPPROT(1-0): 01(Password-protected)
+      )
+    );
+
+    // On an actual device, SendAccessPassword must be called here to unlock
+    // password protection before performing a write operation. However, this
+    // test case assumes that write protection has already been unlocked.
+    // mcp2221A.Flash.SendAccessPassword(...);
+
+    // password not provided
+    // mcp2221A.Flash.ModifyPassword("password"u8);
+
+    // command should not be sent
+    // Mcp2221AControllerTests.AppendPseudoResponse(...);
+    Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
+
+    Assert.That(
+      mcp2221A.Flash.WriteProtectionLevel,
+      Is.EqualTo(DeviceConfigurationProtectionLevel.PasswordProtected)
+    );
+    Assert.That(mcp2221A.Flash.IsDirty, Is.False, "before write");
+
+    Assert.That(
+      async () => await writeInitialSettingsSyncOrAsync(mcp2221A.Flash, default),
+      Throws
+        .InvalidOperationException
+        .With
+        .Message.Contains("no password has been provided")
+    );
+
+    Assert.That(mcp2221A.Flash.IsDirty, Is.False, "after write");
+    Assert.That(
+      Mcp2221AControllerTests.GetEndPointWriteStream(mcp2221A).Length,
+      Is.Zero,
+      "command should not be sent"
     );
   }
 }

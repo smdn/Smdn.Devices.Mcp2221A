@@ -83,7 +83,7 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
   /// populating it with a copy of the initial settings if it has not yet been created.
   /// </value>
   private IFlashMemory SettingsForWrite
-    => stagedSettings ??= flashMemoryFactory.Create().CopyFrom(initialSettings);
+    => EnsureStagedSettingsCreated();
 
   /// <summary>
   /// Gets a value indicating whether there are unwritten staged settings
@@ -140,6 +140,9 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
     this.hardwareRevision = hardwareRevision ?? throw new ArgumentNullException(nameof(hardwareRevision));
     this.firmwareRevision = firmwareRevision ?? throw new ArgumentNullException(nameof(firmwareRevision));
   }
+
+  private IFlashMemory EnsureStagedSettingsCreated()
+    => stagedSettings ??= flashMemoryFactory.Create().CopyFrom(initialSettings);
 
   /// <summary>
   /// Reverts all staged changes and restores the settings to the
