@@ -26,6 +26,41 @@ public readonly struct GpSetting : IEquatable<GpSetting> {
   internal const byte GpioDirectionBitOutput = 0b_000_0_0_000;
   internal const byte GpioDirectionBitInput = GpioDirectionBitMask;
 
+  internal static void WriteFunction(ref byte register, int index, GpFunction function)
+    => WriteDesignation(
+      register: ref register,
+#pragma warning disable SA1513
+      designation: index switch {
+        0 => Gp0Controller.TranslateFunction(function),
+        1 => Gp1Controller.TranslateFunction(function),
+        2 => Gp2Controller.TranslateFunction(function),
+        3 => Gp3Controller.TranslateFunction(function),
+        _ => throw new InvalidOperationException($"GP pin index {index} is not supported. It must be between 0 and 3."),
+      } ?? throw new NotSupportedException($"GP{index} does not support the GP function '{function}'.")
+#pragma warning restore SA1513
+    );
+
+  internal static void WriteDesignation(ref byte register, GpDesignation designation)
+  {
+    register &= unchecked((byte)~DesignationMask);
+    register |= (byte)designation;
+  }
+
+  internal static void WriteGpioOutputValue(ref byte register, PinValue value)
+  {
+    register &= unchecked((byte)~GpioOutputValueBitMask);
+    register |= value.IsHigh ? GpioOutputValueBitHigh : GpioOutputValueBitLow;
+  }
+
+  internal static void WriteGpioDirection(ref byte register, PinMode mode)
+  {
+    register &= unchecked((byte)~GpioDirectionBitMask);
+    register |= (mode == PinMode.Input) ? GpioDirectionBitInput : GpioDirectionBitOutput;
+  }
+
+  /*
+   * instance members
+   */
   private readonly byte index;
   private readonly byte registerValue;
 
