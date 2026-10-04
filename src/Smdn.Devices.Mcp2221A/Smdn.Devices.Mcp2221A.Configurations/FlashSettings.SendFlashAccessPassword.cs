@@ -69,8 +69,8 @@ partial class FlashSettings {
   /// Thrown when <paramref name="password"/> length is not exactly 8 bytes.
   /// </exception>
   /// <exception cref="FlashWriteAccessException">
-  /// Thrown when the device rejects the password (e.g., password mismatch
-  /// or Flash update limits reached).
+  /// Thrown when the device rejects the command (e.g., returning a <c>0x03 Command not allowed</c>
+  /// status when the maximum number of failed Flash updates has been reached).
   /// </exception>
   /// <exception cref="Mcp2221ACommandException">
   /// Thrown when an error occurs during communication with the MCP2221A device.

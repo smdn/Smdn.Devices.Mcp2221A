@@ -183,7 +183,9 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
   /// </param>
   /// <exception cref="FlashWriteAccessException">
   /// Thrown when the device rejects the write operation because Flash write
-  /// protection is active or write access is not permitted.
+  /// protection remains active (e.g., when <see cref="SendAccessPassword"/> was
+  /// omitted or supplied with an incorrect password) or write access is not
+  /// permitted.
   /// </exception>
   /// <remarks>
   /// <para>

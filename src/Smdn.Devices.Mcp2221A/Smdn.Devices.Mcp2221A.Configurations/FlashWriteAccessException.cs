@@ -5,9 +5,9 @@ using System;
 namespace Smdn.Devices.Mcp2221A.Configurations;
 
 /// <summary>
-/// The exception that is thrown when a Flash memory access command fails,
-/// such as when providing an invalid password, exceeding the Flash update limit,
-/// or attempting a write operation while Flash write protection is active.
+/// The exception that is thrown when a Flash memory operation fails or is
+/// rejected, such as when Flash write protection remains active or Flash
+/// update limits have been reached.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -17,17 +17,19 @@ namespace Smdn.Devices.Mcp2221A.Configurations;
 /// <list type="bullet">
 ///   <item>
 ///     <description>
-///       An incorrect password is supplied or Flash update limits have been
-///       reached during a call to <see cref="FlashSettings.SendAccessPassword"/> or
-///       <see cref="FlashSettings.SendAccessPasswordAsync"/>.
+///       A Flash write command is rejected by the device during a call to
+///       <see cref="FlashSettings.Write"/> or <see cref="FlashSettings.WriteAsync"/>
+///       because write protection remains active (e.g., when write access was not
+///       unlocked with <see cref="FlashSettings.SendAccessPassword"/> or
+///       <see cref="FlashSettings.SendAccessPasswordAsync"/> prior to writing) or
+///       write access is not permitted (e.g., returning a <c>0x03 Command not allowed</c>
+///       status).
 ///     </description>
 ///   </item>
 ///   <item>
 ///     <description>
-///       A Flash write command is rejected by the device during a call to
-///       <see cref="FlashSettings.Write"/> or <see cref="FlashSettings.WriteAsync"/>
-///       because write protection remains active or write access is not permitted
-///       (e.g., returning a <c>0x03 Command not allowed</c> status).
+///       Flash update limits have been reached, causing Flash write commands to be
+///       rejected by the device.
 ///     </description>
 ///   </item>
 /// </list>
