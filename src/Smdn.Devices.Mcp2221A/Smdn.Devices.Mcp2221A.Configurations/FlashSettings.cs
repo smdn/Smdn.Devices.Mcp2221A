@@ -49,6 +49,15 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
   private const int OffsetOfUsbPowerAttributes = 8; // USBPWRATTR
   private const int OffsetOfUsbRequiredCurrent = 9; // USBREQCRT
 
+  private static void ThrowIfPasswordLengthNotValid(ReadOnlySpan<byte> password, string paramName)
+  {
+    if (password.Length != FlashMemory.LengthOfPassword)
+      throw new ArgumentException($"The password length must be exactly {FlashMemory.LengthOfPassword} bytes.", paramName);
+  }
+
+  /*
+   * instance members
+   */
   private readonly IFlashMemory initialSettings;
   private readonly IFlashMemoryFactory flashMemoryFactory;
   private readonly Mcp2221ATransceiver transceiver;
@@ -172,6 +181,12 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
   /// <param name="cancellationToken">
   /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
   /// </param>
+  /// <exception cref="FlashWriteAccessException">
+  /// Thrown when the device rejects the write operation because Flash write
+  /// protection remains active (e.g., when <see cref="SendAccessPassword"/> was
+  /// omitted or supplied with an incorrect password) or write access is not
+  /// permitted.
+  /// </exception>
   /// <remarks>
   /// <para>
   /// This method issues the command to persist all staged configuration changes
@@ -190,9 +205,11 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
   /// load the updated Flash settings into SRAM.
   /// </para>
   /// </remarks>
+  /// <seealso cref="SendAccessPassword"/>
   /// <seealso cref="WriteAsync"/>
   /// <seealso cref="Restore"/>
   /// <seealso cref="IsDirty"/>
+  /// <seealso cref="FlashWriteAccessException"/>
   public void Write(CancellationToken cancellationToken = default)
   {
     if (!IsDirty)
@@ -217,7 +234,7 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
   /// Asynchronously writes the current staged settings and any pending password
   /// modifications to the Flash memory of the MCP2221A device.
   /// </summary>
-  /// <inheritdoc cref="Write(CancellationToken)" path="/param|/remarks|/seealso"/>
+  /// <inheritdoc cref="Write(CancellationToken)" path="/param|/exception|/remarks|/seealso"/>
   /// <returns>
   /// A <see cref="ValueTask"/> representing the asynchronous write operation.
   /// </returns>

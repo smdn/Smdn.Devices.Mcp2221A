@@ -35,8 +35,7 @@ partial class FlashSettings {
   /// </exception>
   public FlashSettings ModifyPassword(ReadOnlySpan<byte> password)
   {
-    if (password.Length != FlashMemory.LengthOfPassword)
-      throw new ArgumentException($"The password length must be exactly {FlashMemory.LengthOfPassword} bytes.", nameof(password));
+    ThrowIfPasswordLengthNotValid(password, nameof(password));
 
     if (!password.TryCopyTo(SettingsForWrite.Password))
       throw new InvalidOperationException("The destination password buffer is too short to store the password.");
