@@ -1593,7 +1593,13 @@ partial class FlashSettingsTests {
       Is.EqualTo(Encoding.Unicode.GetByteCount(newValue))
     );
     Assert.That(
-      Encoding.Unicode.GetString(stagedFlashMemory.StoredUsbManufacturerDescriptorStringSpan),
+      Encoding.Unicode.GetString(
+        stagedFlashMemory
+          .StoredUsbManufacturerDescriptorStringSpan
+#if !SYSTEM_TEXT_ENCODING_GETSTRING_READONLYSPAN_OF_BYTE
+          .ToArray()
+#endif
+      ),
       Is.EqualTo(newValue)
     );
     Assert.That(
@@ -1686,7 +1692,13 @@ partial class FlashSettingsTests {
       Is.EqualTo(Encoding.Unicode.GetByteCount(newValue))
     );
     Assert.That(
-      Encoding.Unicode.GetString(stagedFlashMemory.StoredUsbProductDescriptorStringSpan),
+      Encoding.Unicode.GetString(
+        stagedFlashMemory
+          .StoredUsbProductDescriptorStringSpan
+#if !SYSTEM_TEXT_ENCODING_GETSTRING_READONLYSPAN_OF_BYTE
+          .ToArray()
+#endif
+      ),
       Is.EqualTo(newValue)
     );
     Assert.That(
@@ -1777,7 +1789,13 @@ partial class FlashSettingsTests {
       Is.EqualTo(Encoding.Unicode.GetByteCount(newValue))
     );
     Assert.That(
-      Encoding.Unicode.GetString(stagedFlashMemory.StoredUsbSerialNumberDescriptorStringSpan),
+      Encoding.Unicode.GetString(
+        stagedFlashMemory
+          .StoredUsbSerialNumberDescriptorStringSpan
+#if !SYSTEM_TEXT_ENCODING_GETSTRING_READONLYSPAN_OF_BYTE
+          .ToArray()
+#endif
+      ),
       Is.EqualTo(newValue)
     );
     Assert.That(
