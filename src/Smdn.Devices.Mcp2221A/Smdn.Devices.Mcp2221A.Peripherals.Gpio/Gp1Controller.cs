@@ -42,6 +42,16 @@ public sealed class Gp1Controller :
         : GpFunction.LedOutput, // LED_UTX (factory default)
     };
 
+  internal static GpDesignation? TranslateFunction(GpFunction function)
+    => function switch {
+      GpFunction.Gpio => GpDesignation.GpioOperation, // GPIO
+      GpFunction.ClockOutput => GpDesignation.DedicatedFunctionOperation, // CLK OUT
+      GpFunction.Adc => GpDesignation.AlternateFunction0, // ADC1
+      GpFunction.LedOutput => GpDesignation.AlternateFunction1, // LED_UTX
+      GpFunction.InterruptOnChange => GpDesignation.AlternateFunction2, // IOC
+      _ => null,
+    };
+
   /// <inheritdoc/>
   /// <value>
   /// Always <c>1</c>.
@@ -98,14 +108,7 @@ public sealed class Gp1Controller :
   }
 
   private protected override GpDesignation? GetDesignationForFunction(GpFunction function)
-    => function switch {
-      GpFunction.Gpio => GpDesignation.GpioOperation, // GPIO
-      GpFunction.ClockOutput => GpDesignation.DedicatedFunctionOperation, // CLK OUT
-      GpFunction.Adc => GpDesignation.AlternateFunction0, // ADC1
-      GpFunction.LedOutput => GpDesignation.AlternateFunction1, // LED_UTX
-      GpFunction.InterruptOnChange => GpDesignation.AlternateFunction2, // IOC
-      _ => null,
-    };
+    => TranslateFunction(function);
 
   /// <inheritdoc/>
   public ValueTask ConfigureAsInterruptOnChangeAsync(

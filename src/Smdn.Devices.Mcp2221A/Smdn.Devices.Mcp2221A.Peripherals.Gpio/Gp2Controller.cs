@@ -36,6 +36,15 @@ public sealed class Gp2Controller :
         : GpFunction.UsbConfigureStatus, // USBCFG (factory default)
     };
 
+  internal static GpDesignation? TranslateFunction(GpFunction function)
+    => function switch {
+      GpFunction.Gpio => GpDesignation.GpioOperation, // GPIO
+      GpFunction.UsbConfigureStatus => GpDesignation.DedicatedFunctionOperation, // USBCFG
+      GpFunction.Adc => GpDesignation.AlternateFunction0, // ADC2
+      GpFunction.Dac => GpDesignation.AlternateFunction1, // DAC1
+      _ => null,
+    };
+
   /// <inheritdoc/>
   /// <value>
   /// Always <c>2</c>.
@@ -82,13 +91,7 @@ public sealed class Gp2Controller :
   }
 
   private protected override GpDesignation? GetDesignationForFunction(GpFunction function)
-    => function switch {
-      GpFunction.Gpio => GpDesignation.GpioOperation, // GPIO
-      GpFunction.UsbConfigureStatus => GpDesignation.DedicatedFunctionOperation, // USBCFG
-      GpFunction.Adc => GpDesignation.AlternateFunction0, // ADC2
-      GpFunction.Dac => GpDesignation.AlternateFunction1, // DAC1
-      _ => null,
-    };
+    => TranslateFunction(function);
 
   /// <inheritdoc/>
   public ValueTask ConfigureAsDacAsync(

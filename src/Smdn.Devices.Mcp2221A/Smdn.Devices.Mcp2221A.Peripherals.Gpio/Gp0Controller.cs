@@ -28,6 +28,14 @@ public sealed class Gp0Controller : GpController {
         : GpFunction.LedOutput, // LED_URX (factory default)
     };
 
+  internal static GpDesignation? TranslateFunction(GpFunction function)
+    => function switch {
+      GpFunction.Gpio => GpDesignation.GpioOperation, // GPIO
+      GpFunction.UsbSuspendStatus => GpDesignation.DedicatedFunctionOperation, // SSPND
+      GpFunction.LedOutput => GpDesignation.AlternateFunction0, // LED_URX
+      _ => null,
+    };
+
   /// <inheritdoc/>
   /// <value>
   /// Always <c>0</c>.
@@ -58,12 +66,7 @@ public sealed class Gp0Controller : GpController {
   }
 
   private protected override GpDesignation? GetDesignationForFunction(GpFunction function)
-    => function switch {
-      GpFunction.Gpio => GpDesignation.GpioOperation, // GPIO
-      GpFunction.UsbSuspendStatus => GpDesignation.DedicatedFunctionOperation, // SSPND
-      GpFunction.LedOutput => GpDesignation.AlternateFunction0, // LED_URX
-      _ => null,
-    };
+    => TranslateFunction(function);
 
   /// <exception cref="InvalidOperationException">
   /// Thrown when <see cref="GpController.IsUsedByGpioController"/> is <see langword="true"/>.

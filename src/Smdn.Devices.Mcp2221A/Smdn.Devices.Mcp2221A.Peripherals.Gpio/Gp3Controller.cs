@@ -36,6 +36,15 @@ public sealed class Gp3Controller :
         : GpFunction.LedOutput, // LED_I2C (factory default)
     };
 
+  internal static GpDesignation? TranslateFunction(GpFunction function)
+    => function switch {
+      GpFunction.Gpio => GpDesignation.GpioOperation, // GPIO
+      GpFunction.LedOutput => GpDesignation.DedicatedFunctionOperation, // LED_I2C
+      GpFunction.Adc => GpDesignation.AlternateFunction0, // ADC3
+      GpFunction.Dac => GpDesignation.AlternateFunction1, // DAC2
+      _ => null,
+    };
+
   /// <inheritdoc/>
   /// <value>
   /// Always <c>3</c>.
@@ -82,13 +91,7 @@ public sealed class Gp3Controller :
   }
 
   private protected override GpDesignation? GetDesignationForFunction(GpFunction function)
-    => function switch {
-      GpFunction.Gpio => GpDesignation.GpioOperation, // GPIO
-      GpFunction.LedOutput => GpDesignation.DedicatedFunctionOperation, // LED_I2C
-      GpFunction.Adc => GpDesignation.AlternateFunction0, // ADC3
-      GpFunction.Dac => GpDesignation.AlternateFunction1, // DAC2
-      _ => null,
-    };
+    => TranslateFunction(function);
 
   /// <inheritdoc/>
   public ValueTask ConfigureAsDacAsync(

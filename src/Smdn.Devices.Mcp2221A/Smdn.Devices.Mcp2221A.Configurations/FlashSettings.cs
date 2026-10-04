@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Smdn.Devices.Mcp2221A.Transport;
 
@@ -63,6 +61,7 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
   private readonly Mcp2221ATransceiver transceiver;
 
   private IFlashMemory? stagedSettings;
+  private bool hasPasswordProvided;
   private bool hasPasswordModified;
   private bool hasWritten;
 
@@ -84,7 +83,7 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
   /// populating it with a copy of the initial settings if it has not yet been created.
   /// </value>
   private IFlashMemory SettingsForWrite
-    => stagedSettings ??= flashMemoryFactory.Create().CopyFrom(initialSettings);
+    => EnsureStagedSettingsCreated();
 
   /// <summary>
   /// Gets a value indicating whether there are unwritten staged settings
@@ -142,6 +141,9 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
     this.firmwareRevision = firmwareRevision ?? throw new ArgumentNullException(nameof(firmwareRevision));
   }
 
+  private IFlashMemory EnsureStagedSettingsCreated()
+    => stagedSettings ??= flashMemoryFactory.Create().CopyFrom(initialSettings);
+
   /// <summary>
   /// Reverts all staged changes and restores the settings to the
   /// initial state captured at the time of the <see cref="Mcp2221AController"/>
@@ -172,89 +174,5 @@ public sealed partial class FlashSettings : IMcp2221AInfo {
     hasWritten = false;
 
     return this;
-  }
-
-  /// <summary>
-  /// Writes the current staged settings and any pending password modifications
-  /// to the Flash memory of the MCP2221A device.
-  /// </summary>
-  /// <param name="cancellationToken">
-  /// The <see cref="CancellationToken"/> to monitor for cancellation requests.
-  /// </param>
-  /// <exception cref="FlashWriteAccessException">
-  /// Thrown when the device rejects the write operation because Flash write
-  /// protection remains active (e.g., when <see cref="SendAccessPassword"/> was
-  /// omitted or supplied with an incorrect password) or write access is not
-  /// permitted.
-  /// </exception>
-  /// <remarks>
-  /// <para>
-  /// This method issues the command to persist all staged configuration changes
-  /// to the physical non-volatile Flash memory.
-  /// If there are no staged configuration changes or pending password
-  /// modifications (i.e., <see cref="IsDirty"/> is <see langword="false"/>),
-  /// this method returns immediately without issuing any write commands to
-  /// the device.
-  /// </para>
-  /// <para>
-  /// Upon completion, the staged changes are marked as written, causing
-  /// <see cref="IsDirty"/> to return <see langword="false"/> until subsequent
-  /// modifications are made.
-  /// Note that writing to Flash memory does not immediately alter the current
-  /// SRAM operating parameters; a device reset or power cycle is required to
-  /// load the updated Flash settings into SRAM.
-  /// </para>
-  /// </remarks>
-  /// <seealso cref="SendAccessPassword"/>
-  /// <seealso cref="WriteAsync"/>
-  /// <seealso cref="Restore"/>
-  /// <seealso cref="IsDirty"/>
-  /// <seealso cref="FlashWriteAccessException"/>
-  public void Write(CancellationToken cancellationToken = default)
-  {
-    if (!IsDirty)
-      return; // nothing to write
-
-    cancellationToken.ThrowIfCancellationRequested();
-
-    try {
-      using (transceiver.EnterCommandTransaction(cancellationToken)) {
-        hasWritten = true;
-        hasPasswordModified = false;
-        // TODO
-        throw new NotImplementedException();
-      }
-    }
-    catch {
-      throw;
-    }
-  }
-
-  /// <summary>
-  /// Asynchronously writes the current staged settings and any pending password
-  /// modifications to the Flash memory of the MCP2221A device.
-  /// </summary>
-  /// <inheritdoc cref="Write(CancellationToken)" path="/param|/exception|/remarks|/seealso"/>
-  /// <returns>
-  /// A <see cref="ValueTask"/> representing the asynchronous write operation.
-  /// </returns>
-  public async ValueTask WriteAsync(CancellationToken cancellationToken = default)
-  {
-    if (!IsDirty)
-      return; // nothing to write
-
-    cancellationToken.ThrowIfCancellationRequested();
-
-    try {
-      using (await transceiver.EnterCommandTransactionAsync(cancellationToken).ConfigureAwait(false)) {
-        hasWritten = true;
-        hasPasswordModified = false;
-        // TODO
-        throw new NotImplementedException();
-      }
-    }
-    catch {
-      throw;
-    }
   }
 }

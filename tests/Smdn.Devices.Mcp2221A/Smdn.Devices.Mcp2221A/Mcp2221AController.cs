@@ -42,7 +42,7 @@ public partial class Mcp2221AControllerTests {
     byte gp1Settings = 0b_000_1_0_011, // Output: HIGH, Alternate Function 1 (LED UART TX)
     byte gp2Settings = 0b_000_1_0_001, // Output: HIGH, Dedicated function operation (USBCFG)
     byte gp3Settings = 0b_000_1_0_001, // Output: HIGH, Dedicated function operation (LED I2C)
-    byte chipSetting0 = 0b_0_00000_00, // CDCSNEN(7): disabled(0), CHIPPROT(1-0): unprotected(00)
+    byte chipSetting0 = 0b_0_11111_00, // CDCSNEN(7): disabled(0), CHIPPROT(1-0): unprotected(00) / factory default
     byte chipSetting1 = 0b_000_00_000, // CLKDC(4-3): Duty cycle 0%, CLKDIV(2-0): Reserved
     byte chipSetting2 = 0b_00_0_00000, // DACVRM(7-6): VRM is OFF, DACREF(5): VDD, DACVAL(4-0): 0
     byte chipSetting3 = 0b_0_0_0_00_0_00, // INTDETFEEN(6): Disable, INTDETREEN(5): Disable, ADCVRM(4-3): VRM is off, ADCREF(2): VDD

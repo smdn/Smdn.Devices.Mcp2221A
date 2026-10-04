@@ -28,15 +28,6 @@ partial class FlashSettingsTests {
     Assert.That(mcp2221A.Flash.CdcSerialNumberEnumerationEnabled, Is.EqualTo(expected));
   }
 
-#if false // TODO
-  [TestCase(true)]
-  [TestCase(false)]
-  public void CdcSerialNumberEnumerationEnabled_Staged(bool enable)
-  {
-    // FlashSettings.ModifyCdcSerialNumberEnumerationEnabled
-  }
-#endif
-
   [TestCase(0b_0_11111_11, DeviceConfigurationProtectionLevel.Reserved)]
   [TestCase(0b_0_11111_10, DeviceConfigurationProtectionLevel.PermanentlyLocked)]
   [TestCase(0b_0_11111_01, DeviceConfigurationProtectionLevel.PasswordProtected)]
@@ -56,17 +47,6 @@ partial class FlashSettingsTests {
     Assert.That(mcp2221A.Flash.WriteProtectionLevel, Is.EqualTo(expected));
   }
 
-#if false // TODO
-  [TestCase(DeviceConfigurationProtectionLevel.Reserved)]
-  [TestCase(DeviceConfigurationProtectionLevel.PermanentlyLocked)]
-  [TestCase(DeviceConfigurationProtectionLevel.PasswordProtected)]
-  [TestCase(DeviceConfigurationProtectionLevel.None)]
-  public void WriteProtectionLevel_Staged(DeviceConfigurationProtectionLevel level)
-  {
-    // FlashSettings.ModifyWriteProtectionLevel
-  }
-#endif
-
   [TestCase(0b_000_11_010, ClockOutputDutyCycle.Duty75)]
   [TestCase(0b_000_10_010, ClockOutputDutyCycle.Duty50)] // factory default
   [TestCase(0b_000_01_010, ClockOutputDutyCycle.Duty25)]
@@ -85,17 +65,6 @@ partial class FlashSettingsTests {
     Assert.That(mcp2221A.Flash.IsDirty, Is.False);
     Assert.That(mcp2221A.Flash.ClockOutputDutyCycle, Is.EqualTo(expected));
   }
-
-#if false // TODO
-  [TestCase(ClockOutputDutyCycle.Duty75)]
-  [TestCase(ClockOutputDutyCycle.Duty50)]
-  [TestCase(ClockOutputDutyCycle.Duty25)]
-  [TestCase(ClockOutputDutyCycle.Duty0)]
-  public void ClockOutputDutyCycle_Staged(ClockOutputDutyCycle dutyCycle)
-  {
-    // FlashSettings.ModifyClockOutputDutyCycle
-  }
-#endif
 
   [TestCase(0b_000_10_111, ClockOutputFrequency.Frequency375kHz)]
   [TestCase(0b_000_10_110, ClockOutputFrequency.Frequency750kHz)]
@@ -120,21 +89,6 @@ partial class FlashSettingsTests {
     Assert.That(mcp2221A.Flash.ClockOutputFrequency, Is.EqualTo(expected));
   }
 
-#if false // TODO
-  [TestCase(ClockOutputFrequency.Frequency375kHz)]
-  [TestCase(ClockOutputFrequency.Frequency750kHz)]
-  [TestCase(ClockOutputFrequency.Frequency1500kHz)]
-  [TestCase(ClockOutputFrequency.Frequency3MHz)]
-  [TestCase(ClockOutputFrequency.Frequency6MHz)]
-  [TestCase(ClockOutputFrequency.Frequency12MHz)]
-  [TestCase(ClockOutputFrequency.Frequency24MHz)]
-  [TestCase(ClockOutputFrequency.Reserved)]
-  public void ClockOutputFrequency_Staged(ClockOutputFrequency frequency)
-  {
-    // FlashSettings.ModifyClockOutputFrequency
-  }
-#endif
-
   [TestCase(0b_11_1_00000, VoltageReferenceSource.Vrm4096)]
   [TestCase(0b_10_1_00000, VoltageReferenceSource.Vrm2048)]
   [TestCase(0b_01_1_00000, VoltageReferenceSource.Vrm1024)]
@@ -158,18 +112,6 @@ partial class FlashSettingsTests {
     Assert.That(mcp2221A.Flash.DacVoltageReference, Is.EqualTo(expected));
   }
 
-#if false // TODO
-  [TestCase(VoltageReferenceSource.Vrm4096)]
-  [TestCase(VoltageReferenceSource.Vrm2048)]
-  [TestCase(VoltageReferenceSource.Vrm1024)]
-  [TestCase(VoltageReferenceSource.VrmOff)]
-  [TestCase(VoltageReferenceSource.Vdd)]
-  public void DacVoltageReference_Staged(VoltageReferenceSource dacVoltageReference)
-  {
-    // FlashSettings.ModifyDacVoltageReference
-  }
-#endif
-
   [TestCase(0b_10_0_11111, 31)]
   [TestCase(0b_10_0_01000, 8)] // factory default
   [TestCase(0b_00_1_00001, 1)]
@@ -189,17 +131,6 @@ partial class FlashSettingsTests {
     Assert.That(mcp2221A.Flash.DacInitialValue, Is.EqualTo(expected));
   }
 
-#if false // TODO
-  [TestCase(15)]
-  [TestCase(8)]
-  [TestCase(1)]
-  [TestCase(0)]
-  public void DacInitialValue_Staged(int dacInitialValue)
-  {
-    // FlashSettings.ModifyDacInitialValue
-  }
-#endif
-
   [TestCase(0b_0_1_1_01_1_00, InterruptOnChangeTrigger.Both)] // factory default
   [TestCase(0b_0_1_0_00_0_00, InterruptOnChangeTrigger.Falling)]
   [TestCase(0b_0_0_1_00_0_00, InterruptOnChangeTrigger.Rising)]
@@ -218,17 +149,6 @@ partial class FlashSettingsTests {
     Assert.That(mcp2221A.Flash.IsDirty, Is.False);
     Assert.That(mcp2221A.Flash.InterruptOnChangeTrigger, Is.EqualTo(expected));
   }
-
-#if false // TODO
-  [TestCase(InterruptOnChangeTrigger.Both)]
-  [TestCase(InterruptOnChangeTrigger.Falling)]
-  [TestCase(InterruptOnChangeTrigger.Rising)]
-  [TestCase(InterruptOnChangeTrigger.None)]
-  public void InterruptOnChangeTrigger_Staged(InterruptOnChangeTrigger trigger)
-  {
-    // FlashSettings.ModifyInterruptOnChangeTrigger
-  }
-#endif
 
   [TestCase(0b_0_0_0_11_1_00, VoltageReferenceSource.Vrm4096)]
   [TestCase(0b_0_0_0_10_1_00, VoltageReferenceSource.Vrm2048)]
@@ -252,18 +172,6 @@ partial class FlashSettingsTests {
     Assert.That(mcp2221A.Flash.IsDirty, Is.False);
     Assert.That(mcp2221A.Flash.AdcVoltageReference, Is.EqualTo(expected));
   }
-
-#if false // TODO
-  [TestCase(VoltageReferenceSource.Vrm4096)]
-  [TestCase(VoltageReferenceSource.Vrm2048)]
-  [TestCase(VoltageReferenceSource.Vrm1024)]
-  [TestCase(VoltageReferenceSource.VrmOff)]
-  [TestCase(VoltageReferenceSource.Vdd)]
-  public void AdcVoltageReference_Staged(VoltageReferenceSource adcVoltageReference)
-  {
-    // FlashSettings.ModifyAdcVoltageReference
-  }
-#endif
 
   [TestCase(0x04D8)] // factory default
   [TestCase(0xCC00)]
@@ -354,15 +262,6 @@ partial class FlashSettingsTests {
     Assert.That(mcp2221A.Flash.UsbPowerMode, Is.EqualTo(expected));
   }
 
-#if false // TODO
-  [TestCase(UsbPowerMode.SelfPowered)]
-  [TestCase(UsbPowerMode.BusPowered)]
-  public void UsbPowerMode_Staged(UsbPowerMode powerMode)
-  {
-    // FlashSettings.ModifyUsbPowerMode
-  }
-#endif
-
   [TestCase(0b_0_0_1_00000, true)]
   [TestCase(0b_0_0_0_00000, false)] // factory default
   public void UsbRemoteWakeUpEnabled_Initial(
@@ -379,15 +278,6 @@ partial class FlashSettingsTests {
     Assert.That(mcp2221A.Flash.IsDirty, Is.False);
     Assert.That(mcp2221A.Flash.UsbRemoteWakeUpEnabled, Is.EqualTo(expected));
   }
-
-#if false // TODO
-  [TestCase(true)]
-  [TestCase(false)]
-  public void UsbRemoteWakeUpEnabled_Staged(bool enable)
-  {
-    // FlashSettings.ModifyUsbRemoteWakeUpEnabled
-  }
-#endif
 
   [TestCase(0b_00000000, 0)]
   [TestCase(0b_00110010, 100)] // factory default
@@ -407,23 +297,6 @@ partial class FlashSettingsTests {
     Assert.That(mcp2221A.Flash.IsDirty, Is.False);
     Assert.That(mcp2221A.Flash.UsbRequestedCurrentAmount, Is.EqualTo(expected));
   }
-
-#if false // TODO
-  [TestCase(0, 0)]
-  [TestCase(1, 0)]
-  [TestCase(2, 2)]
-  [TestCase(100, 100)] // factory default
-  [TestCase(500, 500)]
-  [TestCase(509, 508)]
-  [TestCase(510, 510)]
-  public void UsbRequestedCurrentAmount_Staged(
-    int currentAmount,
-    int expectedCurrentAmount
-  )
-  {
-    // FlashSettings.ModifyUsbRequestedCurrentAmount
-  }
-#endif
 
   [TestCase(0b_000_1_0_010, true, PinMode.Output, GpFunction.LedOutput, false)] // Alternate function 0 (LEDURX); factory default
   [TestCase(0b_000_0_1_001, false, PinMode.Input, GpFunction.UsbSuspendStatus, false)] // Dedicated function operation (SSPND)
