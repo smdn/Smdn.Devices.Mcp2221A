@@ -33,7 +33,7 @@ partial class FlashSettings {
       );
   }
 
-  private static class RetrieveFlashChipSettingsCommand {
+  private static class ReadFlashDataChipSettingsCommand {
 #pragma warning disable SA1313 // [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
     public static void ConstructCommand(Span<byte> comm, IFlashMemory _)
 #pragma warning restore SA1313 // [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
@@ -59,7 +59,7 @@ partial class FlashSettings {
     }
   }
 
-  private static class RetrieveFlashGpSettingsCommand {
+  private static class ReadFlashDataGpSettingsCommand {
 #pragma warning disable SA1313 // [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
     public static void ConstructCommand(Span<byte> comm, IFlashMemory _)
 #pragma warning restore SA1313 // [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
@@ -92,7 +92,7 @@ partial class FlashSettings {
     SerialNumber = 0x04,
   }
 
-  private static class RetrieveFlashUsbDescriptorStringCommand {
+  private static class ReadFlashDataUsbDescriptorStringCommand {
     public static void ConstructCommand(
       Span<byte> comm,
       (IFlashMemory Memory, ReadFlashDataUsbDescriptorStringSubCode SubCode) arg
@@ -147,7 +147,7 @@ partial class FlashSettings {
     }
   }
 
-  private static class RetrieveFlashChipFactorySerialNumberCommand {
+  private static class ReadFlashDataChipFactorySerialNumberCommand {
 #pragma warning disable SA1313 // [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
     public static void ConstructCommand(Span<byte> comm, IFlashMemory _)
 #pragma warning restore SA1313 // [SA1313] SA1313ParameterNamesMustBeginWithLowerCaseLetter
@@ -193,29 +193,29 @@ partial class FlashSettings {
     _ = await transceiver.CommandAsync(
       arg: (memory, ReadFlashDataUsbDescriptorStringSubCode.Manufacturer),
       cancellationToken: cancellationToken,
-      constructCommand: RetrieveFlashUsbDescriptorStringCommand.ConstructCommand,
-      parseResponse: RetrieveFlashUsbDescriptorStringCommand.ParseResponse
+      constructCommand: ReadFlashDataUsbDescriptorStringCommand.ConstructCommand,
+      parseResponse: ReadFlashDataUsbDescriptorStringCommand.ParseResponse
     ).ConfigureAwait(false);
 
     _ = await transceiver.CommandAsync(
       arg: (memory, ReadFlashDataUsbDescriptorStringSubCode.Product),
       cancellationToken: cancellationToken,
-      constructCommand: RetrieveFlashUsbDescriptorStringCommand.ConstructCommand,
-      parseResponse: RetrieveFlashUsbDescriptorStringCommand.ParseResponse
+      constructCommand: ReadFlashDataUsbDescriptorStringCommand.ConstructCommand,
+      parseResponse: ReadFlashDataUsbDescriptorStringCommand.ParseResponse
     ).ConfigureAwait(false);
 
     _ = await transceiver.CommandAsync(
       arg: (memory, ReadFlashDataUsbDescriptorStringSubCode.SerialNumber),
       cancellationToken: cancellationToken,
-      constructCommand: RetrieveFlashUsbDescriptorStringCommand.ConstructCommand,
-      parseResponse: RetrieveFlashUsbDescriptorStringCommand.ParseResponse
+      constructCommand: ReadFlashDataUsbDescriptorStringCommand.ConstructCommand,
+      parseResponse: ReadFlashDataUsbDescriptorStringCommand.ParseResponse
     ).ConfigureAwait(false);
 
     _ = await transceiver.CommandAsync(
       arg: memory,
       cancellationToken: cancellationToken,
-      constructCommand: RetrieveFlashChipFactorySerialNumberCommand.ConstructCommand,
-      parseResponse: RetrieveFlashChipFactorySerialNumberCommand.ParseResponse
+      constructCommand: ReadFlashDataChipFactorySerialNumberCommand.ConstructCommand,
+      parseResponse: ReadFlashDataChipFactorySerialNumberCommand.ParseResponse
     ).ConfigureAwait(false);
 
     return new(
@@ -244,29 +244,29 @@ partial class FlashSettings {
     _ = transceiver.Command(
       arg: (memory, ReadFlashDataUsbDescriptorStringSubCode.Manufacturer),
       cancellationToken: cancellationToken,
-      constructCommand: RetrieveFlashUsbDescriptorStringCommand.ConstructCommand,
-      parseResponse: RetrieveFlashUsbDescriptorStringCommand.ParseResponse
+      constructCommand: ReadFlashDataUsbDescriptorStringCommand.ConstructCommand,
+      parseResponse: ReadFlashDataUsbDescriptorStringCommand.ParseResponse
     );
 
     _ = transceiver.Command(
       arg: (memory, ReadFlashDataUsbDescriptorStringSubCode.Product),
       cancellationToken: cancellationToken,
-      constructCommand: RetrieveFlashUsbDescriptorStringCommand.ConstructCommand,
-      parseResponse: RetrieveFlashUsbDescriptorStringCommand.ParseResponse
+      constructCommand: ReadFlashDataUsbDescriptorStringCommand.ConstructCommand,
+      parseResponse: ReadFlashDataUsbDescriptorStringCommand.ParseResponse
     );
 
     _ = transceiver.Command(
       arg: (memory, ReadFlashDataUsbDescriptorStringSubCode.SerialNumber),
       cancellationToken: cancellationToken,
-      constructCommand: RetrieveFlashUsbDescriptorStringCommand.ConstructCommand,
-      parseResponse: RetrieveFlashUsbDescriptorStringCommand.ParseResponse
+      constructCommand: ReadFlashDataUsbDescriptorStringCommand.ConstructCommand,
+      parseResponse: ReadFlashDataUsbDescriptorStringCommand.ParseResponse
     );
 
     _ = transceiver.Command(
       arg: memory,
       cancellationToken: cancellationToken,
-      constructCommand: RetrieveFlashChipFactorySerialNumberCommand.ConstructCommand,
-      parseResponse: RetrieveFlashChipFactorySerialNumberCommand.ParseResponse
+      constructCommand: ReadFlashDataChipFactorySerialNumberCommand.ConstructCommand,
+      parseResponse: ReadFlashDataChipFactorySerialNumberCommand.ParseResponse
     );
 
     return new(
@@ -285,15 +285,15 @@ partial class FlashSettings {
     _ = await transceiver.CommandAsync(
       arg: initialSettings,
       cancellationToken: cancellationToken,
-      constructCommand: RetrieveFlashChipSettingsCommand.ConstructCommand,
-      parseResponse: RetrieveFlashChipSettingsCommand.ParseResponse
+      constructCommand: ReadFlashDataChipSettingsCommand.ConstructCommand,
+      parseResponse: ReadFlashDataChipSettingsCommand.ParseResponse
     ).ConfigureAwait(false);
 
     _ = await transceiver.CommandAsync(
       arg: initialSettings,
       cancellationToken: cancellationToken,
-      constructCommand: RetrieveFlashGpSettingsCommand.ConstructCommand,
-      parseResponse: RetrieveFlashGpSettingsCommand.ParseResponse
+      constructCommand: ReadFlashDataGpSettingsCommand.ConstructCommand,
+      parseResponse: ReadFlashDataGpSettingsCommand.ParseResponse
     ).ConfigureAwait(false);
   }
 
@@ -304,15 +304,15 @@ partial class FlashSettings {
     _ = transceiver.Command(
       arg: initialSettings,
       cancellationToken: cancellationToken,
-      constructCommand: RetrieveFlashChipSettingsCommand.ConstructCommand,
-      parseResponse: RetrieveFlashChipSettingsCommand.ParseResponse
+      constructCommand: ReadFlashDataChipSettingsCommand.ConstructCommand,
+      parseResponse: ReadFlashDataChipSettingsCommand.ParseResponse
     );
 
     _ = transceiver.Command(
       arg: initialSettings,
       cancellationToken: cancellationToken,
-      constructCommand: RetrieveFlashGpSettingsCommand.ConstructCommand,
-      parseResponse: RetrieveFlashGpSettingsCommand.ParseResponse
+      constructCommand: ReadFlashDataGpSettingsCommand.ConstructCommand,
+      parseResponse: ReadFlashDataGpSettingsCommand.ParseResponse
     );
   }
 }
