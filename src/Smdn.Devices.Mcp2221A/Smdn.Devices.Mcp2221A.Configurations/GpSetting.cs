@@ -1,9 +1,5 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER
-#define SYSTEM_HASHCODE_COMBINE
-#endif
-
 using System;
 using System.Device.Gpio;
 

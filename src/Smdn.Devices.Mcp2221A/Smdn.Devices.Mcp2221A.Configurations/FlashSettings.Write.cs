@@ -1,9 +1,5 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
-#if NET8_0_OR_GREATER
-#define SYSTEM_TEXT_ENCODING_TRYGETBYTES
-#endif
-
 using System;
 using System.Buffers.Binary;
 using System.ComponentModel;
