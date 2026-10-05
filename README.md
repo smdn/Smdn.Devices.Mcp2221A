@@ -33,10 +33,11 @@ This library also provides the MCP2221/MCP2221A adapter interface for [System.De
   - ⚠Note: MCP2221A can be configured up to approximately 4 Mbps, but operation above 400 kbps is not guaranteed.
   - 💭Planned: support for data transfers larger than 60 bytes is not yet fully implemented.
 - Fetch and modify all SRAM settings (runtime configuration).
-- Fetch Flash settings (default power-on configuration):
+- Read and write Flash settings (default power-on configuration):
+  - All chip settings and GP pin configurations (clock output, DAC/ADC voltage references, power attributes, interrupt triggers, initial GPIO values, etc.)
+  - Write-protection settings (unsecured, password-protected, permanently locked) and password buffer configuration
   - USB descriptor strings: Manufacturer, Product, Serial Number, Chip Factory Serial Number
   - ⚠Note: Chip Factory Serial Number currently always returns `01234567` ([issue #8](../../issues/8)).
-  - 💭Planned: writing settings to Flash.
 - Soft reset via command.
 
 > [!NOTE]
@@ -54,6 +55,7 @@ This library also provides the MCP2221/MCP2221A adapter interface for [System.De
 - Can find and work with multiple MCP2221/MCP2221A devices using `Predicate<IUsbHidDevice>` and/or `Predicate<IMcp2221AInfo>`. ([example](examples/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/))
 - Supports MCP2221/MCP2221A devices with custom VID/PID values written in the chip settings. ([example](examples/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/))
 - Provides I<sup>2</sup>C bus scanning APIs. ([example](examples/Smdn.Devices.Mcp2221A/I2C_ScanBus/))
+- Provides Flash memory read and write capabilities, allowing inspection and persistence of default power-on configurations, GP pin assignments, USB descriptor strings, and write-protection settings. ([examples: Read](examples/Smdn.Devices.Mcp2221A/FlashMemory_Read/), [Write](examples/Smdn.Devices.Mcp2221A/FlashMemory_Write/))
 - Uses the USB HID abstraction layer ([Smdn.IO.UsbHid.Abstractions](https://github.com/smdn/Smdn.IO.UsbHid)) to support HIDSharp, LibUsbDotNet, and other backends. ([docs and examples](examples/Smdn.Devices.Mcp2221A/UsbHidBackendSamples.md))
 - Allows selecting the USB HID backend per device using dependency injection (`IServiceProvider`) and service keys. ([example](examples/Smdn.Devices.Mcp2221A/DependencyInjection_KeyedService))
 
