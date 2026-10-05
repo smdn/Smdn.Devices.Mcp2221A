@@ -309,7 +309,9 @@ public class IClockOutputControllerExtensionsTests {
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
         gp1Settings: InitialGp1Settings,
-        chipSetting1: initialChipSetting1
+        chipSetting1: initialChipSetting1,
+        chipSetting2: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting3: Mcp2221AControllerTests.AllZeroChipSetting
       ),
       shouldDisposeUsbHidDevice: true
     );

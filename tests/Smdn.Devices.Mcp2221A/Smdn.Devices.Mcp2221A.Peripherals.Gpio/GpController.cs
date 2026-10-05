@@ -88,7 +88,9 @@ public partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSetting2: chipSetting2
+        chipSetting1: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting2: chipSetting2,
+        chipSetting3: Mcp2221AControllerTests.AllZeroChipSetting
       ),
       shouldDisposeUsbHidDevice: true
     );

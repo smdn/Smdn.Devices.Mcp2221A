@@ -114,7 +114,6 @@ public class IGpioControllerExtensionsTests {
     const byte InitialGp1Settings = 0b_000_0_1_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_1_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSetting3 = 0b_0_1_1_00_0_00; // ADC: VDD
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -122,7 +121,8 @@ public class IGpioControllerExtensionsTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSetting3: InitialChipSetting3
+        chipSetting2: Mcp2221AControllerTests.NonVrmChipSetting2,
+        chipSetting3: Mcp2221AControllerTests.NonVrmChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -185,7 +185,6 @@ public class IGpioControllerExtensionsTests {
     const byte InitialGp1Settings = 0b_000_0_1_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_1_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSetting3 = 0b_0_1_1_00_0_00; // ADC: VDD
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -193,7 +192,8 @@ public class IGpioControllerExtensionsTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSetting3: InitialChipSetting3
+        chipSetting2: Mcp2221AControllerTests.NonVrmChipSetting2,
+        chipSetting3: Mcp2221AControllerTests.NonVrmChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );

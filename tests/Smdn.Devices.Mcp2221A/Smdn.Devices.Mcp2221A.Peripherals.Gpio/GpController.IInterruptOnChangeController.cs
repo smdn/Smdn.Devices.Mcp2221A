@@ -107,6 +107,8 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
+        chipSetting1: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting2: Mcp2221AControllerTests.AllZeroChipSetting,
         chipSetting3: initialChipSetting3,
         interruptEdgeDetectorState: initialInterruptEdgeDetectorState
       ),
@@ -347,7 +349,9 @@ partial class GpControllerTests {
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
-        gp3Settings: InitialGp3Settings
+        gp3Settings: InitialGp3Settings,
+        chipSetting2: Mcp2221AControllerTests.NonVrmChipSetting2,
+        chipSetting3: Mcp2221AControllerTests.NonVrmChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -945,7 +949,6 @@ partial class GpControllerTests {
     const byte InitialGp1Settings = 0b_000_1_0_011; // Alternate Function 1 (LED UART TX)
     const byte InitialGp2Settings = 0b_000_1_0_001; // Dedicated function operation (USBCFG)
     const byte InitialGp3Settings = 0b_000_1_0_001; // Dedicated function operation (LED I2C)
-    const byte InitialChipSetting3 = 0b_0_1_1_00_0_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 00(Off), ADCREF: 0(VDD)
 
     using var mcp2221A = Mcp2221AController.Create(
       Mcp2221AControllerTests.CreatePseudoDevice(
@@ -953,7 +956,8 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSetting3: InitialChipSetting3
+        chipSetting2: Mcp2221AControllerTests.NonVrmChipSetting2,
+        chipSetting3: Mcp2221AControllerTests.NonVrmChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -1084,6 +1088,8 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
+        chipSetting1: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting2: Mcp2221AControllerTests.AllZeroChipSetting,
         chipSetting3: initialChipSetting3
       ),
       shouldDisposeUsbHidDevice: true

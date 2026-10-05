@@ -27,6 +27,15 @@ public partial class Mcp2221AControllerTests {
   internal const string DefaultSerialNumber = "XXXXXXXXXX";
   internal const string DefaultChipFactorySerialNumber = "01234567";
 
+  // This value is used to set all bits in the CHIPSETTING<n> register to zero,
+  // thereby simplifying the expected command content of the 'SET SRAM SETTINGS'
+  // (by setting all bits to zero).
+  internal const byte AllZeroChipSetting = 0x00;
+
+  // Used to set VDD to its default value in order to prevent re-enabling VRM
+  internal const byte NonVrmChipSetting2 = 0b_10_0_01000; // DACVRM(7-6): VRM 2.048V, DACREF(5): VDD, DACVAL(4-0): 8
+  internal const byte NonVrmChipSetting3 = 0b_0_1_1_01_0_00; // INTDETFEEN(6): Enable, INTDETREEN(5): Enable, ADCVRM(4-3): VRM 1.024V, ADCREF(2): VDD
+
   internal static PseudoUsbHidDevice CreatePseudoDevice(
     int vendorId = Mcp2221AController.DefaultVendorId,
     int productId = Mcp2221AController.DefaultProductId,
@@ -38,14 +47,14 @@ public partial class Mcp2221AControllerTests {
     string product = DefaultProduct,
     string serialNumber = DefaultSerialNumber,
     string chipFactorySerialNumber = DefaultChipFactorySerialNumber,
-    byte gp0Settings = 0b_000_1_0_010, // Output: HIGH, Alternate Function 0 (LED UART RX)
-    byte gp1Settings = 0b_000_1_0_011, // Output: HIGH, Alternate Function 1 (LED UART TX)
-    byte gp2Settings = 0b_000_1_0_001, // Output: HIGH, Dedicated function operation (USBCFG)
-    byte gp3Settings = 0b_000_1_0_001, // Output: HIGH, Dedicated function operation (LED I2C)
+    byte gp0Settings = 0b_000_1_0_010, // Output: HIGH, Alternate Function 0 (LED UART RX) / factory default
+    byte gp1Settings = 0b_000_1_0_011, // Output: HIGH, Alternate Function 1 (LED UART TX) / factory default
+    byte gp2Settings = 0b_000_1_0_001, // Output: HIGH, Dedicated function operation (USBCFG) / factory default
+    byte gp3Settings = 0b_000_1_0_001, // Output: HIGH, Dedicated function operation (LED I2C) / factory default
     byte chipSetting0 = 0b_0_11111_00, // CDCSNEN(7): disabled(0), CHIPPROT(1-0): unprotected(00) / factory default
-    byte chipSetting1 = 0b_000_00_000, // CLKDC(4-3): Duty cycle 0%, CLKDIV(2-0): Reserved
-    byte chipSetting2 = 0b_00_0_00000, // DACVRM(7-6): VRM is OFF, DACREF(5): VDD, DACVAL(4-0): 0
-    byte chipSetting3 = 0b_0_0_0_00_0_00, // INTDETFEEN(6): Disable, INTDETREEN(5): Disable, ADCVRM(4-3): VRM is off, ADCREF(2): VDD
+    byte chipSetting1 = 0b_000_10_010, // CLKDC(4-3): Duty cycle 50%, CLKDIV(2-0): 12MHz / factory default
+    byte chipSetting2 = 0b_10_0_01000, // DACVRM(7-6): VRM 2.048V, DACREF(5): VDD, DACVAL(4-0): 8 / factory default
+    byte chipSetting3 = 0b_0_1_1_01_1_00, // INTDETFEEN(6): Enable, INTDETREEN(5): Enable, ADCVRM(4-3): VRM 1.024V, ADCREF(2): VRM / factory default
     byte usbVidLowerByte = 0xD8, // factory default
     byte usbVidHigherByte = 0x04, // factory default
     byte usbPidLowerByte = 0xDD, // factory default

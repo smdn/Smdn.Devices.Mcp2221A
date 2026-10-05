@@ -87,7 +87,9 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSetting2: initialChipSetting2
+        chipSetting1: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting2: initialChipSetting2,
+        chipSetting3: Mcp2221AControllerTests.AllZeroChipSetting
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -280,7 +282,9 @@ partial class GpControllerTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSetting2: initialChipSetting2
+        chipSetting1: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting2: initialChipSetting2,
+        chipSetting3: Mcp2221AControllerTests.AllZeroChipSetting
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -612,7 +616,9 @@ partial class GpControllerTests {
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
-        gp3Settings: InitialGp3Settings
+        gp3Settings: InitialGp3Settings,
+        chipSetting2: Mcp2221AControllerTests.NonVrmChipSetting2,
+        chipSetting3: Mcp2221AControllerTests.NonVrmChipSetting3
       ),
       shouldDisposeUsbHidDevice: true
     );

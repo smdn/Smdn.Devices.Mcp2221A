@@ -357,7 +357,10 @@ public class IGpControllerGroupExtensionsTests {
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
-        gp3Settings: InitialGp3Settings
+        gp3Settings: InitialGp3Settings,
+        chipSetting1: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting2: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting3: Mcp2221AControllerTests.AllZeroChipSetting
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -1020,7 +1023,10 @@ public class IGpControllerGroupExtensionsTests {
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
-        gp3Settings: InitialGp3Settings
+        gp3Settings: InitialGp3Settings,
+        chipSetting1: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting2: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting3: Mcp2221AControllerTests.AllZeroChipSetting
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -1178,7 +1184,10 @@ public class IGpControllerGroupExtensionsTests {
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
-        gp3Settings: InitialGp3Settings
+        gp3Settings: InitialGp3Settings,
+        chipSetting1: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting2: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting3: Mcp2221AControllerTests.AllZeroChipSetting
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -1487,7 +1496,10 @@ public class IGpControllerGroupExtensionsTests {
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
-        gp3Settings: InitialGp3Settings
+        gp3Settings: InitialGp3Settings,
+        chipSetting1: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting2: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting3: Mcp2221AControllerTests.AllZeroChipSetting
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -1710,7 +1722,10 @@ public class IGpControllerGroupExtensionsTests {
         gp0Settings: InitialGp0Settings,
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
-        gp3Settings: InitialGp3Settings
+        gp3Settings: InitialGp3Settings,
+        chipSetting1: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting2: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting3: Mcp2221AControllerTests.AllZeroChipSetting
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -3738,7 +3753,9 @@ public class IGpControllerGroupExtensionsTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSetting2: chipSetting2
+        chipSetting1: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting2: chipSetting2,
+        chipSetting3: Mcp2221AControllerTests.AllZeroChipSetting
       ),
       shouldDisposeUsbHidDevice: true
     );
@@ -3929,7 +3946,9 @@ public class IGpControllerGroupExtensionsTests {
         gp1Settings: InitialGp1Settings,
         gp2Settings: InitialGp2Settings,
         gp3Settings: InitialGp3Settings,
-        chipSetting2: InitialChipSetting2
+        chipSetting1: Mcp2221AControllerTests.AllZeroChipSetting,
+        chipSetting2: InitialChipSetting2,
+        chipSetting3: Mcp2221AControllerTests.AllZeroChipSetting
       ),
       shouldDisposeUsbHidDevice: true
     );
