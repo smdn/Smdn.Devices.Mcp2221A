@@ -62,6 +62,7 @@ $(Description)
 
 - Provides a .NET interface for MCP2221/MCP2221A devices over USB HID.
 - Supports GPIO, ADC, DAC, clock output, interrupts, and I2C bus access.
+- Supports fetching/modifying SRAM settings (runtime configuration) and reading/writing Flash memory settings (power-on default configuration).
 - Includes [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio/) adapters for seamless integration with [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings/).
 
 This library enables you to select any USB HID backend using dependency injection.
