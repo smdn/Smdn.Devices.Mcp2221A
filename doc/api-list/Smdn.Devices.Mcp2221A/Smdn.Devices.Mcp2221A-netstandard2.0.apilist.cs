@@ -1,12 +1,12 @@
-// Smdn.Devices.Mcp2221A.dll (Smdn.Devices.Mcp2221A-1.0.0)
+// Smdn.Devices.Mcp2221A.dll (Smdn.Devices.Mcp2221A-1.1.0)
 //   Name: Smdn.Devices.Mcp2221A
-//   AssemblyVersion: 1.0.0.0
-//   InformationalVersion: 1.0.0+0bf9c954cff7b4ca33c418cbc5e863d9862124f3
+//   AssemblyVersion: 1.1.0.0
+//   InformationalVersion: 1.1.0+83a39ffc3415421f38ef6eb169d8b97101a1abe8
 //   TargetFramework: .NETStandard,Version=v2.0
 //   Configuration: Release
 //   Metadata: RepositoryUrl=https://github.com/smdn/Smdn.Devices.Mcp2221A
 //   Metadata: RepositoryBranch=main
-//   Metadata: RepositoryCommit=0bf9c954cff7b4ca33c418cbc5e863d9862124f3
+//   Metadata: RepositoryCommit=83a39ffc3415421f38ef6eb169d8b97101a1abe8
 //   Referenced assemblies:
 //     Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51
 //     Microsoft.Extensions.DependencyInjection.Abstractions, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
@@ -26,6 +26,7 @@ using System.Device.I2c;
 using System.Threading;
 using System.Threading.Tasks;
 using Smdn.Devices.Mcp2221A;
+using Smdn.Devices.Mcp2221A.Configurations;
 using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 using Smdn.Devices.Mcp2221A.Peripherals.I2c;
 using Smdn.IO.UsbHid;
@@ -224,6 +225,7 @@ namespace Smdn.Devices.Mcp2221A {
     public VoltageReferenceSource CurrentAdcReferenceSource { get; }
     public VoltageReferenceSource CurrentDacReferenceSource { get; }
     public string FirmwareRevision { get; }
+    public FlashSettings Flash { get; }
     public DeviceConfigurationProtectionLevel FlashWriteProtection { get; }
     public Gp0Controller GpPin0 { get; }
     public Gp1Controller GpPin1 { get; }
@@ -314,6 +316,129 @@ namespace Smdn.Devices.Mcp2221A {
     [CompilerGenerated]
     public void Deconstruct(out int PinNumber, out PinMode PinMode) {}
     [CompilerGenerated]
+    public override string ToString() {}
+  }
+}
+
+namespace Smdn.Devices.Mcp2221A.Configurations {
+  public interface IFlashMemory {
+    Span<byte> ChipFactorySerialNumber { get; }
+    int ChipFactorySerialNumberLength { get; set; }
+    Span<byte> ChipSettings { get; }
+    Span<byte> GpSettings { get; }
+    Span<byte> Password { get; }
+    Span<byte> UsbManufacturerDescriptorString { get; }
+    int UsbManufacturerDescriptorStringLength { get; set; }
+    Span<byte> UsbProductDescriptorString { get; }
+    int UsbProductDescriptorStringLength { get; set; }
+    Span<byte> UsbSerialNumberDescriptorString { get; }
+    int UsbSerialNumberDescriptorStringLength { get; set; }
+  }
+
+  public interface IFlashMemoryFactory {
+    IFlashMemory Create();
+  }
+
+  public sealed class FlashSettings : IMcp2221AInfo {
+    public VoltageReferenceSource AdcVoltageReference { get; }
+    public bool CdcSerialNumberEnumerationEnabled { get; }
+    public ClockOutputDutyCycle ClockOutputDutyCycle { get; }
+    public ClockOutputFrequency ClockOutputFrequency { get; }
+    public int DacInitialValue { get; }
+    public VoltageReferenceSource DacVoltageReference { get; }
+    public GpSetting GpPin0 { get; }
+    public GpSetting GpPin1 { get; }
+    public GpSetting GpPin2 { get; }
+    public GpSetting GpPin3 { get; }
+    public IReadOnlyList<GpSetting> GpPins { get; }
+    public InterruptOnChangeTrigger InterruptOnChangeTrigger { get; }
+    public bool IsDirty { get; }
+    string IMcp2221AInfo.ChipFactorySerialNumber { get; }
+    string IMcp2221AInfo.FirmwareRevision { get; }
+    string IMcp2221AInfo.HardwareRevision { get; }
+    string IMcp2221AInfo.Manufacturer { get; }
+    string IMcp2221AInfo.Product { get; }
+    string IMcp2221AInfo.SerialNumber { get; }
+    public UsbPowerMode UsbPowerMode { get; }
+    public int UsbProductId { get; }
+    public bool UsbRemoteWakeUpEnabled { get; }
+    public int UsbRequestedCurrentAmount { get; }
+    public int UsbVendorId { get; }
+    public DeviceConfigurationProtectionLevel WriteProtectionLevel { get; }
+
+    public string GetChipFactorySerialNumber() {}
+    public string GetUsbManufacturerString() {}
+    public string GetUsbProductString() {}
+    public string GetUsbSerialNumberString() {}
+    public FlashSettings ModifyAdcVoltageReference(VoltageReferenceSource voltageReference) {}
+    public FlashSettings ModifyCdcSerialNumberEnumeration(bool enabled) {}
+    public FlashSettings ModifyClockOutputDutyCycle(ClockOutputDutyCycle dutyCycle) {}
+    public FlashSettings ModifyClockOutputFrequency(ClockOutputFrequency frequency) {}
+    public FlashSettings ModifyDacInitialValue(int @value) {}
+    public FlashSettings ModifyDacVoltageReference(VoltageReferenceSource voltageReference) {}
+    public FlashSettings ModifyGpSetting(int gpIndex, GpFunction? gpFunction, PinMode? gpioMode = null, PinValue? gpioOutputValue = null) {}
+    public FlashSettings ModifyInterruptOnChangeTrigger(InterruptOnChangeTrigger trigger) {}
+    public FlashSettings ModifyPassword(ReadOnlySpan<byte> password) {}
+    public FlashSettings ModifyUsbManufacturerString(ReadOnlySpan<char> @value) {}
+    public FlashSettings ModifyUsbPowerMode(UsbPowerMode powerMode) {}
+    public FlashSettings ModifyUsbProductId(int productId) {}
+    public FlashSettings ModifyUsbProductString(ReadOnlySpan<char> @value) {}
+    public FlashSettings ModifyUsbRemoteWakeUp(bool enabled) {}
+    public FlashSettings ModifyUsbRequestedCurrentAmount(int currentAmount) {}
+    public FlashSettings ModifyUsbSerialNumberString(ReadOnlySpan<char> @value) {}
+    public FlashSettings ModifyUsbVendorId(int vendorId) {}
+    public FlashSettings ModifyWriteProtection(DeviceConfigurationProtectionLevel protectionLevel) {}
+    public FlashSettings Restore() {}
+    public void SendAccessPassword(ReadOnlySpan<byte> password, CancellationToken cancellationToken = default) {}
+    public async ValueTask SendAccessPasswordAsync(ReadOnlyMemory<byte> password, CancellationToken cancellationToken = default) {}
+    public bool TryCopyChipFactorySerialNumberTo(Span<char> destination, out int charsWritten) {}
+    public bool TryCopyUsbManufacturerStringTo(Span<char> destination, out int charsWritten) {}
+    public bool TryCopyUsbProductStringTo(Span<char> destination, out int charsWritten) {}
+    public bool TryCopyUsbSerialNumberStringTo(Span<char> destination, out int charsWritten) {}
+    public bool TryModifyUsbManufacturerString(ReadOnlySpan<char> @value) {}
+    public bool TryModifyUsbProductString(ReadOnlySpan<char> @value) {}
+    public bool TryModifyUsbSerialNumberString(ReadOnlySpan<char> @value) {}
+    public void Write(CancellationToken cancellationToken = default) {}
+    public ValueTask WriteAsync(CancellationToken cancellationToken = default) {}
+    public void WriteInitialSettings(CancellationToken cancellationToken = default) {}
+    public ValueTask WriteInitialSettingsAsync(CancellationToken cancellationToken = default) {}
+  }
+
+  public class FlashWriteAccessException : Mcp2221ACommandException {
+    public FlashWriteAccessException() {}
+    public FlashWriteAccessException(string? message) {}
+    public FlashWriteAccessException(string? message, Exception? innerException) {}
+  }
+
+  public static class IFlashMemoryExtensions {
+    extension(IFlashMemory flashMemory) {
+      public ReadOnlySpan<byte> StoredChipFactorySerialNumberSpan { get; }
+      public ReadOnlySpan<byte> StoredUsbManufacturerDescriptorStringSpan { get; }
+      public ReadOnlySpan<byte> StoredUsbProductDescriptorStringSpan { get; }
+      public ReadOnlySpan<byte> StoredUsbSerialNumberDescriptorStringSpan { get; }
+
+      public IFlashMemory CopyFrom(IFlashMemory source) {}
+      public bool DiffersFrom(IFlashMemory? other) {}
+    }
+  }
+
+  public readonly struct GpSetting : IEquatable<GpSetting> {
+    public static bool operator == (GpSetting left, GpSetting right) {}
+    public static bool operator != (GpSetting left, GpSetting right) {}
+
+    public byte Designation { get; }
+    public GpFunction Function { get; }
+    public PinMode GpioMode { get; }
+    public PinValue GpioOutputValue { get; }
+    public int Index { get; }
+    public bool IsGpio { get; }
+
+    public void Deconstruct(out GpFunction function, out PinMode mode, out PinValue @value) {}
+    public void Deconstruct(out int index, out GpFunction function, out PinMode mode, out PinValue @value) {}
+    public void Deconstruct(out int index, out byte designation, out GpFunction function, out PinMode mode, out PinValue @value) {}
+    public bool Equals(GpSetting other) {}
+    public override bool Equals(object? obj) {}
+    public override int GetHashCode() {}
     public override string ToString() {}
   }
 }
