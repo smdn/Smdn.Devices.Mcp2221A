@@ -13,10 +13,8 @@ namespace Smdn.Devices.Mcp2221A;
 /// Provides extension methods for <see cref="II2cController"/>.
 /// </summary>
 public static class II2cControllerExtensions {
-#pragma warning disable IDE0051
   private static II2cController ThrowIfReceiverIsNull(II2cController controller, string paramName)
     => controller ?? throw new ArgumentNullException(paramName: paramName);
-#pragma warning restore IDE0051
 
 #pragma warning disable CA1034
   extension(II2cController controller) {

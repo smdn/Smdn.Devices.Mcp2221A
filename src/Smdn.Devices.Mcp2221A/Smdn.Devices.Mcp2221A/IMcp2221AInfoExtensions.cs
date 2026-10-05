@@ -8,10 +8,8 @@ namespace Smdn.Devices.Mcp2221A;
 /// Provides extension methods for <see cref="IMcp2221AInfo"/>.
 /// </summary>
 public static class IMcp2221AInfoExtensions {
-#pragma warning disable IDE0051
   private static IMcp2221AInfo ThrowIfReceiverIsNull(IMcp2221AInfo info, string paramName)
     => info ?? throw new ArgumentNullException(paramName: paramName);
-#pragma warning restore IDE0051
 
 #pragma warning disable CA1034
   extension(IMcp2221AInfo info) {

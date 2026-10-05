@@ -12,10 +12,8 @@ namespace Smdn.Devices.Mcp2221A;
 /// Provides extension members for the <see cref="IClockOutputController"/> interface.
 /// </summary>
 public static class IClockOutputControllerExtensions {
-#pragma warning disable IDE0051
   private static IClockOutputController ThrowIfReceiverIsNull(IClockOutputController controller, string paramName)
     => controller ?? throw new ArgumentNullException(paramName: paramName);
-#pragma warning restore IDE0051
 
 #pragma warning disable CA1034
   extension(IClockOutputController controller) {

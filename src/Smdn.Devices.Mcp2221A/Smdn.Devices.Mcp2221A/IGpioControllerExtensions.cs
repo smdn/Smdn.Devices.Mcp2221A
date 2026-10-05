@@ -13,10 +13,8 @@ namespace Smdn.Devices.Mcp2221A;
 /// Provides extension methods for <see cref="IGpioController"/>.
 /// </summary>
 public static class IGpioControllerExtensions {
-#pragma warning disable IDE0051
   private static IGpioController ThrowIfReceiverIsNull(IGpioController controller, string paramName)
     => controller ?? throw new ArgumentNullException(paramName: paramName);
-#pragma warning restore IDE0051
 
 #pragma warning disable CA1034
   extension(IGpioController controller) {

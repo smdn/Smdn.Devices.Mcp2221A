@@ -8,10 +8,8 @@ namespace Smdn.Devices.Mcp2221A.Configurations;
 /// Provides extension members for the <see cref="IFlashMemory"/> interface.
 /// </summary>
 public static class IFlashMemoryExtensions {
-#pragma warning disable IDE0051
   private static IFlashMemory ThrowIfReceiverIsNull(IFlashMemory flashMemory, string paramName)
     => flashMemory ?? throw new ArgumentNullException(paramName: paramName);
-#pragma warning restore IDE0051
 
 #pragma warning disable CA1034
   extension(IFlashMemory flashMemory) {
