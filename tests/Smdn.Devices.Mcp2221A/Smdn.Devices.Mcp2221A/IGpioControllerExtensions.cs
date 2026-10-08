@@ -23,8 +23,7 @@ public class IGpioControllerExtensionsTests {
       () => gpioController!.ConfigureAsGpioOutputAsync(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("controller")
     );
   }
@@ -38,8 +37,7 @@ public class IGpioControllerExtensionsTests {
       () => gpioController!.ConfigureAsGpioOutput(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("controller")
     );
   }
@@ -53,8 +51,7 @@ public class IGpioControllerExtensionsTests {
       () => gpioController!.ConfigureAsGpioInputAsync(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("controller")
     );
   }
@@ -68,8 +65,7 @@ public class IGpioControllerExtensionsTests {
       () => gpioController!.ConfigureAsGpioInput(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("controller")
     );
   }

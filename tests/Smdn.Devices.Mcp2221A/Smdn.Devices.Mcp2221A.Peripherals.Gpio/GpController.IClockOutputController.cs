@@ -230,7 +230,7 @@ partial class GpControllerTests {
       Throws
         .TypeOf<NotSupportedException>()
         .With
-        .Property(nameof(NotSupportedException.Message))
+        .Message
         .Contains(nameof(ClockOutputFrequency.Reserved)),
       $"unsupported frequency ({nameof(ClockOutputFrequency)}.{nameof(ClockOutputFrequency.Reserved)})"
     );
@@ -341,7 +341,7 @@ partial class GpControllerTests {
         .Property(nameof(ArgumentException.ParamName))
         .EqualTo(frequency.HasValue ? nameof(frequency) : nameof(dutyCycle))
         .And
-        .Property(nameof(ArgumentException.Message))
+        .Message
         .Contains(frequency.HasValue ? $"{frequency}" : $"{dutyCycle}"),
       $"undefined frequency or duty cycle ({mcp2221A.GpPin1.PinName}, {frequency}/{dutyCycle})"
     );
@@ -435,10 +435,10 @@ partial class GpControllerTests {
       Throws
         .InvalidOperationException
         .With
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains(mcp2221A.GpPin1.PinName)
         .And
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains(nameof(GpioController))
     );
 
@@ -800,7 +800,7 @@ partial class GpControllerTests {
         // from the subsequent check for `IsUsedByGpioController` will not be thrown.
         .TypeOf<InvalidOperationException>()
         .With
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains(nameof(GpioController))
 #endif
         .TypeOf<Mcp2221AConfigurationException>()

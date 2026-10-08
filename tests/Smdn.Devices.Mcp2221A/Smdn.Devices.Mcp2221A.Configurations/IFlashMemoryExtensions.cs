@@ -200,8 +200,7 @@ public class IFlashMemoryExtensionsTests {
       () => memory.DiffersFrom(new FlashMemory()),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("flashMemory")
     );
   }
@@ -529,8 +528,7 @@ public class IFlashMemoryExtensionsTests {
       () => memory.CopyFrom(new FlashMemory()),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("flashMemory")
     );
   }
@@ -544,8 +542,7 @@ public class IFlashMemoryExtensionsTests {
       () => memory.CopyFrom(null!),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("source")
     );
   }

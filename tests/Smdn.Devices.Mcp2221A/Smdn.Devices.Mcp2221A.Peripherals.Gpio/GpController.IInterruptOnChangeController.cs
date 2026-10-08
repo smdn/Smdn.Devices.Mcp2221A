@@ -296,7 +296,7 @@ partial class GpControllerTests {
         .Property(nameof(ArgumentException.ParamName))
         .EqualTo(nameof(detectionTrigger))
         .And
-        .Property(nameof(ArgumentException.Message))
+        .Message
         .Contains($"{detectionTrigger}"),
       $"undefined trigger ({mcp2221A.GpPin1.PinName}, {detectionTrigger})"
     );
@@ -385,10 +385,10 @@ partial class GpControllerTests {
       Throws
         .InvalidOperationException
         .With
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains(mcp2221A.GpPin1.PinName)
         .And
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains(nameof(GpioController))
     );
 
@@ -996,7 +996,7 @@ partial class GpControllerTests {
         // from the subsequent check for `IsUsedByGpioController` will not be thrown.
         .TypeOf<InvalidOperationException>()
         .With
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains(nameof(GpioController))
 #endif
         .TypeOf<Mcp2221AConfigurationException>()

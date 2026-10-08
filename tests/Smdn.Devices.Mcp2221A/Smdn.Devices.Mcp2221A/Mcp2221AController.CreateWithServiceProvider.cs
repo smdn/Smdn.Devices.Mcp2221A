@@ -97,8 +97,7 @@ public partial class Mcp2221AControllerTests {
       ).ConfigureAwait(false),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("serviceProvider")
     );
 
@@ -110,8 +109,7 @@ public partial class Mcp2221AControllerTests {
       ),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("serviceProvider")
     );
 
@@ -122,8 +120,7 @@ public partial class Mcp2221AControllerTests {
       ).ConfigureAwait(false),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("serviceProvider")
     );
 
@@ -134,8 +131,7 @@ public partial class Mcp2221AControllerTests {
       ),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("serviceProvider")
     );
   }
@@ -218,7 +214,7 @@ public partial class Mcp2221AControllerTests {
       Throws
         .InvalidOperationException
         .With
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains(nameof(IUsbHidService))
     );
   }
@@ -263,7 +259,7 @@ public partial class Mcp2221AControllerTests {
       Throws
         .InvalidOperationException
         .With
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains(nameof(IUsbHidService))
     );
 

@@ -128,8 +128,7 @@ public partial class Mcp2221AControllerTests {
       ).ConfigureAwait(false),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("usbHidDevice")
     );
 
@@ -143,8 +142,7 @@ public partial class Mcp2221AControllerTests {
       ),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("usbHidDevice")
     );
 
@@ -157,8 +155,7 @@ public partial class Mcp2221AControllerTests {
       ).ConfigureAwait(false),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("usbHidDevice")
     );
 
@@ -171,8 +168,7 @@ public partial class Mcp2221AControllerTests {
       ),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("usbHidDevice")
     );
   }

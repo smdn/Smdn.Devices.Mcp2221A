@@ -290,7 +290,7 @@ public class Mcp2221AGpioControllerTests {
       Throws
         .InvalidOperationException
         .With
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .EqualTo($"Pin {pinNumber} is already open."),
       "re-open"
     );

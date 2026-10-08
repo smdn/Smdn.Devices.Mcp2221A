@@ -18,8 +18,7 @@ public class IMcp2221AInfoExtensionsTests {
       () => info!.IsMcp2221A,
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("info")
     );
   }

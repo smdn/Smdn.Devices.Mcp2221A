@@ -436,10 +436,10 @@ partial class GpControllerTests {
         Throws
           .InvalidOperationException
           .With
-          .Property(nameof(InvalidOperationException.Message))
+          .Message
           .Contains($"GP{gp.Index}")
           .And
-          .Property(nameof(InvalidOperationException.Message))
+          .Message
           .Contains(nameof(GpioController))
       );
 
@@ -553,7 +553,7 @@ partial class GpControllerTests {
           .Property(nameof(ArgumentException.ParamName))
           .EqualTo("direction") // .EqualTo(nameof(mode))
           .And
-          .Property(nameof(ArgumentException.Message))
+          .Message
           .Contains($"{mode}"),
         $"undefined pin mode ({gp.PinName}, {mode})"
       );

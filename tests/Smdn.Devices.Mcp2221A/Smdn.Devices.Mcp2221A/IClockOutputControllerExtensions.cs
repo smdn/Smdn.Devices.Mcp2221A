@@ -67,7 +67,7 @@ public class IClockOutputControllerExtensionsTests {
       Throws
         .InvalidOperationException
         .With
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains(nameof(ClockOutputFrequency.Reserved))
     );
   }
@@ -141,8 +141,7 @@ public class IClockOutputControllerExtensionsTests {
       () => gp1!.ResumeClockOutputAsync(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("controller")
     );
   }
@@ -156,8 +155,7 @@ public class IClockOutputControllerExtensionsTests {
       () => gp1!.ResumeClockOutput(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("controller")
     );
   }

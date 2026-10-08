@@ -254,7 +254,7 @@ partial class GpControllerTests {
           .Property(nameof(ArgumentException.ParamName))
           .EqualTo(nameof(voltageReferenceSource))
           .And
-          .Property(nameof(ArgumentException.Message))
+          .Message
           .Contains($"{voltageReferenceSource}"),
         $"undefined voltage reference source ({gp.PinName}, {voltageReferenceSource})"
       );
@@ -339,10 +339,10 @@ partial class GpControllerTests {
         Throws
           .InvalidOperationException
           .With
-          .Property(nameof(InvalidOperationException.Message))
+          .Message
           .Contains($"GP{gp.Index}")
           .And
-          .Property(nameof(InvalidOperationException.Message))
+          .Message
           .Contains(nameof(GpioController))
       );
 

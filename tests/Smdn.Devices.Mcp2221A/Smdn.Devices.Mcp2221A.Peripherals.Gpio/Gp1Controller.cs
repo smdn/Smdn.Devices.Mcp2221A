@@ -195,7 +195,7 @@ public class Gp1ControllerTests {
       Throws
         .TypeOf<NotSupportedException>()
         .With
-        .Property(nameof(NotSupportedException.Message))
+        .Message
         .Contains(mcp2221A.GpPin1.PinName)
     );
   }
@@ -215,7 +215,7 @@ public class Gp1ControllerTests {
       Throws
         .TypeOf<NotSupportedException>()
         .With
-        .Property(nameof(NotSupportedException.Message))
+        .Message
         .Contains(mcp2221A.GpPin1.PinName)
     );
   }

@@ -865,10 +865,10 @@ partial class Mcp2221AGpioDriverTests {
       Throws
         .InvalidOperationException
         .With
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains($"GP{expectedGpIndexInThrownException}")
         .And
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains(nameof(GpioController))
     );
 
@@ -1828,10 +1828,10 @@ partial class Mcp2221AGpioDriverTests {
       Throws
         .InvalidOperationException
         .With
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains($"GP{expectedGpIndexInThrownException}")
         .And
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains(nameof(GpioController))
     );
 

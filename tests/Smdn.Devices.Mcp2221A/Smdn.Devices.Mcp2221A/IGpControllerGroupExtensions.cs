@@ -26,8 +26,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.ConfigureAllGpFunctionsAsync(default, default, default, default, default),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -41,8 +40,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.ConfigureAllGpFunctions(default, default, default, default, default),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -514,8 +512,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.ConfigureAllAsGpioAsync(default, default, default, default, default, default, default, default, default),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -529,8 +526,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.ConfigureAllAsGpio(default, default, default, default, default, default, default, default, default),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -1293,8 +1289,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.ConfigureAllAsGpioOutputAsync(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -1308,8 +1303,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.ConfigureAllAsGpioOutput(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -1564,8 +1558,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.ConfigureAllAsGpioInputAsync(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -1579,8 +1572,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.ConfigureAllAsGpioInput(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -1784,8 +1776,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.ReadAsync(default),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -1799,8 +1790,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.Read(default),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -2146,7 +2136,7 @@ public class IGpControllerGroupExtensionsTests {
       Throws
         .InvalidOperationException
         .With
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains($"pin index: {expectedInvalidGpIndex}")
     );
     Assert.That(
@@ -2174,8 +2164,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.ReadAsync(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -2189,8 +2178,7 @@ public class IGpControllerGroupExtensionsTests {
       () => _ = gpPins!.Read(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -2369,8 +2357,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.WriteAsync(pinValuePairs: default),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -2384,8 +2371,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.Write(pinValuePairs: default),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -2699,7 +2685,7 @@ public class IGpControllerGroupExtensionsTests {
       Throws
         .InvalidOperationException
         .With
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains($"pin index: {expectedInvalidGpIndex}")
     );
     Assert.That(
@@ -2718,8 +2704,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.WriteAsync(gp0Value: default, gp1Value: default, gp2Value: default, gp3Value: default),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -2733,8 +2718,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.Write(gp0Value: default, gp1Value: default, gp2Value: default, gp3Value: default),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -2972,8 +2956,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.ReadAnalogRawAsync(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -2987,8 +2970,7 @@ public class IGpControllerGroupExtensionsTests {
       () => _ = gpPins!.ReadAnalogRaw(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -3161,8 +3143,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.ReadAnalogVoltageAsync(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -3176,8 +3157,7 @@ public class IGpControllerGroupExtensionsTests {
       () => _ = gpPins!.ReadAnalogVoltage(),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -3360,8 +3340,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.ReadAnalogVoltageAsync(referenceVoltage: 5.0),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -3375,8 +3354,7 @@ public class IGpControllerGroupExtensionsTests {
       () => _ = gpPins!.ReadAnalogVoltage(referenceVoltage: 5.0),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -3555,8 +3533,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.WriteAnalogVoltageAsync(0.0),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -3570,8 +3547,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.WriteAnalogVoltage(0.0),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -3664,7 +3640,7 @@ public class IGpControllerGroupExtensionsTests {
       Throws
         .TypeOf<InvalidOperationException>()
         .With
-        .Property(nameof(InvalidOperationException.Message))
+        .Message
         .Contains("Vdd")
     );
 
@@ -3807,8 +3783,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.WriteAnalogVoltageAsync(0.0, referenceVoltage: 5.0),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -3822,8 +3797,7 @@ public class IGpControllerGroupExtensionsTests {
       () => gpPins!.WriteAnalogVoltage(0.0, referenceVoltage: 5.0),
       Throws
         .ArgumentNullException
-        .With
-        .Property(nameof(ArgumentNullException.ParamName))
+        .ParamName
         .EqualTo("gpPins")
     );
   }
@@ -4016,8 +3990,7 @@ public class IGpControllerGroupExtensionsTests {
     static IResolveConstraint ThrowsArgumentException(string expectedParamName)
       => Throws
         .TypeOf<ArgumentException>()
-        .With
-        .Property(nameof(ArgumentException.ParamName))
+        .ParamName
         .EqualTo(expectedParamName);
 
     // voltage exceeds referenceVoltage

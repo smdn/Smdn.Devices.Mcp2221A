@@ -172,7 +172,7 @@ partial class GpControllerTests {
         .Property(nameof(ArgumentException.ParamName))
         .EqualTo(nameof(mode))
         .And
-        .Property(nameof(ArgumentException.Message))
+        .Message
         .Contains($"{mode}"),
       $"undefined pin mode ({gp.PinName}, {mode})"
     );
@@ -184,7 +184,7 @@ partial class GpControllerTests {
         .Property(nameof(ArgumentException.ParamName))
         .EqualTo(nameof(mode))
         .And
-        .Property(nameof(ArgumentException.Message))
+        .Message
         .Contains($"{mode}"),
       $"undefined pin mode ({gp.PinName}, {mode})"
     );

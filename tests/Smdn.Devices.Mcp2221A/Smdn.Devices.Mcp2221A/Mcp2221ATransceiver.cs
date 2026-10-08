@@ -65,7 +65,7 @@ public class Mcp2221ATransceiverTests {
       Throws
         .TypeOf<Mcp2221ACommandException>()
         .With
-        .Property(nameof(Mcp2221ACommandException.Message))
+        .Message
         .Contains($"{ResponseCommandCode:X2}")
     );
   }
@@ -138,7 +138,7 @@ public class Mcp2221ATransceiverTests {
       Throws
         .TypeOf<Mcp2221ACommandException>()
         .With
-        .Property(nameof(Mcp2221ACommandException.Message))
+        .Message
         .Contains($"{actualReportLength} bytes")
     );
 
@@ -194,7 +194,7 @@ public class Mcp2221ATransceiverTests {
       Throws
         .TypeOf<Mcp2221ACommandException>()
         .With
-        .Property(nameof(Mcp2221ACommandException.Message))
+        .Message
         .Contains($"{ActualReportLength} bytes")
     );
 
