@@ -334,13 +334,6 @@ partial class FlashSettingsTests {
     );
   }
 
-#if false // TODO
-  public void GpPin0_Staged()
-  {
-    // FlashSettings.ModifyGpSetting(index: 0, ...)
-  }
-#endif
-
   [TestCase(0b_000_1_1_100, true, PinMode.Input, GpFunction.InterruptOnChange, false)] // Alternate function 2 (Interrupt Detector)
   [TestCase(0b_000_1_0_011, true, PinMode.Output, GpFunction.LedOutput, false)] // Alternate function 1 (LEDUTX); factory default
   [TestCase(0b_000_0_1_010, false, PinMode.Input, GpFunction.Adc, false)] // Alternate function 0 (ADC1)
@@ -376,13 +369,6 @@ partial class FlashSettingsTests {
       Is.EqualTo(mcp2221A.Flash.GpPins[1])
     );
   }
-
-#if false // TODO
-  public void GpPin1_Staged()
-  {
-    // FlashSettings.ModifyGpSetting(index: 1, ...)
-  }
-#endif
 
   [TestCase(0b_000_1_1_011, true, PinMode.Input, GpFunction.Dac, false)] // Alternate function 1 (DAC1)
   [TestCase(0b_000_0_1_010, false, PinMode.Input, GpFunction.Adc, false)] // Alternate function 0 (ADC2)
@@ -420,13 +406,6 @@ partial class FlashSettingsTests {
     );
   }
 
-#if false // TODO
-  public void GpPin2_Staged()
-  {
-    // FlashSettings.ModifyGpSetting(index: 2, ...)
-  }
-#endif
-
   [TestCase(0b_000_1_1_011, true, PinMode.Input, GpFunction.Dac, false)] // Alternate function 1 (DAC2)
   [TestCase(0b_000_0_1_010, false, PinMode.Input, GpFunction.Adc, false)] // Alternate function 0 (ADC3)
   [TestCase(0b_000_1_0_001, true, PinMode.Output, GpFunction.LedOutput, false)] // Dedicated function operation (LEDI2C); factory default
@@ -462,13 +441,6 @@ partial class FlashSettingsTests {
       Is.EqualTo(mcp2221A.Flash.GpPins[3])
     );
   }
-
-#if false // TODO
-  public void GpPin3_Staged()
-  {
-    // FlashSettings.ModifyGpSetting(index: 3, ...)
-  }
-#endif
 
   [Test]
   public void GpPins_IReadOnlyList_Count()
@@ -595,14 +567,6 @@ partial class FlashSettingsTests {
     );
   }
 
-#if false // TODO
-  [TestCase]
-  public void TryCopyUsbManufacturerStringTo_Staged(string manufacturer)
-  {
-    // FlashSettings.ModifyUsbManufacturerString
-  }
-#endif
-
   [TestCase("MCP2221 USB-I2C/UART Combo")] // factory default
   [TestCase("")]
   [TestCase("Product")]
@@ -648,14 +612,6 @@ partial class FlashSettingsTests {
     );
   }
 
-#if false // TODO
-  [TestCase]
-  public void TryCopyUsbProductStringTo_Staged(string product)
-  {
-    // FlashSettings.ModifyUsbProductString
-  }
-#endif
-
   [TestCase("")] // factory default
   [TestCase("Serial Number")]
   [TestCase("🔌")]
@@ -699,14 +655,6 @@ partial class FlashSettingsTests {
     );
   }
 
-#if false // TODO
-  [TestCase]
-  public void TryCopyUsbSerialNumberStringTo_Staged(string serialNumber)
-  {
-    // FlashSettings.ModifyUsbSerialNumberString
-  }
-#endif
-
   [TestCase("01234567")] // factory default
   [TestCase("")]
   [TestCase("ABC")]
@@ -749,12 +697,4 @@ partial class FlashSettingsTests {
       Is.False
     );
   }
-
-#if false // TODO
-  [TestCase]
-  public void TryCopyChipFactorySerialNumberTo_Staged(string manufacturer)
-  {
-    // FlashSettings.ModifyChipFactorySerialNumber
-  }
-#endif
 }
