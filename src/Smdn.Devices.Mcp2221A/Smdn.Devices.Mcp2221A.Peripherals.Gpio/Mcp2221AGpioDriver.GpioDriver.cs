@@ -96,7 +96,7 @@ partial class Mcp2221AGpioDriver : GpioDriver {
       new(
         ThrowIfIndexOfGpPinIsOutOfRange(pinNumber, nameof(pinNumber)),
         default
-      )
+      ),
     ];
 
     FetchGpioStates(
@@ -119,7 +119,7 @@ partial class Mcp2221AGpioDriver : GpioDriver {
         new(
           ThrowIfIndexOfGpPinIsOutOfRange(pinNumber, nameof(pinNumber)),
           mode
-        )
+        ),
       ],
       shouldThrowIfUsedByGpioController: false,
       cancellationToken: default
@@ -154,7 +154,7 @@ partial class Mcp2221AGpioDriver : GpioDriver {
       new(
         ThrowIfIndexOfGpPinIsOutOfRange(pinNumber, nameof(pinNumber)),
         default
-      )
+      ),
     ];
 
     FetchGpioStates(
@@ -197,7 +197,7 @@ partial class Mcp2221AGpioDriver : GpioDriver {
         new(
           ThrowIfIndexOfGpPinIsOutOfRange(pinNumber, nameof(pinNumber)),
           value
-        )
+        ),
       ],
       pinModePairs: default,
       shouldThrowIfUsedByGpioController: false,
@@ -233,7 +233,7 @@ partial class Mcp2221AGpioDriver : GpioDriver {
           GetLastUpdatedValueOrThrow(pinNumber) == PinValue.Low
             ? PinValue.High
             : PinValue.Low
-        )
+        ),
       ],
       pinModePairs: default,
       shouldThrowIfUsedByGpioController: false,
