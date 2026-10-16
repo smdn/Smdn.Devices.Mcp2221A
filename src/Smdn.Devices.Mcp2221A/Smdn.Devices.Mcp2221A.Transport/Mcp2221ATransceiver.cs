@@ -100,9 +100,11 @@ internal sealed partial class Mcp2221ATransceiver : IDisposable {
   {
     ThrowIfDisposed();
 
-    await transactionSemaphore
-#if !SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
-      !
+    await
+#if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
+      transactionSemaphore
+#else
+      transactionSemaphore!
 #endif
       .WaitAsync(cancellationToken)
       .ConfigureAwait(false);
@@ -116,9 +118,10 @@ internal sealed partial class Mcp2221ATransceiver : IDisposable {
   {
     ThrowIfDisposed();
 
+#if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
     transactionSemaphore
-#if !SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLATTRIBUTE
-      !
+#else
+    transactionSemaphore!
 #endif
       .Wait(cancellationToken);
 
