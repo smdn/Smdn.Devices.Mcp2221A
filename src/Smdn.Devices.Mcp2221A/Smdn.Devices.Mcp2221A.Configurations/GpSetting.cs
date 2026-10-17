@@ -25,7 +25,6 @@ public readonly struct GpSetting : IEquatable<GpSetting> {
   internal static void WriteFunction(ref byte register, int index, GpFunction function)
     => WriteDesignation(
       register: ref register,
-#pragma warning disable SA1513
       designation: index switch {
         0 => Gp0Controller.TranslateFunction(function),
         1 => Gp1Controller.TranslateFunction(function),
@@ -33,7 +32,6 @@ public readonly struct GpSetting : IEquatable<GpSetting> {
         3 => Gp3Controller.TranslateFunction(function),
         _ => throw new InvalidOperationException($"GP pin index {index} is not supported. It must be between 0 and 3."),
       } ?? throw new NotSupportedException($"GP{index} does not support the GP function '{function}'.")
-#pragma warning restore SA1513
     );
 
   internal static void WriteDesignation(ref byte register, GpDesignation designation)

@@ -31,7 +31,6 @@ public sealed class Mcp2221AI2cDevice : I2cDevice, II2cDevice {
   ///     path="docs/I2cReadWriteTransmissionSpeedParameter/remarks/*"
   ///   />
   /// </remarks>
-#pragma warning disable SA1513
   public int TransmissionSpeedInKbps {
     get;
     set {
@@ -46,7 +45,6 @@ public sealed class Mcp2221AI2cDevice : I2cDevice, II2cDevice {
       field = value;
     }
   } = Mcp2221AI2cBus.DefaultTransmissionSpeedInKbps;
-#pragma warning restore SA1513
 
   private readonly bool shouldDisposeMcp2221AController;
 
