@@ -167,11 +167,17 @@ public readonly struct I2cAddress :
   /// <inheritdoc/>
   public override int GetHashCode() => address.GetHashCode();
 
+#pragma warning disable SA1315
+  // In `IEqualityOperators.Equality`, the parameter names are `left` and `right`,
+  // but since this has already been released as part of the public API in version
+  // 1.0.0 or later, the current names must be kept.
+
   /// <inheritdoc/>
   public static bool operator ==(I2cAddress x, I2cAddress y) => x.Equals(y);
 
   /// <inheritdoc/>
   public static bool operator !=(I2cAddress x, I2cAddress y) => !x.Equals(y);
+#pragma warning restore SA1315
 
   /// <summary>
   /// Compares this address to another <see cref="I2cAddress" />.
