@@ -59,7 +59,7 @@ jobs:
 
   run-tests-package-dotnet:
     name: Run tests with released packages
-    uses: smdn/workflows-dotnet/.github/workflows/test.yml@99535f4de918d69d51a15f5af1d449b7813192bc # test/v1.11.0
+    uses: smdn/workflows-dotnet/.github/workflows/test.yml@8c4f88f08af9d1d3d1fc655c373774565b28a2b9 # test/v1.11.2
     permissions:
       contents: read
     needs: await-package-publishing

@@ -10,18 +10,29 @@ on:
   pull_request:
     types: [closed]
 
+  workflow_dispatch:
+    inputs:
+      pr_number_request_for_release:
+        description: "The number of pull request that requests to merge the release working branch."
+        required: true
+        type: number
+
 jobs:
   run-publish-release-target:
-    uses: smdn/workflows-dotnet/.github/workflows/publish-release-target.yml@1035ae4555df7e5108a41439f86ed31f67924d04 # release-target/v1.17.1
+    name: Publish release target ${{ github.head_ref }}
+    uses: smdn/workflows-dotnet/.github/workflows/publish-release-target.yml@82483644b5076d58d6e5a0813e69370a71f49500 # release-target/v1.17.2
     permissions:
       contents: write
       packages: write
       pull-requests: read
     if: |
-      (github.event.pull_request.merged == true && startsWith(github.head_ref, 'releases/')) &&
-      (contains(github.event.pull_request.labels.*.name, 'release-target'))
+      (
+        (github.event.pull_request.merged == true && startsWith(github.head_ref, 'releases/')) &&
+        (contains(github.event.pull_request.labels.*.name, 'release-target'))
+      ) ||
+      github.event_name == 'workflow_dispatch'
     with:
-      pr_number_request_for_release: ${{ github.event.pull_request.number }}
+      pr_number_request_for_release: ${{ fromJson(github.event.pull_request.number || inputs.pr_number_request_for_release) }}
       pr_label_request_for_release:  'release-target'
       workflow_runs_on:              'ubuntu-26.04'
       dotnet_sdk_version:            '10.0.100'

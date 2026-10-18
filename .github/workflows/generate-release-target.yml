@@ -24,55 +24,24 @@ on:
         default: false
 
 jobs:
-  determine-release-target:
-    runs-on: ubuntu-slim
-    outputs:
-      tag_name: ${{ steps.release-target.outputs.tag_name }}
-      dry_run: ${{ steps.release-target.outputs.dry_run }}
-    steps:
-    - name: Determine the release target tag
-      id: release-target
-      run: |
-        # If workflow is triggered by workflow_dispatch, the value of github.ref_name contains branch ref which workflow runs from.
-        # Due to the reason of above, github.event.inputs.release_target_tag_name must be tested before testing github.ref_name.
-        if [[ -n '${{ github.event.inputs.release_target_tag_name }}' ]]; then
-          # use dispatched tag name
-          echo 'tag_name=${{ github.event.inputs.release_target_tag_name }}' >> $GITHUB_OUTPUT
-
-          if [ '${{ github.event.inputs.dry_run }}' = 'true' ]; then
-            echo 'dry_run=true' >> $GITHUB_OUTPUT
-          else
-            echo 'dry_run=false' >> $GITHUB_OUTPUT
-          fi
-
-          exit 0
-        fi
-
-        if [[ -n '${{ github.ref_name }}' ]]; then
-          # use pushed tag name
-          echo 'tag_name=${{ github.ref_name }}' >> $GITHUB_OUTPUT
-          echo 'dry_run=false' >> $GITHUB_OUTPUT
-          exit 0
-        fi
-
-        echo "::error::release target tag could not be determined."
-        exit 1
-
   run-generate-release-target:
-    uses: smdn/workflows-dotnet/.github/workflows/generate-release-target.yml@1035ae4555df7e5108a41439f86ed31f67924d04 # release-target/v1.17.1
+    name: Generate release target ${{ inputs.release_target_tag_name || github.ref_name }}
+    uses: smdn/workflows-dotnet/.github/workflows/generate-release-target.yml@82483644b5076d58d6e5a0813e69370a71f49500 # release-target/v1.17.2
     permissions:
       contents: write
       pull-requests: write
-    needs: determine-release-target
-    if: startsWith(needs.determine-release-target.outputs.tag_name, 'new-release/')
+    # If `inputs` is not specified, it evaluates to `falsy`, but `github.ref_name` is always assigned some string.
+    # Therefore, `inputs` must be evaluated first.
+    if: startsWith(inputs.release_target_tag_name || github.ref_name, 'new-release/')
     with:
-      release_target_tag_name: ${{ needs.determine-release-target.outputs.tag_name }}
+      release_target_tag_name: ${{ inputs.release_target_tag_name || github.ref_name }}
       release_target_tag_prefix: 'new-release/'
       release_target_pr_label: 'release-target'
       release_tag_prefix: 'releases/'
+      generate_release_note: ${{ !github.event.repository.private }}
       workflow_runs_on: 'ubuntu-26.04'
       dotnet_sdk_version: '10.0.100'
-      dry_run: ${{ needs.determine-release-target.outputs.dry_run == 'true' }}
+      dry_run: ${{ inputs.dry_run == 'true' }}
     secrets:
       token_repo:         ${{ secrets.PUBLISH_NEW_RELEASE }}
       token_pullrequest:  ${{ secrets.PUBLISH_NEW_RELEASE }}

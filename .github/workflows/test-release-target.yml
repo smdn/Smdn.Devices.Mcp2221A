@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: "2026 smdn <smdn@smdn.jp>"
+
+name: Run tests with release target
+
+permissions: {}
+
+on:
+  push:
+    # Triggered by a push to the release working branch.
+    # The prefix for the release working branch is determined by the `release_tag_prefix`
+    # parameter in `generate-release-target.yml`. Therefore, the branch name filter must
+    # match this prefix.
+    branches: 'releases/**'
+
+jobs:
+  determine-release-target:
+    name: Determine the release target
+    runs-on: ubuntu-slim
+    outputs:
+      package_id: ${{ steps.release-target.outputs.package_id }}
+    steps:
+      - name: Determine the release target
+        id: release-target
+        shell: bash
+        run: |
+          release_working_branch="${GITHUB_REF_NAME}"
+          package_id_with_version="${release_working_branch##*/}"
+          package_id="${package_id_with_version%%-*}"
+
+          if [ -n "$package_id" ]; then
+            echo "package_id=$package_id" >> $GITHUB_OUTPUT
+          else
+            echo "::error::Could not determine package ID from branch name: $release_working_branch"
+            exit 1
+          fi
+
+  run-tests-dotnet:
+    name: Run .NET tests ${{ needs.determine-release-target.outputs.package_id }}
+    uses: smdn/workflows-dotnet/.github/workflows/test.yml@8c4f88f08af9d1d3d1fc655c373774565b28a2b9 # test/v1.11.2
+    permissions:
+      contents: read
+    needs: determine-release-target
+    with:
+      project:                                ${{ needs.determine-release-target.outputs.package_id }}
+      os:                                     'ubuntu-26.04, ubuntu-24.04, ubuntu-22.04, windows-latest, macos-latest'
+      timeout_minutes_test_job:               10
+      timeout_hang:                           "[ {'OS':'windows','Timeout':'6min'}, {'OS':'macos','Timeout':'3min'}, {'OS':'','Timeout':'1min'} ]"
+      dotnet_test_options_configuration:      'Release' # Perform testing with the release configuration
+    secrets:
+      token_repo: ${{ secrets.GITHUB_TOKEN }}
+
+  post-tests-dotnet:
+    # This job is intended to be referenced by the branch protection rules (Status Checks).
+    # Do not change the 'name' or job ID, as doing so will break the status check validation.
+    # Avoid adding 'if: always()', otherwise this job will report success even if previous tests fail.
+    name: .NET test status
+    needs: run-tests-dotnet
+    runs-on: ubuntu-slim
+    steps:
+      - name: .NET test status
+        run: echo "All .NET tests completed successfully."
