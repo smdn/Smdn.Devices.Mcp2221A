@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
+# SPDX-License-Identifier: MIT
+#
+# EditorConfig is awesome: https://EditorConfig.org
+#
+# StyleCop.Analyzers Naming Settings
+# ref: https://dotnetanalyzers.github.io/StyleCopAnalyzers/Configuration.html
+#
+[*.cs]
+stylecop.naming.allowedHungarianPrefixes = gp

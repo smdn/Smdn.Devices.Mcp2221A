@@ -21,10 +21,6 @@ SPDX-License-Identifier: MIT
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
-  <PropertyGroup Label="code analysis">
-    <StyleCopAnalyzersConfigurationFile>$(MSBuildThisFileDirectory)stylecop.json</StyleCopAnalyzersConfigurationFile>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference
       Include="Smdn.MSBuild.DefineConstants.NETSdkApi"
