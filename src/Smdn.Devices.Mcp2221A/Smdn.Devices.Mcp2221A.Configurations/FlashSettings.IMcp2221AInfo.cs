@@ -9,7 +9,6 @@ namespace Smdn.Devices.Mcp2221A.Configurations;
 partial class FlashSettings {
 #pragma warning restore IDE0040
   private static string DecodeUsbDescriptorString(ReadOnlySpan<byte> bytes)
-#pragma warning disable SA1114
     => Encoding.Unicode.GetString(
 #if SYSTEM_TEXT_ENCODING_GETSTRING_READONLYSPAN_OF_BYTE
       bytes
@@ -19,7 +18,6 @@ partial class FlashSettings {
       bytes.Length
 #endif
     );
-#pragma warning restore SA1114
 
   private static string DecodeChipFactorySerialNumberString(ReadOnlySpan<byte> bytes)
   {
@@ -40,7 +38,6 @@ partial class FlashSettings {
       serialNumberChars[i] = (char)bytes[i];
     }
 
-#pragma warning disable SA1114
     return new string(
 #if SYSTEM_STRING_CTOR_READONLYSPAN_OF_CHAR
       serialNumberChars
@@ -50,7 +47,6 @@ partial class FlashSettings {
       serialNumberChars.Length
 #endif
     );
-#pragma warning restore SA1114
 #endif
   }
 
