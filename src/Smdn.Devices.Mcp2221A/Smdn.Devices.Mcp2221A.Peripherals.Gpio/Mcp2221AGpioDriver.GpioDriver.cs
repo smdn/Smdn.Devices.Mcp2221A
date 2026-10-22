@@ -6,9 +6,7 @@ using System.Threading;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
-#pragma warning disable IDE0040
 partial class Mcp2221AGpioDriver : GpioDriver {
-#pragma warning restore IDE0040
   /// <inheritdoc/>
   protected override int PinCount => NumberOfGpPins;
 

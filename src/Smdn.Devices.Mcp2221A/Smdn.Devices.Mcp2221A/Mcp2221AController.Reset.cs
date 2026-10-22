@@ -5,10 +5,7 @@ using System.Threading.Tasks;
 
 namespace Smdn.Devices.Mcp2221A;
 
-#pragma warning disable IDE0040
 partial class Mcp2221AController {
-#pragma warning restore IDE0040
-
   /// <inheritdoc cref="Reset(CancellationToken)"/>
   /// <summary>
   /// Asynchronously sends a 'RESET CHIP' command to the MCP2221/MCP2221A

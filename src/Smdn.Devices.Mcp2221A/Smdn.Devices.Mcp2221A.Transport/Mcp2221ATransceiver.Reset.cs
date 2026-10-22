@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace Smdn.Devices.Mcp2221A.Transport;
 
-#pragma warning disable IDE0040
 partial class Mcp2221ATransceiver {
-#pragma warning restore IDE0040
   private static class ResetChipCommand {
     public static void ConstructCommand(
       Span<byte> comm,

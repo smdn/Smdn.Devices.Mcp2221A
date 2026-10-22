@@ -7,9 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Smdn.Devices.Mcp2221A.Transport;
 
-#pragma warning disable IDE0040
 partial class Mcp2221ATransceiver {
-#pragma warning restore IDE0040
   private static string ConvertByteSequenceToString(
     ReadOnlySpan<byte> sequence,
     int? actualLength = default

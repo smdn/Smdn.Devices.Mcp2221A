@@ -15,9 +15,7 @@ using SequenceIs = Smdn.Test.NUnit.Constraints.Buffers.Is;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
-#pragma warning disable IDE0040
 partial class GpControllerTests {
-#pragma warning restore IDE0040
   private static System.Collections.IEnumerable YieldTestCases_ConfigureAsAdcSyncOrAsync()
   {
     const byte InitialChipSetting3_AdcVrm = 0b_0_1_1_01_1_00; // INTDETFEEN: 1, INTDETREEN: 1, ADCVRM: 01(1.024V), ADCREF: 1(VRM) (factory default)

@@ -12,9 +12,7 @@ using System.Threading.Tasks;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
-#pragma warning disable IDE0040
 partial class GpController : IGpioController {
-#pragma warning restore IDE0040
   private protected void ThrowIfInvalidConfiguration(GpFunction requiredFunction)
   {
     if (CurrentFunction != requiredFunction) {

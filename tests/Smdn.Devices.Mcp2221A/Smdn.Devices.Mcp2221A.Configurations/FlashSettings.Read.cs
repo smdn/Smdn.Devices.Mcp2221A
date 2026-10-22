@@ -8,9 +8,7 @@ using NUnit.Framework;
 
 namespace Smdn.Devices.Mcp2221A.Configurations;
 
-#pragma warning disable IDE0040
 partial class FlashSettingsTests {
-#pragma warning restore IDE0040
   [TestCase(0b_0_11111_00, false)] // factory default
   [TestCase(0b_1_11111_00, true)]
   public void CdcSerialNumberEnumerationEnabled_Initial(

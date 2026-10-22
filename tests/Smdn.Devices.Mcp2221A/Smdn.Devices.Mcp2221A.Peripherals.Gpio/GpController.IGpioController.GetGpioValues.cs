@@ -16,9 +16,7 @@ using SequenceIs = Smdn.Test.NUnit.Constraints.Buffers.Is;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
-#pragma warning disable IDE0040
 partial class GpControllerTests {
-#pragma warning restore IDE0040
   [Test]
   public void GetModeAsync_Disposed()
     => GetModeSyncOrAsync_Disposed(

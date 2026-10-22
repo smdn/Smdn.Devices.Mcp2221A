@@ -13,9 +13,7 @@ using SequenceIs = Smdn.Test.NUnit.Constraints.Buffers.Is;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
-#pragma warning disable IDE0040
 partial class GpControllerTests {
-#pragma warning restore IDE0040
   private static System.Collections.IEnumerable YieldTestCases_ConfigureAsDacSyncOrAsync()
   {
     const byte InitialChipSetting2_DacVrm = 0b_01_1_00111; // DAC: VRM 1.024V; Output = 7

@@ -12,9 +12,7 @@ using Smdn.Devices.Mcp2221A.Transport;
 
 namespace Smdn.Devices.Mcp2221A.Configurations;
 
-#pragma warning disable IDE0040
 partial class FlashSettings {
-#pragma warning restore IDE0040
   private static class WriteFlashDataCommand {
     public static void ConstructWriteChipSettingsCommand(
       Span<byte> comm,

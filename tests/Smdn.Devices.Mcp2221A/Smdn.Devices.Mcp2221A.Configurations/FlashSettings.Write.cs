@@ -9,9 +9,7 @@ using NUnit.Framework;
 
 namespace Smdn.Devices.Mcp2221A.Configurations;
 
-#pragma warning disable IDE0040
 partial class FlashSettingsTests {
-#pragma warning restore IDE0040
   [TestCase(0b_0_11111_00, false, 0b_0_11111_00)] // initial: factory default
   [TestCase(0b_0_11111_00, true, 0b_1_11111_00)] // initial: factory default
   [TestCase(0b_1_00000_11, false, 0b_0_00000_11)]

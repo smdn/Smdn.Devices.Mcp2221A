@@ -8,9 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
-#pragma warning disable IDE0040
 partial class Mcp2221AI2cBus {
-#pragma warning restore IDE0040
   /// <summary>
   /// A constant represents the maximum size of data that can be
   /// transferred over the I2C bus.

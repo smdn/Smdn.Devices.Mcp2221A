@@ -7,9 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Smdn.Devices.Mcp2221A.Configurations;
 
-#pragma warning disable IDE0040
 partial class FlashSettings {
-#pragma warning restore IDE0040
 #if NULL_STATE_STATIC_ANALYSIS_ATTRIBUTES
   [DoesNotReturn]
 #endif

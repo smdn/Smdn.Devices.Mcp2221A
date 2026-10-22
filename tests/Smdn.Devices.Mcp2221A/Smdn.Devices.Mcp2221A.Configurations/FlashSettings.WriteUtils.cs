@@ -7,9 +7,7 @@ using NUnit.Framework;
 
 namespace Smdn.Devices.Mcp2221A.Configurations;
 
-#pragma warning disable IDE0040
 partial class FlashSettingsTests {
-#pragma warning restore IDE0040
   [TestCaseSource(nameof(YieldTestCases_TryModifyUsbManufacturerString))]
   public void ModifyUsbManufacturerString(
     string initialUsbManufacturerString,

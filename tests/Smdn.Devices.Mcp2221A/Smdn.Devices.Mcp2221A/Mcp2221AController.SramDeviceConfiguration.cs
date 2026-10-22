@@ -7,9 +7,7 @@ using NUnit.Framework;
 
 namespace Smdn.Devices.Mcp2221A;
 
-#pragma warning disable IDE0040
 partial class Mcp2221AControllerTests {
-#pragma warning restore IDE0040
   [TestCase(0b_0_11110_00, false)] // factory default
   [TestCase(0b_1_00000_00, true)]
   [TestCase(0b_1_00000_11, true)]

@@ -13,9 +13,7 @@ using SequenceIs = Smdn.Test.NUnit.Constraints.Buffers.Is;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
-#pragma warning disable IDE0040
 partial class GpControllerTests {
-#pragma warning restore IDE0040
   private static System.Collections.IEnumerable YieldTestCases_ConfigureAsClockOutputSyncOrAsync()
   {
     const byte InitialChipSetting1_50Percent12MHz = 0b_000_10_010; // Duty cycle: 50%; Divider: 12MHz (factory default)

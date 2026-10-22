@@ -16,9 +16,7 @@ using SequenceIs = Smdn.Test.NUnit.Constraints.Buffers.Is;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
-#pragma warning disable IDE0040
 partial class GpControllerTests {
-#pragma warning restore IDE0040
   [TestCaseSource(nameof(YieldTestCases_GP0_InvalidConfigurationSettings))]
   public void SetMode_GPO_InvalidConfiguration(byte gp0Settings)
     => SetModeSyncAndAsync_InvalidConfiguration(

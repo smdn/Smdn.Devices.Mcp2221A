@@ -13,9 +13,7 @@ using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
 
-#pragma warning disable IDE0040
 partial class Mcp2221AControllerTests {
-#pragma warning restore IDE0040
   private static System.Collections.IEnumerable YieldTestCases_CreateI2cDeviceAdapter()
   {
     const bool ShouldDisposeMcp2221AController = true;

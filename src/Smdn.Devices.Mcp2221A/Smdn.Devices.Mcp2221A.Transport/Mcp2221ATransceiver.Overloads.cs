@@ -5,9 +5,7 @@ using System.Threading.Tasks;
 
 namespace Smdn.Devices.Mcp2221A.Transport;
 
-#pragma warning disable IDE0040
 partial class Mcp2221ATransceiver {
-#pragma warning restore IDE0040
   public TResponse Command<TResponse>(
     Mcp2221AConstructCommandAction<None> constructCommand,
     Mcp2221AParseResponseFunc<None, TResponse> parseResponse,

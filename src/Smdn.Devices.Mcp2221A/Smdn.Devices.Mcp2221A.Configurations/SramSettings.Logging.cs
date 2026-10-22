@@ -8,9 +8,7 @@ using Smdn.Formats.Binary;
 
 namespace Smdn.Devices.Mcp2221A.Configurations;
 
-#pragma warning disable IDE0040
 partial class SramSettings {
-#pragma warning restore IDE0040
   private static string FormatSettingsInBinary(ReadOnlySpan<byte> s)
   {
     // [0] Clock Output Divider Value

@@ -10,10 +10,7 @@ using Smdn.Devices.Mcp2221A.Configurations;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
-#pragma warning disable IDE0040
-
 partial class Mcp2221AGpioDriver {
-#pragma warning restore IDE0040
   internal static int ThrowIfInvalidGpIndex(int gpIndex)
   {
     if (gpIndex is < 0 or >= NumberOfGpPins)
@@ -228,7 +225,6 @@ partial class Mcp2221AGpioDriver {
     }
   }
 
-#pragma warning restore IDE0040
   private static class GetGpioValuesCommand {
 #pragma warning disable IDE0060 // [IDE0060] Remove unused parameter
     public static void ConstructCommand(

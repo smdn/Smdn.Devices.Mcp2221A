@@ -10,9 +10,7 @@ using Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
 namespace Smdn.Devices.Mcp2221A.Configurations;
 
-#pragma warning disable IDE0040
 partial class FlashSettings {
-#pragma warning restore IDE0040
   /// <summary>
   /// Modifies the password required for accessing protected
   /// Flash configurations.

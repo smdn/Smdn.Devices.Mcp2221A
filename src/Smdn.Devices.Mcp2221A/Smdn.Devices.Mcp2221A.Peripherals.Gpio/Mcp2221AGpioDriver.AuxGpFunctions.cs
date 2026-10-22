@@ -9,9 +9,7 @@ using Smdn.Devices.Mcp2221A.Configurations;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 
-#pragma warning disable IDE0040
 partial class Mcp2221AGpioDriver {
-#pragma warning restore IDE0040
   internal static int? ThrowIfDacOutputValueOutOfRange(int? value, string paramName)
     => value.HasValue ? ThrowIfDacOutputValueOutOfRange(value.Value, paramName) : null;
 

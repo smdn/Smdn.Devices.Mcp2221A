@@ -5,9 +5,7 @@ using System.Text;
 
 namespace Smdn.Devices.Mcp2221A.Configurations;
 
-#pragma warning disable IDE0040
 partial class FlashSettings {
-#pragma warning restore IDE0040
   private static string DecodeUsbDescriptorString(ReadOnlySpan<byte> bytes)
     => Encoding.Unicode.GetString(
 #if SYSTEM_TEXT_ENCODING_GETSTRING_READONLYSPAN_OF_BYTE

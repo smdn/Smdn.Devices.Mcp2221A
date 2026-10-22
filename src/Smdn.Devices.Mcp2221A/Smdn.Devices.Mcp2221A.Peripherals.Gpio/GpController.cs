@@ -52,9 +52,7 @@ namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
 /// All GP pins support standard GPIO (General Purpose Input/Output) functionality.
 /// </para>
 /// </remarks>
-#pragma warning disable IDE0040
 public abstract partial class GpController {
-#pragma warning restore IDE0040
   private protected static NotSupportedException CreateUnsupportedGpDesignationException(
     int gpIndex,
     GpDesignation designation

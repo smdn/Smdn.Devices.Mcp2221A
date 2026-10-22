@@ -11,9 +11,7 @@ using Smdn.Devices.Mcp2221A.Transport;
 
 namespace Smdn.Devices.Mcp2221A;
 
-#pragma warning disable IDE0040
 partial class Mcp2221AController {
-#pragma warning restore IDE0040
   private static async ValueTask<Mcp2221AController> CreateFromInfoAndTransceiverAsync(
     Mcp2221ATransceiver transceiver,
     FlashSettings flashSettings,

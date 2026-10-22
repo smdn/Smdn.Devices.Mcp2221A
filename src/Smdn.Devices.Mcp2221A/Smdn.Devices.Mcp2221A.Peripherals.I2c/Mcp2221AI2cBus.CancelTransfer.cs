@@ -7,9 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
-#pragma warning disable IDE0040
 partial class Mcp2221AI2cBus {
-#pragma warning restore IDE0040
   private static class CancelTransferCommand {
 #pragma warning disable IDE0060 // [IDE0060] Remove unused parameter
     public static void ConstructCommand(

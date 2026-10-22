@@ -4,9 +4,7 @@ using System;
 
 namespace Smdn.Devices.Mcp2221A.Configurations;
 
-#pragma warning disable IDE0040
 partial class FlashSettings {
-#pragma warning restore IDE0040
   /// <summary>
   /// Specifies the maximum length, in characters, of the USB string descriptors
   /// stored in the Flash memory.

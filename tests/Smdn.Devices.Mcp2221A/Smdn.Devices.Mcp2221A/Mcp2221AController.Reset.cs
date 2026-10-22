@@ -14,9 +14,7 @@ using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
 
-#pragma warning disable IDE0040
 partial class Mcp2221AControllerTests {
-#pragma warning restore IDE0040
   [Test]
   public void ResetAsync()
     => ResetSyncOrAsync(
