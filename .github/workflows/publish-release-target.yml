@@ -20,7 +20,7 @@ on:
 jobs:
   run-publish-release-target:
     name: Publish release target ${{ github.head_ref }}
-    uses: smdn/workflows-dotnet/.github/workflows/publish-release-target.yml@82483644b5076d58d6e5a0813e69370a71f49500 # release-target/v1.17.2
+    uses: smdn/workflows-dotnet/.github/workflows/publish-release-target.yml@21607577114f3fd6ed136af54a6ed21dec281422 # release-target/v1.17.3
     permissions:
       contents: write
       packages: write
@@ -33,9 +33,9 @@ jobs:
       github.event_name == 'workflow_dispatch'
     with:
       pr_number_request_for_release: ${{ fromJson(github.event.pull_request.number || inputs.pr_number_request_for_release) }}
-      pr_label_request_for_release:  'release-target'
-      workflow_runs_on:              'ubuntu-26.04'
-      dotnet_sdk_version:            '10.0.100'
+      pr_label_request_for_release:  "release-target"
+      workflow_runs_on:              "ubuntu-26.04"
+      dotnet_sdk_version:            "10.0.100"
     secrets:
       token_repo:                 ${{ secrets.PUBLISH_NEW_RELEASE }}
       token_push_nuget_org:       ${{ secrets.PUBLISH_PACKAGE_NUGETORG }}

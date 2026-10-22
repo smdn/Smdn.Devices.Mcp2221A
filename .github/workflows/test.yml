@@ -7,20 +7,20 @@ permissions: {}
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-    - 'src/**/*.cs'
-    - 'src/**/*.csproj'
-    - 'tests/**/*.cs'
-    - 'tests/**/*.csproj'
+      - "src/**/*.cs"
+      - "src/**/*.csproj"
+      - "tests/**/*.cs"
+      - "tests/**/*.csproj"
 
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-    - 'src/**/*.cs'
-    - 'src/**/*.csproj'
-    - 'tests/**/*.cs'
-    - 'tests/**/*.csproj'
+      - "src/**/*.cs"
+      - "src/**/*.csproj"
+      - "tests/**/*.cs"
+      - "tests/**/*.csproj"
 
   workflow_dispatch:
     inputs:
@@ -70,7 +70,7 @@ on:
         description: "The argument to be set to the `--output <VERBOSITY_LEVEL>` option of the `dotnet test` command."
         required: false
         type: string
-        default: ''
+        default: ""
 
 jobs:
   run-tests-dotnet:

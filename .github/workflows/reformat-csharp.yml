@@ -1,0 +1,67 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: "2026 smdn <smdn@smdn.jp>"
+#cSpell:ignore pullrequest
+
+name: Reformat C# code
+
+permissions: {}
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: "The project name to perform `dotnet format` on."
+        required: false
+        type: string
+
+      workflow_runs_on:
+        description: "The OS label which run the workflow on. (ubuntu-latest, ubuntu-24.04, ubuntu-22.04, etc.)"
+        required: false
+        type: string
+
+      extra_options_common:
+        description: "The common extra options to be set on running the `dotnet restore/format` command."
+        required: false
+        type: string
+
+      dotnet_format_options_verbosity_level:
+        # cSpell:disable-next-line
+        description: "The argument to be set to the `--verbosity <LEVEL>` option of the `dotnet format` command. <LEVEL> := q[uiet], m[inimal], n[ormal], d[etailed], diag[nostic]"
+        required: false
+        type: string
+
+      dotnet_format_options_severity_level:
+        description: "The argument to be set to the `--severity <LEVEL>` option of the `dotnet format` command. <LEVEL> := error, hidden, info, warn"
+        required: false
+        type: string
+
+      verbose:
+        description: "If true, enables verbose output."
+        required: false
+        type: boolean
+        default: false
+
+      dry_run:
+        description: "If true, performs a trial run."
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  run-reformat-csharp:
+    name: Reformat C# code
+    uses: smdn/workflows-dotnet/.github/workflows/reformat-csharp.yml@1afadf1fb24fa76f08a78a8e15e645390d4ea98a # reformat-csharp/v1.0.0
+    permissions:
+      contents: write
+      pull-requests: write
+    with:
+      project: ${{ inputs.project }}
+      workflow_runs_on: ${{ inputs.workflow_runs_on == '' && 'ubuntu-latest' || inputs.workflow_runs_on }}
+      extra_options_common: ${{ inputs.extra_options_common }}
+      dotnet_format_options_verbosity_level: ${{ inputs.dotnet_format_options_verbosity_level }}
+      dotnet_format_options_severity_level: ${{ inputs.dotnet_format_options_severity_level }}
+      verbose: ${{ inputs.verbose == true }}
+      dry_run: ${{ inputs.dry_run == true }}
+    secrets:
+      token_repo: ${{ secrets.GITHUB_TOKEN }}
+      token_pullrequest: ${{ secrets.GITHUB_TOKEN }}

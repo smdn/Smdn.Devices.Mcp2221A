@@ -11,7 +11,7 @@ on:
     # The prefix for the release working branch is determined by the `release_tag_prefix`
     # parameter in `generate-release-target.yml`. Therefore, the branch name filter must
     # match this prefix.
-    branches: 'releases/**'
+    branches: "releases/**"
 
 jobs:
   determine-release-target:
@@ -43,10 +43,10 @@ jobs:
     needs: determine-release-target
     with:
       project:                                ${{ needs.determine-release-target.outputs.package_id }}
-      os:                                     'ubuntu-26.04, ubuntu-24.04, ubuntu-22.04, windows-latest, macos-latest'
+      os:                                     "ubuntu-26.04, ubuntu-24.04, ubuntu-22.04, windows-latest, macos-latest"
       timeout_minutes_test_job:               10
       timeout_hang:                           "[ {'OS':'windows','Timeout':'6min'}, {'OS':'macos','Timeout':'3min'}, {'OS':'','Timeout':'1min'} ]"
-      dotnet_test_options_configuration:      'Release' # Perform testing with the release configuration
+      dotnet_test_options_configuration:      "Release" # Perform testing with the release configuration
     secrets:
       token_repo: ${{ secrets.GITHUB_TOKEN }}
 

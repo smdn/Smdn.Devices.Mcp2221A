@@ -47,7 +47,7 @@ on:
         description: "The argument to be set to the `--output <VERBOSITY_LEVEL>` option of the `dotnet test` command."
         required: false
         type: string
-        default: ''
+        default: ""
 
 jobs:
   await-package-publishing:
@@ -67,7 +67,7 @@ jobs:
     with:
       project:                                ${{ inputs.project }}
       os:                                     ${{ inputs.os == '' && 'ubuntu-26.04, ubuntu-24.04, ubuntu-22.04, windows-latest, macos-latest' || inputs.os }}
-      extra_options_common:                   '/p:TestReleasedPackage=true'
+      extra_options_common:                   "/p:TestReleasedPackage=true"
       verbose:                                ${{ inputs.verbose == true }}
       timeout_minutes_test_job:               10
       timeout_hang:                           "[ {'OS':'windows','Timeout':'6min'}, {'OS':'macos','Timeout':'3min'}, {'OS':'','Timeout':'1min'} ]"

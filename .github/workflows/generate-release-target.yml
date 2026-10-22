@@ -26,7 +26,7 @@ on:
 jobs:
   run-generate-release-target:
     name: Generate release target ${{ inputs.release_target_tag_name || github.ref_name }}
-    uses: smdn/workflows-dotnet/.github/workflows/generate-release-target.yml@82483644b5076d58d6e5a0813e69370a71f49500 # release-target/v1.17.2
+    uses: smdn/workflows-dotnet/.github/workflows/generate-release-target.yml@21607577114f3fd6ed136af54a6ed21dec281422 # release-target/v1.17.3
     permissions:
       contents: write
       pull-requests: write
@@ -35,13 +35,13 @@ jobs:
     if: startsWith(inputs.release_target_tag_name || github.ref_name, 'new-release/')
     with:
       release_target_tag_name: ${{ inputs.release_target_tag_name || github.ref_name }}
-      release_target_tag_prefix: 'new-release/'
-      release_target_pr_label: 'release-target'
-      release_tag_prefix: 'releases/'
+      release_target_tag_prefix: "new-release/"
+      release_target_pr_label: "release-target"
+      release_tag_prefix: "releases/"
       generate_release_note: ${{ !github.event.repository.private }}
-      workflow_runs_on: 'ubuntu-26.04'
-      dotnet_sdk_version: '10.0.100'
-      dry_run: ${{ inputs.dry_run == 'true' }}
+      workflow_runs_on: "ubuntu-26.04"
+      dotnet_sdk_version: "10.0.100"
+      dry_run: ${{ inputs.dry_run == true }}
     secrets:
       token_repo:         ${{ secrets.PUBLISH_NEW_RELEASE }}
       token_pullrequest:  ${{ secrets.PUBLISH_NEW_RELEASE }}

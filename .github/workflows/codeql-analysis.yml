@@ -53,44 +53,44 @@ jobs:
         include:
           - language: csharp
             build-mode: manual
-            source-root: './src'
+            source-root: "./src"
           - language: actions
             build-mode: none
-            source-root: './.github'
+            source-root: "./.github"
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        persist-credentials: false
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
-      with:
-        languages: ${{ matrix.language }}
-        build-mode: ${{ matrix.build-mode }}
-        # If you wish to specify custom queries, you can do so here or in a config file.
-        # By default, queries listed here will override any specified in a config file.
-        # Prefix the list here with "+" to use these queries and those in the config file.
-        # queries: ./path/to/local/query, your-org/your-repo/queries@main
-        config-file: ./.github/codeql/configurations.yml
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          # If you wish to specify custom queries, you can do so here or in a config file.
+          # By default, queries listed here will override any specified in a config file.
+          # Prefix the list here with "+" to use these queries and those in the config file.
+          # queries: ./path/to/local/query, your-org/your-repo/queries@main
+          config-file: ./.github/codeql/configurations.yml
 
-    - name: Autobuild
-      if: ${{ (matrix.build-mode == 'autobuild') || (matrix.build-mode == '') }}
-      uses: github/codeql-action/autobuild@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+      - name: Autobuild
+        if: ${{ (matrix.build-mode == 'autobuild') || (matrix.build-mode == '') }}
+        uses: github/codeql-action/autobuild@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
 
-    - name: Prepare .NET SDK ${{ env.MINIMAL_DOTNET_SDK_VERSION }}
-      uses: smdn/workflows-dotnet/actions/prepare-dotnet-sdk@ca77c33b60b27d8734f7e7cc02f97a9b274c6779 # actions/prepare-dotnet-sdk/v1.3.0
-      if: ${{ (matrix.build-mode == 'manual') && (matrix.language == 'csharp') }}
-      with:
-        minimal_dotnet_sdk_version: '${{ env.MINIMAL_DOTNET_SDK_VERSION }}'
+      - name: Prepare .NET SDK ${{ env.MINIMAL_DOTNET_SDK_VERSION }}
+        uses: smdn/workflows-dotnet/actions/prepare-dotnet-sdk@ca77c33b60b27d8734f7e7cc02f97a9b274c6779 # actions/prepare-dotnet-sdk/v1.3.0
+        if: ${{ (matrix.build-mode == 'manual') && (matrix.language == 'csharp') }}
+        with:
+          minimal_dotnet_sdk_version: "${{ env.MINIMAL_DOTNET_SDK_VERSION }}"
 
-    - name: Build all .NET projects
-      if: ${{ (matrix.build-mode == 'manual') && (matrix.language == 'csharp') }}
-      run: |
-        ./eng/BuildAllProjects.ps1
+      - name: Build all .NET projects
+        if: ${{ (matrix.build-mode == 'manual') && (matrix.language == 'csharp') }}
+        run: |
+          ./eng/BuildAllProjects.ps1
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
-      with:
-        category: "/language:${{ matrix.language }}"
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          category: "/language:${{ matrix.language }}"
