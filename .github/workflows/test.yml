@@ -9,6 +9,9 @@ on:
   push:
     branches: [main]
     paths:
+      - "global.json"
+      - "**/Directory.Build.props"
+      - "**/Directory.Build.targets"
       - "src/**/*.cs"
       - "src/**/*.csproj"
       - "tests/**/*.cs"
@@ -17,6 +20,9 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - "global.json"
+      - "**/Directory.Build.props"
+      - "**/Directory.Build.targets"
       - "src/**/*.cs"
       - "src/**/*.csproj"
       - "tests/**/*.cs"
@@ -75,7 +81,7 @@ on:
 jobs:
   run-tests-dotnet:
     name: Run .NET tests
-    uses: smdn/workflows-dotnet/.github/workflows/test.yml@8c4f88f08af9d1d3d1fc655c373774565b28a2b9 # test/v1.11.2
+    uses: smdn/workflows-dotnet/.github/workflows/test.yml@41a6fdd7adfa481246a48c8b7d78cdd7903f07a5 # test/v1.11.3
     permissions:
       contents: read
     with:
