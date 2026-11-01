@@ -1993,8 +1993,7 @@ partial class Mcp2221AGpioDriverTests {
       async () => await applyDacRawValueAsyncFunc(mcp2221A.GpPins, value),
       Throws
         .TypeOf<ArgumentOutOfRangeException>()
-        .With
-        .Property(nameof(ArgumentOutOfRangeException.ParamName))
+        .ParamName
         .EqualTo("value")
         .And
         .Property(nameof(ArgumentOutOfRangeException.ActualValue))

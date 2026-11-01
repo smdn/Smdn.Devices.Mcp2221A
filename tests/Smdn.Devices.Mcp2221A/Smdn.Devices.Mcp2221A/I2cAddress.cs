@@ -32,8 +32,7 @@ public class I2cAddressTests {
       () => _ = new I2cAddress(address: address),
       Throws
         .TypeOf<ArgumentOutOfRangeException>()
-        .With
-        .Property(nameof(ArgumentOutOfRangeException.ParamName))
+        .ParamName
         .EqualTo("address")
     );
 
@@ -61,8 +60,7 @@ public class I2cAddressTests {
       () => _ = new I2cAddress(deviceAddressBits: deviceBits, hardwareBits),
       Throws
         .TypeOf<ArgumentOutOfRangeException>()
-        .With
-        .Property(nameof(ArgumentOutOfRangeException.ParamName))
+        .ParamName
         .EqualTo("deviceAddressBits")
       );
 
@@ -75,8 +73,7 @@ public class I2cAddressTests {
       () => _ = new I2cAddress(deviceBits, hardwareAddressBits: hardwareBits),
       Throws
         .TypeOf<ArgumentOutOfRangeException>()
-        .With
-        .Property(nameof(ArgumentOutOfRangeException.ParamName))
+        .ParamName
         .EqualTo("hardwareAddressBits")
     );
 

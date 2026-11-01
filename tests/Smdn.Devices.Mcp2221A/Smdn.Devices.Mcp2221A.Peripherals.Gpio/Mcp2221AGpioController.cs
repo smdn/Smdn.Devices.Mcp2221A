@@ -395,7 +395,7 @@ public class Mcp2221AGpioControllerTests {
 
     Assert.That(
       () => mcp2221A.GpioController.SetPinMode(pinNumber, mode),
-      Throws.TypeOf<InvalidOperationException>()
+      Throws.InvalidOperationException
     );
 
     Assert.That(
@@ -519,7 +519,7 @@ public class Mcp2221AGpioControllerTests {
 
     Assert.That(
       () => mcp2221A.GpioController.SetPinMode(pinNumber, unsupportedOrUndefinedPinMode),
-      Throws.TypeOf<InvalidOperationException>()
+      Throws.InvalidOperationException
     );
 
     Assert.That(
@@ -555,7 +555,7 @@ public class Mcp2221AGpioControllerTests {
 
     Assert.That(
       () => mcp2221A.GpioController.GetPinMode(pinNumber),
-      Throws.TypeOf<InvalidOperationException>()
+      Throws.InvalidOperationException
     );
 
     Assert.That(
@@ -685,7 +685,7 @@ public class Mcp2221AGpioControllerTests {
 
     Assert.That(
       () => mcp2221A.GpioController.Write(pinNumber, value),
-      Throws.TypeOf<InvalidOperationException>()
+      Throws.InvalidOperationException
     );
 
     Assert.That(
@@ -1010,7 +1010,7 @@ public class Mcp2221AGpioControllerTests {
 
     Assert.That(
       () => mcp2221A.GpioController.Read(pinNumber),
-      Throws.TypeOf<InvalidOperationException>()
+      Throws.InvalidOperationException
     );
 
     Assert.That(
@@ -1256,7 +1256,7 @@ public class Mcp2221AGpioControllerTests {
 
     Assert.That(
       () => mcp2221A.GpioController.Toggle(pinNumber),
-      Throws.TypeOf<InvalidOperationException>()
+      Throws.InvalidOperationException
     );
 
     Assert.That(
@@ -1399,7 +1399,7 @@ public class Mcp2221AGpioControllerTests {
 
     Assert.That(
       () => mcp2221A.GpioController.WaitForEvent(pinNumber, pinEventTypes, cts.Token),
-      Throws.TypeOf<InvalidOperationException>()
+      Throws.InvalidOperationException
     );
 
     Assert.That(
@@ -1498,7 +1498,7 @@ public class Mcp2221AGpioControllerTests {
 
     Assert.That(
       async () => await mcp2221A.GpioController.WaitForEventAsync(pinNumber, pinEventTypes, cts.Token).ConfigureAwait(false),
-      Throws.TypeOf<InvalidOperationException>()
+      Throws.InvalidOperationException
     );
 
     Assert.That(
@@ -1595,7 +1595,7 @@ public class Mcp2221AGpioControllerTests {
         pinEventTypes,
         static (sender, e) => throw new InvalidOperationException("event should not be raised")
       ),
-      Throws.TypeOf<InvalidOperationException>()
+      Throws.InvalidOperationException
     );
   }
 
@@ -1670,7 +1670,7 @@ public class Mcp2221AGpioControllerTests {
         pinNumber,
         static (sender, e) => throw new InvalidOperationException("event should not be raised")
       ),
-      Throws.TypeOf<InvalidOperationException>()
+      Throws.InvalidOperationException
     );
   }
 

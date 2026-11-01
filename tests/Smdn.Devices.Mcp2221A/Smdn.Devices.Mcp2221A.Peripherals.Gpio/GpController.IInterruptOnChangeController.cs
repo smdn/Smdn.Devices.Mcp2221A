@@ -290,8 +290,7 @@ partial class GpControllerTests {
       async () => await configureAsInterruptOnChangeAsyncFunc(mcp2221A.GpPin1, detectionTrigger),
       Throws
         .InstanceOf<ArgumentException>()
-        .With
-        .Property(nameof(ArgumentException.ParamName))
+        .ParamName
         .EqualTo(nameof(detectionTrigger))
         .And
         .Message

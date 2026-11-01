@@ -248,8 +248,7 @@ partial class GpControllerTests {
         async () => await configureAsAdcAsyncFunc(gp, voltageReferenceSource),
         Throws
           .InstanceOf<ArgumentException>()
-          .With
-          .Property(nameof(ArgumentException.ParamName))
+          .ParamName
           .EqualTo(nameof(voltageReferenceSource))
           .And
           .Message

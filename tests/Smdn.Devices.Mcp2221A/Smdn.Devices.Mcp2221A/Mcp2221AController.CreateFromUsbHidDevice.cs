@@ -370,9 +370,7 @@ public partial class Mcp2221AControllerTests {
       ).ConfigureAwait(false),
       Throws
         .TypeOf<Mcp2221AUnavailableException>()
-        .With
-        .Property(nameof(Mcp2221AUnavailableException.InnerException))
-        .TypeOf<NotSupportedException>()
+        .With.InnerException.TypeOf<NotSupportedException>()
     );
 
     Assert.That(device.IsDisposed, Is.EqualTo(shouldDisposeUsbHidDevice));

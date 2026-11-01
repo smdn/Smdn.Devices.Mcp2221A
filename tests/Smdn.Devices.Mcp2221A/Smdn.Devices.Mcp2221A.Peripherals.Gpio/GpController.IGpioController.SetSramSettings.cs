@@ -547,8 +547,7 @@ partial class GpControllerTests {
         async () => await configureAsGpioAsyncFunc(gp, mode),
         Throws
           .InstanceOf<ArgumentException>()
-          .With
-          .Property(nameof(ArgumentException.ParamName))
+          .ParamName
           .EqualTo("direction") // .EqualTo(nameof(mode))
           .And
           .Message

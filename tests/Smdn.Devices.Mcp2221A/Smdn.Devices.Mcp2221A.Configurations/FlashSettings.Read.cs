@@ -467,8 +467,7 @@ partial class FlashSettingsTests {
       () => _ = mcp2221A.Flash.GpPins[index],
       Throws
         .TypeOf<ArgumentOutOfRangeException>()
-        .With
-        .Property(nameof(ArgumentOutOfRangeException.ParamName))
+        .ParamName
         .EqualTo("index")
         .And
         .Property(nameof(ArgumentOutOfRangeException.ActualValue))

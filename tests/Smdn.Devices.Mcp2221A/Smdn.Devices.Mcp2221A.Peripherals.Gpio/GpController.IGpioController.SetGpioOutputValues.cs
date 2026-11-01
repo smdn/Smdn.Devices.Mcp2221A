@@ -166,8 +166,7 @@ partial class GpControllerTests {
       () => gp.SetMode(mode),
       Throws
         .InstanceOf<ArgumentException>()
-        .With
-        .Property(nameof(ArgumentException.ParamName))
+        .ParamName
         .EqualTo(nameof(mode))
         .And
         .Message
@@ -178,8 +177,7 @@ partial class GpControllerTests {
       async () => await gp.SetModeAsync(mode),
       Throws
         .InstanceOf<ArgumentException>()
-        .With
-        .Property(nameof(ArgumentException.ParamName))
+        .ParamName
         .EqualTo(nameof(mode))
         .And
         .Message

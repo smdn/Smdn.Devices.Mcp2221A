@@ -458,8 +458,7 @@ partial class GpControllerTests {
         async () => await configureAsDacAsyncFunc(gp, voltageReferenceSource),
         Throws
           .InstanceOf<ArgumentException>()
-          .With
-          .Property(nameof(ArgumentException.ParamName))
+          .ParamName
           .EqualTo(nameof(voltageReferenceSource))
           .And
           .Message
@@ -557,8 +556,7 @@ partial class GpControllerTests {
         async () => await configureAsDacAsyncFunc(gp, voltageReferenceSource, initialOutputValue),
         Throws
           .TypeOf<ArgumentOutOfRangeException>()
-          .With
-          .Property(nameof(ArgumentOutOfRangeException.ParamName))
+          .ParamName
           .EqualTo("initialOutputValue")
           .And
           .Property(nameof(ArgumentOutOfRangeException.ActualValue))
@@ -983,8 +981,7 @@ partial class GpControllerTests {
         async () => await writeAnalogRawAsyncFunc(gp, value),
         Throws
           .TypeOf<ArgumentOutOfRangeException>()
-          .With
-          .Property(nameof(ArgumentOutOfRangeException.ParamName))
+          .ParamName
           .EqualTo("value")
           .And
           .Property(nameof(ArgumentOutOfRangeException.ActualValue))

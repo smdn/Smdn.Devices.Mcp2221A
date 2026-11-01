@@ -335,8 +335,7 @@ partial class GpControllerTests {
       async () => await configureAsClockOutputAsyncFunc(mcp2221A.GpPin1, frequency, dutyCycle),
       Throws
         .InstanceOf<ArgumentException>()
-        .With
-        .Property(nameof(ArgumentException.ParamName))
+        .ParamName
         .EqualTo(frequency.HasValue ? nameof(frequency) : nameof(dutyCycle))
         .And
         .Message

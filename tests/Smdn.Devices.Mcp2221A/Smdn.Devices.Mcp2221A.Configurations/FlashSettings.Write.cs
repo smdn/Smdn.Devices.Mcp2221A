@@ -205,12 +205,11 @@ partial class FlashSettingsTests {
     );
   }
 
-  [TestCase((ClockOutputDutyCycle)(-1), typeof(InvalidEnumArgumentException))]
-  [TestCase((ClockOutputDutyCycle)0b100, typeof(InvalidEnumArgumentException))]
-  [TestCase((ClockOutputDutyCycle)0xFF, typeof(InvalidEnumArgumentException))]
+  [TestCase((ClockOutputDutyCycle)(-1))]
+  [TestCase((ClockOutputDutyCycle)0b100)]
+  [TestCase((ClockOutputDutyCycle)0xFF)]
   public void ModifyClockOutputDutyCycle_NewValueInvalid(
-    ClockOutputDutyCycle newValue,
-    Type expectedTypeOfException
+    ClockOutputDutyCycle newValue
   )
   {
     var stagedFlashMemory = new FlashMemory();
@@ -226,9 +225,8 @@ partial class FlashSettingsTests {
     Assert.That(
       () => mcp2221A.Flash.ModifyClockOutputDutyCycle(dutyCycle: newValue),
       Throws
-        .TypeOf(expectedTypeOfException)
-        .With
-        .Property(nameof(ArgumentException.ParamName))
+        .TypeOf<InvalidEnumArgumentException>()
+        .ParamName
         .EqualTo("dutyCycle")
     );
     Assert.That(mcp2221A.Flash.IsDirty, Is.False, "after modification (should not be modified)");
@@ -386,16 +384,15 @@ partial class FlashSettingsTests {
     );
   }
 
-  [TestCase((VoltageReferenceSource)(-1), typeof(InvalidEnumArgumentException))]
-  [TestCase((VoltageReferenceSource)0b_0_0000_01_0, typeof(InvalidEnumArgumentException))]
-  [TestCase((VoltageReferenceSource)0b_0_0000_10_0, typeof(InvalidEnumArgumentException))]
-  [TestCase((VoltageReferenceSource)0b_0_0000_11_0, typeof(InvalidEnumArgumentException))]
-  [TestCase((VoltageReferenceSource)0b_0_0001_00_0, typeof(InvalidEnumArgumentException))]
-  [TestCase((VoltageReferenceSource)0b_0_0001_11_1, typeof(InvalidEnumArgumentException))]
-  [TestCase((VoltageReferenceSource)0xFF, typeof(InvalidEnumArgumentException))]
+  [TestCase((VoltageReferenceSource)(-1))]
+  [TestCase((VoltageReferenceSource)0b_0_0000_01_0)]
+  [TestCase((VoltageReferenceSource)0b_0_0000_10_0)]
+  [TestCase((VoltageReferenceSource)0b_0_0000_11_0)]
+  [TestCase((VoltageReferenceSource)0b_0_0001_00_0)]
+  [TestCase((VoltageReferenceSource)0b_0_0001_11_1)]
+  [TestCase((VoltageReferenceSource)0xFF)]
   public void ModifyDacVoltageReference_NewValueInvalid(
-    VoltageReferenceSource newValue,
-    Type expectedTypeOfException
+    VoltageReferenceSource newValue
   )
   {
     var stagedFlashMemory = new FlashMemory();
@@ -411,9 +408,8 @@ partial class FlashSettingsTests {
     Assert.That(
       () => mcp2221A.Flash.ModifyDacVoltageReference(voltageReference: newValue),
       Throws
-        .TypeOf(expectedTypeOfException)
-        .With
-        .Property(nameof(ArgumentException.ParamName))
+        .TypeOf<InvalidEnumArgumentException>()
+        .ParamName
         .EqualTo("voltageReference")
     );
     Assert.That(mcp2221A.Flash.IsDirty, Is.False, "after modification (should not be modified)");
@@ -498,8 +494,7 @@ partial class FlashSettingsTests {
       () => mcp2221A.Flash.ModifyDacInitialValue(value: newValue),
       Throws
         .TypeOf<ArgumentOutOfRangeException>()
-        .With
-        .Property(nameof(ArgumentOutOfRangeException.ParamName))
+        .ParamName
         .EqualTo("value")
         .With
         .Property(nameof(ArgumentOutOfRangeException.ActualValue))
@@ -565,12 +560,11 @@ partial class FlashSettingsTests {
     );
   }
 
-  [TestCase((InterruptOnChangeTrigger)(-1), typeof(InvalidEnumArgumentException))]
-  [TestCase((InterruptOnChangeTrigger)0b_100, typeof(InvalidEnumArgumentException))]
-  [TestCase((InterruptOnChangeTrigger)0xFF, typeof(InvalidEnumArgumentException))]
+  [TestCase((InterruptOnChangeTrigger)(-1))]
+  [TestCase((InterruptOnChangeTrigger)0b_100)]
+  [TestCase((InterruptOnChangeTrigger)0xFF)]
   public void ModifyInterruptOnChangeTrigger_NewValueInvalid(
-    InterruptOnChangeTrigger newValue,
-    Type expectedTypeOfException
+    InterruptOnChangeTrigger newValue
   )
   {
     var stagedFlashMemory = new FlashMemory();
@@ -586,9 +580,8 @@ partial class FlashSettingsTests {
     Assert.That(
       () => mcp2221A.Flash.ModifyInterruptOnChangeTrigger(trigger: newValue),
       Throws
-        .TypeOf(expectedTypeOfException)
-        .With
-        .Property(nameof(ArgumentException.ParamName))
+        .TypeOf<InvalidEnumArgumentException>()
+        .ParamName
         .EqualTo("trigger")
     );
     Assert.That(mcp2221A.Flash.IsDirty, Is.False, "after modification (should not be modified)");
@@ -653,16 +646,15 @@ partial class FlashSettingsTests {
     );
   }
 
-  [TestCase((VoltageReferenceSource)(-1), typeof(InvalidEnumArgumentException))]
-  [TestCase((VoltageReferenceSource)0b_0_0000_01_0, typeof(InvalidEnumArgumentException))]
-  [TestCase((VoltageReferenceSource)0b_0_0000_10_0, typeof(InvalidEnumArgumentException))]
-  [TestCase((VoltageReferenceSource)0b_0_0000_11_0, typeof(InvalidEnumArgumentException))]
-  [TestCase((VoltageReferenceSource)0b_0_0001_00_0, typeof(InvalidEnumArgumentException))]
-  [TestCase((VoltageReferenceSource)0b_0_0001_11_1, typeof(InvalidEnumArgumentException))]
-  [TestCase((VoltageReferenceSource)0xFF, typeof(InvalidEnumArgumentException))]
+  [TestCase((VoltageReferenceSource)(-1))]
+  [TestCase((VoltageReferenceSource)0b_0_0000_01_0)]
+  [TestCase((VoltageReferenceSource)0b_0_0000_10_0)]
+  [TestCase((VoltageReferenceSource)0b_0_0000_11_0)]
+  [TestCase((VoltageReferenceSource)0b_0_0001_00_0)]
+  [TestCase((VoltageReferenceSource)0b_0_0001_11_1)]
+  [TestCase((VoltageReferenceSource)0xFF)]
   public void ModifyAdcVoltageReference_NewValueInvalid(
-    VoltageReferenceSource newValue,
-    Type expectedTypeOfException
+    VoltageReferenceSource newValue
   )
   {
     var stagedFlashMemory = new FlashMemory();
@@ -678,9 +670,8 @@ partial class FlashSettingsTests {
     Assert.That(
       () => mcp2221A.Flash.ModifyAdcVoltageReference(voltageReference: newValue),
       Throws
-        .TypeOf(expectedTypeOfException)
-        .With
-        .Property(nameof(ArgumentException.ParamName))
+        .TypeOf<InvalidEnumArgumentException>()
+        .ParamName
         .EqualTo("voltageReference")
     );
     Assert.That(mcp2221A.Flash.IsDirty, Is.False, "after modification (should not be modified)");
@@ -837,12 +828,11 @@ partial class FlashSettingsTests {
     );
   }
 
-  [TestCase((UsbPowerMode)(-1), typeof(InvalidEnumArgumentException))]
-  [TestCase((UsbPowerMode)0b_10, typeof(InvalidEnumArgumentException))]
-  [TestCase((UsbPowerMode)0xFF, typeof(InvalidEnumArgumentException))]
+  [TestCase((UsbPowerMode)(-1))]
+  [TestCase((UsbPowerMode)0b_10)]
+  [TestCase((UsbPowerMode)0xFF)]
   public void ModifyUsbPowerMode_NewValueInvalid(
-    UsbPowerMode newValue,
-    Type expectedTypeOfException
+    UsbPowerMode newValue
   )
   {
     var stagedFlashMemory = new FlashMemory();
@@ -858,9 +848,8 @@ partial class FlashSettingsTests {
     Assert.That(
       () => mcp2221A.Flash.ModifyUsbPowerMode(powerMode: newValue),
       Throws
-        .TypeOf(expectedTypeOfException)
-        .With
-        .Property(nameof(ArgumentException.ParamName))
+        .TypeOf<InvalidEnumArgumentException>()
+        .ParamName
         .EqualTo("powerMode")
     );
     Assert.That(mcp2221A.Flash.IsDirty, Is.False, "after modification (should not be modified)");
@@ -1009,8 +998,7 @@ partial class FlashSettingsTests {
       () => mcp2221A.Flash.ModifyUsbRequestedCurrentAmount(currentAmount: newValue),
       Throws
         .TypeOf<ArgumentOutOfRangeException>()
-        .With
-        .Property(nameof(ArgumentException.ParamName))
+        .ParamName
         .EqualTo("currentAmount")
     );
     Assert.That(mcp2221A.Flash.IsDirty, Is.False, "after modification (should not be modified)");
@@ -1414,8 +1402,7 @@ partial class FlashSettingsTests {
       () => mcp2221A.Flash.ModifyGpSetting(gpIndex: gpIndex, gpFunction: GpFunction.Gpio),
       Throws
         .TypeOf<ArgumentOutOfRangeException>()
-        .With
-        .Property(nameof(ArgumentException.ParamName))
+        .ParamName
         .EqualTo("gpIndex")
     );
 

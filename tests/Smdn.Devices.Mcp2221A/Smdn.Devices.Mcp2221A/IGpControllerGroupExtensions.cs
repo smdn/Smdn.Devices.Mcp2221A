@@ -3980,8 +3980,7 @@ public class IGpControllerGroupExtensionsTests {
     static IResolveConstraint ThrowsArgumentOutOfRangeException(string expectedParamName, object expectedActualValue)
       => Throws
         .TypeOf<ArgumentOutOfRangeException>()
-        .With
-        .Property(nameof(ArgumentOutOfRangeException.ParamName))
+        .ParamName
         .EqualTo(expectedParamName)
         .And
         .Property(nameof(ArgumentOutOfRangeException.ActualValue))

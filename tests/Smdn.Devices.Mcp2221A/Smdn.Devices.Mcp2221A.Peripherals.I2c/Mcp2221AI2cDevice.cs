@@ -109,8 +109,7 @@ public class Mcp2221AI2cDeviceTests {
       () => i2cDevice.TransmissionSpeedInKbps = newTransmissionSpeedInKbps,
       Throws
         .TypeOf<ArgumentOutOfRangeException>()
-        .With
-          .Property(nameof(ArgumentOutOfRangeException.ParamName))
+        .ParamName
           .EqualTo(nameof(i2cDevice.TransmissionSpeedInKbps))
         .With
           .Property(nameof(ArgumentOutOfRangeException.ActualValue))

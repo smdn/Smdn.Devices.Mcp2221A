@@ -36,8 +36,7 @@ public class AdcAllChannelSampleTests {
       () => _ = new AdcAllChannelSample(adc1: adc1, adc2: adc2, adc3: adc3),
       Throws
         .TypeOf<ArgumentOutOfRangeException>()
-        .With
-        .Property(nameof(ArgumentOutOfRangeException.ParamName))
+        .ParamName
         .EqualTo(expectedExceptionParamName)
         .And
         .Property(nameof(ArgumentOutOfRangeException.ActualValue))
@@ -126,8 +125,7 @@ public class AdcAllChannelSampleTests {
       () => _ = new AdcAllChannelSample().AsVoltage(adcVoltageReference: adcVoltageReference),
       Throws
         .InstanceOf<ArgumentException>()
-        .With
-        .Property(nameof(ArgumentException.ParamName))
+        .ParamName
         .EqualTo("adcVoltageReference")
     );
   }
@@ -185,8 +183,7 @@ public class AdcAllChannelSampleTests {
       () => new AdcAllChannelSample().AsVoltage(referenceVoltage: referenceVoltage),
       Throws
         .InstanceOf<ArgumentException>()
-        .With
-        .Property(nameof(ArgumentException.ParamName))
+        .ParamName
         .EqualTo(nameof(referenceVoltage))
     );
   }
