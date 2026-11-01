@@ -138,16 +138,16 @@ public class AdcAllChannelSampleTests {
 
     yield return new object[] { (ushort)0, (ushort)0, (ushort)0, Vdd_5V0, 0.0d, 0.0d, 0.0d };
     yield return new object[] { (ushort)512, (ushort)512, (ushort)512, Vdd_5V0, 2.5d, 2.5d, 2.5d };
-    yield return new object[] { (ushort)1023, (ushort)0, (ushort)0, Vdd_5V0, (1023.0d * 5.0d) / 1024.0, 0.0d, 0.0d };
+    yield return new object[] { (ushort)1023, (ushort)0, (ushort)0, Vdd_5V0, 1023.0d * 5.0d / 1024.0, 0.0d, 0.0d };
 
     yield return new object[] { (ushort)0, (ushort)0, (ushort)0, Vdd_3V3, 0.0d, 0.0d, 0.0d };
     yield return new object[] { (ushort)256, (ushort)256, (ushort)256, Vdd_3V3, 0.825d, 0.825d, 0.825d };
-    yield return new object[] { (ushort)0, (ushort)1023, (ushort)0, Vdd_3V3, 0.0d, (1023.0d * 3.3d) / 1024.0d, 0.0d };
+    yield return new object[] { (ushort)0, (ushort)1023, (ushort)0, Vdd_3V3, 0.0d, 1023.0d * 3.3d / 1024.0d, 0.0d };
 
     yield return new object[] { (ushort)0, (ushort)0, (ushort)0, Vdd_Zero, 0.0d, 0.0d, 0.0d };
     yield return new object[] { (ushort)1023, (ushort)1023, (ushort)1023, Vdd_Zero, 0.0d, 0.0d, 0.0d };
 
-    yield return new object[] { (ushort)100, (ushort)500, (ushort)1000, Vdd_3V3, (100.0d * 3.3d) / 1024.0d, (500.0d * 3.3d) / 1024.0d, (1000.0d * 3.3d) / 1024.0d };
+    yield return new object[] { (ushort)100, (ushort)500, (ushort)1000, Vdd_3V3, 100.0d * 3.3d / 1024.0d, 500.0d * 3.3d / 1024.0d, 1000.0d * 3.3d / 1024.0d };
   }
 
   [TestCaseSource(nameof(YieldTestCases_AsVoltage_WithReferenceVoltage))]

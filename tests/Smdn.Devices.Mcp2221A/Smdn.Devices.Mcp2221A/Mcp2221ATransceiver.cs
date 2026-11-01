@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 using System;
 using System.Device.Gpio;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,8 +10,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 
 using NUnit.Framework;
-
-using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
 

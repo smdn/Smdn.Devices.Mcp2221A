@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 using System;
+
 using NUnit.Framework;
 
 namespace Smdn.Devices.Mcp2221A;
@@ -80,17 +81,17 @@ public class I2cAddressTests {
   [TestCase(0x10, 0x10, true)]
   [TestCase(0x10, 0x11, false)]
   public void Equals_ToI2cAddress(int address, int addressOther, bool expectedValue)
-    => Assert.That((new I2cAddress(address)).Equals(new I2cAddress(addressOther)), Is.EqualTo(expectedValue));
+    => Assert.That(new I2cAddress(address).Equals(new I2cAddress(addressOther)), Is.EqualTo(expectedValue));
 
   [TestCase(0x10, 0x10, true)]
   [TestCase(0x10, 0x11, false)]
   public void Equals_ToInt(int address, int addressOther, bool expectedValue)
-    => Assert.That((new I2cAddress(address)).Equals(addressOther), Is.EqualTo(expectedValue));
+    => Assert.That(new I2cAddress(address).Equals(addressOther), Is.EqualTo(expectedValue));
 
   [TestCase(0x10, 0x10, true)]
   [TestCase(0x10, 0x11, false)]
   public void Equals_ToByte(int address, byte addressOther, bool expectedValue)
-    => Assert.That((new I2cAddress(address)).Equals(addressOther), Is.EqualTo(expectedValue));
+    => Assert.That(new I2cAddress(address).Equals(addressOther), Is.EqualTo(expectedValue));
 
   [Test]
   public void Equals_ToObject()
@@ -145,7 +146,7 @@ public class I2cAddressTests {
   [TestCase(0x10, 0x11, -1)]
   [TestCase(0x11, 0x10, 1)]
   public void CompareTo_I2cAddress(int address, int addressOther, int expectedValue)
-    => Assert.That((new I2cAddress(address)).CompareTo(new I2cAddress(addressOther)), Is.EqualTo(expectedValue));
+    => Assert.That(new I2cAddress(address).CompareTo(new I2cAddress(addressOther)), Is.EqualTo(expectedValue));
 
   [TestCase(0x08, 0x08)]
   [TestCase(0x10, 0x10)]

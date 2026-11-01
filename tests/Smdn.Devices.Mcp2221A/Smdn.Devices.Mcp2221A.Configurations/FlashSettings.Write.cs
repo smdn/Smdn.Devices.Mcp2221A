@@ -1451,7 +1451,7 @@ partial class FlashSettingsTests {
     // being in a 'dirty' state until a write operation is performed using Write(),
     // and it remains in the 'dirty' state even if Restore() is called.
     Assert.That(
-      () => mcp2221A.Flash.Restore(),
+      mcp2221A.Flash.Restore,
       Throws.Nothing
     );
     Assert.That(

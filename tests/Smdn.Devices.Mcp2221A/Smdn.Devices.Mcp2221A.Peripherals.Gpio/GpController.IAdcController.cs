@@ -9,8 +9,6 @@ using System.Threading.Tasks;
 
 using NUnit.Framework;
 
-using Smdn.IO.UsbHid;
-
 using SequenceIs = Smdn.Test.NUnit.Constraints.Buffers.Is;
 
 namespace Smdn.Devices.Mcp2221A.Peripherals.Gpio;
@@ -327,7 +325,7 @@ partial class GpControllerTests {
     }
 
     foreach (var gp in new GpController[] { mcp2221A.GpPin1, mcp2221A.GpPin2, mcp2221A.GpPin3 }) {
-       // command should not be sent
+      // command should not be sent
       // Mcp2221AControllerTests.AppendPseudoResponse(...);
       Mcp2221AControllerTests.ClearSentCommands(mcp2221A);
 

@@ -2909,7 +2909,7 @@ public class IGpControllerGroupExtensionsTests {
       shouldDisposeUsbHidDevice: true
     );
 
-      // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
+    // [MCP2221A] 3.1.11 SET GPIO OUTPUT VALUES
     var setGpioOutputValuesResponse = string.Concat(
       "50-00-",
       "00-00-00-00-", // do not modify
@@ -3412,8 +3412,8 @@ public class IGpControllerGroupExtensionsTests {
     const double Vdd_3V3 = 3.3;
     const double Vdd_Zero = 0.0;
 
-    yield return new object[] { "00-00-", "00-02-", "FF-03-", Vdd_5V0, 0.0d, 2.5d, (1023.0d * 5.0d) / 1024.0 };
-    yield return new object[] { "00-00-", "00-01-", "FF-03-", Vdd_3V3, 0.0d, 0.825d, (1023.0d * 3.3d) / 1024.0d };
+    yield return new object[] { "00-00-", "00-02-", "FF-03-", Vdd_5V0, 0.0d, 2.5d, 1023.0d * 5.0d / 1024.0 };
+    yield return new object[] { "00-00-", "00-01-", "FF-03-", Vdd_3V3, 0.0d, 0.825d, 1023.0d * 3.3d / 1024.0d };
     yield return new object[] { "00-00-", "00-01-", "FF-03-", Vdd_Zero, 0.0d, 0.0d, 0.0d };
   }
 

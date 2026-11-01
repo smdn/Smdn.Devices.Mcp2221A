@@ -72,7 +72,7 @@ partial class Mcp2221AControllerTests {
     Assert.That(() => mcp2221A.Reset(), Throws.TypeOf<ObjectDisposedException>());
     Assert.That(async () => await mcp2221A.ResetAsync(), Throws.TypeOf<ObjectDisposedException>());
 
-    Assert.That(() => mcp2221A.Dispose(), Throws.Nothing);
+    Assert.That(mcp2221A.Dispose, Throws.Nothing);
   }
 
   [Test]
@@ -132,7 +132,7 @@ partial class Mcp2221AControllerTests {
     Assert.That(() => _ = mcp2221A.I2cBus, Throws.Nothing);
     Assert.That(() => _ = mcp2221A.GpioController, Throws.Nothing);
 
-    Assert.That(() => mcp2221A.Dispose(), Throws.Nothing);
+    Assert.That(mcp2221A.Dispose, Throws.Nothing);
   }
 
   [Test]

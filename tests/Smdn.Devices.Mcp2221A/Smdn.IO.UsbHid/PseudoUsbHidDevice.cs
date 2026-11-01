@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Smdn.IO.UsbHid;
 
-class PseudoUsbHidDevice : IUsbHidDevice {
+internal class PseudoUsbHidDevice : IUsbHidDevice {
   public bool IsDisposed { get; private set; }
 
   /// <inheritdoc/>

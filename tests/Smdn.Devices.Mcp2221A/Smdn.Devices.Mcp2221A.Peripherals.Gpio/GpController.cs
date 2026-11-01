@@ -37,7 +37,7 @@ public partial class GpControllerTests {
       gpSettings[gp] |= mode switch {
         PinMode.Output => 0b_000_0_0_000,
         PinMode.Input => 0b_000_0_1_000,
-        var invalid => throw new InvalidOperationException("invalid mode: {invalid}"),
+        var invalid => throw new InvalidOperationException($"invalid mode: {invalid}"),
       };
     }
 

@@ -2,14 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 using NUnit.Framework;
 
 using Smdn.Devices.Mcp2221A.Peripherals.I2c;
-using Smdn.IO.UsbHid;
 
 namespace Smdn.Devices.Mcp2221A;
 

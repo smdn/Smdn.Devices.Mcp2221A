@@ -4,13 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 using NUnit.Framework;
-
-using Smdn.IO.UsbHid;
 
 using SequenceIs = Smdn.Test.NUnit.Constraints.Buffers.Is;
 

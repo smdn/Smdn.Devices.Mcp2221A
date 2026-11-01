@@ -279,22 +279,22 @@ partial class Mcp2221AGpioDriverTests {
         gp3Mode,
         gp3InitialValue
        ) => {
-        gpPins.ConfigureAllGpSettings(
-          gp0Function,
-          gp0Mode,
-          gp0InitialValue,
-          gp1Function,
-          gp1Mode,
-          gp1InitialValue,
-          gp2Function,
-          gp2Mode,
-          gp2InitialValue,
-          gp3Function,
-          gp3Mode,
-          gp3InitialValue
-        );
-        return default;
-      }
+         gpPins.ConfigureAllGpSettings(
+           gp0Function,
+           gp0Mode,
+           gp0InitialValue,
+           gp1Function,
+           gp1Mode,
+           gp1InitialValue,
+           gp2Function,
+           gp2Mode,
+           gp2InitialValue,
+           gp3Function,
+           gp3Mode,
+           gp3InitialValue
+         );
+         return default;
+       }
     );
 
   private void ConfigureAllGpSettingsSyncOrAsync_ModesAndInitialValuesMustBeIgnoredIfSetToNonGpioFunction(
@@ -461,22 +461,22 @@ partial class Mcp2221AGpioDriverTests {
         gp3Mode,
         gp3InitialValue
        ) => {
-        gpPins.ConfigureAllGpSettings(
-          gp0Function,
-          gp0Mode,
-          gp0InitialValue,
-          gp1Function,
-          gp1Mode,
-          gp1InitialValue,
-          gp2Function,
-          gp2Mode,
-          gp2InitialValue,
-          gp3Function,
-          gp3Mode,
-          gp3InitialValue
-        );
-        return default;
-      }
+         gpPins.ConfigureAllGpSettings(
+           gp0Function,
+           gp0Mode,
+           gp0InitialValue,
+           gp1Function,
+           gp1Mode,
+           gp1InitialValue,
+           gp2Function,
+           gp2Mode,
+           gp2InitialValue,
+           gp3Function,
+           gp3Mode,
+           gp3InitialValue
+         );
+         return default;
+       }
     );
 
   private void ConfigureAllGpSettingsSyncOrAsync_ModesAndInitialValuesMustBeIgnoredIfFunctionIsNull(
@@ -751,22 +751,22 @@ partial class Mcp2221AGpioDriverTests {
         gp3Mode,
         gp3InitialValue
        ) => {
-        gpPins.ConfigureAllGpSettings(
-          gp0Function,
-          gp0Mode,
-          gp0InitialValue,
-          gp1Function,
-          gp1Mode,
-          gp1InitialValue,
-          gp2Function,
-          gp2Mode,
-          gp2InitialValue,
-          gp3Function,
-          gp3Mode,
-          gp3InitialValue
-        );
-        return default;
-      }
+         gpPins.ConfigureAllGpSettings(
+           gp0Function,
+           gp0Mode,
+           gp0InitialValue,
+           gp1Function,
+           gp1Mode,
+           gp1InitialValue,
+           gp2Function,
+           gp2Mode,
+           gp2InitialValue,
+           gp3Function,
+           gp3Mode,
+           gp3InitialValue
+         );
+         return default;
+       }
     );
 
   private void ConfigureAllGpSettingsSyncOrAsync_ThrowsWhenUsedByGpioController(

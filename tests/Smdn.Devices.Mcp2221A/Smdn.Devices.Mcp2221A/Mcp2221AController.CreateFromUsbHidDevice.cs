@@ -407,7 +407,7 @@ public partial class Mcp2221AControllerTests {
     using var device = CreatePseudoDevice();
     using var cts = new CancellationTokenSource();
 
-    device.OnEndPointOpeningAction = () => cts.Cancel();
+    device.OnEndPointOpeningAction = cts.Cancel;
 
     Assert.That(
       async () => await createFunc(

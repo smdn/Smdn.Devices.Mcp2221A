@@ -1,8 +1,5 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
-using System;
-using System.Buffers;
-
 namespace System.IO;
 
 internal static class StreamExtensions {

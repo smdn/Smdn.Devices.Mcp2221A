@@ -462,10 +462,10 @@ public class Mcp2221AGpioControllerTests {
     // [4 + 4n]: Alter GP<n> pin direction: 0x00=disable, (value other than 0)=enable
     // [5 + 4n]: GP<n> pin direction: 0x00=output, (any other value)=input
     for (var n = 0; n < 4; n++) {
-      expectedSentCommand[2 + 4 * n] = 0x00;
-      expectedSentCommand[3 + 4 * n] = 0x00;
-      expectedSentCommand[4 + 4 * n] = (byte)(n == pinNumber ? 0xFF : 0x00);
-      expectedSentCommand[5 + 4 * n] = (byte)((n == pinNumber) ? (mode == PinMode.Output ? 0x00 : 0xFF) : 0x00);
+      expectedSentCommand[2 + (4 * n)] = 0x00;
+      expectedSentCommand[3 + (4 * n)] = 0x00;
+      expectedSentCommand[4 + (4 * n)] = (byte)(n == pinNumber ? 0xFF : 0x00);
+      expectedSentCommand[5 + (4 * n)] = (byte)((n == pinNumber) ? (mode == PinMode.Output ? 0x00 : 0xFF) : 0x00);
     }
 
     Assert.That(
@@ -760,10 +760,10 @@ public class Mcp2221AGpioControllerTests {
     // [4 + 4n]: Alter GP<n> pin direction: 0x00=disable, (value other than 0)=enable
     // [5 + 4n]: GP<n> pin direction: 0x00=output, (any other value)=input
     for (var n = 0; n < 4; n++) {
-      expectedSentCommand[2 + 4 * n] = (byte)(n == pinNumber ? 0xFF : 0x00);
-      expectedSentCommand[3 + 4 * n] = (byte)((n == pinNumber) ? (value == PinValue.Low ? 0x00 : 0xFF) : 0x00);
-      expectedSentCommand[4 + 4 * n] = 0x00;
-      expectedSentCommand[5 + 4 * n] = 0x00;
+      expectedSentCommand[2 + (4 * n)] = (byte)(n == pinNumber ? 0xFF : 0x00);
+      expectedSentCommand[3 + (4 * n)] = (byte)((n == pinNumber) ? (value == PinValue.Low ? 0x00 : 0xFF) : 0x00);
+      expectedSentCommand[4 + (4 * n)] = 0x00;
+      expectedSentCommand[5 + (4 * n)] = 0x00;
     }
 
     Assert.That(
@@ -1333,10 +1333,10 @@ public class Mcp2221AGpioControllerTests {
     // [4 + 4n]: Alter GP<n> pin direction: 0x00=disable, (value other than 0)=enable
     // [5 + 4n]: GP<n> pin direction: 0x00=output, (any other value)=input
     for (var n = 0; n < 4; n++) {
-      expectedSentCommand[2 + 4 * n] = (byte)(n == pinNumber ? 0xFF : 0x00);
-      expectedSentCommand[3 + 4 * n] = (byte)((n == pinNumber) ? (valueToggledFromInitial == PinValue.Low ? 0x00 : 0xFF) : 0x00);
-      expectedSentCommand[4 + 4 * n] = 0x00;
-      expectedSentCommand[5 + 4 * n] = 0x00;
+      expectedSentCommand[2 + (4 * n)] = (byte)(n == pinNumber ? 0xFF : 0x00);
+      expectedSentCommand[3 + (4 * n)] = (byte)((n == pinNumber) ? (valueToggledFromInitial == PinValue.Low ? 0x00 : 0xFF) : 0x00);
+      expectedSentCommand[4 + (4 * n)] = 0x00;
+      expectedSentCommand[5 + (4 * n)] = 0x00;
     }
 
     // command should not be sent

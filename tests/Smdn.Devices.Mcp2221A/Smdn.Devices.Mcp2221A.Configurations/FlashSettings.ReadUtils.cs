@@ -1,7 +1,5 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
-using System;
-
 using NUnit.Framework;
 
 namespace Smdn.Devices.Mcp2221A.Configurations;

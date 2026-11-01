@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 using System;
-using System.Buffers;
 #if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLWHENATTRIBUTE
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -12,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Smdn.IO.UsbHid;
 
-class PseudoUsbHidEndPoint : IUsbHidEndPoint {
+internal class PseudoUsbHidEndPoint : IUsbHidEndPoint {
   public IUsbHidDevice Device { get; private set; }
 
 #if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLWHENATTRIBUTE
