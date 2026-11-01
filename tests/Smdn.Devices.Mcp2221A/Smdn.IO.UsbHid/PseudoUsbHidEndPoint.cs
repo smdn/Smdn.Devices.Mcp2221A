@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 using System;
+#if !(SYSTEM_IO_STREAM_READ_SPAN_OF_BYTE || SYSTEM_IO_STREAM_READASYNC_MEMORY_OF_BYTE)
+using System.Buffers; // ArrayPool
+#endif
 #if SYSTEM_DIAGNOSTICS_CODEANALYSIS_MEMBERNOTNULLWHENATTRIBUTE
 using System.Diagnostics.CodeAnalysis;
 #endif

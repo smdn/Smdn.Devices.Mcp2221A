@@ -1,9 +1,13 @@
 // SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
+#if !SYSTEM_IO_STREAM_READEXACTLY
+using System.Buffers; // ArrayPool
+#endif
+
 namespace System.IO;
 
 internal static class StreamExtensions {
-#if !NET7_0_OR_GREATER
+#if !SYSTEM_IO_STREAM_READEXACTLY
   public static void ReadExactly(this Stream stream, Span<byte> destination)
   {
     if (stream is null)
