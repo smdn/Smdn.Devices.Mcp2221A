@@ -86,19 +86,23 @@ services.AddHidApiDotNetUsbHid();
 ________
 **HIDSharp (Apache License 2.0)** [![NuGet Smdn.IO.UsbHid.Providers.HidSharp](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.HidSharp.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp/):
 
-To use HIDSharp, add a `PackageReference` for [Smdn.IO.UsbHid.Providers.HidSharp](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp) to your project file. Then, register the backend provider with the `ServiceCollection` using the `AddHidSharpUsbHid()` extension method.
+<details>
+<summary>Instructions for Use</summary>
+
+Add a `PackageReference` for [Smdn.IO.UsbHid.Providers.HidSharp](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp) to your project file. Then, register the backend provider with the `ServiceCollection` using the `AddHidSharpUsbHid()` extension method.
 
 ```cs
 var services = new ServiceCollection();
 
 services.AddHidSharpUsbHid();
 ```
+</details>
 
 ________
 **LibUsbDotNet version 3 (LGPL-3.0)** [![NuGet Smdn.IO.UsbHid.Providers.LibUsbDotNetV3](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3/):
 
 <details>
-<summary>Read More</summary>
+<summary>Instructions for Use</summary>
 
 Add a `PackageReference` for [Smdn.IO.UsbHid.Providers.LibUsbDotNetV3](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3), and then register the provider using the `AddLibUsbDotNetV3UsbHid()` method.
 
@@ -112,13 +116,13 @@ services.AddLibUsbDotNetV3UsbHid(
 </details>
 
 > [!TIP]
-> To use LibUsbDotNet, you need to either install `libusb-1.0` on your system or manually copy it to the output directory of the executable. For more details, please refer to the [LibUsbDotNet documentation](https://github.com/LibUsbDotNet/LibUsbDotNet/wiki#how-to-use-libusbdotnet).
+> To use LibUsbDotNet, you need to either install the native library `libusb-1.0` on your system or manually copy it to the output directory of the executable. For more details, please refer to the [LibUsbDotNet documentation](https://github.com/LibUsbDotNet/LibUsbDotNet/wiki#how-to-use-libusbdotnet).
 
 ________
 **LibUsbDotNet version 2 (LGPL-3.0)** [![NuGet Smdn.IO.UsbHid.Providers.LibUsbDotNet](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.LibUsbDotNet.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNet/):
 
 <details>
-<summary>Read More</summary>
+<summary>Instructions for Use</summary>
 
 Add a `PackageReference` for [Smdn.IO.UsbHid.Providers.LibUsbDotNet](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNet), and then register the provider using the `AddLibUsbDotNetUsbHid()` method.
 
@@ -163,10 +167,11 @@ On Ubuntu 24.04 (Kernel 6.8+) and newer systems, you may also encounter a driver
 
 
 ## Write code
-Add package [Smdn.Devices.Mcp2221A](https://www.nuget.org/packages/Smdn.Devices.Mcp2221A/) to your project.
+Add package [Smdn.Devices.Mcp2221A](https://www.nuget.org/packages/Smdn.Devices.Mcp2221A/) and your preferred [USB HID backend provider](#usb_hid_backend_providers) to your project.
 
 ```
 dotnet add package Smdn.Devices.Mcp2221A
+dotnet add package Smdn.IO.UsbHid.Providers.HidSharp
 ```
 
 Then write your codes. The simplest code, blinking the LEDs connected to the GP pins is like below.
