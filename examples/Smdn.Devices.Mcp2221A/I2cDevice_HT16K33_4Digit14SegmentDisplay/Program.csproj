@@ -16,11 +16,11 @@ SPDX-License-Identifier: MIT
     <PackageReference Include="Iot.Device.Bindings" Version="4.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
 
-    <!-- Add HidSharp (Apache License 2.0) as the USB HID backend provider. -->
+    <!-- Add HIDSharp (Apache License 2.0) as the USB HID backend provider. -->
     <PackageReference Include="Smdn.IO.UsbHid.Providers.HidSharp" Version="1.0.0" />
     <!--
       By changing the PackageReference, you can use libraries such as LibUsbDotNet
-      as a backend instead of HidSharp. For more details, refer to this documentation:
+      as a backend instead of HIDSharp. For more details, refer to this documentation:
 
       https://github.com/smdn/Smdn.Devices.Mcp2221A/tree/main/examples/Smdn.Devices.Mcp2221A/UsbHidBackendSamples.md
     -->

@@ -19,7 +19,7 @@ var services = new ServiceCollection();
 const string ServiceKey1 = "MCP2221A-1";
 const string ServiceKey2 = "MCP2221A-2";
 
-// Configure the first MCP2221A to use the HidSharp backend.
+// Configure the first MCP2221A to use the HIDSharp backend.
 services.AddHidSharpUsbHid(serviceKey: ServiceKey1);
 
 // Configure the second MCP2221A to use the LibUsbDotNet

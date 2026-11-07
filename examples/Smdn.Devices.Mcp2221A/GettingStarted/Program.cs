@@ -12,7 +12,7 @@ var services = new ServiceCollection();
 // please refer to this document:
 // https://github.com/smdn/Smdn.Devices.Mcp2221A/tree/main/examples/Smdn.Devices.Mcp2221A/UsbHidBackendSamples.md
 
-// Use HidSharp (Apache License 2.0)
+// Use HIDSharp (Apache License 2.0)
 // (Add `Smdn.IO.UsbHid.Providers.HidSharp` to PackageReference)
 services.AddHidSharpUsbHid();
 

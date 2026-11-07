@@ -66,9 +66,9 @@ This library communicates with the MCP2221/MCP2221A device using the **USB HID**
 
 This design, integrated with standard .NET dependency injection, gives you the flexibility to choose a provider based on your specific requirements, such as licensing.
 
-**HidSharp (Apache License 2.0)** [![NuGet Smdn.IO.UsbHid.Providers.HidSharp](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.HidSharp.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp/):
+**HIDSharp (Apache License 2.0)** [![NuGet Smdn.IO.UsbHid.Providers.HidSharp](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.HidSharp.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp/):
 
-To use HidSharp, add a `PackageReference` for [Smdn.IO.UsbHid.Providers.HidSharp](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp) to your project file. Then, register the backend provider with the `ServiceCollection` using the `AddHidSharpUsbHid()` extension method.
+To use HIDSharp, add a `PackageReference` for [Smdn.IO.UsbHid.Providers.HidSharp](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp) to your project file. Then, register the backend provider with the `ServiceCollection` using the `AddHidSharpUsbHid()` extension method.
 
 ```cs
 var services = new ServiceCollection();
@@ -163,7 +163,7 @@ using Smdn.IO.UsbHid.DependencyInjection;
 
 var services = new ServiceCollection();
 
-// Use HidSharp (Apache License 2.0)
+// Use HIDSharp (Apache License 2.0)
 // (Add `Smdn.IO.UsbHid.Providers.HidSharp` to PackageReference)
 services.AddHidSharpUsbHid();
 

@@ -39,7 +39,7 @@ try {
       // This enables more advanced device selection, such as filtering by
       // device path.
 
-      // If you are using HidSharp, you can reference the underlying implementation as follows:
+      // If you are using HIDSharp, you can reference the underlying implementation as follows:
       if (usbHidDevice is IUsbHidDevice<HidSharp.HidDevice> { UnderlyingDevice: var hidSharpDevice }) {
         return
           hidSharpDevice.DevicePath == "/sys/devices/....../hidraw/hidraw0" ||

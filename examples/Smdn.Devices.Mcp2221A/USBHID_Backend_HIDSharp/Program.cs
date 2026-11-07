@@ -9,7 +9,7 @@ using Smdn.IO.UsbHid.DependencyInjection;
 
 var services = new ServiceCollection();
 
-// Use HidSharp (Apache License 2.0)
+// Use HIDSharp (Apache License 2.0)
 // (Add `Smdn.IO.UsbHid.Providers.HidSharp` to PackageReference)
 services.AddHidSharpUsbHid();
 
@@ -17,7 +17,7 @@ using var serviceProvider = services.BuildServiceProvider();
 
 await using var device = await Mcp2221AController.CreateAsync(serviceProvider);
 
-// You can retrieve the HidSharp device object (IUsbHidDevice) used by
+// You can retrieve the HIDSharp device object (IUsbHidDevice) used by
 // the Mcp2221AController via the HidDevice property.
 // For more information about IUsbHidDevice, see https://github.com/smdn/Smdn.IO.UsbHid/
 // or 'USBHID_SelectDevice' example.
