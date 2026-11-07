@@ -12,6 +12,7 @@ some of which are distributed under license terms different from those of this s
 In addition, when using `Smdn.IO.UsbHid.Providers.*`, `Smdn.Devices.Mcp2221A` may
 indirectly depend on the following libraries:
 
+* 'HidApi.Net' (MIT License)
 * 'HIDSharp' (Apache License 2.0)
 * 'LibUsbDotNet' (LGPL-3.0)
 * 'Polly.Core' and 'Polly.Extensions' (BSD-3-Clause License)
@@ -19,6 +20,36 @@ indirectly depend on the following libraries:
 
 Please refer to the respective sections below or `ThirdPartyNotices.md` in
 `Smdn.IO.UsbHid.Providers.*` for their specific license notices and terms.
+
+
+
+## License notice for HidApi.Net
+- https://github.com/badcel/HidApi.Net/
+- https://github.com/badcel/HidApi.Net/blob/main/license.txt
+
+```txt
+MIT License
+
+Copyright (c) 2022 Marcel Tiede
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
 
 
 
