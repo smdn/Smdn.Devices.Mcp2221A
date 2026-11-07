@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
+# SPDX-License-Identifier: MIT
+#
+#
+#      udev rules for MCP2221/MCP2221A + HidApi.Net
+#
+#
+# To enable user-space libraries (like HidApi.Net or hidapi) to communicate
+# with the MCP2221 via /dev/hidraw*, the device node must have appropriate
+# permissions. This rule ensures the device is accessible without root
+# privileges upon connection.
+#
+# The rules below assigns the 'hidraw' device created for MCP2221/
+# MCP2221A (04d8:00dd) to the 'plugdev' group and grants access to the
+# non-root users.
+#
+# How to apply:
+#   1. Copy this file to /etc/udev/rules.d/
+#   2. Reload the udev rules: `sudo udevadm control --reload-rules`
+#   3. Trigger the rules for hidraw subsystem: `sudo udevadm trigger -s hidraw`
+#
+# How to revert:
+#   1. Delete this file from /etc/udev/rules.d/
+#   2. Run the reload and trigger commands mentioned above.
+#
+# Note on driver conflict:
+#   In Ubuntu 24.04+, the 'hid_mcp2221' kernel driver may claim the device
+#   before this rule can create a /dev/hidraw* node. If the device file
+#   does not appear after applying this rule, you MUST also blacklist
+#   the 'hid_mcp2221' module to allow 'usbhid' to handle the device.
+#   Refer to 'misc/modprobe/blacklist-MCP2221.conf' for more details.
+#
+# Reference:
+#   https://github.com/libusb/hidapi/blob/master/udev/69-hid.rules
+#   http://reactivated.net/writing_udev_rules.html
+#   https://wiki.archlinux.jp/index.php/Udev
+#
+
+# Match MCP2221/MCP2221A by Vendor ID (04d8) and Product ID (00dd).
+# Grant unprivileged access via 'plugdev' group, '0660' mode, and systemd 'uaccess' tag.
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="00dd", GROUP="plugdev", MODE="0660", TAG+="uaccess"
+
+# Use this instead if you need to target a specific physical port (via bus number and device path).
+# Replace 'x' and 'y' with values from 'udevadm info -a -n /dev/hidrawX'.
+# SUBSYSTEM=="hidraw", ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="00dd", ATTRS{busnum}=="x", ATTRS{devpath}=="y", GROUP="plugdev", MODE="0660", TAG+="uaccess"

@@ -56,7 +56,7 @@ This library also provides the MCP2221/MCP2221A adapter interface for [System.De
 - Supports MCP2221/MCP2221A devices with custom VID/PID values written in the chip settings. ([example](examples/Smdn.Devices.Mcp2221A/USBHID_SelectDevice/))
 - Provides I<sup>2</sup>C bus scanning APIs. ([example](examples/Smdn.Devices.Mcp2221A/I2C_ScanBus/))
 - Provides Flash memory read and write capabilities, allowing inspection and persistence of default power-on configurations, GP pin assignments, USB descriptor strings, and write-protection settings. ([examples: Read](examples/Smdn.Devices.Mcp2221A/FlashMemory_Read/), [Write](examples/Smdn.Devices.Mcp2221A/FlashMemory_Write/))
-- Uses the USB HID abstraction layer ([Smdn.IO.UsbHid.Abstractions](https://github.com/smdn/Smdn.IO.UsbHid)) to support HIDSharp, LibUsbDotNet, and other backends. ([docs and examples](examples/Smdn.Devices.Mcp2221A/UsbHidBackendSamples.md))
+- Uses the USB HID abstraction layer ([Smdn.IO.UsbHid.Abstractions](https://github.com/smdn/Smdn.IO.UsbHid)) to support HidApi.Net, HIDSharp, LibUsbDotNet, and other backends. ([docs and examples](examples/Smdn.Devices.Mcp2221A/UsbHidBackendSamples.md))
 - Allows selecting the USB HID backend per device using dependency injection (`IServiceProvider`) and service keys. ([example](examples/Smdn.Devices.Mcp2221A/DependencyInjection_KeyedService))
 
 # Getting started
@@ -66,6 +66,24 @@ This library communicates with the MCP2221/MCP2221A device using the **USB HID**
 
 This design, integrated with standard .NET dependency injection, gives you the flexibility to choose a provider based on your specific requirements, such as licensing.
 
+**HidApi.Net (MIT License)** [![NuGet Smdn.IO.UsbHid.Providers.HidApiDotNet](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.HidApiDotNet.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidApiDotNet/):
+
+<details>
+<summary>Instructions for Use</summary>
+
+To use HidApi.Net, add a `PackageReference` for [Smdn.IO.UsbHid.Providers.HidApiDotNet](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidApiDotNet) to your project file. Then, register the backend provider with the `ServiceCollection` using the `AddHidApiDotNetUsbHid()` extension method.
+
+```cs
+var services = new ServiceCollection();
+
+services.AddHidApiDotNetUsbHid();
+```
+</details>
+
+> [!TIP]
+> To use HidApi.Net, you need to either install the native library `hidapi` on your system or manually copy it to the output directory of the executable. For more details, please refer to the [hidapi documentation](https://github.com/libusb/hidapi#installing-hidapi).
+
+________
 **HIDSharp (Apache License 2.0)** [![NuGet Smdn.IO.UsbHid.Providers.HidSharp](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.HidSharp.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp/):
 
 To use HIDSharp, add a `PackageReference` for [Smdn.IO.UsbHid.Providers.HidSharp](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp) to your project file. Then, register the backend provider with the `ServiceCollection` using the `AddHidSharpUsbHid()` extension method.
@@ -305,6 +323,13 @@ Unhandled exception. Smdn.Devices.Mcp2221A.Mcp2221AUnavailableException: The req
  ---> HidSharp.Exceptions.DeviceUnauthorizedAccessException: Not permitted to open HID class device at /dev/hidraw0.
 ```
 
+HidApi.Net:
+
+```
+Unhandled exception. Smdn.Devices.Mcp2221A.Mcp2221AUnavailableException: The requested MCP2221/MCP2221A is unavailable due to reasons such as unprivileged access, being disconnected, or being blocked by another driver. (device='/dev/hidraw4')
+ ---> HidApi.HidException: Failed to open a device with path '/dev/hidraw4': Permission denied
+```
+
 If you want to give access privileges to a non-root user instead, you can use udev rule file. See [udev rule files](misc/udev/).
 
 
@@ -333,6 +358,7 @@ This project uses the following components. See [ThirdPartyNotices.md](./ThirdPa
 
 - [LibUsbDotNet/LibUsbDotNet](https://github.com/LibUsbDotNet/LibUsbDotNet)
 - [SeekHisKingdom/HIDSharp](https://github.com/SeekHisKingdom/HIDSharp)
+- [badcel/HidApi.Net](https://github.com/badcel/HidApi.Net)
 - [App-vNext/Polly](https://github.com/App-vNext/Polly)
 - [smdn/Smdn.IO.UsbHid](https://github.com/smdn/Smdn.IO.UsbHid)
 <!-- #pragma section-end NupkgReadmeFile_Notice -->

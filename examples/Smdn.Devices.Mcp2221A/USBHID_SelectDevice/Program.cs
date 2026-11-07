@@ -39,6 +39,13 @@ try {
       // This enables more advanced device selection, such as filtering by
       // device path.
 
+      // If you are using HidApi.Net, you can reference the underlying implementation as follows:
+      if (usbHidDevice is IUsbHidDevice<HidApi.DeviceInfo> { UnderlyingDevice: var hidApiDotNetDevice }) {
+        return
+          hidApiDotNetDevice.Path == "/dev/hidraw0" &&
+          hidApiDotNetDevice.BusType == HidApi.BusType.Usb;
+      }
+
       // If you are using HIDSharp, you can reference the underlying implementation as follows:
       if (usbHidDevice is IUsbHidDevice<HidSharp.HidDevice> { UnderlyingDevice: var hidSharpDevice }) {
         return

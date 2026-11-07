@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 #
 #
-#      udev rules for MCP2221/MCP2221A + HIDSharp (hidraw)
+#      udev rules for MCP2221/MCP2221A + HIDSharp
 #
 #
 # To enable user-space libraries (like HIDSharp or hidapi) to communicate

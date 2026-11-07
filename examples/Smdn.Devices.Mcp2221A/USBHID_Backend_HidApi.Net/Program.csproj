@@ -1,0 +1,25 @@
+﻿<!--
+SPDX-FileCopyrightText: 2026 smdn <smdn@smdn.jp>
+SPDX-License-Identifier: MIT
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Smdn.Devices.Mcp2221A" Version="[1.0.0,2.0.0)" />
+
+    <!-- Add HidApi.Net (MIT License) as the USB HID backend provider. -->
+    <PackageReference Include="Smdn.IO.UsbHid.Providers.HidApiDotNet" Version="1.0.0" />
+    <!-- If you need to specify the version of HidApi.Net, explicitly describe the PackageReference. -->
+    <!--
+    <PackageReference Include="HidApi.Net" Version="1.2.0" />
+    -->
+  </ItemGroup>
+
+</Project>
