@@ -1,12 +1,12 @@
 {
   "sdk": {
-    "version": "10.0.100",
+    "version": "11.0.100",
     "rollForward": "latestMajor",
     "allowPrerelease": false
   },
   "msbuild-sdks": {
     "Smdn.MSBuild.ProjectAssets.Common": "1.7.2",
-    "Smdn.MSBuild.ProjectAssets.Library": "1.17.2"
+    "Smdn.MSBuild.ProjectAssets.Library": "1.18.0"
   },
   "test": {
     "runner": "Microsoft.Testing.Platform"

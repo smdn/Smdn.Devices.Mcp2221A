@@ -5,10 +5,10 @@ SPDX-License-Identifier: MIT
 <Project>
   <Import Project="Sdk.props" Sdk="Smdn.MSBuild.ProjectAssets.Library" />
 
-  <Import
-    Condition=" '$(IsTestProject)' == 'true' "
-    Project="$(MSBuildThisFileDirectory)TargetFrameworks.props"
-  />
+  <PropertyGroup Condition=" '$(IsTestProject)' == 'true' ">
+    <!-- default target frameworks for test projects -->
+    <TargetFrameworks>net11.0;net10.0</TargetFrameworks>
+  </PropertyGroup>
 
   <ItemGroup Condition=" '$(IsTestProject)' == 'true' ">
     <PackageReference Include="NUnit" Version="5.0.0" />
@@ -18,7 +18,7 @@ SPDX-License-Identifier: MIT
   <ItemGroup>
     <PackageReference
       Include="Smdn.MSBuild.DefineConstants.NETSdkApi"
-      Version="[1.8.4]"
+      Version="[1.8.5]"
       PrivateAssets="all"
       IncludeAssets="build"
     />
