@@ -1069,7 +1069,6 @@ partial class Mcp2221AGpioDriverTests {
     const byte GpIP = 0x01; // GP<n> direction value: INPUT
     const byte GpEF = 0xEF; // GP<n> direction value: GP<n> is not set for GPIO operation
 
-#pragma warning disable CA1825
     // Mcp2221AConfigurationException will be thrown
     yield return new object?[] {
       new byte[] { GpEE, GpIP, GpLO, GpIP, GpLO, GpIP, GpLO, GpIP },
@@ -1153,7 +1152,6 @@ partial class Mcp2221AGpioDriverTests {
       new[] { ExpectedValue.Exception, ExpectedValue.Exception, ExpectedValue.Exception, ExpectedValue.Exception },
       new[] { ExpectedMode.Input, ExpectedMode.Output, ExpectedMode.Input, ExpectedMode.Output },
     };
-#pragma warning restore CA1825
   }
 
   [TestCaseSource(nameof(YieldTestCases_FetchGpioStatesSyncOrAsync_NotSetForGpioOperation))]
@@ -1411,7 +1409,6 @@ partial class Mcp2221AGpioDriverTests {
     static byte[] GpioOutputResponse(ReadOnlySpan<byte> gp0, ReadOnlySpan<byte> gp1, ReadOnlySpan<byte> gp2, ReadOnlySpan<byte> gp3)
       => [.. gp0, .. gp1, .. gp2, .. gp3];
 
-#pragma warning disable CA1825
     // Mcp2221AConfigurationExceptionMcp2221AConfigurationException will be thrown
     yield return new object?[] {
       new PinValuePair[] { new(0, PinValue.High) },
@@ -1532,7 +1529,6 @@ partial class Mcp2221AGpioDriverTests {
       new[] { ExpectedValue.Low, ExpectedValue.High, ExpectedValue.Low, ExpectedValue.Initial },
       new[] { ExpectedMode.Input, ExpectedMode.Output, ExpectedMode.Input, ExpectedMode.Initial },
     };
-#pragma warning restore CA1825
   }
 
   [TestCaseSource(nameof(YieldTestCases_ApplyGpioStatesSyncOrAsync_NotSetForGpioOperation))]
