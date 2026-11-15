@@ -17,9 +17,7 @@ public static class IGpControllerGroupExtensions {
   private static IGpControllerGroup ThrowIfReceiverIsNull(IGpControllerGroup gpPins, string paramName)
     => gpPins ?? throw new ArgumentNullException(paramName: paramName);
 
-#pragma warning disable CA1034
   extension(IGpControllerGroup gpPins) {
-#pragma warning restore CA1034
     /// <summary>
     /// Configures the assigned functions (GPIO, ADC, DAC, etc.) for all
     /// GP pins (GP0-GP3) in a single communication.

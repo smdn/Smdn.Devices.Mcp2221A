@@ -16,9 +16,7 @@ public static class IGpioControllerExtensions {
   private static IGpioController ThrowIfReceiverIsNull(IGpioController controller, string paramName)
     => controller ?? throw new ArgumentNullException(paramName: paramName);
 
-#pragma warning disable CA1034
   extension(IGpioController controller) {
-#pragma warning restore CA1034
     /// <summary>
     /// Asynchronously configures the pin as a GPIO and sets its
     /// direction to output (<see cref="PinMode.Output"/>).

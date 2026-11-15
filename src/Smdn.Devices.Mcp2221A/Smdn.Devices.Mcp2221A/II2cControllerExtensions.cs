@@ -16,9 +16,7 @@ public static class II2cControllerExtensions {
   private static II2cController ThrowIfReceiverIsNull(II2cController controller, string paramName)
     => controller ?? throw new ArgumentNullException(paramName: paramName);
 
-#pragma warning disable CA1034
   extension(II2cController controller) {
-#pragma warning restore CA1034
     /// <remarks>
     ///   <include
     ///     file="../Smdn.Devices.Mcp2221A.docs.xml"

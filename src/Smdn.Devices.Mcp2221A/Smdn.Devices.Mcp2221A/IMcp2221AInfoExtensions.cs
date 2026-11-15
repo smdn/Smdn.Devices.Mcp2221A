@@ -11,9 +11,7 @@ public static class IMcp2221AInfoExtensions {
   private static IMcp2221AInfo ThrowIfReceiverIsNull(IMcp2221AInfo info, string paramName)
     => info ?? throw new ArgumentNullException(paramName: paramName);
 
-#pragma warning disable CA1034
   extension(IMcp2221AInfo info) {
-#pragma warning restore CA1034
     /// <remarks>
     /// If the <see cref="IMcp2221AInfo.FirmwareRevision"/> is not retrieved or is an unknown
     /// revision, assume it is an MCP2221A.

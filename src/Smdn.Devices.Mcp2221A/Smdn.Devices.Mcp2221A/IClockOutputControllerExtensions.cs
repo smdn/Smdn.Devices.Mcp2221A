@@ -15,9 +15,7 @@ public static class IClockOutputControllerExtensions {
   private static IClockOutputController ThrowIfReceiverIsNull(IClockOutputController controller, string paramName)
     => controller ?? throw new ArgumentNullException(paramName: paramName);
 
-#pragma warning disable CA1034
   extension(IClockOutputController controller) {
-#pragma warning restore CA1034
     /// <summary>
     /// Gets the current clock output frequency in Hertz (Hz).
     /// </summary>

@@ -11,9 +11,7 @@ public static class IFlashMemoryExtensions {
   private static IFlashMemory ThrowIfReceiverIsNull(IFlashMemory flashMemory, string paramName)
     => flashMemory ?? throw new ArgumentNullException(paramName: paramName);
 
-#pragma warning disable CA1034
   extension(IFlashMemory flashMemory) {
-#pragma warning restore CA1034
     /// <summary>
     /// Gets a <see cref="ReadOnlySpan{T}"/> containing only the valid string bytes
     /// currently stored in <see cref="IFlashMemory.UsbManufacturerDescriptorString"/>.
@@ -82,7 +80,7 @@ public static class IFlashMemoryExtensions {
         .ChipFactorySerialNumber
         .Slice(0, flashMemory.ChipFactorySerialNumberLength);
 
-#pragma warning disable CS1574, CS1734
+#pragma warning disable CS1574
     /// <summary>
     /// Determines whether the non-password Flash memory contents of the current
     /// <see cref="IFlashMemory"/> instance differ from another
@@ -113,7 +111,7 @@ public static class IFlashMemoryExtensions {
     /// <exception cref="ArgumentNullException">
     /// Thrown when <paramref name="flashMemory"/> is <see langword="null"/>.
     /// </exception>
-#pragma warning restore CS1574, CS1734
+#pragma warning restore CS1574
     public bool DiffersFrom(IFlashMemory? other)
     {
       var @this = ThrowIfReceiverIsNull(flashMemory, nameof(flashMemory));

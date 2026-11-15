@@ -5,9 +5,7 @@ using System;
 namespace Smdn.Devices.Mcp2221A.Peripherals.I2c;
 
 internal static class IMcp2221AInfoBusSpeedExtensions {
-#pragma warning disable CA1034
   extension(IMcp2221AInfo info) {
-#pragma warning restore CA1034
     internal byte CalculateBusSpeedDividerOrThrow(
       int transmissionSpeed,
       string paramName

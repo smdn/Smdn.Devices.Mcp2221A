@@ -15,9 +15,7 @@ public static class II2cDeviceExtensions {
   private static II2cDevice ThrowIfReceiverIsNull(II2cDevice device, string paramName)
     => device ?? throw new ArgumentNullException(paramName: paramName);
 
-#pragma warning disable CA1034
   extension(II2cDevice device) {
-#pragma warning restore CA1034
     /// <seealso cref="II2cController.Read(I2cAddress, int, Span{byte},CancellationToken)"/>
     public void Read(
       Span<byte> buffer,

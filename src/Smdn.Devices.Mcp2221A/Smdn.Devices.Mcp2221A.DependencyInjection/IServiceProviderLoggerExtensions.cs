@@ -14,9 +14,7 @@ internal static class IServiceProviderLoggerExtensions {
   private static IServiceProvider ThrowIfReceiverIsNull(IServiceProvider serviceProvider, string paramName)
     => serviceProvider ?? throw new ArgumentNullException(paramName: paramName);
 
-#pragma warning disable CA1034
   extension(IServiceProvider serviceProvider) {
-#pragma warning restore CA1034
     /// <summary>
     /// Retrieves a keyed <see cref="ILogger{T}"/> or <see cref="ILogger"/>
     /// from the service provider, or creates a new one using a registered

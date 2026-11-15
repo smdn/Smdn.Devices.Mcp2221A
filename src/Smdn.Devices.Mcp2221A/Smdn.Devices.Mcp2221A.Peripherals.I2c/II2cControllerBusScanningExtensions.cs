@@ -38,9 +38,7 @@ public static class II2cControllerBusScanningExtensions {
       toAddress = I2cAddress.DeviceMaxValue;
   }
 
-#pragma warning disable CA1034
   extension(II2cController controller) {
-#pragma warning restore CA1034
     /// <summary>
     /// Asynchronously scans the I2C bus for responding devices by attempting
     /// Write and Read operations across a specified range of addresses.
