@@ -94,11 +94,13 @@ internal class PseudoUsbHidDevice : IUsbHidDevice {
     endpoint = null;
   }
 
-  public async ValueTask DisposeAsync()
+  public ValueTask DisposeAsync()
   {
     IsDisposed = true;
 
     endpoint = null;
+
+    return default;
   }
 
   public IUsbHidEndPoint OpenEndPoint(

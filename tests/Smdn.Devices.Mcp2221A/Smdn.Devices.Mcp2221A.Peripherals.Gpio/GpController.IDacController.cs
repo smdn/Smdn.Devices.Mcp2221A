@@ -1062,7 +1062,7 @@ partial class GpControllerTests {
       }
     );
 
-  private async ValueTask WriteAnalogRawSyncOrAsync(
+  private ValueTask WriteAnalogRawSyncOrAsync(
     byte chipSetting2,
     int value,
     Func<Mcp2221AController, int, ValueTask> writeAnalogRawAsyncFunc
@@ -1104,5 +1104,7 @@ partial class GpControllerTests {
 
     Assert.That(((IDacController)mcp2221A.GpPin2).LastWriteAnalogRawValue, Is.EqualTo(value));
     Assert.That(((IDacController)mcp2221A.GpPin3).LastWriteAnalogRawValue, Is.EqualTo(value));
+
+    return default;
   }
 }

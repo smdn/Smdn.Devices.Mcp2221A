@@ -2054,7 +2054,7 @@ partial class Mcp2221AGpioDriverTests {
       }
     );
 
-  private async ValueTask ApplyDacRawValueSyncOrAsync(
+  private ValueTask ApplyDacRawValueSyncOrAsync(
     byte chipSetting2,
     int value,
     Func<IGpControllerGroup, int, ValueTask> applyDacRawValueAsyncFunc
@@ -2112,6 +2112,8 @@ partial class Mcp2221AGpioDriverTests {
     );
 
     Assert.That(mcp2221A.LastWriteAnalogRawValue, Is.EqualTo(value));
+
+    return default;
   }
 
   [Test]
