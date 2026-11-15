@@ -68,6 +68,7 @@ $(Description)
 This library enables you to select any USB HID backend using dependency injection.
 Depending on licensing and other requirements, you can choose any of the following backend providers.
 
+- [Smdn.IO.UsbHid.Providers.HidApiDotNet](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidApiDotNet)
 - [Smdn.IO.UsbHid.Providers.HidSharp](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidSharp)
 - [Smdn.IO.UsbHid.Providers.LibUsbDotNet](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNet)
 - [Smdn.IO.UsbHid.Providers.LibUsbDotNetV3](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3)
