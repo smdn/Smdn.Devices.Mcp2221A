@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 
 using NUnit.Framework;
 
-using Smdn.Devices.Mcp2221A.Peripherals.I2c;
-
 namespace Smdn.Devices.Mcp2221A;
 
 partial class Mcp2221AControllerTests {
