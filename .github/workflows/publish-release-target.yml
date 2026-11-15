@@ -20,8 +20,9 @@ on:
 jobs:
   run-publish-release-target:
     name: Publish release target ${{ github.head_ref }}
-    uses: smdn/workflows-dotnet/.github/workflows/publish-release-target.yml@7c6895a73dbcd571efe34f42d7bcc689617feb1a # release-target/v1.17.4
+    uses: smdn/workflows-dotnet/.github/workflows/publish-release-target.yml@7df62165414d80dc8d58a798c2afbfacb2dd08f1 # release-target/v1.18.0
     permissions:
+      actions: read
       contents: write
       packages: write
       pull-requests: read
@@ -37,6 +38,8 @@ jobs:
       workflow_runs_on:              "ubuntu-26.04"
       dotnet_sdk_version:            "10.0.100"
     secrets:
-      token_repo:                 ${{ secrets.PUBLISH_NEW_RELEASE }}
+      token_repo:                 ${{ secrets.GITHUB_TOKEN }}
+      token_new_release:          ${{ secrets.PUBLISH_NEW_RELEASE }}
+      token_gist:                 ${{ secrets.PUBLISH_NEW_RELEASE }}
       token_push_nuget_org:       ${{ secrets.PUBLISH_PACKAGE_NUGETORG }}
-      token_push_github_packages: ${{ secrets.PUBLISH_NEW_RELEASE }}
+      token_push_github_packages: ${{ secrets.GITHUB_TOKEN }}

@@ -46,7 +46,11 @@ jobs:
       os:                                     "ubuntu-26.04, ubuntu-24.04, ubuntu-22.04, windows-latest, macos-latest"
       timeout_minutes_test_job:               10
       timeout_hang:                           "[ {'OS':'windows','Timeout':'6min'}, {'OS':'macos','Timeout':'3min'}, {'OS':'','Timeout':'1min'} ]"
-      dotnet_test_options_configuration:      "Release" # Perform testing with the release configuration
+      # Perform testing with the release configuration
+      dotnet_test_options_configuration: "Release"
+      # For testing, use the released package (PackageReference) rather than
+      # the local project (ProjectReference) for dependency libraries
+      extra_options_common: "/p:ReplaceProjectReferenceToPackageReference=true"
     secrets:
       token_repo: ${{ secrets.GITHUB_TOKEN }}
 
