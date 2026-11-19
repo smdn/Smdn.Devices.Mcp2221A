@@ -62,9 +62,12 @@ jobs:
   post-tests-dotnet:
     # This job is intended to be referenced by the branch protection rules (Status Checks).
     # Do not change the 'name' or job ID, as doing so will break the status check validation.
-    # Avoid adding 'if: always()', otherwise this job will report success even if previous tests fail.
+    # Only run when preceding job succeeds or is skipped (such as when branch/label conditions
+    # do not match); avoid 'if: always()' so failures or cancellations in preceding job is
+    # not masked as success.
     name: .NET test status
     needs: run-tests-dotnet
+    if: ${{ always() && (needs.run-tests-dotnet.result == 'success' || needs.run-tests-dotnet.result == 'skipped') }}
     runs-on: ubuntu-slim
     steps:
       - name: .NET test status
