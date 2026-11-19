@@ -35,7 +35,7 @@ partial class Mcp2221AI2cBus {
 
   [LoggerMessage(
     EventId = 202,
-    EventName = "I2C Write Error",
+    EventName = "I2C Begin Write",
     Level = LogLevel.Debug,
     Message = "Write {RequestedLength} bytes"
   )]
@@ -43,7 +43,7 @@ partial class Mcp2221AI2cBus {
 
   [LoggerMessage(
     EventId = 203,
-    EventName = "I2C Read Error",
+    EventName = "I2C Begin Read",
     Level = LogLevel.Debug,
     Message = "Read {RequestedLength} bytes"
   )]

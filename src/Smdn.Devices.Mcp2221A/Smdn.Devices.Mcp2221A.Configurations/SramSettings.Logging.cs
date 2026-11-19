@@ -50,7 +50,7 @@ partial class SramSettings {
 
   [LoggerMessage(
     EventId = 21,
-    EventName = "SRAM settings",
+    EventName = "Store SRAM settings",
     Level = LogLevel.Debug,
     Message = "Stored SRAM settings: {CurrentSettings}"
   )]
@@ -58,7 +58,7 @@ partial class SramSettings {
 
   [LoggerMessage(
     EventId = 22,
-    EventName = "SRAM settings",
+    EventName = "Restore SRAM settings",
     Level = LogLevel.Debug,
     Message = "Restored SRAM settings: {CurrentSettings}"
   )]

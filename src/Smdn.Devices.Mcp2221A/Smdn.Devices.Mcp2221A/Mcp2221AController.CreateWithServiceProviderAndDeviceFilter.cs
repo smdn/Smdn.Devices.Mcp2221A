@@ -582,7 +582,7 @@ partial class Mcp2221AController {
 
   [LoggerMessage(
     EventId = 5,
-    EventName = "Device Creation",
+    EventName = "Device Creation (Acquire Chip Information)",
     Level = LogLevel.Warning,
     Message = "Unable to access the USB HID device or acquire chip information. ({Device})"
   )]
@@ -590,7 +590,7 @@ partial class Mcp2221AController {
 
   [LoggerMessage(
     EventId = 6,
-    EventName = "Device Creation",
+    EventName = "Device Creation (Evaluating Device Info)",
     Level = LogLevel.Debug,
     Message = "Evaluating filter criteria: ({Mcp2221AInfo})"
   )]
@@ -598,7 +598,7 @@ partial class Mcp2221AController {
 
   [LoggerMessage(
     EventId = 7,
-    EventName = "Device Creation",
+    EventName = "Device Creation (Device Info Not Matched)",
     Level = LogLevel.Debug,
     Message = "Filter criteria dit not match: ({Mcp2221AInfo})"
   )]
