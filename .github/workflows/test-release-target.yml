@@ -6,25 +6,30 @@ name: Run tests with release target
 permissions: {}
 
 on:
-  push:
-    # Triggered by a push to the release working branch.
-    # The prefix for the release working branch is determined by the `release_tag_prefix`
-    # parameter in `generate-release-target.yml`. Therefore, the branch name filter must
-    # match this prefix.
-    branches: "releases/**"
+  pull_request:
+    types: [opened, reopened, synchronize]
 
 jobs:
   determine-release-target:
     name: Determine the release target
     runs-on: ubuntu-slim
+    # The prefix for the release working branch and label for the release target are
+    # determined by the `release_tag_prefix` and `release_target_pr_label` parameter
+    # in `generate-release-target.yml`. Therefore, the branch name and label filter
+    # must match these values.
+    if: >-
+      startsWith(github.head_ref, 'releases/') &&
+      contains(github.event.pull_request.labels.*.name, 'release-target')
     outputs:
       package_id: ${{ steps.release-target.outputs.package_id }}
     steps:
       - name: Determine the release target
         id: release-target
+        env:
+          INPUT_RELEASE_WORKING_BRANCH: ${{ github.head_ref }}
         shell: bash
         run: |
-          release_working_branch="${GITHUB_REF_NAME}"
+          release_working_branch=$INPUT_RELEASE_WORKING_BRANCH
           package_id_with_version="${release_working_branch##*/}"
           package_id="${package_id_with_version%%-*}"
 
