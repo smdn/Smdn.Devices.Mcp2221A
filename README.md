@@ -58,13 +58,38 @@ This library also provides the MCP2221/MCP2221A adapter interface for [System.De
 - Provides Flash memory read and write capabilities, allowing inspection and persistence of default power-on configurations, GP pin assignments, USB descriptor strings, and write-protection settings. ([examples: Read](examples/Smdn.Devices.Mcp2221A/FlashMemory_Read/), [Write](examples/Smdn.Devices.Mcp2221A/FlashMemory_Write/))
 - Uses the USB HID abstraction layer ([Smdn.IO.UsbHid.Abstractions](https://github.com/smdn/Smdn.IO.UsbHid)) to support HidApi.Net, HIDSharp, LibUsbDotNet, and other backends. ([docs and examples](examples/Smdn.Devices.Mcp2221A/UsbHidBackendSamples.md))
 - Allows selecting the USB HID backend per device using dependency injection (`IServiceProvider`) and service keys. ([example](examples/Smdn.Devices.Mcp2221A/DependencyInjection_KeyedService))
+- Supports Native AOT compilation. ([docs and examples](examples/Smdn.Devices.Mcp2221A/NativeAOT/README.md))
 
 # Getting started
 
 ## Select USB HID backend provider <a name="usb_hid_backend_providers">§</a>
 This library communicates with the MCP2221/MCP2221A device using the **USB HID** interface. To do this, you must add a `PackageReference` for one of the following USB HID backend provider packages (`Smdn.IO.UsbHid.Providers.*`).
 
-This design, integrated with standard .NET dependency injection, gives you the flexibility to choose a provider based on your specific requirements, such as licensing.
+This design, integrated with standard .NET dependency injection, gives you the flexibility to choose a provider based on your specific requirements, such as licensing and Native AOT compatibility.
+
+<details>
+
+<summary>Native AOT Compatibility and Considerations</summary>
+
+While `Smdn.Devices.Mcp2221A` and its abstraction layers are designed to be AOT compatible, the AOT support status of underlying USB HID backend libraries varies. For comprehensive notes on Native AOT compilation, potential compilation warnings (such as `IL3058`), and configuration guidelines, refer to the [Native AOT sample README](examples/Smdn.Devices.Mcp2221A/NativeAOT/README.md).
+
+</details>
+
+The following table summarizes the available backend providers, comparing their licenses, AOT support, required native libraries, and supported operating systems:
+
+| USB HID Backend Provider | Backend Library <br> (.NET Implementation) | Backend Library License | Backend Library AOT Support | Required Native Library | Supported OS |
+| --- | --- | --- | --- | --- | --- |
+| `Smdn.IO.UsbHid.Providers.HidApiDotNet` | [HidApi.Net](https://github.com/badcel/HidApi.Net) | MIT License | ⚠️ \*1 | `hidapi` | Windows, Linux, macOS |
+| `Smdn.IO.UsbHid.Providers.HidSharp` | [HIDSharp](https://github.com/SeekHisKingdom/HIDSharp) | Apache License 2.0 | ❓ \*2 | - | Windows, Linux, macOS |
+| `Smdn.IO.UsbHid.Providers.LibUsbDotNet` | [LibUsbDotNet](https://github.com/LibUsbDotNet/LibUsbDotNet), version 2 | LGPL-3.0 | ❓ \*2 | `libusb` | Windows, Linux, macOS |
+| `Smdn.IO.UsbHid.Providers.LibUsbDotNetV3` | [LibUsbDotNet](https://github.com/LibUsbDotNet/LibUsbDotNet), version 3 | LGPL-3.0 | ❓ \*2 | `libusb` | Windows, Linux, macOS |
+
+<small>
+
+\*1 [HidApi.Net claims AOT compatibility](https://github.com/badcel/HidApi.Net#native-aot), but because it is not explicitly marked with `IsAotCompatible=true`, warning IL3058 may be reported during AOT-enabled compilation.<br>
+\*2 The library does not explicitly claim or document AOT compatibility.
+
+</small>
 
 **HidApi.Net (MIT License)** [![NuGet Smdn.IO.UsbHid.Providers.HidApiDotNet](https://img.shields.io/nuget/v/Smdn.IO.UsbHid.Providers.HidApiDotNet.svg)](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.HidApiDotNet/):
 
