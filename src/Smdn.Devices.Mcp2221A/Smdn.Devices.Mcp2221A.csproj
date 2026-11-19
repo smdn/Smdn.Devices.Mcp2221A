@@ -8,7 +8,8 @@ SPDX-License-Identifier: MIT
     <VersionPrefix>1.1.0</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion>
-    <IsAotCompatible>false</IsAotCompatible>
+    <!-- Suppress assembly AOT compatibility warning in the CI/CD environment (packaging and testing) -->
+    <NoWarn Condition="'$(ContinuousIntegrationBuild)' == 'true'">$(NoWarn);IL3058</NoWarn>
   </PropertyGroup>
 
   <!--
@@ -30,6 +31,9 @@ SPDX-License-Identifier: MIT
     <Description>
 <![CDATA[`$(AssemblyName)` is a .NET library for the **Microchip Technology MCP2221 and MCP2221A, a USB2.0 to I2C/UART Protocol Converter with GPIO**.
 This library provides APIs that enable .NET applications to access the functions of the MCP2221/MCP2221A via the USB HID interface.
+
+Note: Although this package is marked with `IsAotCompatible=true`, some of the dependency libraries do not explicitly state their AOT compatibility or are not yet AOT-compatible.
+As a result, warnings such as `IL3058` may be reported during AOT-enabled compilation.
 ]]>
     </Description>
     <PackageTags>USB,USB-HID,MCP2221,MCP2221A,I2C,GPIO,System.Device.Gpio</PackageTags>
@@ -43,6 +47,19 @@ This library provides APIs that enable .NET applications to access the functions
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" /> <!-- 'keyed services' are available in 8.0.0+ -->
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" /> <!-- LoggerMessageAttribute is available in 6.0.0+ -->
     <PackageReference Include="Smdn.IO.UsbHid.Abstractions" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup
+    Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))"
+    Label="Update to AOT-ready package version"
+  >
+    <!--
+    TODO: Since an AOT-compatible version has not yet been released, update to that version once it is released.
+    <PackageReference Update="System.Device.Gpio" />
+    -->
+    <PackageReference Update="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Update="Microsoft.Extensions.Logging" Version="10.0.0" />
+    <PackageReference Update="Smdn.IO.UsbHid.Abstractions" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
