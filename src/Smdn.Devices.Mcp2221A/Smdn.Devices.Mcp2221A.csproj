@@ -31,6 +31,9 @@ SPDX-License-Identifier: MIT
     <Description>
 <![CDATA[`$(AssemblyName)` is a .NET library for the **Microchip Technology MCP2221 and MCP2221A, a USB2.0 to I2C/UART Protocol Converter with GPIO**.
 This library provides APIs that enable .NET applications to access the functions of the MCP2221/MCP2221A via the USB HID interface.
+
+Note: Although this package is marked with `IsAotCompatible=true`, some of the dependency libraries do not explicitly state their AOT compatibility or are not yet AOT-compatible.
+As a result, warnings such as `IL3058` may be reported during AOT-enabled compilation.
 ]]>
     </Description>
     <PackageTags>USB,USB-HID,MCP2221,MCP2221A,I2C,GPIO,System.Device.Gpio</PackageTags>
