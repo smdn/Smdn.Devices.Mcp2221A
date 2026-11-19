@@ -8,6 +8,8 @@ SPDX-License-Identifier: MIT
     <VersionPrefix>1.1.0</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion>
+    <!-- Suppress assembly AOT compatibility warning in the CI/CD environment (packaging and testing) -->
+    <NoWarn Condition="'$(ContinuousIntegrationBuild)' == 'true'">$(NoWarn);IL3058</NoWarn>
   </PropertyGroup>
 
   <!--
