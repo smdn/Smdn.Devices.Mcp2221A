@@ -1,28 +1,112 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- https://learn.microsoft.com/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Smdn.Devices.Mcp2221A.Peripherals.I2c.II2cControllerBusScanningExtensions.&lt;G&gt;$FAC7F5D278C49E6EF92AAC718EB63B9A.ScanBus(Smdn.Devices.Mcp2221A.I2cAddress,Smdn.Devices.Mcp2221A.I2cAddress,System.Int32,System.IProgress{Smdn.Devices.Mcp2221A.Peripherals.I2c.I2cScanBusProgress},System.Threading.CancellationToken)</Target>
+    <Left>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Left>
+    <Right>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Smdn.Devices.Mcp2221A.Peripherals.I2c.II2cControllerBusScanningExtensions.&lt;G&gt;$FAC7F5D278C49E6EF92AAC718EB63B9A.ScanBusAsync(Smdn.Devices.Mcp2221A.I2cAddress,Smdn.Devices.Mcp2221A.I2cAddress,System.Int32,System.IProgress{Smdn.Devices.Mcp2221A.Peripherals.I2c.I2cScanBusProgress},System.Threading.CancellationToken)</Target>
+    <Left>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Left>
+    <Right>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Smdn.Devices.Mcp2221A.Peripherals.I2c.II2cControllerBusScanningExtensions.ScanBus(Smdn.Devices.Mcp2221A.Peripherals.I2c.II2cController,Smdn.Devices.Mcp2221A.I2cAddress,Smdn.Devices.Mcp2221A.I2cAddress,System.Int32,System.IProgress{Smdn.Devices.Mcp2221A.Peripherals.I2c.I2cScanBusProgress},System.Threading.CancellationToken)</Target>
+    <Left>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Left>
+    <Right>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Smdn.Devices.Mcp2221A.Peripherals.I2c.II2cControllerBusScanningExtensions.ScanBusAsync(Smdn.Devices.Mcp2221A.Peripherals.I2c.II2cController,Smdn.Devices.Mcp2221A.I2cAddress,Smdn.Devices.Mcp2221A.I2cAddress,System.Int32,System.IProgress{Smdn.Devices.Mcp2221A.Peripherals.I2c.I2cScanBusProgress},System.Threading.CancellationToken)</Target>
+    <Left>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Left>
+    <Right>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Smdn.Devices.Mcp2221A.Peripherals.I2c.II2cControllerBusScanningExtensions.&lt;G&gt;$FAC7F5D278C49E6EF92AAC718EB63B9A.ScanBus(Smdn.Devices.Mcp2221A.I2cAddress,Smdn.Devices.Mcp2221A.I2cAddress,System.Int32,System.IProgress{Smdn.Devices.Mcp2221A.Peripherals.I2c.I2cScanBusProgress},System.Threading.CancellationToken)</Target>
     <Left>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Left>
-    <Right>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Right>
+    <Right>lib/net10.0/Smdn.Devices.Mcp2221A.dll</Right>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Smdn.Devices.Mcp2221A.Peripherals.I2c.II2cControllerBusScanningExtensions.&lt;G&gt;$FAC7F5D278C49E6EF92AAC718EB63B9A.ScanBusAsync(Smdn.Devices.Mcp2221A.I2cAddress,Smdn.Devices.Mcp2221A.I2cAddress,System.Int32,System.IProgress{Smdn.Devices.Mcp2221A.Peripherals.I2c.I2cScanBusProgress},System.Threading.CancellationToken)</Target>
     <Left>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Left>
-    <Right>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Right>
+    <Right>lib/net10.0/Smdn.Devices.Mcp2221A.dll</Right>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Smdn.Devices.Mcp2221A.Peripherals.I2c.II2cControllerBusScanningExtensions.ScanBus(Smdn.Devices.Mcp2221A.Peripherals.I2c.II2cController,Smdn.Devices.Mcp2221A.I2cAddress,Smdn.Devices.Mcp2221A.I2cAddress,System.Int32,System.IProgress{Smdn.Devices.Mcp2221A.Peripherals.I2c.I2cScanBusProgress},System.Threading.CancellationToken)</Target>
     <Left>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Left>
-    <Right>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Right>
+    <Right>lib/net10.0/Smdn.Devices.Mcp2221A.dll</Right>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Smdn.Devices.Mcp2221A.Peripherals.I2c.II2cControllerBusScanningExtensions.ScanBusAsync(Smdn.Devices.Mcp2221A.Peripherals.I2c.II2cController,Smdn.Devices.Mcp2221A.I2cAddress,Smdn.Devices.Mcp2221A.I2cAddress,System.Int32,System.IProgress{Smdn.Devices.Mcp2221A.Peripherals.I2c.I2cScanBusProgress},System.Threading.CancellationToken)</Target>
     <Left>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Left>
-    <Right>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Right>
+    <Right>lib/net10.0/Smdn.Devices.Mcp2221A.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Smdn.Devices.Mcp2221A.ClockOutputDutyCycle</Target>
+    <Left>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Left>
+    <Right>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Smdn.Devices.Mcp2221A.ClockOutputFrequency</Target>
+    <Left>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Left>
+    <Right>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Smdn.Devices.Mcp2221A.DeviceConfigurationProtectionLevel</Target>
+    <Left>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Left>
+    <Right>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Smdn.Devices.Mcp2221A.GpFunction</Target>
+    <Left>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Left>
+    <Right>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Smdn.Devices.Mcp2221A.I2cAddress</Target>
+    <Left>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Left>
+    <Right>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Smdn.Devices.Mcp2221A.InterruptOnChangeTrigger</Target>
+    <Left>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Left>
+    <Right>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Smdn.Devices.Mcp2221A.UsbPowerMode</Target>
+    <Left>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Left>
+    <Right>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Smdn.Devices.Mcp2221A.VoltageReferenceSource</Target>
+    <Left>lib/net8.0/Smdn.Devices.Mcp2221A.dll</Left>
+    <Right>lib/netstandard2.1/Smdn.Devices.Mcp2221A.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
 </Suppressions>
