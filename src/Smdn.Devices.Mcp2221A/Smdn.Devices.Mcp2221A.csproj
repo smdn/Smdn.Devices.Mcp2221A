@@ -32,9 +32,6 @@ SPDX-License-Identifier: MIT
     <Description>
 <![CDATA[`$(AssemblyName)` is a .NET library for the **Microchip Technology MCP2221 and MCP2221A, a USB2.0 to I2C/UART Protocol Converter with GPIO**.
 This library provides APIs that enable .NET applications to access the functions of the MCP2221/MCP2221A via the USB HID interface.
-
-Note: Although this package is marked with `IsAotCompatible=true`, some of the dependency libraries do not explicitly state their AOT compatibility or are not yet AOT-compatible.
-As a result, warnings such as `IL3058` may be reported during AOT-enabled compilation.
 ]]>
     </Description>
     <PackageTags>USB,USB-HID,MCP2221,MCP2221A,I2C,GPIO,System.Device.Gpio</PackageTags>
@@ -92,6 +89,9 @@ Depending on licensing and other requirements, you can choose any of the followi
 - [Smdn.IO.UsbHid.Providers.LibUsbDotNetV3](https://www.nuget.org/packages/Smdn.IO.UsbHid.Providers.LibUsbDotNetV3)
 
 Please add one of the backend providers to the project's package references.
+
+Note: Although this package is marked with `IsAotCompatible=true`, some of the dependency libraries do not explicitly state their AOT compatibility or are not yet AOT-compatible.
+As a result, warnings such as `IL3058` may be reported during AOT-enabled compilation.
 
 ## Usage
 This is an example of switching the output of each pin on GP0-GP3 of the MCP2221A at specific intervals to make the connected LED blink.
