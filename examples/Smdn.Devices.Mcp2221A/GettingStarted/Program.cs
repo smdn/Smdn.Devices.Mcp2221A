@@ -16,6 +16,10 @@ var services = new ServiceCollection();
 // (Add `Smdn.IO.UsbHid.Providers.HidSharp` to PackageReference)
 services.AddHidSharpUsbHid();
 
+// Use HidApi.Net (MIT License)
+// (Add `Smdn.IO.UsbHid.Providers.HidApiDotNet` to PackageReference)
+// services.AddHidApiDotNetUsbHid();
+
 // Use LibUsbDotNet version 3 (LGPL-3.0)
 // (Add `Smdn.IO.UsbHid.Providers.LibUsbDotNetV3` to PackageReference)
 // services.AddLibUsbDotNetV3UsbHid();
